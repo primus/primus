@@ -39,6 +39,11 @@ describe('Primus', function () {
     expect(spark.primus).to.equal(primus);
   });
 
+  it('can customize the pathname', function () {
+    expect(primus.pathname).to.equal('/primus');
+    expect(new Primus(server, { pathname: '/foo' }).pathname).to.equal('/foo');
+  });
+
   it('accepts custom message parsers', function () {
     var primus = new Primus(server, { parser: 'jsonh' });
 

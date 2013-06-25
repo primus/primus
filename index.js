@@ -16,17 +16,18 @@ function Primus(server, options) {
 
   options = options || {};
 
-  this.transformer = null;
-  this.encoder = null;
-  this.decoder = null;
+  this.transformer = null;                // Reference to the real-time engine instance.
+  this.encoder = null;                    // Shorthand to the parser's encoder.
+  this.decoder = null;                    // Shorthand to the parser's decoder.
+  this.sparks = 0;                        // Increment id for connection ids
+  this.connected = 0;                     // Connection counter;
+  this.connections = Object.create(null); // Connection storage.
 
-  this.sparks = 0;
   this.server = server;
-  this.parsers(options.parser);
   this.pathname = options.pathname || '/primus';
-  this.Spark = Spark.bind(Spark, this);
-  this.connections = Object.create(null);
 
+  this.parsers(options.parser);
+  this.Spark = Spark.bind(Spark, this);
   this.initialise(options.transformer || options.transport);
 }
 
@@ -58,10 +59,12 @@ Primus.prototype.initialise = function initialise(transformer) {
   this.transformer = new Transformer(this);
 
   this.on('connection', function connection(stream) {
+    this.connected++;
     this.connections[stream.id] = stream;
   });
 
   this.on('disconnected', function disconnected(stream) {
+    this.connected--;
     delete this.connections[stream.id];
   });
 };
@@ -69,12 +72,12 @@ Primus.prototype.initialise = function initialise(transformer) {
 /**
  * Iterate over the connections.
  *
- * @param {Function} fn
+ * @param {Function} fn The function that is called every iteration.
  * @api public
  */
 Primus.prototype.forEach = function forEach(fn) {
   for (var stream in this.connections) {
-    fn(this.connections[stream], stream);
+    fn(this.connections[stream], stream, this.connections);
   }
 
   return this;
@@ -90,6 +93,8 @@ Primus.prototype.parsers = function parsers(type) {
   this.parser = require('./parsers/'+ (type || 'json').toLowerCase());
   this.encoder = this.parser.encoder;
   this.decoder = this.parser.decoder;
+
+  return this;
 };
 
 /**
