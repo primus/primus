@@ -12,6 +12,8 @@ var Spark = require('./spark');
  * @api public
  */
 function Primus(server, options) {
+  if (!(this instanceof Primus)) return new Primus(server, options);
+
   options = options || {};
 
   this.transformer = null;
@@ -25,10 +27,10 @@ function Primus(server, options) {
   this.Spark = Spark.bind(Spark, this);
   this.connections = Object.create(null);
 
-  this.initialiase(options.transformer || options.transport);
+  this.initialise(options.transformer || options.transport);
 }
 
-Primus.prototype.__proto__ = require('events').EventEmitter;
+Primus.prototype.__proto__ = require('events').EventEmitter.prototype;
 
 //
 // Lazy read the primus.js JavaScript client.
@@ -42,7 +44,7 @@ Object.defineProperty(Primus.prototype, 'client', {
 //
 // Expose the current version number.
 //
-Primus.prototype.version = require('./package.json');
+Primus.prototype.version = require('./package.json').version;
 
 /**
  * Initialise the real-time transport that was choosen.
@@ -51,7 +53,7 @@ Primus.prototype.version = require('./package.json');
  * @api private
  */
 Primus.prototype.initialise = function initialise(transformer) {
-  var Transformer = require('.//'+ (transformer || 'websockets').toLowerCase());
+  var Transformer = require('./transformers/'+ (transformer || 'websockets').toLowerCase());
 
   this.transformer = new Transformer(this);
 
