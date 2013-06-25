@@ -50,4 +50,20 @@ describe('Primus', function () {
     expect(primus.parser.library).to.be.a('string');
     expect(primus.parser.library).to.include('JSONH');
   });
+
+  it('stores new connections internally');
+  it('removes connections internally on disconnect');
+
+  describe('#forEach', function () {
+    it('iterates over all active connections');
+  });
+
+  describe('#library', function () {
+    it('includes the library of the parsers');
+    it('includes the library of the transformer');
+    it('includes the transformers client');
+    it('includes the prism client library');
+    it('includes the configuration details');
+    it('includes the decoders');
+  });
 });
