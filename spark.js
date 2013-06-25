@@ -13,8 +13,8 @@
  */
 function Spark(primus, headers, address, id) {
   this.primus = primus;         // References to the primus.
-  this.headers = headers;       // The request headers.
-  this.address = address;       // The remote address.
+  this.headers = headers || {}; // The request headers.
+  this.address = address || {}; // The remote address.
   this.id = id || this.uuid();  // Unique id for socket.
 
   this.writable = true;         // Silly stream compatiblity.
@@ -37,7 +37,7 @@ Spark.prototype.initialise = function initialise() {
   //
   // We've received new data from our client, decode and emit it.
   //
-  this.on('primus::data', function message(data) {
+  spark.on('primus::data', function message(data) {
     primus.decoder(data, function decoding(err, packet) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
@@ -51,7 +51,7 @@ Spark.prototype.initialise = function initialise() {
   //
   // The client has disconnected.
   //
-  this.on('primus::end', function disconnect() {
+  spark.on('primus::end', function disconnect() {
     spark.emit('end');
     spark.removeAllListeners();
     primus.emit('disconnection', spark);
@@ -61,7 +61,7 @@ Spark.prototype.initialise = function initialise() {
   // Announce a new connection.
   //
   process.nextTick(function tick() {
-    primus.emit('connection', this);
+    primus.emit('connection', spark);
   });
 };
 
@@ -72,7 +72,7 @@ Spark.prototype.initialise = function initialise() {
  * @api private
  */
 Spark.prototype.uuid = function uuid() {
-  return this.address.port+'$'+ this.portal.sparks++;
+  return this.address.port+'$'+ this.primus.sparks++;
 };
 
 /**
@@ -104,7 +104,7 @@ Spark.prototype.emits = function emits(event, parser) {
 Spark.prototype.write = function write(data) {
   var spark = this;
 
-  this.primus.encoder(data, function encoded(err, packet) {
+  spark.primus.encoder(data, function encoded(err, packet) {
     //
     // Do a "save" emit('error') when we fail to parse a message. We don't
     // want to throw here as listening to errors should be optional.
