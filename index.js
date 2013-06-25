@@ -14,7 +14,7 @@ var Spark = require('./spark');
 function Primus(server, options) {
   options = options || {};
 
-  this.transporter = null;
+  this.transformer = null;
   this.encoder = null;
   this.decoder = null;
 
@@ -24,7 +24,7 @@ function Primus(server, options) {
   this.Spark = Spark.bind(Spark, this);
   this.connections = Object.create(null);
 
-  this.initialiase(options.transport);
+  this.initialiase(options.transformer || options.transport);
 }
 
 Primus.prototype.__proto__ = require('events').EventEmitter;
@@ -50,7 +50,7 @@ Primus.prototype.version = require('./package.json');
  * @api private
  */
 Primus.prototype.initialise = function initialise(transformer) {
-  var Transformer = require('.//'+ (transformer || 'ws').toLowerCase());
+  var Transformer = require('.//'+ (transformer || 'websockets').toLowerCase());
 
   this.transformer = new Transformer(this);
 
@@ -84,10 +84,9 @@ Primus.prototype.forEach = function forEach(fn) {
  * @api private
  */
 Primus.prototype.parsers = function parsers(type) {
-  var parser = require('./parsers/'+ (type || 'json').toLowerCase());
-
-  this.encoder = parser.encoder;
-  this.decoder = parser.decoder;
+  this.parser = require('./parsers/'+ (type || 'json').toLowerCase());
+  this.encoder = this.parser.encoder;
+  this.decoder = this.parser.decoder;
 };
 
 /**
@@ -99,20 +98,22 @@ Primus.prototype.parsers = function parsers(type) {
 Primus.prototype.library = function compile() {
   var encoder = this.encoder.client || this.encoder
     , decoder = this.decoder.client || this.decoder
-    , library = this.transporter.library || ''
-    , transport = this.transporter.client
+    , library = this.transformer.library || ''
+    , transport = this.transformer.client
+    , parser = this.parser.library || ''
     , client = this.client;
 
   //
   // Replace some basic content.
   //
   client = client
+    .replace('= null; // @import {primus::pathname}', this.pathname.toString())
     .replace('= null; // @import {primus::version}', '"'+ this.version +'"')
     .replace('= null; // @import {primus::transport}', transport.toString())
     .replace('= null; // @import {primus::encoder}', encoder.toString())
     .replace('= null; // @import {primus::decoder}', decoder.toString())
-    .replace('= null; // @import {primus::pathname}', this.pathname)
-    .replace('/* {primus::library} */', library);
+    .replace('/* {primus::library} */', library.toString())
+    .replace('/* {primus::parser} */', parser.toString());
 
   return client;
 };

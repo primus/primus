@@ -2,6 +2,7 @@
   'use strict';
 
   /* {primus::library} */
+  /* {primus::parser} */
 
   /**
    * Primus in a real-time library agnostic framework for establishing real-time
@@ -148,6 +149,17 @@
   };
 
   /**
+   * Return a list of assigned event listeners.
+   *
+   * @param {String} event The events that should be listed.
+   * @returns {Array}
+   * @api public
+   */
+  Primus.prototype.listeners = function listeners(event) {
+    return (this.events[event] || []).slice(0);
+  };
+
+  /**
    * Emit an event to all registered event listeners.
    *
    * @param {String} event The name of the event.
@@ -199,7 +211,8 @@
 
       //
       // Timeout is required to prevent crashes on WebSockets connections on
-      // mobile devices.
+      // mobile devices. We need to handle these edge cases in our own library
+      // as we cannot be certain that all frameworks fix these issues.
       //
       setTimeout(function timeout() {
         primus.emit('primus::'+ event, data);

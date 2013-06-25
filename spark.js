@@ -31,7 +31,7 @@ Spark.prototype.__proto__ = require('events').EventEmitter.prototype;
  */
 Spark.prototype.initialise = function initialise() {
   var primus = this.primus
-    , socket = this;
+    , spark = this;
 
   //
   // We've received new data from our client, decode and emit it.
@@ -42,8 +42,8 @@ Spark.prototype.initialise = function initialise() {
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
-      if (err) return socket.listeners('error').length && socket.emit('error', err);
-      socket.emit('data', packet);
+      if (err) return spark.listeners('error').length && spark.emit('error', err);
+      spark.emit('data', packet);
     });
   });
 
@@ -51,8 +51,9 @@ Spark.prototype.initialise = function initialise() {
   // The client has disconnected.
   //
   this.on('primus::end', function disconnect() {
-    socket.emit('end');
-    socket.removeAllListeners();
+    spark.emit('end');
+    spark.removeAllListeners();
+    primus.emit('disconnection', spark)
   });
 
   //
@@ -73,32 +74,32 @@ Spark.prototype.initialise = function initialise() {
  * @api public
  */
 Spark.prototype.emits = function emits(event, parser) {
-  var socket = this;
+  var spark = this;
 
   return function emit(arg) {
-    var data = parser ? parser.apply(socket, arguments) : arg;
+    var data = parser ? parser.apply(spark, arguments) : arg;
 
-    socket.emit('primus::'+ event, data);
+    spark.emit('primus::'+ event, data);
   };
 };
 
 /**
- * Send a new message to a given socket.
+ * Send a new message to a given spark.
  *
  * @param {Mixed} data The data that needs to be written.
  * @returns {Boolean} Always returns true.
  * @api public
  */
 Spark.prototype.write = function write(data) {
-  var socket = this;
+  var spark = this;
 
   this.primus.encoder(data, function encoded(err, packet) {
     //
     // Do a "save" emit('error') when we fail to parse a message. We don't
     // want to throw here as listening to errors should be optional.
     //
-    if (err) return socket.listeners('error').length && socket.emit('error', err);
-    socket.emit('data', packet);
+    if (err) return spark.listeners('error').length && spark.emit('error', err);
+    spark.emit('data', packet);
   });
 
   return true;
