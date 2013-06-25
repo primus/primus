@@ -20,7 +20,11 @@ module.exports = function server() {
   // the next tick).
   //
   this.engine.on('connection', function connection(socket) {
-    var spark = new Spark(socket.request.headers, socket.request.address());
+    var spark = new Spark(
+        socket.request.headers
+      , socket.request.address()
+      , socket.id
+    );
 
     spark.on('end', function end() {
       socket.end();

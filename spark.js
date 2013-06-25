@@ -11,13 +11,14 @@
  * @param {Object} address The remoteAddress and port.
  * @api public
  */
-function Spark(primus, headers, address) {
-  this.primus = primus;     // References to the primus.
-  this.headers = headers;   // The request headers.
-  this.address = address;   // The remote address.
+function Spark(primus, headers, address, id) {
+  this.primus = primus;         // References to the primus.
+  this.headers = headers;       // The request headers.
+  this.address = address;       // The remote address.
+  this.id = id || this.uuid();  // Unique id for socket.
 
-  this.writable = true;     // Silly stream compatiblity.
-  this.readable = true;     // Silly stream compatiblity.
+  this.writable = true;         // Silly stream compatiblity.
+  this.readable = true;         // Silly stream compatiblity.
 
   this.initialise();
 }
@@ -53,7 +54,7 @@ Spark.prototype.initialise = function initialise() {
   this.on('primus::end', function disconnect() {
     spark.emit('end');
     spark.removeAllListeners();
-    primus.emit('disconnection', spark)
+    primus.emit('disconnection', spark);
   });
 
   //
@@ -62,6 +63,16 @@ Spark.prototype.initialise = function initialise() {
   process.nextTick(function tick() {
     primus.emit('connection', this);
   });
+};
+
+/**
+ * Generate a unique uuid.
+ *
+ * @returns {String} uuid.
+ * @api private
+ */
+Spark.prototype.uuid = function uuid() {
+  return this.address.port+'$'+ this.portal.sparks++;
 };
 
 /**

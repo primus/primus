@@ -18,6 +18,7 @@ function Primus(server, options) {
   this.encoder = null;
   this.decoder = null;
 
+  this.sparks = 0;
   this.server = server;
   this.parsers(options.parser);
   this.pathname = options.pathname || '/primus';

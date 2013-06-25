@@ -12,14 +12,17 @@ module.exports = function server() {
     , Spark = this.Spark
     , primus = this.primus;
 
-  this.service = new WebSocketServer({ noServer: true });
+  this.service = new WebSocketServer({ noServer: true, clientTracking: false });
 
   //
   // Listen to upgrade requests
   //
   this.on('upgrade', function upgrade(req, socket, head) {
     this.service.handleUpgrade(req, socket, head, function create(socket) {
-      var spark = new Spark(socket.upgradeReq.headers, socket.upgradeReq.address());
+      var spark = new Spark(
+        socket.upgradeReq.headers,
+        socket.upgradeReq.address()
+      );
 
       spark.on('end', function end() {
         socket.close();
