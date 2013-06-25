@@ -1,0 +1,24 @@
+{
+  "name": "primus",
+  "version": "0.0.0",
+  "description": "Primus is a simple abstraction around real-time frameworks. It allows you to easily switch between different frameworks without any code changes.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": "",
+  "keywords": [
+    "primus",
+    "real-time",
+    "realtime",
+    "websocket",
+    "engine.io",
+    "socket.io",
+    "transformer"
+  ],
+  "author": "Arnout Kazemier",
+  "license": "MIT",
+  "dependencies": {
+    "extendable": "0.0.3"
+  }
+}
