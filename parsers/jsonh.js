@@ -29,4 +29,4 @@ exports.decoder = function decoder(data, fn) {
 //
 // Expose the library so it can be added in our primus module.
 //
-exports.library = require('fs').readFileSync(require.resolve('jsonh'));
+exports.library = require('fs').readFileSync(require.resolve('jsonh'), 'utf-8');

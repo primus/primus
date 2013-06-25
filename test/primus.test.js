@@ -39,5 +39,10 @@ describe('Primus', function () {
     expect(spark.primus).to.equal(primus);
   });
 
-  it('accepts custom message parsers');
+  it('accepts custom message parsers', function () {
+    var primus = new Primus(server, { parser: 'jsonh' });
+
+    expect(primus.parser.library).to.be.a('string');
+    expect(primus.parser.library).to.include('JSONH');
+  });
 });
