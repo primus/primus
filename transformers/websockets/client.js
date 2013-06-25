@@ -23,12 +23,12 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Socket) return this.emit('connection failed');
+  if (!Socket) return this.emit('error', new Error('No WebSocket constructor'));
 
   //
   // Connect to the given url.
   //
-  primus.on('primus::connect', function connect(url) {
+  primus.on('outgoing::connect', function connect(url) {
     if (socket) socket.close();
 
     socket = new Socket(url);
@@ -36,9 +36,9 @@ module.exports = function client() {
     //
     // Setup the Event handlers.
     //
-    socket.onopen = primus.emits('open');
+    socket.onopen = primus.emits('connect');
     socket.onerror = primus.emits('error');
-    socket.onclose = primus.emits('close');
+    socket.onclose = primus.emits('end');
     socket.onmessage = primus.emits('data', function parse(evt) {
       return evt.data;
     });
@@ -47,7 +47,7 @@ module.exports = function client() {
   //
   // We need to write a new message to the socket.
   //
-  primus.on('primus::write', function write(message) {
+  primus.on('outgoing::write', function write(message) {
     if (socket) socket.send(message);
   });
 
@@ -55,14 +55,14 @@ module.exports = function client() {
   // Attempt to reconnect the socket. It asumes that the `close` event is
   // called if it failed to disconnect.
   //
-  primus.on('primus::reconnect', function reconnect() {
+  primus.on('outgoing::reconnect', function reconnect() {
     if (socket) socket.close();
   });
 
   //
   // We need to close the socket.
   //
-  primus.on('primus::close', function close() {
+  primus.on('outgoing::close', function close() {
     if (socket) {
       socket.close();
       socket = null;
