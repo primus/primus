@@ -1,5 +1,5 @@
 'use strict';
-/*globals eio*/
+/* globals MozWebSocket */
 
 /**
  * Minimum viable WebSocket client. This function is stringified and written in
@@ -13,14 +13,25 @@ module.exports = function client() {
     , socket;
 
   //
+  // Selects an available WebSocket constructor.
+  //
+  var Socket = (function ws() {
+    if ('undefined' !== typeof WebSocket) return WebSocket;
+    if ('undefined' !== typeof MozWebSocket) return MozWebSocket;
+    if ('function' === typeof require) return require('ws');
+
+    return undefined;
+  })();
+
+  if (!Socket) return this.emit('connection failed');
+
+  //
   // Connect to the given url.
   //
   primus.on('primus::connect', function connect(url) {
     if (socket) socket.close();
 
-    socket = eio(url, {
-      path: this.pathname
-    });
+    socket = new Socket(url);
 
     //
     // Setup the Event handlers.
@@ -45,10 +56,7 @@ module.exports = function client() {
   // called if it failed to disconnect.
   //
   primus.on('primus::reconnect', function reconnect() {
-    if (socket) {
-      socket.close();
-      socket.open();
-    }
+    if (socket) socket.close();
   });
 
   //
