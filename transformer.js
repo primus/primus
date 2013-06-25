@@ -1,5 +1,8 @@
 'use strict';
 
+var querystring = require('querystring').parse
+  , url = require('url').parse;
+
 /**
  * Transformer skeletons
  *
@@ -45,6 +48,8 @@ Transformer.prototype.initialise = function initialise() {
  * @api private
  */
 Transformer.prototype.request = function request(req, res) {
+  if (!this.test(req)) return;
+
   this.emit('request', req, res);
 };
 
@@ -57,8 +62,30 @@ Transformer.prototype.request = function request(req, res) {
  * @param {Buffer} head Buffered data.
  * @api private
  */
-Transformer.prototype.upgrade = function upgrade(req, res, head) {
-  this.emit('upgrade');
+Transformer.prototype.upgrade = function upgrade(req, socket, head) {
+  if (!this.test(req)) return socket.end();
+
+  //
+  // Copy buffer to prevent large buffer retention in Node core.
+  // @see jmatthewsr-ms/node-slab-memory-issues
+  //
+  var buffy = new Buffer(head.length);
+  head.copy(upgrade);
+
+  this.emit('upgrade', req, socket, buffy);
+};
+
+/**
+ * Check if we should accept this request.
+ *
+ * @param {Request} req HTTP Request.
+ * @returns {Boolean} Do we need to accept this request.
+ * @api private
+ */
+Transformer.prototype.test = function test(req) {
+  req.uri = url(req.url);
+
+  return req.uri.pathname === this.primus.pathname;
 };
 
 //
