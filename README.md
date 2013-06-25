@@ -40,7 +40,7 @@ var server = http.createServer(/* request handler */)
 In addition to support different frameworks we've also made it possible to use
 custom encoding and decoding libraries. We're using `JSON` by default but you
 could also use `msgpack` or `JSONH` for example (but these parsers need to be
-supported by prisum, so check out the parser folder for examples). To set parser
+supported by Primus, so check out the parser folder for examples). To set parser
 you can supply a `parser` configuration option:
 
 ```js
@@ -58,9 +58,77 @@ primus.library();
 ```
 
 Which returns the client-side library. It's not minified as that is out of the
-scope of this project.
+scope of this project. You can store this on a CDN or on your static server. Do
+what ever you want with it, but I would advice you to regenerate that file every
+time you redeploy so it always contains a client side library that is compatible
+with your back-end.
 
-### Supported real-time framworks
+Once you're all set up you can start listening for connections. These
+connections are announced through the `connection` event.
+
+```js
+primus.on('connection', function (spark) {
+  // spark is the new connection.
+});
+```
+
+Disconnects are announced using a `disconnection` event:
+
+```js
+primus.on('disconnected', funciton (spark) {
+  // the spark that disconnected
+});
+```
+
+The `spark` the actual real-time socket/connection. Sparks have a really low
+level interface and only expose a couple properties that are cross engine
+supported. The interface is modeled towards a Nodejs stream compatible
+interface.
+
+#### spark.headers
+
+The `spark.headers` property contains contains the headers of either the request
+that started a handshake with the server or the headers of the actual real-time
+connection. This depends on the module you are using.
+
+#### spark.address
+
+The `spark.address` property contains the remoteAddress and remotePort of the
+connection. If you're running your server behind a reverse proxy it will be
+useless to you and you should probably be checking the `spark.headers` for
+`x-fowarded-xxx` headers instead.
+
+#### spark.write(data)
+
+You can use the `spark.write` method to send data over the socket. The data is
+automatically encoded for you using the `parser` that you've set while creating
+the Primus instance. This method always returns `true` so back pressuere isn't
+handled.
+
+```js
+spark.write({ foo: 'bar' });
+```
+
+#### spark.end()
+
+The `spark.end()` closes the connection.
+
+#### spark.emits(event, parser)
+
+This method is mostly used internally. It returns a function that emits assigned
+`event` every time it's called. It only emits the first received argument or the
+result of the optional `parser` call. The `parser` function receives all
+arguments and can parse it down to a single value or just extracts the useful
+information from the data. Please note that the data that is received here isn't
+decoded yet.
+
+```js
+spark.emits('event', function parser(structure) {
+  return structure.data;
+});
+```
+
+### Supported real-time frameworks
 
 The following transformers/transports are supported in Primus:
 
@@ -80,7 +148,7 @@ var primus = new Primus(server, { transformer: 'engine.io' });
 
 #### WebSockets
 
-To use pure websockets you need to install the `ws` module:
+To use pure WebSockets you need to install the `ws` module:
 
 ```
 npm install ws --save
@@ -91,6 +159,9 @@ And tell `Primus` that you want to use `WebSockets` as transformer:
 ```js
 var primus = new Primus(server, { transformer: 'websockets' });
 ```
+
+As you can see above, it doesn't matter how you write the name of the
+transformer, we just `toLowerCase()` everything.
 
 ### Versioning
 
