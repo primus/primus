@@ -1,9 +1,9 @@
 'use strict';
 
 //
-// Expose the module as new Transporter instance.
+// Expose the module as new Transformer instance.
 //
-module.exports = require('../../transporter').extend({
+module.exports = require('../../transformer').extend({
   // Creating a new real-time server.
   server: require('./server'),
 
