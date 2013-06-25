@@ -4,14 +4,18 @@
   "description": "Primus is a simple abstraction around real-time frameworks. It allows you to easily switch between different frameworks without any code changes.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.test.js')"
   },
-  "repository": "",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/3rd-Eden/primus.git"
+  },
   "keywords": [
     "primus",
     "real-time",
     "realtime",
     "websocket",
+    "ws",
     "engine.io",
     "socket.io",
     "transformer"
@@ -20,5 +24,12 @@
   "license": "MIT",
   "dependencies": {
     "extendable": "0.0.3"
+  },
+  "devDependencies": {
+    "chai": "1.7.x",
+    "engine.io": "0.6.x",
+    "mocha": "1.11.x",
+    "pre-commit": "0.0.x",
+    "ws": "0.4.x"
   }
 }
