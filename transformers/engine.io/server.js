@@ -19,7 +19,7 @@ module.exports = function server() {
   // automatically announce it self as a new connection once it's created (after
   // the next tick).
   //
-  this.engine.on('connection', function connection(socket) {
+  this.service.on('connection', function connection(socket) {
     var spark = new Spark(
         socket.request.headers
       , socket.request.address()

@@ -115,11 +115,11 @@ Primus.prototype.library = function compile() {
   // Replace some basic content.
   //
   client = client
-    .replace('= null; // @import {primus::pathname}', this.pathname.toString())
-    .replace('= null; // @import {primus::version}', '"'+ this.version +'"')
-    .replace('= null; // @import {primus::transport}', transport.toString())
-    .replace('= null; // @import {primus::encoder}', encoder.toString())
-    .replace('= null; // @import {primus::decoder}', decoder.toString())
+    .replace('null; // @import {primus::pathname}', this.pathname.toString())
+    .replace('null; // @import {primus::version}', '"'+ this.version +'"')
+    .replace('null; // @import {primus::transport}', transport.toString())
+    .replace('null; // @import {primus::encoder}', encoder.toString())
+    .replace('null; // @import {primus::decoder}', decoder.toString())
     .replace('/* {primus::library} */', library.toString())
     .replace('/* {primus::parser} */', parser.toString());
 

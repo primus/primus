@@ -51,16 +51,65 @@ describe('Primus', function () {
     expect(primus.parser.library).to.include('JSONH');
   });
 
-  it('stores new connections internally');
-  it('removes connections internally on disconnect');
+  it('stores new connections internally', function (done) {
+    expect(primus.connected).to.equal(0);
+    var spark = new primus.Spark();
+
+    process.nextTick(function () {
+      expect(primus.connected).to.equal(1);
+      var sparks = new primus.Spark();
+
+      setTimeout(function () {
+        expect(Object.keys(primus.connections).length).to.equal(primus.connected);
+        sparks.end();
+        spark.end();
+
+        done();
+      }, 0);
+    });
+  });
+
+  it('removes connections internally on disconnect', function (done) {
+    var spark = new primus.Spark()
+      , sparks = new primus.Spark();
+
+    process.nextTick(function () {
+      expect(primus.connected).to.equal(2);
+      sparks.end();
+      spark.end();
+
+      setTimeout(function () {
+        expect(primus.connected).to.equal(0);
+        expect(Object.keys(primus.connections).length).to.equal(primus.connected);
+
+        done();
+      }, 0);
+    });
+  });
 
   describe('#forEach', function () {
     it('iterates over all active connections');
   });
 
   describe('#library', function () {
-    it('includes the library of the parsers');
-    it('includes the library of the transformer');
+    it('includes the library of the parsers', function () {
+      var primus = new Primus(server, { parser: 'jsonh' })
+        , library = primus.library();
+
+      expect(library).to.be.a('string');
+      expect(primus.parser.library).to.be.a('string');
+      expect(library).to.include(primus.parser.library);
+    });
+
+    it('includes the library of the transformer', function () {
+      var primus = new Primus(server, { transformer: 'engine.io' })
+        , library = primus.library();
+
+      expect(library).to.be.a('string');
+      expect(primus.transformer.library).to.be.a('string');
+      expect(library).to.include(primus.transformer.library);
+    });
+
     it('includes the transformers client');
     it('includes the prism client library');
     it('includes the configuration details');
