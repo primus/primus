@@ -24,9 +24,9 @@ module.exports = function server() {
         socket.upgradeReq.address()
       );
 
-      spark.on('end', function end() {
+      spark.on('outgoing::end', function end() {
         socket.close();
-      }).on('data', function write(data) {
+      }).on('outgoing::data', function write(data) {
         socket.send(data);
       });
 

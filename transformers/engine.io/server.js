@@ -26,9 +26,9 @@ module.exports = function server() {
       , socket.id
     );
 
-    spark.on('end', function end() {
+    spark.on('incoming::end', function end() {
       socket.end();
-    }).on('data', function write(data) {
+    }).on('incoming::data', function write(data) {
       socket.write(data);
     });
 
