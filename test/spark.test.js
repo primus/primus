@@ -126,6 +126,12 @@ describe('Spark', function () {
 
       spark.end();
     });
+
+    it('emits an outgoing::end event', function (done) {
+      var spark = new primus.Spark();
+      spark.on('outgoing::end', done);
+      spark.end();
+    });
   });
 
   describe('#write', function () {
@@ -140,6 +146,20 @@ describe('Spark', function () {
         done();
       }).on('error', function (err) {
         throw err;
+      });
+
+      expect(spark.write(data)).to.equal(true);
+    });
+
+    it('emits an error when it cannot encode the data', function (done) {
+      var spark = new primus.Spark()
+        , data = { foo: 'bar' };
+
+      data.recusrive = data;
+
+      spark.on('error', function (err) {
+        expect(err).to.be.instanceOf(Error);
+        done();
       });
 
       expect(spark.write(data)).to.equal(true);

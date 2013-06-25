@@ -53,6 +53,12 @@ Spark.prototype.initialise = function initialise() {
   //
   spark.on('incoming::end', function disconnect() {
     spark.emit('end');
+  });
+
+  //
+  // End is triggered by both incoming and outgoing events.
+  //
+  spark.on('end', function () {
     spark.removeAllListeners();
     primus.emit('disconnection', spark);
   });
@@ -125,8 +131,8 @@ Spark.prototype.end = function end() {
   var spark = this;
 
   process.nextTick(function tick() {
-    spark.emit('incoming::end');
     spark.emit('outgoing::end');
+    spark.emit('end');
   });
 };
 
