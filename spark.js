@@ -23,7 +23,7 @@ function Spark(primus, headers, address, id) {
   this.initialise();
 }
 
-Spark.prototype.__proto__ = require('events').EventEmitter.prototype;
+Spark.prototype.__proto__ = require('stream').prototype;
 
 /**
  * Attach hooks and automatically announce a new connection.
@@ -37,7 +37,7 @@ Spark.prototype.initialise = function initialise() {
   //
   // We've received new data from our client, decode and emit it.
   //
-  spark.on('primus::data', function message(data) {
+  spark.on('incoming::data', function message(data) {
     primus.decoder(data, function decoding(err, packet) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
@@ -51,7 +51,7 @@ Spark.prototype.initialise = function initialise() {
   //
   // The client has disconnected.
   //
-  spark.on('primus::end', function disconnect() {
+  spark.on('incoming::end', function disconnect() {
     spark.emit('end');
     spark.removeAllListeners();
     primus.emit('disconnection', spark);
@@ -90,7 +90,7 @@ Spark.prototype.emits = function emits(event, parser) {
   return function emit(arg) {
     var data = parser ? parser.apply(spark, arguments) : arg;
 
-    spark.emit('primus::'+ event, data);
+    spark.emit('incoming::'+ event, data);
   };
 };
 
@@ -110,7 +110,7 @@ Spark.prototype.write = function write(data) {
     // want to throw here as listening to errors should be optional.
     //
     if (err) return spark.listeners('error').length && spark.emit('error', err);
-    spark.emit('data', packet);
+    spark.emit('outgoing::data', packet);
   });
 
   return true;
@@ -122,8 +122,12 @@ Spark.prototype.write = function write(data) {
  * @api private
  */
 Spark.prototype.end = function end() {
-  this.emit('end');
-  this.removeAllListeners();
+  var spark = this;
+
+  process.nextTick(function tick() {
+    spark.emit('incoming::end');
+    spark.emit('outgoing::end');
+  });
 };
 
 //
