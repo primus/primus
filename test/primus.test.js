@@ -27,7 +27,7 @@ describe('Primus', function () {
 
   it('exposes the client library', function () {
     expect(primus.client).to.be.a('string');
-    expect(primus.client).to.include('{primus::library}');
+    expect(primus.client).to.include('{primus::version}');
   });
 
   it('exposes the Spark constructor', function () {
@@ -78,7 +78,7 @@ describe('Primus', function () {
       sparks.end();
       spark.end();
 
-      setTimeout(function () {
+      process.nextTick(function () {
         expect(primus.connected).to.equal(0);
         expect(Object.keys(primus.connections).length).to.equal(primus.connected);
 
@@ -107,6 +107,7 @@ describe('Primus', function () {
 
       expect(library).to.be.a('string');
       expect(primus.transformer.library).to.be.a('string');
+
       expect(library).to.include(primus.transformer.library);
     });
 

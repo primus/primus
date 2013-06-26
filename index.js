@@ -63,7 +63,7 @@ Primus.prototype.initialise = function initialise(transformer) {
     this.connections[stream.id] = stream;
   });
 
-  this.on('disconnected', function disconnected(stream) {
+  this.on('disconnection', function disconnected(stream) {
     this.connected--;
     delete this.connections[stream.id];
   });
@@ -114,16 +114,17 @@ Primus.prototype.library = function compile() {
   //
   // Replace some basic content.
   //
-  client = client
+  client = ('(function primusclient() {' + client)
     .replace('null; // @import {primus::pathname}', this.pathname.toString())
     .replace('null; // @import {primus::version}', '"'+ this.version +'"')
     .replace('null; // @import {primus::transport}', transport.toString())
     .replace('null; // @import {primus::encoder}', encoder.toString())
-    .replace('null; // @import {primus::decoder}', decoder.toString())
-    .replace('/* {primus::library} */', library.toString())
-    .replace('/* {primus::parser} */', parser.toString());
+    .replace('null; // @import {primus::decoder}', decoder.toString());
 
-  return client;
+  if (library && library.length) client += library;
+  if (parser && parser.length) client += parser;
+
+  return client + '})(this);';
 };
 
 //
