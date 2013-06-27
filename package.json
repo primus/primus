@@ -31,10 +31,10 @@
     "files": "test/*.browser.js",
     "browsers": {
       "ie": [6, 7, 8, 9, 10],
-      "ff": [3, 19],
+      "ff": [3, 19, 'nightly'],
       "safari": [4, 5],
-      "opera": [11, 12],
-      "chome": [25]
+      "opera": [10, 11, 12, 'next'],
+      "chrome": [25, 'canary']
     }
   },
   "devDependencies": {
