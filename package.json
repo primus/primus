@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.test.js')",
-    "browser": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.browser.js')"
+    "browser": "./node_modules/.bin/testling ."
   },
   "repository": {
     "type": "git",
@@ -43,6 +43,7 @@
     "mocha": "1.11.x",
     "pre-commit": "0.0.x",
     "ws": "0.4.x",
-    "jsonh": "0.0.3"
+    "jsonh": "0.0.3",
+    "testling": "*"
   }
 }
