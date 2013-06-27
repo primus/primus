@@ -30,6 +30,7 @@
     "engine.io": "0.6.x",
     "mocha": "1.11.x",
     "pre-commit": "0.0.x",
-    "ws": "0.4.x"
+    "ws": "0.4.x",
+    "jsonh": "0.0.3"
   }
 }
