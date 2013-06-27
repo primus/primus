@@ -38,7 +38,7 @@ Primus.prototype.__proto__ = require('events').EventEmitter.prototype;
 //
 Object.defineProperty(Primus.prototype, 'client', {
   get: function read() {
-    return require('fs').readFileSync('./primus.js', 'utf-8');
+    return require('fs').readFileSync(__dirname + '/primus.js', 'utf-8');
   }
 });
 
@@ -108,14 +108,30 @@ Primus.prototype.library = function compile() {
     , decoder = this.decoder.client || this.decoder
     , library = this.transformer.library || ''
     , transport = this.transformer.client
-    , parser = this.parser.library || ''
-    , client = this.client;
+    , parser = this.parser.library || '';
+
+  //
+  // Add a simple export wrapper so it can be used as Node.js, amd or browser
+  // client.
+  //
+  var client = [
+    '(function (name, context, definition) {',
+    '  if (typeof module !== "undefined" && module.exports) {',
+    '    module.exports = definition();',
+    '  } else if (typeof define == "function" && define.amd) {',
+    '    define(definition);',
+    '  } else {',
+    '    context[name] = definition();',
+    '  }',
+    '})("Primus", this, function PRIMUS() {',
+    this.client
+  ].join('\n');
 
   //
   // Replace some basic content.
   //
-  client = ('(function primusclient() {' + client)
-    .replace('null; // @import {primus::pathname}', this.pathname.toString())
+  client = client
+    .replace('null; // @import {primus::pathname}', '"'+ this.pathname.toString() +'"')
     .replace('null; // @import {primus::version}', '"'+ this.version +'"')
     .replace('null; // @import {primus::transport}', transport.toString())
     .replace('null; // @import {primus::encoder}', encoder.toString())
@@ -124,7 +140,10 @@ Primus.prototype.library = function compile() {
   if (library && library.length) client += library;
   if (parser && parser.length) client += parser;
 
-  return client + '})(this);';
+  //
+  // Close the export wrapper and return the client.
+  //
+  return client + ' return Primus; });';
 };
 
 //
