@@ -83,24 +83,35 @@ describe('Primus', function () {
         expect(Object.keys(primus.connections).length).to.equal(primus.connected);
 
         done();
-      }, 0);
+      });
     });
   });
 
   describe('#forEach', function () {
-    it('iterates over all active connections');
+    it('iterates over all active connections', function (done) {
+      var spark = new primus.Spark()
+        , sparks = new primus.Spark();
+
+      process.nextTick(function () {
+        expect(primus.connected).to.equal(2);
+
+        var iterations = 0;
+
+        primus.forEach(function (client, id, connections) {
+          expect(connections).to.be.a('object');
+          expect(client).to.be.instanceOf(primus.Spark);
+          expect(id).to.be.a('string');
+
+          iterations++;
+        });
+
+        expect(iterations).to.equal(2);
+        done();
+      });
+    });
   });
 
   describe('#library', function () {
-    it('includes the library of the parsers', function () {
-      var primus = new Primus(server, { parser: 'jsonh' })
-        , library = primus.library();
-
-      expect(library).to.be.a('string');
-      expect(primus.parser.library).to.be.a('string');
-      expect(library).to.include(primus.parser.library);
-    });
-
     it('includes the library of the transformer', function () {
       var primus = new Primus(server, { transformer: 'engine.io' })
         , library = primus.library();
@@ -111,9 +122,37 @@ describe('Primus', function () {
       expect(library).to.include(primus.transformer.library);
     });
 
-    it('includes the transformers client');
-    it('includes the prism client library');
-    it('includes the configuration details');
-    it('includes the decoders');
+    it('includes the transformers client', function () {
+      var primus = new Primus(server, { transformer: 'engine.io' })
+        , library = primus.library();
+
+      expect(library).to.be.a('string');
+      expect(primus.transformer.client).to.be.a('function');
+
+      expect(library).to.include(primus.transformer.client.toString());
+    });
+
+    it('includes the prism client library', function () {
+      expect(primus.library()).to.include('Primus(url)');
+    });
+
+    it('includes the configuration details', function () {
+      expect(primus.library()).to.include(primus.version);
+      expect(primus.library()).to.include(primus.pathname);
+    });
+
+    it('includes the library of the parsers', function () {
+      var primus = new Primus(server, { parser: 'jsonh' })
+        , library = primus.library();
+
+      expect(library).to.be.a('string');
+      expect(primus.parser.library).to.be.a('string');
+      expect(library).to.include(primus.parser.library);
+    });
+
+    it('includes the decoders', function () {
+      expect(primus.library()).to.include(primus.encoder.toString());
+      expect(primus.library()).to.include(primus.decoder.toString());
+    });
   });
 });
