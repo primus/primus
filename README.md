@@ -1,5 +1,7 @@
 # Primus
 
+[![Build Status](https://travis-ci.org/3rd-Eden/primus.png)](https://travis-ci.org/3rd-Eden/primus)
+
 Primus, the creator god of transformers but now also known as universal wrapper
 for real-time frameworks. There are a lot of real-time frameworks available for
 Node.js and they all have different opinions on how real-time should be done.
