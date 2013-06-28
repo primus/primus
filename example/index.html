@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Primus</title>
+  <script src="/library"></script>
+</head>
+<body>
+  <p>
+    Welcome to Primus example.
+  </p>
+
+  <script>
+    var primus = new Primus();
+
+    primus.on('reconnect', function () {
+      console.log('primus: reconnect event happend');
+    });
+
+    primus.on('error', function (err) {
+      console.log('primus: error event', err);
+    });
+
+    primus.on('data', function (data) {
+      console.log('primus: received data', data);
+    });
+
+    primus.on('end', function () {
+      console.log('primus: connection closed');
+    });
+  </script>
