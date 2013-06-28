@@ -51,7 +51,7 @@ Primus.prototype.initialise = function initalise() {
       if (fail) return primus.emit('end');
 
       // Try to re-open the connection again.
-      primus.emit('outgoing::reconnect', primus.uri());
+      primus.emit('outgoing::reconnect', primus.uri('ws'), primus.uri('http'));
     }, primus.backoff);
   });
 
@@ -69,7 +69,7 @@ Primus.prototype.initialise = function initalise() {
  * @api private
  */
 Primus.prototype.connect = function connect() {
-  this.emit('outgoing::connect', this.uri());
+  this.emit('outgoing::connect', this.uri('ws'), this.uri('http'));
 
   return this;
 };
@@ -173,15 +173,16 @@ Primus.prototype.parse = function parse(url) {
 };
 
 /**
- * Generates a connection url.
+ * Generates a connection uri.
  *
+ * @param {String} protocol The protocol that should used to crate the uri.
  * @returns {String} The url.
  * @api private
  */
-Primus.prototype.uri = function uri() {
+Primus.prototype.uri = function uri(protocol) {
   var server = [];
 
-  server.push(this.url.protocol === 'https:' ? 'wss:' : 'ws:', '');
+  server.push(this.url.protocol === 'https:' ? protocol +'s:' : protocol +':', '');
   server.push(this.url.host, this.pathname.slice(1));
 
   //
