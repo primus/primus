@@ -10,8 +10,8 @@ function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url);
   options = options || {};
 
-  this.events = {};                       // Stores the events.
   this.buffer = [];                       // Stores premature send data.
+  this._events = {};                       // Stores the events.
   this.writable = true;                   // Silly stream compatiblity.
   this.readable = true;                   // Silly stream compatiblity.
   this.url = this.parse(url);             // Parse the url to a readable format.
@@ -19,6 +19,10 @@ function Primus(url, options) {
 
   this.initialise().connect();
 }
+
+try {
+  Primus.prototype = new(require('stream'));
+} catch (e) {}
 
 /**
  * Initialise the Primus and setup all parsers and internal listeners.
@@ -101,6 +105,8 @@ Primus.prototype.end = function end(data) {
 
   this.emit('outgoing::end');
   this.emit('end');
+
+  this.writable = false;
 
   return this;
 };
@@ -191,7 +197,7 @@ Primus.prototype.uri = function uri() {
  * @api public
  */
 Primus.prototype.listeners = function listeners(event) {
-  return (this.events[event] || []).slice(0);
+  return (this._events[event] || []).slice(0);
 };
 
 /**
@@ -202,14 +208,14 @@ Primus.prototype.listeners = function listeners(event) {
  * @api public
  */
 Primus.prototype.emit = function emit(event) {
-  if (!(event in this.events)) return false;
+  if (!(event in this._events)) return false;
 
   var args = Array.prototype.slice.call(arguments, 1)
-    , length = this.events[event].length
+    , length = this._events[event].length
     , i = 0;
 
   for (; i < length; i++) {
-    this.events[event][i].apply(this, args);
+    this._events[event][i].apply(this, args);
   }
 
   return true;
@@ -223,8 +229,36 @@ Primus.prototype.emit = function emit(event) {
  * @api public
  */
 Primus.prototype.on = function on(event, fn) {
-  if (!(event in this.events)) this.events[event] = [];
-  this.events[event].push(fn);
+  if (!(event in this._events)) this._events[event] = [];
+  this._events[event].push(fn);
+
+  return this;
+};
+
+/**
+ * Remove event listeners.
+ *
+ * @param {String} event The event we want to remove.
+ * @param {Function} fn The listener that we need to find.
+ * @api public
+ */
+Primus.prototype.removeListener = function removeListener(event, fn) {
+  if (!this._events || !(event in this._events)) return this;
+
+  var listeners = this._events[event]
+    , events = [];
+
+  for (var i = 0, length = listeners.length; i < length; i++) {
+    if (!fn || listeners[i] === fn) continue;
+
+    events.push(listeners[i]);
+  }
+
+  //
+  // Reset the array, or remove it completely if we have no more listeners.
+  //
+  if (events.length) this._events[event] = events;
+  else delete this._events[event];
 
   return this;
 };
