@@ -11,6 +11,7 @@ var querystring = require('querystring').parse
  * @api public
  */
 function Transformer(primus) {
+  this.Spark = primus.Spark;
   this.primus = primus;
   this.service = null;
 
