@@ -15,10 +15,10 @@ module.exports = function client() {
   //
   // Connect to the given url.
   //
-  primus.on('outgoing::connect', function connect(url) {
+  primus.on('outgoing::connect', function connect(ws, http) {
     if (socket) socket.close();
 
-    socket = new BCSocket(url);
+    socket = new BCSocket(http, { reconnect: false });
 
     //
     // Setup the Event handlers.
@@ -40,7 +40,7 @@ module.exports = function client() {
   // Attempt to reconnect the socket. It asumes that the `close` event is
   // called if it failed to disconnect.
   //
-  primus.on('outgoing::reconnect', function reconnect() {
+  primus.on('outgoing::reconnect', function reconnect(ws, http) {
     if (socket) {
       socket.close();
       socket.open();

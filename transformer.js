@@ -3,6 +3,11 @@
 var querystring = require('querystring').parse
   , url = require('url').parse;
 
+//
+// Used to fake middleware's
+//
+function noop() {}
+
 /**
  * Transformer skeletons
  *
@@ -51,7 +56,7 @@ Transformer.prototype.initialise = function initialise() {
 Transformer.prototype.request = function request(req, res) {
   if (!this.test(req)) return;
 
-  this.emit('request', req, res);
+  this.emit('request', req, res, noop);
 };
 
 /**
@@ -73,7 +78,7 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
   var buffy = new Buffer(head.length);
   head.copy(upgrade);
 
-  this.emit('upgrade', req, socket, buffy);
+  this.emit('upgrade', req, socket, buffy, noop);
 };
 
 /**
@@ -86,7 +91,10 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
 Transformer.prototype.test = function test(req) {
   req.uri = url(req.url);
 
-  return req.uri.pathname === this.primus.pathname;
+  //
+  // Make sure that the first part of the path matches.
+  //
+  return req.uri.pathname.slice(0, this.primus.pathname.length) === this.primus.pathname;
 };
 
 //

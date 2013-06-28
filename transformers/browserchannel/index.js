@@ -2,7 +2,7 @@
 
 var path = require('path')
   , directory = require.resolve('browserchannel')
-  , library = path.join(path.dirname(directory), 'dist/bcsocket.js');
+  , library = path.join(path.dirname(directory), 'dist/bcsocket-uncompressed.js');
 
 //
 // Expose the module as new Transformer instance.
@@ -15,5 +15,5 @@ module.exports = require('../../transformer').extend({
   client: require('./client'),
 
   // The client-side library of the browserchannel.
-  library: require('fs').readFileSync(library, 'utf-8')
+  library: require('fs').readFileSync(library, 'utf-8').trim().slice(0, -3) + '.call("undefined" !== typeof window ? window : this);'
 });
