@@ -136,7 +136,11 @@ The following transformers/transports are supported in Primus:
 
 #### engine.io
 
-To enable `engine.io` you need to install the `engine.io` module:
+Engine.io is the low level transport functionality of socket.io 1.0. It supports
+multiple transports for creating a real-time connection. It uses transport
+upgrading instead of downgrading which makes it more resilliant to blocking
+proxies and firewalls. To enable `engine.io` you need to install the `engine.io`
+module:
 
 ```
 npm install engine.io --save
@@ -150,7 +154,11 @@ var primus = new Primus(server, { transformer: 'engine.io' });
 
 #### WebSockets
 
-To use pure WebSockets you need to install the `ws` module:
+If you are targetting a high end audiance or maybe just something for internal
+uses you can use a pure WebSocket server. This uses the `ws` WebSocket module
+which is known to be one if not the fastest WebSocket server available in
+Node.js and supports all protocol specifications. To use pure WebSockets you
+need to install the `ws` module:
 
 ```
 npm install ws --save
@@ -162,8 +170,25 @@ And tell `Primus` that you want to use `WebSockets` as transformer:
 var primus = new Primus(server, { transformer: 'websockets' });
 ```
 
-As you can see above, it doesn't matter how you write the name of the
-transformer, we just `toLowerCase()` everything.
+#### Browserchannel
+
+Browserchannel was the original technology that GMail used for their real-time
+communication. It's designed for same domain communication and does not use
+WebSockets. To use browser channel you need to install the `browserchannel`
+module:
+
+```
+npm install browserchannel --save
+```
+
+And tell `Primus` that you want to use `WebSockets` as transformer:
+
+```js
+var primus = new Primus(server, { transformer: 'browserchannel' });
+```
+
+As you can see from the examples above, it doesn't matter how you write the name
+of the transformer, we just `toLowerCase()` everything.
 
 ### Versioning
 
