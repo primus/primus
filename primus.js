@@ -45,11 +45,13 @@ Primus.prototype.initialise = function initalise() {
 
   this.on('incoming::end', function end() {
     this.reconnect(function (fail, backoff) {
+      primus.emit('reconnect');
+
       primus.backoff = backoff; // Save the opts again of this backoff.
-      if (fail) return primus.emit('end', fail);
+      if (fail) return primus.emit('end');
 
       // Try to re-open the connection again.
-      primus.emit('outgoing::reconnect');
+      primus.emit('outgoing::reconnect', primus.uri());
     }, primus.backoff);
   });
 
@@ -119,7 +121,7 @@ Primus.prototype.end = function end(data) {
  * @param {Object} opts Options for configuring the timeout.
  * @api private
  */
-Primus.prototype.backoff = function backoff(callback, opts) {
+Primus.prototype.reconnect = function reconnect(callback, opts) {
   opts = opts || {};
 
   opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
