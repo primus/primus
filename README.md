@@ -174,17 +174,34 @@ var primus = new Primus(server, { transformer: 'websockets' });
 
 Browserchannel was the original technology that GMail used for their real-time
 communication. It's designed for same domain communication and does not use
-WebSockets. To use browser channel you need to install the `browserchannel`
+WebSockets. To use browserchannel you need to install the `browserchannel`
 module:
 
 ```
 npm install browserchannel --save
 ```
 
-And tell `Primus` that you want to use `WebSockets` as transformer:
+And tell `Primus` that you want to use `browserchannel` as transformer:
 
 ```js
 var primus = new Primus(server, { transformer: 'browserchannel' });
+```
+
+#### Socket.IO
+
+The socket.io transport was written against socket.io 0.9. It was one of the
+first real-time servers written on Node.js and is one of the most used modules
+in Node.js. It uses multiple transports to connect the server. To use socket.io
+you need to install the `socket.io` module:
+
+```
+npm install socket.io --save
+```
+
+And tell `Primus` that you want to use `socket.io` as transformer:
+
+```js
+var primus = new Primus(server, { transformer: 'socket.io' });
 ```
 
 As you can see from the examples above, it doesn't matter how you write the name
