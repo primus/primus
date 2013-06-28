@@ -47,7 +47,7 @@ module.exports = function client() {
   //
   // We need to write a new message to the socket.
   //
-  primus.on('outgoing::write', function write(message) {
+  primus.on('outgoing::data', function write(message) {
     if (socket) socket.send(message);
   });
 
@@ -55,8 +55,9 @@ module.exports = function client() {
   // Attempt to reconnect the socket. It asumes that the `close` event is
   // called if it failed to disconnect.
   //
-  primus.on('outgoing::reconnect', function reconnect() {
-    if (socket) socket.close();
+  primus.on('outgoing::reconnect', function reconnect(url) {
+    if (socket) primus.emit('outgoing::close');
+    primus.emit('outgoing::connect', url);
   });
 
   //

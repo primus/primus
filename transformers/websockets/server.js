@@ -9,8 +9,8 @@
  */
 module.exports = function server() {
   var WebSocketServer = require('ws').Server
-    , Spark = this.Spark
-    , primus = this.primus;
+    , primus = this.primus
+    , Spark = this.Spark;
 
   this.service = new WebSocketServer({ noServer: true, clientTracking: false });
 
@@ -21,7 +21,7 @@ module.exports = function server() {
     this.service.handleUpgrade(req, socket, head, function create(socket) {
       var spark = new Spark(
         socket.upgradeReq.headers,
-        socket.upgradeReq.address()
+        socket.upgradeReq.connection.address()
       );
 
       spark.on('outgoing::end', function end() {
