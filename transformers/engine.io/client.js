@@ -18,7 +18,7 @@ module.exports = function client() {
   primus.on('outgoing::connect', function connect(url) {
     if (socket) socket.close();
 
-    socket = eio(url, {
+    socket = primus.eio(url, {
       path: this.pathname
     });
 
@@ -36,7 +36,7 @@ module.exports = function client() {
   //
   // We need to write a new message to the socket.
   //
-  primus.on('outgoing::write', function write(message) {
+  primus.on('outgoing::data', function write(message) {
     if (socket) socket.send(message);
   });
 
