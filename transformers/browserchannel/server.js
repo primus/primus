@@ -17,7 +17,9 @@ module.exports = function server() {
   // automatically announce it self as a new connection once it's created (after
   // the next tick).
   //
-  this.service = browserchannel.server(function connection(socket) {
+  this.service = browserchannel.server({
+    base: primus.pathname
+  }, function connection(socket) {
     var spark = new Spark(
         socket.headers
       , socket.address
