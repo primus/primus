@@ -125,9 +125,12 @@ Spark.prototype.write = function write(data) {
 /**
  * End the connection.
  *
- * @api private
+ * @param {Mixed} data Optional closing data.
+ * @api public
  */
-Spark.prototype.end = function end() {
+Spark.prototype.end = function end(data) {
+  if (data) this.write(data);
+
   var spark = this;
 
   process.nextTick(function tick() {

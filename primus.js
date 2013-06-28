@@ -6,12 +6,16 @@
  *
  * @param {String} url The url of your server.
  */
-function Primus(url) {
+function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url);
+  options = options || {};
 
-  this.events = {};             // Stores the events.
-  this.backoff = {};            // Stores the backoff configuration.
-  this.url = this.parse(url);
+  this.events = {};                       // Stores the events.
+  this.buffer = [];                       // Stores premature send data.
+  this.writable = true;                   // Silly stream compatiblity.
+  this.readable = true;                   // Silly stream compatiblity.
+  this.url = this.parse(url);             // Parse the url to a readable format.
+  this.backoff = options.reconnect || {}; // Stores the backoff configuration.
 
   this.initialise().connect();
 }
@@ -45,6 +49,11 @@ Primus.prototype.initialise = function initalise() {
     }, primus.backoff);
   });
 
+  //
+  // Setup the real-time client.
+  //
+  this.client();
+
   return this;
 };
 
@@ -60,11 +69,36 @@ Primus.prototype.connect = function connect() {
 };
 
 /**
- * Close the connection.
+ * Send a new message.
  *
+ * @param {Mixed} data The data that needs to be written.
+ * @returns {Boolean} Always returns true.
  * @api public
  */
-Primus.prototype.end = function end() {
+Primus.prototype.write = function write(data) {
+  var primus = this;
+
+  this.encoder(data, function encoded(err, packet) {
+    //
+    // Do a "save" emit('error') when we fail to parse a message. We don't
+    // want to throw here as listening to errors should be optional.
+    //
+    if (err) return primus.listeners('error').length && primus.emit('error', err);
+    primus.emit('outgoing::data', packet);
+  });
+
+  return true;
+};
+
+/**
+ * Close the connection.
+ *
+ * @param {Mixed} data last packet of data.
+ * @api public
+ */
+Primus.prototype.end = function end(data) {
+  if (data) this.write(data);
+
   this.emit('outgoing::end');
   this.emit('end');
 
