@@ -14,7 +14,10 @@ module.exports = function server() {
     , primus = this.primus;
 
   this.service = new Engine(new EventEmitter(), {
-    resource: primus.pathname
+    'resource': primus.pathname,
+    'destroy upgrade': false,
+    'browser client': false,
+    'log level': -1
   });
 
   //
