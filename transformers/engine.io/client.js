@@ -18,7 +18,7 @@ module.exports = function client() {
   primus.on('outgoing::connect', function connect(url) {
     if (socket) socket.close();
 
-    socket = primus.eio(url, {
+    socket = eio(url, {
       path: this.pathname
     });
 
