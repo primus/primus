@@ -15,5 +15,5 @@ module.exports = require('../../transformer').extend({
   client: require('./client'),
 
   // The client-side library of the browserchannel.
-  library: require('fs').readFileSync(library, 'utf-8').trim().slice(0, -3) + '.call("undefined" !== typeof window ? window : this);'
+  library: require('fs').readFileSync(library, 'utf-8')
 });

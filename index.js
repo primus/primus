@@ -137,13 +137,19 @@ Primus.prototype.library = function compile() {
     .replace('null; // @import {primus::encoder}', encoder.toString())
     .replace('null; // @import {primus::decoder}', decoder.toString());
 
-  if (library && library.length) client += library;
+  //
+  // Add the parser inside the closure, to prevent global leaking.
+  //
   if (parser && parser.length) client += parser;
 
   //
-  // Close the export wrapper and return the client.
+  // Close the export wrapper and return the client. If we need to add
+  // a library, we should add them after we've created our closure and module
+  // exports. Some libraries seem to fail hard once they are wrapped in our
+  // closure so i'll rather expose a global variable instead of having to monkey
+  // patch to much code.
   //
-  return client + ' return Primus; });';
+  return client + ' return Primus; });' + library;
 };
 
 //

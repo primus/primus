@@ -15,15 +15,23 @@
  *
  * @param {String} url The url of your server.
  */
-function Primus(url) {
+function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url);
+  options = options || {};
 
-  this.events = {};             // Stores the events.
-  this.backoff = {};            // Stores the backoff configuration.
-  this.url = this.parse(url);
+  this.buffer = [];                       // Stores premature send data.
+  this._events = {};                       // Stores the events.
+  this.writable = true;                   // Silly stream compatiblity.
+  this.readable = true;                   // Silly stream compatiblity.
+  this.url = this.parse(url);             // Parse the url to a readable format.
+  this.backoff = options.reconnect || {}; // Stores the backoff configuration.
 
   this.initialise().connect();
 }
+
+try {
+  Primus.prototype = new(require('stream'));
+} catch (e) {}
 
 /**
  * Initialise the Primus and setup all parsers and internal listeners.
@@ -46,13 +54,20 @@ Primus.prototype.initialise = function initalise() {
 
   this.on('incoming::end', function end() {
     this.reconnect(function (fail, backoff) {
+      primus.emit('reconnect');
+
       primus.backoff = backoff; // Save the opts again of this backoff.
-      if (fail) return primus.emit('end', fail);
+      if (fail) return primus.emit('end');
 
       // Try to re-open the connection again.
-      primus.emit('outgoing::reconnect');
+      primus.emit('outgoing::reconnect', primus.uri('ws'), primus.uri('http'));
     }, primus.backoff);
   });
+
+  //
+  // Setup the real-time client.
+  //
+  this.client();
 
   return this;
 };
@@ -63,19 +78,46 @@ Primus.prototype.initialise = function initalise() {
  * @api private
  */
 Primus.prototype.connect = function connect() {
-  this.emit('outgoing::connect', this.uri());
+  this.emit('outgoing::connect', this.uri('ws'), this.uri('http'));
 
   return this;
 };
 
 /**
- * Close the connection.
+ * Send a new message.
  *
+ * @param {Mixed} data The data that needs to be written.
+ * @returns {Boolean} Always returns true.
  * @api public
  */
-Primus.prototype.end = function end() {
+Primus.prototype.write = function write(data) {
+  var primus = this;
+
+  this.encoder(data, function encoded(err, packet) {
+    //
+    // Do a "save" emit('error') when we fail to parse a message. We don't
+    // want to throw here as listening to errors should be optional.
+    //
+    if (err) return primus.listeners('error').length && primus.emit('error', err);
+    primus.emit('outgoing::data', packet);
+  });
+
+  return true;
+};
+
+/**
+ * Close the connection.
+ *
+ * @param {Mixed} data last packet of data.
+ * @api public
+ */
+Primus.prototype.end = function end(data) {
+  if (data) this.write(data);
+
   this.emit('outgoing::end');
   this.emit('end');
+
+  this.writable = false;
 
   return this;
 };
@@ -88,7 +130,7 @@ Primus.prototype.end = function end() {
  * @param {Object} opts Options for configuring the timeout.
  * @api private
  */
-Primus.prototype.backoff = function backoff(callback, opts) {
+Primus.prototype.reconnect = function reconnect(callback, opts) {
   opts = opts || {};
 
   opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
@@ -140,15 +182,16 @@ Primus.prototype.parse = function parse(url) {
 };
 
 /**
- * Generates a connection url.
+ * Generates a connection uri.
  *
+ * @param {String} protocol The protocol that should used to crate the uri.
  * @returns {String} The url.
  * @api private
  */
-Primus.prototype.uri = function uri() {
+Primus.prototype.uri = function uri(protocol) {
   var server = [];
 
-  server.push(this.url.protocol === 'https:' ? 'wss:' : 'ws:', '');
+  server.push(this.url.protocol === 'https:' ? protocol +'s:' : protocol +':', '');
   server.push(this.url.host, this.pathname.slice(1));
 
   //
@@ -166,7 +209,7 @@ Primus.prototype.uri = function uri() {
  * @api public
  */
 Primus.prototype.listeners = function listeners(event) {
-  return (this.events[event] || []).slice(0);
+  return (this._events[event] || []).slice(0);
 };
 
 /**
@@ -177,14 +220,14 @@ Primus.prototype.listeners = function listeners(event) {
  * @api public
  */
 Primus.prototype.emit = function emit(event) {
-  if (!(event in this.events)) return false;
+  if (!(event in this._events)) return false;
 
   var args = Array.prototype.slice.call(arguments, 1)
-    , length = this.events[event].length
+    , length = this._events[event].length
     , i = 0;
 
   for (; i < length; i++) {
-    this.events[event][i].apply(this, args);
+    this._events[event][i].apply(this, args);
   }
 
   return true;
@@ -198,8 +241,36 @@ Primus.prototype.emit = function emit(event) {
  * @api public
  */
 Primus.prototype.on = function on(event, fn) {
-  if (!(event in this.events)) this.events[event] = [];
-  this.events[event].push(fn);
+  if (!(event in this._events)) this._events[event] = [];
+  this._events[event].push(fn);
+
+  return this;
+};
+
+/**
+ * Remove event listeners.
+ *
+ * @param {String} event The event we want to remove.
+ * @param {Function} fn The listener that we need to find.
+ * @api public
+ */
+Primus.prototype.removeListener = function removeListener(event, fn) {
+  if (!this._events || !(event in this._events)) return this;
+
+  var listeners = this._events[event]
+    , events = [];
+
+  for (var i = 0, length = listeners.length; i < length; i++) {
+    if (!fn || listeners[i] === fn) continue;
+
+    events.push(listeners[i]);
+  }
+
+  //
+  // Reset the array, or remove it completely if we have no more listeners.
+  //
+  if (events.length) this._events[event] = events;
+  else delete this._events[event];
 
   return this;
 };
@@ -245,7 +316,7 @@ Primus.prototype.client = function client() {
   primus.on('outgoing::connect', function connect(url) {
     if (socket) socket.close();
 
-    socket = eio(url, {
+    socket = primus.eio(url, {
       path: this.pathname
     });
 
@@ -263,7 +334,7 @@ Primus.prototype.client = function client() {
   //
   // We need to write a new message to the socket.
   //
-  primus.on('outgoing::write', function write(message) {
+  primus.on('outgoing::data', function write(message) {
     if (socket) socket.send(message);
   });
 
@@ -297,7 +368,7 @@ Primus.prototype.decoder = function decoder(data, fn) {
   catch (e) { fn(e); }
 };
 Primus.prototype.version = "0.0.0";
-;(function(){
+ return Primus; });;(function(){
 
 /**
  * Require the given path.
@@ -3421,4 +3492,4 @@ if (typeof exports == "object") {
   define(function(){ return require("engine.io"); });
 } else {
   this["eio"] = require("engine.io");
-}})(); return Primus; });
+}})();

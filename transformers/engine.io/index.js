@@ -11,5 +11,5 @@ module.exports = require('../../transformer').extend({
   client: require('./client'),
 
   // The client-side library of engine.io.
-  library: require('fs').readFileSync(__dirname + '/library.js', 'utf-8').trim().slice(0, -3) + '.call(Primus.prototype);'
+  library: require('fs').readFileSync(__dirname + '/library.js', 'utf-8')
 });
