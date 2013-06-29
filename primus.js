@@ -11,14 +11,18 @@ function Primus(url, options) {
   options = options || {};
 
   this.buffer = [];                       // Stores premature send data.
-  this._events = {};                       // Stores the events.
+  this._events = {};                      // Stores the events.
   this.writable = true;                   // Silly stream compatiblity.
   this.readable = true;                   // Silly stream compatiblity.
   this.url = this.parse(url);             // Parse the url to a readable format.
   this.backoff = options.reconnect || {}; // Stores the backoff configuration.
-
+  this.readyState = Primus.CLOSED;        // The readyState of the connection.
   this.initialise().connect();
 }
+
+Primus.OPENING = 0;   // We're opening the connection.
+Primus.CLOSED  = 1;   // No active connection.
+Primus.OPEN    = 2;   // The connection is open.
 
 try {
   Primus.prototype = new(require('stream'));
@@ -32,6 +36,22 @@ try {
 Primus.prototype.initialise = function initalise() {
   var primus = this;
 
+  this.on('outgoing::connect', function connecting() {
+    primus.readyState = Primus.OPENING;
+  });
+
+  this.on('incoming::connect', function connect() {
+    primus.readyState = Primus.OPEN;
+
+    if (primus.buffer.length) {
+      for (var i = 0, length = primus.buffer.length; i < length; i++) {
+        primus.write(primus.buffer[i]);
+      }
+
+      primus.buffer.length = 0;
+    }
+  });
+
   this.on('incoming::data', function message(data) {
     primus.decoder(data, function decoding(err, packet) {
       //
@@ -44,6 +64,8 @@ Primus.prototype.initialise = function initalise() {
   });
 
   this.on('incoming::end', function end() {
+    primus.readyState = Primus.CLOSED;
+
     this.reconnect(function (fail, backoff) {
       primus.emit('reconnect');
 
@@ -84,14 +106,18 @@ Primus.prototype.connect = function connect() {
 Primus.prototype.write = function write(data) {
   var primus = this;
 
-  this.encoder(data, function encoded(err, packet) {
-    //
-    // Do a "save" emit('error') when we fail to parse a message. We don't
-    // want to throw here as listening to errors should be optional.
-    //
-    if (err) return primus.listeners('error').length && primus.emit('error', err);
-    primus.emit('outgoing::data', packet);
-  });
+  if (this.readyState !== Primus.OPEN) {
+    this.encoder(data, function encoded(err, packet) {
+      //
+      // Do a "save" emit('error') when we fail to parse a message. We don't
+      // want to throw here as listening to errors should be optional.
+      //
+      if (err) return primus.listeners('error').length && primus.emit('error', err);
+      primus.emit('outgoing::data', packet);
+    });
+  } else {
+    primus.buffer.push(data);
+  }
 
   return true;
 };
@@ -109,6 +135,7 @@ Primus.prototype.end = function end(data) {
   this.emit('end');
 
   this.writable = false;
+  this.readyState = Primus.CLOSED;
 
   return this;
 };
