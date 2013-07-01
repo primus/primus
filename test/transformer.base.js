@@ -31,10 +31,6 @@ module.exports = function base(transformer) {
 
     afterEach(function afterEach(done) {
       server.close(done);
-
-      primus.forEach(function (spark) {
-        spark.end();
-      });
     });
 
     describe('.Socket', function () {
@@ -76,7 +72,11 @@ module.exports = function base(transformer) {
 
         socket.on('data', function (message) {
           expect(message).to.be.a('number');
-          if (++received === messages) done();
+
+          if (++received === messages) {
+            socket.end();
+            done();
+          }
         });
       });
     });

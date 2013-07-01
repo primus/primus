@@ -64,7 +64,7 @@ module.exports = function client() {
   //
   // We need to close the socket.
   //
-  primus.on('outgoing::close', function close() {
+  primus.on('outgoing::end', function close() {
     if (socket) {
       socket.close();
       socket = null;

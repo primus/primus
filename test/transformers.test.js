@@ -1,7 +1,7 @@
 'use strict';
 
 [
-  //'Engine.IO',
+  'Engine.IO',
   'Socket.IO',
   'WebSockets',
   'BrowserChannel'
