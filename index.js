@@ -98,12 +98,13 @@ Primus.prototype.parsers = function parsers(type) {
 };
 
 /**
- * Generate a front-end library.
+ * Generate a client library.
  *
- * @returns {String} The client side library.
+ * @param {Boolean} noframework Don't include the library.
+ * @returns {String} The client library.
  * @api public
  */
-Primus.prototype.library = function compile() {
+Primus.prototype.library = function compile(noframework) {
   var encoder = this.encoder.client || this.encoder
     , decoder = this.decoder.client || this.decoder
     , library = this.transformer.library || ''
@@ -149,7 +150,7 @@ Primus.prototype.library = function compile() {
   // closure so i'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client + ' return Primus; });' + library;
+  return client + ' return Primus; });' + (noframework ? '' : library);
 };
 
 //

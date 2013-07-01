@@ -17,6 +17,9 @@ function Primus(url, options) {
   this.url = this.parse(url);             // Parse the url to a readable format.
   this.backoff = options.reconnect || {}; // Stores the backoff configuration.
   this.readyState = Primus.CLOSED;        // The readyState of the connection.
+
+  if (Stream) Stream.call(this);          // Initialize a stream interface.
+
   this.initialise().connect();
 }
 
@@ -24,9 +27,26 @@ Primus.OPENING = 0;   // We're opening the connection.
 Primus.CLOSED  = 1;   // No active connection.
 Primus.OPEN    = 2;   // The connection is open.
 
+//
+// It's possible that we're running in Node.js or in a Node.js compatible
+// enviroument such as browserify. In these cases we want to use some build in
+// libraries to minimize our dependence on the DOM.
+//
+var Stream, parse;
+
 try {
-  Primus.prototype = new(require('stream'));
-} catch (e) {}
+  parse = require('url').parse;
+  Stream = require('stream');
+
+  Primus.prototype = new Stream();
+} catch (e) {
+  parse = function parse(url) {
+    var a = document.createElement('a');
+    a.href = url;
+
+    return a;
+  };
+}
 
 /**
  * Initialise the Primus and setup all parsers and internal listeners.
@@ -192,12 +212,7 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
  * @returns {Object} Parsed connection.
  * @api public
  */
-Primus.prototype.parse = function parse(url) {
-  var a = document.createElement('a');
-  a.href = url;
-
-  return a;
-};
+Primus.prototype.parse = parse;
 
 /**
  * Generates a connection uri.
