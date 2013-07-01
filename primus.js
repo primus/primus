@@ -62,6 +62,7 @@ Primus.prototype.initialise = function initalise() {
 
   this.on('incoming::connect', function connect() {
     primus.readyState = Primus.OPEN;
+    primus.emit('open');
 
     if (primus.buffer.length) {
       for (var i = 0, length = primus.buffer.length; i < length; i++) {
@@ -126,7 +127,7 @@ Primus.prototype.connect = function connect() {
 Primus.prototype.write = function write(data) {
   var primus = this;
 
-  if (this.readyState !== Primus.OPEN) {
+  if (this.readyState === Primus.OPEN) {
     this.encoder(data, function encoded(err, packet) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
