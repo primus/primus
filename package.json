@@ -39,6 +39,7 @@
     }
   },
   "devDependencies": {
+    "browserchannel": "1.0.x",
     "chai": "1.7.x",
     "engine.io": "0.6.x",
     "engine.io-client": "0.6.x",
