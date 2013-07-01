@@ -41,12 +41,13 @@
   "devDependencies": {
     "chai": "1.7.x",
     "engine.io": "0.6.x",
+    "engine.io-client": "0.6.x",
+    "jsonh": "0.0.x",
     "mocha": "1.11.x",
     "pre-commit": "0.0.x",
-    "ws": "0.4.x",
-    "jsonh": "0.0.3",
+    "socket.io": "0.9.x",
+    "socket.io-client": "0.9.x",
     "testling": "*",
-    "socket.io-client": "~0.9.16",
-    "engine.io-client": "~0.6.3"
+    "ws": "0.4.x"
   }
 }
