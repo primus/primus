@@ -43,6 +43,15 @@ Object.defineProperty(Primus.prototype, 'client', {
 });
 
 //
+// Lazy compile the primus.js JavaScript client for Node.js
+//
+Object.defineProperty(Primus.prototype, 'Socket', {
+  get: function () {
+    return require('load').compiler(this.library(true), 'primus.js');
+  }
+});
+
+//
 // Expose the current version number.
 //
 Primus.prototype.version = require('./package.json').version;
