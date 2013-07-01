@@ -45,6 +45,8 @@
     "pre-commit": "0.0.x",
     "ws": "0.4.x",
     "jsonh": "0.0.3",
-    "testling": "*"
+    "testling": "*",
+    "socket.io-client": "~0.9.16",
+    "engine.io-client": "~0.6.3"
   }
 }

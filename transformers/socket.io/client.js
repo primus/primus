@@ -17,7 +17,7 @@ module.exports = function client() {
   //
   var factory = (function factory() {
     if ('undefined' !== typeof io && io.connect) return io.connect;
-    try { return require('socket.io-client'); }
+    try { return require('socket.io-client').connect; }
     catch (e) {}
 
     return undefined;

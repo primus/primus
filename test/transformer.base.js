@@ -55,7 +55,6 @@ module.exports = function base(transformer) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
         socket.on('data', function (message) {
-          console.log('received::data', message);
           expect(message).to.equal('pong');
           socket.end();
           done();
