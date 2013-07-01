@@ -13,6 +13,19 @@ module.exports = function client() {
     , socket;
 
   //
+  // Selects an available Socket.io constructor.
+  //
+  var factory = (function factory() {
+    if ('undefined' !== typeof io && io.connect) return io.connect;
+    try { return require('socket.io-client'); }
+    catch (e) {}
+
+    return undefined;
+  })();
+
+  if (!factory) return this.emit('error', new Error('No Socket.IO client factory'));
+
+  //
   // Connect to the given url.
   //
   primus.on('outgoing::connect', function connect(url) {
@@ -22,7 +35,7 @@ module.exports = function client() {
     // We need to remove the pathname here as socket.io will assume that we want
     // to connect to a namespace instead.
     //
-    socket = io.connect(url.replace(this.pathname.slice(1), ''), {
+    socket = factory(url.replace(this.pathname.slice(1), ''), {
       'resource': this.pathname.slice(1),
       'force new connection': true,
       'reconnect': false

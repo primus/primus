@@ -13,12 +13,25 @@ module.exports = function client() {
     , socket;
 
   //
+  // Selects an available Engine.io factory.
+  //
+  var factory = (function factory() {
+    if ('undefined' !== typeof eio) return eio;
+    try { return require('engine.io-client'); }
+    catch (e) {}
+
+    return undefined;
+  })();
+
+  if (!factory) return this.emit('error', new Error('No Engine.IO client factory'));
+
+  //
   // Connect to the given url.
   //
   primus.on('outgoing::connect', function connect(url) {
     if (socket) socket.close();
 
-    socket = eio(url, {
+    socket = factory(url, {
       path: this.pathname
     });
 

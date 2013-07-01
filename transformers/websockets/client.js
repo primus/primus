@@ -15,15 +15,16 @@ module.exports = function client() {
   //
   // Selects an available WebSocket constructor.
   //
-  var Socket = (function ws() {
+  var Factory = (function factory() {
     if ('undefined' !== typeof WebSocket) return WebSocket;
     if ('undefined' !== typeof MozWebSocket) return MozWebSocket;
-    if ('function' === typeof require) return require('ws');
+    try { return require('ws'); }
+    catch (e) {}
 
     return undefined;
   })();
 
-  if (!Socket) return this.emit('error', new Error('No WebSocket constructor'));
+  if (!Factory) return this.emit('error', new Error('No WebSocket factory'));
 
   //
   // Connect to the given url.
@@ -31,7 +32,7 @@ module.exports = function client() {
   primus.on('outgoing::connect', function connect(url) {
     if (socket) socket.close();
 
-    socket = new Socket(url);
+    socket = new Factory(url);
 
     //
     // Setup the Event handlers.

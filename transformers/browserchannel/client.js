@@ -13,12 +13,25 @@ module.exports = function client() {
     , socket;
 
   //
+  // Selects an available Browserchannel factory.
+  //
+  var Factory = (function factory() {
+    if ('undefined' !== typeof BCSocket) return BCSocket;
+    try { return require('browserchannel').BCSocket; }
+    catch (e) {}
+
+    return undefined;
+  })();
+
+  if (!Factory) return this.emit('error', new Error('No Browserchannel client factory'));
+
+  //
   // Connect to the given url.
   //
   primus.on('outgoing::connect', function connect(ws, http) {
     if (socket) socket.close();
 
-    socket = new BCSocket(http, { reconnect: false });
+    socket = new Factory(http, { reconnect: false });
 
     //
     // Setup the Event handlers.
