@@ -74,6 +74,8 @@ Primus.prototype.initialise = function initalise() {
   });
 
   this.on('incoming::data', function message(data) {
+    if ('primus::server::close' === data) return primus.emit('incoming::end', true);
+
     primus.decoder(data, function decoding(err, packet) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
@@ -84,12 +86,13 @@ Primus.prototype.initialise = function initalise() {
     });
   });
 
-  this.on('incoming::end', function end() {
+  this.on('incoming::end', function end(intentional) {
     if (primus.readyState === Primus.CLOSED) return;
-
     primus.readyState = Primus.CLOSED;
 
-    this.reconnect(function (fail, backoff) {
+    if (intentional) return primus.emit('end');
+
+    this.reconnect(function reconnect(fail, backoff) {
       primus.emit('reconnect');
 
       primus.backoff = backoff; // Save the opts again of this backoff.

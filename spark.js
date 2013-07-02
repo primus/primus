@@ -141,6 +141,12 @@ Spark.prototype.write = function write(data) {
 Spark.prototype.end = function end(data) {
   if (data) this.write(data);
 
+  //
+  // Tell our connection that this is a intended close and that is shouldn't do
+  // any reconnect operations.
+  //
+  this.write('primus::server::close');
+
   var spark = this;
 
   process.nextTick(function tick() {
