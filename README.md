@@ -157,6 +157,137 @@ spark.on('data', function message(data) {
 
 The `end` event is emitted when the client has disconnected.
 
+### Connecting from the browser.
+
+Primus comes with it's client framework which can be compiled using
+`primus.library()` as mentioned above. To create a connection you can simply
+create a new Primus instance:
+
+```js
+var primus = new Primus(url, { options });
+
+//
+// But it can be easier, with some syntax sugar.
+//
+var primus = Primus.connect(url, { options });
+```
+
+#### primus.write(message)
+
+Once you've created your primus instance you're ready to go. When you want to
+write data to your server you can just call the `.write` method:
+
+```js
+primus.write('message');
+```
+
+It automatically encodes your messages using the parser that you've specified on
+the server. So sending objects back and forth between the server is nothing
+different then just writing:
+
+```js
+primus.write({ foo: 'bar' });
+```
+
+When you are sending messages to the server, you don't have to wait for the
+`open` event to happen, the client will automatically buffer all the data you've
+send and automatically write it to the server once it's connected. The client
+supports a couple of different events.
+
+#### primus.on('data')
+
+The `data` event is the most important event of the whole library. It's emitted
+when we receive data from the server. The data that is received is already
+decoded by the specified parser.
+
+```js
+primus.on('data', function message(data) {
+  console.log('Received a new message from the server', data);
+});
+```
+
+#### primus.on('open')
+
+The `open` event is emitted when we've successfully created a connection with
+the server. It will also be emitted when we've successfully reconnected when the
+connection goes down unintentionally.
+
+```js
+primus.on('open', function open() {
+  console.log('Connection is alive and kicking');
+});
+```
+
+#### primus.on('error')
+
+The `error` event is emitted when something breaks that is out of our control.
+Unlike Node.js, we do not throw an error if no error event listener is
+specified. The cause of an error could be that we've failed to encode or decode
+a message or we failed to create a connection.
+
+```js
+primus.on('error', function error(err) {
+  console.error('Something horrible has happend', err, err.message);
+});
+```
+
+#### primus.on('reconnect')
+
+The `reconnect` event is emitted when we're attempting to reconnect to the
+server. This all happens transparently and it's just a way for you to know when
+these reconnects are actually happening.
+
+```js
+primus.on('reconnecting', function () {
+  console.log('reconnecting');
+})
+```
+
+#### primus.on('end')
+
+The `end` event is emitted when we've closed the connection. When this event is
+emitted you should consider your connection to be fully dead with no way of
+reconnecting. But it's also emitted when the server closes the connection.
+
+```js
+primus.on('end', function () {
+  console.log('connection closed');
+});
+```
+
+#### primus.end()
+
+When you want to close the connection you can call the `primus.end()` method.
+After this the connection should be considered dead and a new connection needs
+to be made using `Primus.connect(url)` or `primus = new Primus(url)` if you want
+to talk with the server again.
+
+```js
+primus.end();
+```
+
+#### Reconnecting
+
+When the connection goes down unexpectedly a automatic reconnect process is
+started. It's using a randomized exponential backoff algorithm to prevent
+clients to DDOS your server when you reboot as they will all be re-connecting at
+different times. The reconnection can be configured using the `options` argument
+in `Primus` and you should add these options to the `backoff` property:
+
+```js
+primus = Primus.connect(url, {
+  backoff: {
+    maxDelay: Infinity // Number: The max delay for a reconnect retry.
+  , minDelay: 500 // Number: The minimum delay before we reconnect.
+  , retries: 10 // Number: How many times should we attempt to reconnect.
+  , factor: 2 // Number The backoff factor.
+  }
+});
+```
+
+If you are interested in learning more about the backoff algorithm you might
+want to read http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
+
 ### Supported real-time frameworks
 
 The following transformers/transports are supported in Primus:

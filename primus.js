@@ -187,7 +187,7 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
 
   opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
   opts.minDelay = opts.minDelay || 500;       // Minimum delay.
-  opts.retries = opts.retries || 25;          // Amount of allowed retries.
+  opts.retries = opts.retries || 10;          // Amount of allowed retries.
   opts.attempt = (+opts.attempt || 0) + 1;    // Current attempt.
   opts.factor = opts.factor || 2;             // Backoff factor.
 
@@ -347,6 +347,18 @@ Primus.prototype.emits = function emits(event, parser) {
       primus.emit('incoming::'+ event, data);
     }, 0);
   };
+};
+
+/**
+ * Syntax sugar, adopt a Socket.IO like API.
+ *
+ * @param {String} url The url we want to connect to.
+ * @param {Object} options Connection options.
+ * @returns {Primus}
+ * @api public
+ */
+Primus.connect = function connect(url, options) {
+  return new Primus(url, options);
 };
 
 //
