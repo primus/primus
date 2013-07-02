@@ -47,10 +47,37 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should change readyStates', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        expect(socket.readyState).to.equal(Socket.OPENING);
+
+        socket.on('open', function () {
+          expect(socket.readyState).to.equal(Socket.OPEN);
+          socket.end();
+        }).on('end', function () {
+          expect(socket.readyState).to.equal(Socket.CLOSED);
+          done();
+        });
+      });
+
       it('emits an `end` event when its closed', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
         socket.on('open', function () {
+          socket.end();
+        }).on('end', done);
+      });
+
+      it('only emits `end` once', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function () {
+          socket.end();
+          socket.end();
+          socket.end();
+          socket.end();
+          socket.end();
           socket.end();
         }).on('end', done);
       });
@@ -66,6 +93,23 @@ module.exports = function base(transformer) {
 
         socket.on('open', function () {
           socket.write({ echo: 'pong' });
+        });
+      });
+
+      it('emits an `error` event when it cannot encode the data', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function () {
+          var data = { foo: 'bar' };
+          data.recusrive = data;
+
+          socket.write(data);
+        }).on('error', function (err) {
+          expect(err).to.not.be.instanceOf(String);
+          expect(err.message).to.contain('JSON');
+
+          socket.end();
+          done();
         });
       });
 

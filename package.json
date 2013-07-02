@@ -30,13 +30,16 @@
   "testling": {
     "harness": "mocha-bdd",
     "files": "test/*.browser.js",
-    "browsers": {
-      "ie": [ 6, 7, 8 ],
-      "ff": [ 19 ],
-      "safari": [ 5 ],
-      "opera": [ 12 ],
-      "chrome": [ 25 ]
-    }
+    "browsers": [
+      "ie/6..latest",
+      "chrome/22..latest",
+      "firefox/16..latest",
+      "safari/latest",
+      "opera/11.0..latest",
+      "iphone/6",
+      "ipad/6",
+      "android-browser/latest"
+    ]
   },
   "devDependencies": {
     "browserchannel": "1.0.x",

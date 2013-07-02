@@ -20,7 +20,7 @@ function Primus(url, options) {
 
   if (Stream) Stream.call(this);          // Initialize a stream interface.
 
-  this.initialise().connect();
+  this.initialise().open();
 }
 
 Primus.OPENING = 0;   // We're opening the connection.
@@ -113,7 +113,7 @@ Primus.prototype.initialise = function initalise() {
  *
  * @api private
  */
-Primus.prototype.connect = function connect() {
+Primus.prototype.open = function open() {
   this.emit('outgoing::connect', this.uri('ws'), this.uri('http'));
 
   return this;
@@ -152,6 +152,7 @@ Primus.prototype.write = function write(data) {
  * @api public
  */
 Primus.prototype.end = function end(data) {
+  if (this.readyState === Primus.CLOSED) return this;
   if (data) this.write(data);
 
   this.writable = false;
