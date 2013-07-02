@@ -59,22 +59,24 @@ module.exports = function client() {
 
   //
   // Attempt to reconnect the socket. It asumes that the `close` event is
-  // called if it failed to disconnect.
+  // called if it failed to disconnect. Bypass the namespaces and use
+  // socket.socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
     if (socket) {
-      socket.disconnect();
-      socket.connected = socket.connecting = socket.reconnecting = false;
-      socket.connect();
+      socket.socket.disconnect();
+      socket.connected = socket.socket.connecting = socket.socket.reconnecting = false;
+      socket.socket.connect();
     }
   });
 
   //
-  // We need to close the socket.
+  // We need to close the socket. Bypass the namespaces and disconnect using
+  // socket.socket.
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
-      socket.disconnect();
+      socket.socket.disconnect();
       socket = null;
     }
   });
