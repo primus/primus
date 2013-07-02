@@ -177,19 +177,31 @@ module.exports = function base(transformer) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
       });
 
-      it('should receive querystrings', function (done) {
-        primus.on('connection', function (spark) {
-          expect(spark.query).to.be.a('object');
-
-          if (transformer.toLowerCase() !== 'browserchannel') {
+      if (transformer.toLowerCase() !== 'browserchannel') {
+        it('should receive querystrings', function (done) {
+          primus.on('connection', function (spark) {
+            expect(spark.query).to.be.a('object');
             expect(spark.query.foo).to.equal('bar');
-          }
 
-          socket.end();
+            socket.end();
+          });
+
+          var socket = new Socket('http://localhost:'+ server.portnumber +'/?foo=bar');
+          socket.on('end', done);
+        });
+      }
+
+      it('should not trigger a reconnect when we end the connection', function (done) {
+        primus.on('connection', function (spark) {
+          spark.end();
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber +'/?foo=bar');
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
         socket.on('end', done);
+        socket.on('reconnect', function () {
+          throw new Error('fuck');
+        });
       });
     });
   });
