@@ -47,6 +47,14 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('emits an `end` event when its closed', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function () {
+          socket.end();
+        }).on('end', done);
+      });
+
       it('sends & receives messages', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
@@ -77,6 +85,19 @@ module.exports = function base(transformer) {
             socket.end();
             done();
           }
+        });
+      });
+
+      it('should not reconnect when we close the connection', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function (message) {
+          socket.end();
+          done();
+        });
+
+        socket.on('reconnect', function () {
+          throw new Error('fuck');
         });
       });
     });

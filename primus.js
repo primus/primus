@@ -85,6 +85,8 @@ Primus.prototype.initialise = function initalise() {
   });
 
   this.on('incoming::end', function end() {
+    if (primus.readyState === Primus.CLOSED) return;
+
     primus.readyState = Primus.CLOSED;
 
     this.reconnect(function (fail, backoff) {
