@@ -65,6 +65,15 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
+      //
+      // Browserscope cannot close the connection if it's already connecting. By
+      // passing behaviour by checking the readyState and defer the close call.
+      //
+      if (socket.readyState === socket.CONNECTING) {
+        return socket.onopen = function () {
+          primus.emit('outgoing::end');
+        };
+      }
       socket.close();
       socket = null;
     }
