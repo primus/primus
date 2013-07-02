@@ -17,7 +17,6 @@ module.exports = function base(transformer) {
 
       primus.on('connection', function (spark) {
         spark.on('data', function data(packet) {
-          if (packet === 'end') spark.end();
           if (packet.echo) spark.write(packet.echo);
           if (packet.pipe) require('fs').createReadStream(__filename).pipe(spark, {
             autoClose: false
@@ -143,6 +142,54 @@ module.exports = function base(transformer) {
         socket.on('reconnect', function () {
           throw new Error('fuck');
         });
+      });
+    });
+
+    describe('Server', function () {
+      it('emits `end` when the connection is closed', function (done) {
+        primus.on('connection', function (spark) {
+          spark.on('end', done);
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function () {
+          socket.end();
+        });
+      });
+
+      it('should emit an `error` when it fails to encode the data', function (done) {
+        primus.on('connection', function (spark) {
+          var data = { foo: 'bar' };
+          data.recusrive = data;
+
+          spark.on('error', function (err) {
+            expect(err).to.not.be.a('string');
+            expect(err.message).to.include('JSON');
+
+            socket.end();
+            done();
+          });
+
+          spark.write(data);
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+      });
+
+      it('should receive querystrings', function (done) {
+        primus.on('connection', function (spark) {
+          expect(spark.query).to.be.a('object');
+
+          if (transformer.toLowerCase() !== 'browserchannel') {
+            expect(spark.query.foo).to.equal('bar');
+          }
+
+          socket.end();
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber +'/?foo=bar');
+        socket.on('end', done);
       });
     });
   });
