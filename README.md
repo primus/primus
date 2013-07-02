@@ -88,7 +88,7 @@ primus.on('disconnected', funciton (spark) {
 
 The `spark` the actual real-time socket/connection. Sparks have a really low
 level interface and only expose a couple properties that are cross engine
-supported. The interface is modeled towards a Nodejs stream compatible
+supported. The interface is modeled towards a Node.js stream compatible
 interface.
 
 #### spark.headers
@@ -99,16 +99,24 @@ connection. This depends on the module you are using.
 
 #### spark.address
 
-The `spark.address` property contains the remoteAddress and remotePort of the
+The `spark.address` property contains the `remoteAddress` and `remotePort` of the
 connection. If you're running your server behind a reverse proxy it will be
 useless to you and you should probably be checking the `spark.headers` for
 `x-fowarded-xxx` headers instead.
+
+#### spark.query
+
+The `spark.query` contains the query string you used to connect to server. It's
+parsed to a object. Please note that this is not available for all supported
+transformers, but it's proven to be to useful to not implement it because one
+silly tranformer refuses to support it. Yes.. I'm looking at you,
+browserchannel.
 
 #### spark.write(data)
 
 You can use the `spark.write` method to send data over the socket. The data is
 automatically encoded for you using the `parser` that you've set while creating
-the Primus instance. This method always returns `true` so back pressuere isn't
+the Primus instance. This method always returns `true` so back pressure isn't
 handled.
 
 ```js
@@ -134,15 +142,30 @@ spark.emits('event', function parser(structure) {
 });
 ```
 
+#### spark.on('data')
+
+The `data` event is emitted when a message is received from the client. It's
+automatically decoded by the specified decoder.
+
+```js
+spark.on('data', function message(data) {
+  // the message we've received.
+});
+```
+
+#### spark.on('end')
+
+The `end` event is emitted when the client has disconnected.
+
 ### Supported real-time frameworks
 
 The following transformers/transports are supported in Primus:
 
 #### engine.io
 
-Engine.io is the low level transport functionality of socket.io 1.0. It supports
+Engine.io is the low level transport functionality of Socket.io 1.0. It supports
 multiple transports for creating a real-time connection. It uses transport
-upgrading instead of downgrading which makes it more resilliant to blocking
+upgrading instead of downgrading which makes it more resilient to blocking
 proxies and firewalls. To enable `engine.io` you need to install the `engine.io`
 module:
 
@@ -156,9 +179,23 @@ And tell `Primus` that you want to us `engine.io` as transformer:
 var primus = new Primus(server, { transformer: 'engine.io' });
 ```
 
+If you want to use the client interface inside of Node.js you also need to
+install the `engine.io-client`:
+
+```
+npm install engine.io-client --save
+```
+
+And then you can access it from your server instance:
+
+```js
+var Socket = primus.Socket;
+  , socket = new Socket('url');
+```
+
 #### WebSockets
 
-If you are targetting a high end audiance or maybe just something for internal
+If you are targeting a high end audience or maybe just something for internal
 uses you can use a pure WebSocket server. This uses the `ws` WebSocket module
 which is known to be one if not the fastest WebSocket server available in
 Node.js and supports all protocol specifications. To use pure WebSockets you
@@ -172,6 +209,14 @@ And tell `Primus` that you want to use `WebSockets` as transformer:
 
 ```js
 var primus = new Primus(server, { transformer: 'websockets' });
+```
+
+The `WebSockets` transformer comes with build in client support and can be
+accessed using:
+
+```js
+var Socket = primus.Socket;
+  , socket = new Socket('url');
 ```
 
 #### Browserchannel
@@ -191,6 +236,14 @@ And tell `Primus` that you want to use `browserchannel` as transformer:
 var primus = new Primus(server, { transformer: 'browserchannel' });
 ```
 
+The `browserchannel` transformer comes with build in client support and can be
+accessed using:
+
+```js
+var Socket = primus.Socket;
+  , socket = new Socket('url');
+```
+
 #### Socket.IO
 
 The socket.io transport was written against socket.io 0.9. It was one of the
@@ -206,6 +259,20 @@ And tell `Primus` that you want to use `socket.io` as transformer:
 
 ```js
 var primus = new Primus(server, { transformer: 'socket.io' });
+```
+
+If you want to use the client interface inside of Node.js you also need to
+install the `socket.io-client`:
+
+```
+npm install socket.io-client --save
+```
+
+And then you can access it from your server instance:
+
+```js
+var Socket = primus.Socket;
+  , socket = new Socket('url');
 ```
 
 As you can see from the examples above, it doesn't matter how you write the name

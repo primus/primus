@@ -4,7 +4,10 @@
  * Primus in a real-time library agnostic framework for establishing real-time
  * connections with servers.
  *
+ * @constructor
  * @param {String} url The url of your server.
+ * @param {Object} options The configuration.
+ * @api private
  */
 function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url);
@@ -12,8 +15,8 @@ function Primus(url, options) {
 
   this.buffer = [];                       // Stores premature send data.
   this._events = {};                      // Stores the events.
-  this.writable = true;                   // Silly stream compatiblity.
-  this.readable = true;                   // Silly stream compatiblity.
+  this.writable = true;                   // Silly stream compatibility.
+  this.readable = true;                   // Silly stream compatibility.
   this.url = this.parse(url);             // Parse the url to a readable format.
   this.backoff = options.reconnect || {}; // Stores the backoff configuration.
   this.readyState = Primus.CLOSED;        // The readyState of the connection.
@@ -29,7 +32,7 @@ Primus.OPEN    = 2;   // The connection is open.
 
 //
 // It's possible that we're running in Node.js or in a Node.js compatible
-// enviroument such as browserify. In these cases we want to use some build in
+// environment such as browserify. In these cases we want to use some build in
 // libraries to minimize our dependence on the DOM.
 //
 var Stream, parse;
@@ -172,8 +175,8 @@ Primus.prototype.end = function end(data) {
 };
 
 /**
- * Exponential backoff algorithm for retry aperations. It uses an randomized
- * retry so we don't DDOS our server when it goes down under presure.
+ * Exponential backoff algorithm for retry operations. It uses an randomized
+ * retry so we don't DDOS our server when it goes down under pressure.
  *
  * @param {Function} callback Callback to be called after the timeout.
  * @param {Object} opts Options for configuring the timeout.
@@ -219,7 +222,7 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
 /**
  * Parse the connection string.
  *
- * @param {String} url Connection url
+ * @param {String} url Connection url.
  * @returns {Object} Parsed connection.
  * @api public
  */

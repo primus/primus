@@ -3,7 +3,7 @@
 var Spark = require('./spark');
 
 /**
- * Primus is a unversal wrapper for real-time frameworks that provides a common
+ * Primus is a universal wrapper for real-time frameworks that provides a common
  * interface for server and client interaction.
  *
  * @constructor
@@ -57,13 +57,23 @@ Object.defineProperty(Primus.prototype, 'Socket', {
 Primus.prototype.version = require('./package.json').version;
 
 /**
- * Initialise the real-time transport that was choosen.
+ * Initialise the real-time transport that was chosen.
  *
- * @param {String} transformer The name of the transformer
+ * @param {Mixed} transformer The name of the transformer or a constructor;
  * @api private
  */
 Primus.prototype.initialise = function initialise(transformer) {
-  var Transformer = require('./transformers/'+ (transformer || 'websockets').toLowerCase());
+  transformer = transformer || 'websockets';
+
+  var Transformer;
+
+  if ('string' === typeof transformer) {
+    Transformer = require('./transformers/'+ transformer.toLowerCase());
+  }
+
+  if ('function' !== typeof Transformer) {
+    throw new Error('The given transformer is not a constructor');
+  }
 
   this.transformer = new Transformer(this);
 
@@ -95,13 +105,25 @@ Primus.prototype.forEach = function forEach(fn) {
 /**
  * Install message parsers.
  *
- * @param {String} type Parse name.
+ * @param {Mixed} type Parse name or parser Object.
  * @api private
  */
 Primus.prototype.parsers = function parsers(type) {
-  this.parser = require('./parsers/'+ (type || 'json').toLowerCase());
-  this.encoder = this.parser.encoder;
-  this.decoder = this.parser.decoder;
+  type = type || 'json';
+
+  var parser;
+
+  if ('string' === typeof type) {
+    parser = require('./parsers/'+ type.toLowerCase());
+  }
+
+  if ('object' !== typeof parser) {
+    throw new Error('The given parser is not an Object');
+  }
+
+  this.encoder = parser.encoder;
+  this.decoder = parser.decoder;
+  this.parser = parser;
 
   return this;
 };
@@ -156,7 +178,7 @@ Primus.prototype.library = function compile(noframework) {
   // Close the export wrapper and return the client. If we need to add
   // a library, we should add them after we've created our closure and module
   // exports. Some libraries seem to fail hard once they are wrapped in our
-  // closure so i'll rather expose a global variable instead of having to monkey
+  // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
   return client + ' return Primus; });' + (noframework ? '' : library);

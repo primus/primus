@@ -17,6 +17,10 @@
       console.log('primus: reconnect event happend');
     });
 
+    primus.on('open', function () {
+      console.log('primus: connection established');
+    });
+
     primus.on('error', function (err) {
       console.log('primus: error event', err);
     });
