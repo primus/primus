@@ -76,15 +76,15 @@ Primus.prototype.initialise = function initalise() {
     }
   });
 
-  this.on('incoming::data', function message(data) {
-    primus.decoder(data, function decoding(err, packet) {
+  this.on('incoming::data', function message(raw) {
+    primus.decoder(raw, function decoding(err, packet) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
       if (err) return primus.listeners('error').length && primus.emit('error', err);
       if ('primus::server::close' === packet) return primus.emit('incoming::end', packet);
-      primus.emit('data', packet);
+      primus.emit('data', packet, raw);
     });
   });
 

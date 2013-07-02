@@ -47,14 +47,14 @@ Spark.prototype.initialise = function initialise() {
   //
   // We've received new data from our client, decode and emit it.
   //
-  spark.on('incoming::data', function message(data) {
-    primus.decoder(data, function decoding(err, packet) {
+  spark.on('incoming::data', function message(raw) {
+    primus.decoder(raw, function decoding(err, packet) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
       if (err) return spark.listeners('error').length && spark.emit('error', err);
-      spark.emit('data', packet);
+      spark.emit('data', packet, raw);
     });
   });
 
