@@ -152,11 +152,11 @@ Primus.prototype.write = function write(data) {
 Primus.prototype.end = function end(data) {
   if (data) this.write(data);
 
-  this.emit('outgoing::end');
-  this.emit('end');
-
   this.writable = false;
   this.readyState = Primus.CLOSED;
+
+  this.emit('outgoing::end');
+  this.emit('end');
 
   return this;
 };
