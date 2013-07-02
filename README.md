@@ -12,6 +12,14 @@ Node.js and they all have different opinions on how real-time should be done.
 Primus provides a common low level interface to communicate in real-time using
 various of real-time frameworks.
 
+### Highlights
+
+1. Effortless switching between real-time frameworks and message parsers.
+2. Clean and stream compatible interface for client and server.
+3. Fixes bugs in frameworks and real-time communication where needed.
+4. Build with love and passion for real-time.
+5. Reconnect that actually works.
+
 ### Installation
 
 Primus is released in `npm` and can be installed using:
@@ -112,6 +120,11 @@ transformers, but it's proven to be to useful to not implement it because one
 silly tranformer refuses to support it. Yes.. I'm looking at you,
 browserchannel.
 
+#### spark.id
+
+This is the connection id we use to identify the connection. This should not be
+seen as a "session id" and can change between disconnects and reconnects.
+
 #### spark.write(data)
 
 You can use the `spark.write` method to send data over the socket. The data is
@@ -156,6 +169,24 @@ spark.on('data', function message(data) {
 #### spark.on('end')
 
 The `end` event is emitted when the client has disconnected.
+
+```js
+primus.on('connection', function (spark) {
+  console.log('connection has the following headers', spark.headers);
+  console.log('connection was made from', spark.address);
+  console.log('connection id', spark.id);
+
+  spark.on('data', function (data) {
+    console.log('recieved data from the client', data);
+
+    if ('foo' !== data.secrethandshake) spark.end();
+    spark.write({ foo: 'bar' });
+    spark.write('banana');
+  });
+
+  spark.write('Hello world');
+})
+```
 
 ### Connecting from the browser.
 
@@ -285,8 +316,24 @@ primus = Primus.connect(url, {
 });
 ```
 
+Please do note when we reconnect, you will receive a new `connection` event on
+the server. As the previous connection was completely dead and should there for
+be considered a new connection.
+
 If you are interested in learning more about the backoff algorithm you might
 want to read http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
+
+```js
+var primus = Primus.connect(url);
+
+primus.on('data', function (message) {
+  console.log('recieved a message', message);
+
+  primus.write({ echo: message });
+});
+
+primus.write('hello world');
+```
 
 ### Supported real-time frameworks
 
