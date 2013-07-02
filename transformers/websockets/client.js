@@ -29,15 +29,15 @@ module.exports = function client() {
   //
   // Connect to the given url.
   //
-  primus.on('outgoing::connect', function connect(url) {
+  primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    socket = new Factory(url);
+    socket = new Factory(primus.uri('http', true));
 
     //
     // Setup the Event handlers.
     //
-    socket.onopen = primus.emits('connect');
+    socket.onopen = primus.emits('open');
     socket.onerror = primus.emits('error');
     socket.onclose = primus.emits('end');
     socket.onmessage = primus.emits('data', function parse(evt) {
@@ -58,7 +58,7 @@ module.exports = function client() {
   //
   primus.on('outgoing::reconnect', function reconnect(url) {
     if (socket) primus.emit('outgoing::close');
-    primus.emit('outgoing::connect', url);
+    primus.emit('outgoing::open', url);
   });
 
   //

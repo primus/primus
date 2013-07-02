@@ -28,15 +28,15 @@ module.exports = function client() {
   //
   // Connect to the given url.
   //
-  primus.on('outgoing::connect', function connect(ws, http) {
+  primus.on('outgoing::open', function connect() {
     if (socket) socket.close();
 
-    socket = new Factory(http, { reconnect: false });
+    socket = new Factory(primus.uri('http'), { reconnect: false });
 
     //
     // Setup the Event handlers.
     //
-    socket.onopen = primus.emits('connect');
+    socket.onopen = primus.emits('open');
     socket.onerror = primus.emits('error');
     socket.onclose = primus.emits('end');
     socket.onmessage = primus.emits('data');
@@ -53,11 +53,9 @@ module.exports = function client() {
   // Attempt to reconnect the socket. It asumes that the `close` event is
   // called if it failed to disconnect.
   //
-  primus.on('outgoing::reconnect', function reconnect(ws, http) {
-    if (socket) {
-      socket.close();
-      socket.open();
-    }
+  primus.on('outgoing::reconnect', function reconnect() {
+    if (socket) socket.close();
+    primus.emit('outgoing::open');
   });
 
   //

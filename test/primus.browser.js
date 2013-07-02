@@ -29,6 +29,10 @@ describe('primus.js', function () {
       assert.ok(primus.events.foo.length);
       assert.ok(primus.events.foo[0] === foo);
     });
+
+    it('is chaining', function () {
+      assert.ok(primus.on('foo', function foo() {}) === primus);
+    });
   });
 
   describe('#listeners', function () {

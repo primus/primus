@@ -56,11 +56,11 @@ try {
 Primus.prototype.initialise = function initalise() {
   var primus = this;
 
-  this.on('outgoing::connect', function connecting() {
+  this.on('outgoing::open', function opening() {
     primus.readyState = Primus.OPENING;
   });
 
-  this.on('incoming::connect', function connect() {
+  this.on('incoming::open', function opened() {
     primus.readyState = Primus.OPEN;
     primus.emit('open');
 
@@ -103,7 +103,7 @@ Primus.prototype.initialise = function initalise() {
       if (fail) return primus.emit('end');
 
       // Try to re-open the connection again.
-      primus.emit('outgoing::reconnect', primus.uri('ws'), primus.uri('http'));
+      primus.emit('outgoing::reconnect');
     }, primus.backoff);
   });
 
@@ -121,7 +121,7 @@ Primus.prototype.initialise = function initalise() {
  * @api private
  */
 Primus.prototype.open = function open() {
-  this.emit('outgoing::connect', this.uri('ws'), this.uri('http'));
+  this.emit('outgoing::open');
 
   return this;
 };
@@ -229,10 +229,11 @@ Primus.prototype.parse = parse;
  * Generates a connection uri.
  *
  * @param {String} protocol The protocol that should used to crate the uri.
+ * @param {Boolean} querystring Do we need to include a querystring.
  * @returns {String} The url.
  * @api private
  */
-Primus.prototype.uri = function uri(protocol) {
+Primus.prototype.uri = function uri(protocol, querystring) {
   var server = [];
 
   server.push(this.url.protocol === 'https:' ? protocol +'s:' : protocol +':', '');
@@ -241,7 +242,7 @@ Primus.prototype.uri = function uri(protocol) {
   //
   // Optionally add a search query.
   //
-  if (this.url.search) server.push(this.url.search);
+  if (this.url.search && querystring) server.push(this.url.search);
   return server.join('/');
 };
 

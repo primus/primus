@@ -28,17 +28,17 @@ module.exports = function client() {
   //
   // Connect to the given url.
   //
-  primus.on('outgoing::connect', function connect(url) {
+  primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    socket = factory(url, {
+    socket = factory(primus.uri('ws', true), {
       path: this.pathname
     });
 
     //
     // Setup the Event handlers.
     //
-    socket.onopen = primus.emits('connect');
+    socket.onopen = primus.emits('open');
     socket.onerror = primus.emits('error');
     socket.onclose = primus.emits('end');
     socket.onmessage = primus.emits('data', function parse(evt) {

@@ -28,15 +28,15 @@ module.exports = function client() {
   //
   // Connect to the given url.
   //
-  primus.on('outgoing::connect', function connect(url) {
+  primus.on('outgoing::open', function open() {
     if (socket) socket.disconnect();
 
     //
     // We need to remove the pathname here as socket.io will assume that we want
     // to connect to a namespace instead.
     //
-    socket = factory(url.replace(this.pathname.slice(1), ''), {
-      'resource': this.pathname.slice(1),
+    socket = factory(primus.uri('http', true).replace(primus.pathname.slice(1), ''), {
+      'resource': primus.pathname.slice(1),
       'force new connection': true,
       'reconnect': false
     });
@@ -44,7 +44,7 @@ module.exports = function client() {
     //
     // Setup the Event handlers.
     //
-    socket.on('connect', primus.emits('connect'));
+    socket.on('connect', primus.emits('open'));
     socket.on('connect_failed', primus.emits('error'));
     socket.on('message', primus.emits('data'));
     socket.on('disconnect', primus.emits('end', function parser(kind) {
