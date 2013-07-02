@@ -27,9 +27,10 @@ module.exports = function server() {
   //
   this.service.on('connection', function connection(socket) {
     var spark = new Spark(
-        socket.handshake.headers
-      , socket.handshake.address
-      , socket.id
+        socket.handshake.headers  // HTTP request headers.
+      , socket.handshake.address  // IP address.
+      , socket.handshake.query    // Optional query string.
+      , socket.id                 // Unique connection id
     );
 
     spark.on('outgoing::end', function end() {

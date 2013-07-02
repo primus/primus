@@ -38,6 +38,12 @@ describe('Spark', function () {
     expect(primus.sparks).to.equal(1);
   });
 
+  it('uses the supplied id if one is provided', function () {
+    var spark = new primus.Spark({}, {}, {}, 'balls');
+
+    expect(spark.id).to.equal('balls');
+  });
+
   it('emits a `connection` event on the primus instance when created', function (done) {
     primus.on('connection', function (socket) {
       expect(socket).to.equal(spark);
@@ -45,6 +51,13 @@ describe('Spark', function () {
     });
 
     var spark = new primus.Spark();
+  });
+
+  it('transforms querystrings', function()  {
+    var spark = new primus.Spark({}, {}, 'string=foo');
+
+    expect(spark.query).to.be.a('object');
+    expect(spark.query.string).to.equal('foo');
   });
 
   describe('#emits', function () {

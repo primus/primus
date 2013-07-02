@@ -1,5 +1,7 @@
 'use strict';
 
+var parse = require('url').parse;
+
 /**
  * Minimum viable WebSocket server for Node.js that works through the Primus
  * interface.
@@ -20,8 +22,9 @@ module.exports = function server() {
   this.on('upgrade', function upgrade(req, socket, head) {
     this.service.handleUpgrade(req, socket, head, function create(socket) {
       var spark = new Spark(
-        socket.upgradeReq.headers,
-        socket.upgradeReq.connection.address()
+          socket.upgradeReq.headers               // HTTP request headers.
+        , socket.upgradeReq.connection.address()  // Ip address.
+        , parse(socket.upgradeReq.url).query      // Optional query string.
       );
 
       spark.on('outgoing::end', function end() {

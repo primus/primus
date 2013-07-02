@@ -1,5 +1,7 @@
 'use strict';
 
+var parse = require('querystring').parse;
+
 /**
  * The Spark is an indefinable, indescribable energy or soul of a transformer
  * which can be used to create new transformers. In our case, it's a simple
@@ -9,16 +11,24 @@
  * @param {Primus} primus Reference to the Primus server. (Set using .bind)
  * @param {Object} headers The request headers for this connection.
  * @param {Object} address The remoteAddress and port.
+ * @param {Object} query The query string of request.
+ * @param {String} id An optional id of the socket, or we will generate one.
  * @api public
  */
-function Spark(primus, headers, address, id) {
+function Spark(primus, headers, address, query, id) {
   this.primus = primus;         // References to the primus.
   this.headers = headers || {}; // The request headers.
   this.address = address || {}; // The remote address.
+  this.query = query || {};     // The query string.
   this.id = id || this.uuid();  // Unique id for socket.
 
   this.writable = true;         // Silly stream compatiblity.
   this.readable = true;         // Silly stream compatiblity.
+
+  //
+  // Parse our query string.
+  //
+  if ('string' === typeof this.query) this.query = parse(this.query);
 
   this.initialise();
 }

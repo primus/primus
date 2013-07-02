@@ -163,6 +163,11 @@ Primus.prototype.library = function compile(noframework) {
 };
 
 //
+// Expose the Spark interface so it can be extended by third-party.
+//
+Primus.Spark = Spark;
+
+//
 // Expose the module.
 //
 module.exports = Primus;
