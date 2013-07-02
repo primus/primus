@@ -95,6 +95,25 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('receives the raw packet data', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('data', function (message, raw) {
+          var data = JSON.stringify(message);
+          expect(message).to.equal('pong');
+
+          expect(raw).to.not.equal(message);
+          expect(data).to.equal(raw);
+
+          socket.end();
+          done();
+        });
+
+        socket.on('open', function () {
+          socket.write({ echo: 'pong' });
+        });
+      });
+
       it('emits an `error` event when it cannot encode the data', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
@@ -177,19 +196,20 @@ module.exports = function base(transformer) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
       });
 
-      if (transformer.toLowerCase() !== 'browserchannel') {
-        it('should receive querystrings', function (done) {
-          primus.on('connection', function (spark) {
-            expect(spark.query).to.be.a('object');
+      it('should receive querystrings', function (done) {
+        primus.on('connection', function (spark) {
+          expect(spark.query).to.be.a('object');
+
+          if (transformer.toLowerCase() !== 'browserchannel') {
             expect(spark.query.foo).to.equal('bar');
+          }
 
-            socket.end();
-          });
-
-          var socket = new Socket('http://localhost:'+ server.portnumber +'/?foo=bar');
-          socket.on('end', done);
+          socket.end();
         });
-      }
+
+        var socket = new Socket('http://localhost:'+ server.portnumber +'/?foo=bar');
+        socket.on('end', done);
+      });
 
       it('should not trigger a reconnect when we end the connection', function (done) {
         primus.on('connection', function (spark) {
