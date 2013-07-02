@@ -74,14 +74,13 @@ Primus.prototype.initialise = function initalise() {
   });
 
   this.on('incoming::data', function message(data) {
-    if ('primus::server::close' === data) return primus.emit('incoming::end', true);
-
     primus.decoder(data, function decoding(err, packet) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
       if (err) return primus.listeners('error').length && primus.emit('error', err);
+      if ('primus::server::close' === packet) return primus.emit('incoming::end', packet);
       primus.emit('data', packet);
     });
   });
@@ -90,7 +89,12 @@ Primus.prototype.initialise = function initalise() {
     if (primus.readyState === Primus.CLOSED) return;
     primus.readyState = Primus.CLOSED;
 
-    if (intentional) return primus.emit('end');
+    //
+    // Some transformers emit garbage when they close the connection. Like the
+    // reason why it closed etc, we should explicitly check if WE send an
+    // intentional message.
+    //
+    if ('primus::server::close' === intentional) return primus.emit('end');
 
     this.reconnect(function reconnect(fail, backoff) {
       primus.emit('reconnect');
