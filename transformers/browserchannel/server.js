@@ -29,7 +29,7 @@ module.exports = function server() {
     );
 
     spark.on('outgoing::end', function end() {
-      socket.close();
+      socket.stop();
     }).on('outgoing::data', function write(data) {
       socket.send(data);
     });
