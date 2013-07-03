@@ -41,6 +41,7 @@ module.exports = function server() {
   // Listen to upgrade requests.
   //
   this.service.installHandlers(this, {
-    prefix: primus.pathname
+    prefix: primus.pathname,
+    log: this.logger.plain
   });
 };

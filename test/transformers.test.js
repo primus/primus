@@ -1,6 +1,7 @@
 'use strict';
 
 [
+  'SockJS',
   'Engine.IO',
   'Socket.IO',
   'WebSockets',

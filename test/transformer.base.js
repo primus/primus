@@ -200,7 +200,10 @@ module.exports = function base(transformer) {
         primus.on('connection', function (spark) {
           expect(spark.query).to.be.a('object');
 
-          if (transformer.toLowerCase() !== 'browserchannel') {
+          if (
+               transformer.toLowerCase() !== 'browserchannel'
+            && transformer.toLowerCase() !== 'sockjs'
+          ) {
             expect(spark.query.foo).to.equal('bar');
           }
 

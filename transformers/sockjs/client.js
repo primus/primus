@@ -17,6 +17,9 @@ module.exports = function client() {
   //
   var Factory = (function Factory() {
     if ('undefined' !== typeof SockJS) return SockJS;
+    try {
+      return require('sockjs-client-node');
+    } catch (e) { }
 
     return undefined;
   })();

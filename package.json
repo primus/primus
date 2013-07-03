@@ -53,6 +53,7 @@
     "socket.io-client": "0.9.x",
     "sockjs": "0.3.x",
     "testling": "*",
-    "ws": "0.4.x"
+    "ws": "0.4.x",
+    "sockjs-client-node": "0.0.0"
   }
 }
