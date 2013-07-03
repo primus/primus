@@ -168,6 +168,47 @@ module.exports = function base(transformer) {
           throw new Error('fuck');
         });
       });
+
+      it('should reconnect when the connection closes unexcpectingly', function (done) {
+        primus.on('connection', function (spark) {
+          if (!reconnected) {
+            reconnected = true;
+
+            //
+            // Forcefully kill a connection to trigger a reconnect
+            //
+            switch (transformer.toLowerCase()) {
+              case 'socket.io':
+                primus.transformer.service.transports[spark.id].close();
+              break;
+
+              default:
+                spark.emit('outgoing::end');
+            }
+          }
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber)
+          , reconnected = false
+          , reconnect = false
+          , opened = 0;
+
+        socket.on('reconnect', function (message) {
+          reconnect = true;
+        });
+
+        socket.on('open', function () {
+          if (++opened !== 2) return;
+
+          expect(reconnect).to.equal(true);
+
+          primus.forEach(function (socket) {
+            socket.end();
+          });
+
+          done();
+        });
+      });
     });
 
     describe('Server', function () {
