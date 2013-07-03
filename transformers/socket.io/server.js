@@ -8,12 +8,14 @@
  * @api private
  */
 module.exports = function server() {
-  var EventEmitter = require('events').EventEmitter
-    , Engine = require('socket.io').Manager
+  var Engine = require('socket.io').Manager
     , Spark = this.Spark
     , primus = this.primus;
 
-  this.service = new Engine(new EventEmitter(), {
+  //
+  // Listen to upgrade requests.
+  //
+  this.service = new Engine(this, {
     'resource': primus.pathname,
     'destroy upgrade': false,
     'browser client': false,
@@ -41,14 +43,5 @@ module.exports = function server() {
 
     socket.on('disconnect', spark.emits('end'));
     socket.on('message', spark.emits('data'));
-  });
-
-  //
-  // Listen to upgrade requests.
-  //
-  this.on('upgrade', function upgrade(req, socket, head) {
-    this.service.handleUpgrade(req, socket, head);
-  }).on('request', function request(req, res) {
-    this.service.handleRequest(req, res);
   });
 };
