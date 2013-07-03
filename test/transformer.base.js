@@ -11,7 +11,13 @@ module.exports = function base(transformer) {
       , primus;
 
     beforeEach(function beforeEach(done) {
-      server = http.createServer();
+      server = http.createServer(function (req, res) {
+        console.error('Uncaught request', req.url);
+        if (req.url !== '/nothrow') throw new Error('I should never be called');
+
+        res.end('original listener');
+      });
+
       primus = new Primus(server, { transformer: transformer });
       Socket = primus.Socket;
 
@@ -224,6 +230,15 @@ module.exports = function base(transformer) {
         socket.on('end', done);
         socket.on('reconnect', function () {
           throw new Error('fuck');
+        });
+      });
+
+      it('should still allow requests to the original listener', function (done) {
+        common.request('http://localhost:'+ server.portnumber +'/nothrow', function (err, res, body) {
+          if (err) return done(err);
+
+          expect(body).to.equal('original listener');
+          done();
         });
       });
     });

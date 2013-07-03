@@ -14,6 +14,11 @@ exports.Primus = require('../');
 exports.expect = chai.expect;
 
 //
+// Expose request
+//
+exports.request = require('request');
+
+//
 // Expose a port number generator.
 //
 var port = 1024;

@@ -57,15 +57,27 @@ Transformer.prototype.log = function log(type) {
 Transformer.prototype.initialise = function initialise() {
   if (this.server) this.server();
 
+  var server = this.primus.server;
+
+  server.listeners('request').map(this.on.bind(this, 'previous::request'));
+  server.listeners('upgrade').map(this.on.bind(this, 'previous::upgrade'));
+
+  //
+  // Remove the old listeners as we want to be the first request handler for all
+  // events.
+  //
+  server.removeAllListeners('request');
+  server.removeAllListeners('upgrade');
+
   //
   // Start listening for incoming requests if we have a listener assigned to us.
   //
-  if (this.listeners('request').length) {
-    this.primus.server.on('request', this.request.bind(this));
+  if (this.listeners('request').length || this.listeners('previous::request').length) {
+    server.on('request', this.request.bind(this));
   }
 
-  if (this.listeners('upgrade').length) {
-    this.primus.server.on('upgrade', this.upgrade.bind(this));
+  if (this.listeners('upgrade').length || this.listeners('previous::upgrade').length) {
+    server.on('upgrade', this.upgrade.bind(this));
   }
 };
 
@@ -78,7 +90,7 @@ Transformer.prototype.initialise = function initialise() {
  * @api private
  */
 Transformer.prototype.request = function request(req, res) {
-  if (!this.test(req)) return;
+  if (!this.test(req)) return this.emit('previous::request', req, res);
 
   this.emit('request', req, res, noop);
 };
@@ -93,8 +105,6 @@ Transformer.prototype.request = function request(req, res) {
  * @api private
  */
 Transformer.prototype.upgrade = function upgrade(req, socket, head) {
-  if (!this.test(req)) return socket.end();
-
   //
   // Copy buffer to prevent large buffer retention in Node core.
   // @see jmatthewsr-ms/node-slab-memory-issues
@@ -102,6 +112,7 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
   var buffy = new Buffer(head.length);
   head.copy(upgrade);
 
+  if (!this.test(req)) return this.emit('previous::upgrade', req, socket, buffy);
   this.emit('upgrade', req, socket, buffy, noop);
 };
 

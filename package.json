@@ -54,6 +54,7 @@
     "sockjs": "0.3.x",
     "testling": "*",
     "ws": "0.4.x",
-    "sockjs-client-node": "0.0.0"
+    "sockjs-client-node": "0.0.0",
+    "request": "~2.21.0"
   }
 }
