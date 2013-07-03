@@ -1,6 +1,7 @@
 'use strict';
 
-var Spark = require('./spark');
+var Transformer = require('./transformer')
+  , Spark = require('./spark');
 
 /**
  * Primus is a universal wrapper for real-time frameworks that provides a common
@@ -59,16 +60,14 @@ Primus.prototype.version = require('./package.json').version;
 /**
  * Initialise the real-time transport that was chosen.
  *
- * @param {Mixed} transformer The name of the transformer or a constructor;
+ * @param {Mixed} Transformer The name of the transformer or a constructor;
  * @api private
  */
-Primus.prototype.initialise = function initialise(transformer) {
-  transformer = transformer || 'websockets';
+Primus.prototype.initialise = function initialise(Transformer) {
+  Transformer = Transformer || 'websockets';
 
-  var Transformer;
-
-  if ('string' === typeof transformer) {
-    Transformer = require('./transformers/'+ transformer.toLowerCase());
+  if ('string' === typeof Transformer) {
+    Transformer = require('./transformers/'+ Transformer.toLowerCase());
   }
 
   if ('function' !== typeof Transformer) {
@@ -105,16 +104,14 @@ Primus.prototype.forEach = function forEach(fn) {
 /**
  * Install message parsers.
  *
- * @param {Mixed} type Parse name or parser Object.
+ * @param {Mixed} parser Parse name or parser Object.
  * @api private
  */
-Primus.prototype.parsers = function parsers(type) {
-  type = type || 'json';
+Primus.prototype.parsers = function parsers(parser) {
+  parser = parser || 'json';
 
-  var parser;
-
-  if ('string' === typeof type) {
-    parser = require('./parsers/'+ type.toLowerCase());
+  if ('string' === typeof parser) {
+    parser = require('./parsers/'+ parser.toLowerCase());
   }
 
   if ('object' !== typeof parser) {
@@ -185,8 +182,10 @@ Primus.prototype.library = function compile(noframework) {
 };
 
 //
-// Expose the Spark interface so it can be extended by third-party.
+// Expose the constructors of our Spark and Transformer so it can be extended by
+// a third party if needed.
 //
+Primus.Transformer = Transformer;
 Primus.Spark = Spark;
 
 //

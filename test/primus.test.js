@@ -20,6 +20,14 @@ describe('Primus', function () {
     server.close(done);
   });
 
+  it('exposes the Spark constructor', function () {
+    expect(Primus.Spark).to.be.a('function');
+  });
+
+  it('exposes the Transformer contructor', function () {
+    expect(Primus.Transformer).to.be.a('function');
+  });
+
   it('exposes the current version number', function () {
     expect(primus.version).to.be.a('string');
     expect(primus.version).to.equal(require('../package.json').version);
@@ -30,7 +38,7 @@ describe('Primus', function () {
     expect(primus.client).to.include('{primus::version}');
   });
 
-  it('exposes the Spark constructor', function () {
+  it('exposes the wrapped Spark constructor', function () {
     expect(primus.Spark).to.be.a('function');
   });
 
@@ -51,6 +59,27 @@ describe('Primus', function () {
     expect(primus.parser.library).to.include('JSONH');
   });
 
+  it('accepts a third-party parser', function () {
+    var parser = {
+      encoder: function () {},
+      decoder: function () {}
+    };
+
+    var primus = new Primus(server, { parser: parser });
+
+    expect(primus.parser).to.equal(parser);
+    expect(primus.encoder).to.equal(parser.encoder);
+    expect(primus.decoder).to.equal(parser.decoder);
+
+    try {
+      new Primus(server, { parser: function () {}});
+    } catch (e) {
+      return expect(e).to.be.instanceOf(Error);
+    }
+
+    throw new Error('I should have throwed above');
+  });
+
   it('stores new connections internally', function (done) {
     expect(primus.connected).to.equal(0);
     var spark = new primus.Spark();
@@ -67,6 +96,24 @@ describe('Primus', function () {
         done();
       }, 0);
     });
+  });
+
+  it('accepts a third-party transformer', function () {
+    var Optimus = Primus.Transformer.extend({
+      server: function () {},
+      client: function () {}
+    });
+
+    var primus = new Primus(server, { transformer: Optimus });
+    expect(primus.transformer).to.be.instanceOf(Optimus);
+
+    try {
+      new Primus(server, { transformer: []});
+    } catch (e) {
+      return expect(e).to.be.instanceOf(Error);
+    }
+
+    throw new Error('I should have throwed');
   });
 
   it('removes connections internally on disconnect', function (done) {
