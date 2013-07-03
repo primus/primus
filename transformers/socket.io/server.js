@@ -17,7 +17,7 @@ module.exports = function server() {
     'resource': primus.pathname,
     'destroy upgrade': false,
     'browser client': false,
-    'log level': -1
+    'logger': this.logger
   });
 
   //
