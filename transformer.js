@@ -12,7 +12,7 @@ function noop() {}
  * Transformer skeletons
  *
  * @constructor
- * @param {Primus} primus Reference to the primus
+ * @param {Primus} primus Reference to the primus.
  * @api public
  */
 function Transformer(primus) {
@@ -24,6 +24,30 @@ function Transformer(primus) {
 }
 
 Transformer.prototype.__proto__ = require('events').EventEmitter.prototype;
+
+//
+// Simple logger shortcut.
+//
+Object.defineProperty(Transformer.prototype, 'logger', {
+  get: function logger() {
+    return {
+      error: this.log.bind(this.primus, 'log', 'error'),  // Log error <line>.
+      warn:  this.log.bind(this.primus, 'log', 'warn'),   // Log warn <line>.
+      info:  this.log.bind(this.primus, 'log', 'info'),   // Log info <line>.
+      debug: this.log.bind(this.primus, 'log', 'debug'),  // Log debug <line>.
+      plain: this.log.bind(this.primus, 'log')            // Log x <line>.
+    };
+  }
+});
+
+/**
+ * Simple log handler that will emit log messages under the given `type`.
+ *
+ * @api private
+ */
+Transformer.prototype.log = function log(type) {
+  this.emit.apply(this, arguments);
+};
 
 /**
  * Create the server and attach the apropriate event listeners.
