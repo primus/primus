@@ -29,9 +29,7 @@ module.exports = function client() {
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    socket = new Factory(primus.uri('ws', true), {
-      path: this.pathname
-    });
+    socket = new Factory(primus.uri('http', false));
 
     //
     // Setup the Event handlers.
