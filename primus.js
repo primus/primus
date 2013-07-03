@@ -100,12 +100,13 @@ Primus.prototype.initialise = function initalise() {
     if ('primus::server::close' === intentional) return primus.emit('end');
 
     this.reconnect(function reconnect(fail, backoff) {
-      primus.emit('reconnect');
-
       primus.backoff = backoff; // Save the opts again of this backoff.
       if (fail) return primus.emit('end');
 
+      //
       // Try to re-open the connection again.
+      //
+      primus.emit('reconnect', backoff);
       primus.emit('outgoing::reconnect');
     }, primus.backoff);
   });
