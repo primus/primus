@@ -11,7 +11,7 @@
   </p>
 
   <script>
-    var primus = new Primus();
+    var primus = new Primus('http://localhost:8080/?query=string');
 
     primus.on('reconnect', function () {
       console.log('primus: reconnect event happend');
