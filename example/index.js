@@ -26,11 +26,6 @@ var http = require('http')
 // file which we can use for testing.
 //
 server = http.createServer(function server(req, res) {
-  if (req.url === '/library') {
-    res.setHeader('Content-Type', 'text/javascript');
-    return res.end(primus.library());
-  }
-
   res.setHeader('Content-Type', 'text/html');
   fs.createReadStream(__dirname + '/index.html').pipe(res);
 });
