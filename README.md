@@ -75,7 +75,38 @@ Which returns the client-side library. It's not minified as that is out of the
 scope of this project. You can store this on a CDN or on your static server. Do
 what ever you want with it, but I would advice you to regenerate that file every
 time you redeploy so it always contains a client side library that is compatible
-with your back-end.
+with your back-end. To save the file you can use:
+
+```js
+primus.save(__dirname +'/primus.js');
+```
+
+This will store the compiled library in your current directory. If you want to
+save it asyncronously, you can supply the method with an callback method:
+
+```js
+primus.save(__dirname +'/primus.js', function save(err) {
+
+});
+```
+
+But to make it easier for you during development we've automatically added an
+extra route to the supplied HTTP server, this will serve the library for you so
+you don't have to save it. Please note, that this route isn't optimized for
+serving static assets and should only be used during development. In your HTML
+page add:
+
+```html
+<script src="/primus/primus.js"></script>
+```
+
+If you've configured a different `pathname` in the options deploy on a different
+domain then your primus server you would ofcourse need to update the `src`
+attribute to the correct location. It's always available at:
+
+```
+<protocol>://<server location>/<pathname>/primus.js
+```
 
 Once you're all set up you can start listening for connections. These
 connections are announced through the `connection` event.
