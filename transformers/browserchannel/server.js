@@ -23,7 +23,10 @@ module.exports = function server() {
   }, function connection(socket) {
     var spark = new Spark(
         socket.headers    // HTTP request headers.
-      , socket.address    // IP address.
+      , {                 // IP address Location.
+          remoteAddress: socket.address,
+          remotePort: 1337
+        }
       , query             // Query string, not allowed by browser channel.
       , socket.id         // Unique connection id.
     );

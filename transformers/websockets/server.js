@@ -23,7 +23,7 @@ module.exports = function server() {
     this.service.handleUpgrade(req, socket, head, function create(socket) {
       var spark = new Spark(
           socket.upgradeReq.headers               // HTTP request headers.
-        , socket.upgradeReq.connection.address()  // Ip address.
+        , socket.upgradeReq                       // Ip address location.
         , parse(socket.upgradeReq.url).query      // Optional query string.
       );
 

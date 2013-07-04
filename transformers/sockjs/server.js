@@ -22,7 +22,7 @@ module.exports = function server() {
   this.service.on('connection', function connection(socket) {
     var spark = new Spark(
         socket.headers                      // HTTP request headers.
-      , socket.address                      // IP address.
+      , socket                              // IP address location.
       , {}                                  // Optional query string.
       , socket.id                           // Unique connection id.
     );
