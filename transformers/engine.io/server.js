@@ -22,10 +22,7 @@ module.exports = function server() {
   this.service.on('connection', function connection(socket) {
     var spark = new Spark(
         socket.request.headers              // HTTP request headers.
-      , {                                   // IP address location.
-          remoteAddress: socket.request.connection.remoteAddress,
-          remotePort: socket.request.connection.remotePort
-        }
+      , socket.request.primus               // IP Address location.
       , socket.request.query                // Optional query string.
       , socket.id                           // Unique connection id.
     );
@@ -46,6 +43,15 @@ module.exports = function server() {
   this.on('upgrade', function upgrade(req, socket, head) {
     this.service.handleUpgrade(req, socket, head);
   }).on('request', function request(req, res) {
+    //
+    // Engine.IO closes the handshake socket before we receive a `connection`
+    // event. And as the socket is already answered it can be undefined.
+    //
+    req.primus = {
+      remoteAddress: req.socket.remoteAddress,
+      remotePort: req.socket.remotePort
+    };
+
     this.service.handleRequest(req, res);
   });
 };
