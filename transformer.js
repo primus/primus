@@ -16,9 +16,11 @@ function noop() {}
  * @api public
  */
 function Transformer(primus) {
-  this.Spark = primus.Spark;
-  this.primus = primus;
-  this.service = null;
+  this.Spark = primus.Spark;    // Used by the Server to create a new connection.
+  this.primus = primus;         // Reference to the primus instance.
+  this.primusjs = null;         // Path to the client library.
+  this.service = null;          // Stores the real-time service.
+  this.buffer = null;           // Buffer of the library.
 
   this.initialise();
 }
@@ -79,6 +81,23 @@ Transformer.prototype.initialise = function initialise() {
   if (this.listeners('upgrade').length || this.listeners('previous::upgrade').length) {
     server.on('upgrade', this.upgrade.bind(this));
   }
+
+  //
+  // Create a client url, this where we respond with our library.
+  //
+  var pathname = this.primus.pathname.split('/').filter(Boolean);
+  pathname.push('primus.js');
+  this.primusjs = '/'+ pathname.join('/');
+
+  //
+  // Listen for static requests.
+  //
+  this.on('static', function serve(req, res) {
+    this.buffer = this.buffer || new Buffer(this.primus.library());
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
+    res.end(this.buffer);
+  });
 };
 
 /**
@@ -91,6 +110,7 @@ Transformer.prototype.initialise = function initialise() {
  */
 Transformer.prototype.request = function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
+  if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
 
   this.emit('request', req, res, noop);
 };

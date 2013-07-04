@@ -1,7 +1,8 @@
 'use strict';
 
 var Transformer = require('./transformer')
-  , Spark = require('./spark');
+  , Spark = require('./spark')
+  , fs = require('fs');
 
 /**
  * Primus is a universal wrapper for real-time frameworks that provides a common
@@ -39,7 +40,8 @@ Primus.prototype.__proto__ = require('events').EventEmitter.prototype;
 //
 Object.defineProperty(Primus.prototype, 'client', {
   get: function read() {
-    return require('fs').readFileSync(__dirname + '/primus.js', 'utf-8');
+    read.primus = read.primus || fs.readFileSync(__dirname + '/primus.js', 'utf-8');
+    return read.primus;
   }
 });
 

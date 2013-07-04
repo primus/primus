@@ -3,6 +3,7 @@
 module.exports = function base(transformer) {
   describe('Transformer: '+ transformer, function () {
     var common = require('./common')
+      , request = common.request
       , Primus = common.Primus
       , http = require('http')
       , expect = common.expect
@@ -275,12 +276,29 @@ module.exports = function base(transformer) {
       });
 
       it('should still allow requests to the original listener', function (done) {
-        common.request('http://localhost:'+ server.portnumber +'/nothrow', function (err, res, body) {
-          if (err) return done(err);
+        request(
+          'http://localhost:'+ server.portnumber +'/nothrow',
+          function (err, res, body) {
+            if (err) return done(err);
 
-          expect(body).to.equal('original listener');
-          done();
-        });
+            expect(body).to.equal('original listener');
+            done();
+          }
+        );
+      });
+
+      it('responds to library requests', function (done) {
+        request(
+          'http://localhost:'+ server.portnumber + '/primus/primus.js',
+          function (err, res, body) {
+            if (err) return done(err);
+
+            expect(res.statusCode).to.equal(200);
+            expect(res.headers['content-type']).to.equal('text/javascript; charset=utf-8');
+            expect(body).to.equal(primus.library());
+            done();
+          }
+        );
       });
 
       it('correctly parses the ip address', function (done) {
