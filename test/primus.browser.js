@@ -73,7 +73,7 @@ describe('primus.js', function () {
 
   describe('#emits', function () {
     it('returns a function that emits the given event', function (done) {
-      primus.on('incoming::spark', function (data) {
+      primus.on('incoming::spark', function incoming(data) {
         assert.ok(data === 'meh');
         done();
       });
