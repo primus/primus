@@ -23,8 +23,8 @@ module.exports = function server() {
     var spark = new Spark(
         socket.request.headers              // HTTP request headers.
       , {                                   // IP address location.
-          remoteAddress: socket.request.socket.remoteAddress,
-          remotePort: socket.request.socket.remotePort
+          remoteAddress: socket.request.connection.remoteAddress,
+          remotePort: socket.request.connection.remotePort
         }
       , socket.request.query                // Optional query string.
       , socket.id                           // Unique connection id.
