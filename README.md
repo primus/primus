@@ -422,11 +422,41 @@ var Socket = primus.Socket;
   , socket = new Socket('url');
 ```
 
+#### SockJS
+
+SockJS is a real-time server that focuses on cross-domain connections and does
+this by using multiple transports. To use SockJS you need to install the
+`sockjs` module:
+
+```
+npm install sockjs --save
+```
+
+And tell `Primus` that you want to use `sockjs` as transformer:
+
+```js
+var primus = new Primus(server, { transformer: 'sockjs' });
+```
+
+If yo want to use the client interface inside of Node.js you also need to
+install the `sockjs-client-node` module:
+
+```
+npm install socket.io-client --save
+```
+
+And then you can access it from your server instance:
+
+```js
+var Socket = primus.Socket;
+  , socket = new Socket('url');
+```
+
 #### Socket.IO
 
-The socket.io transport was written against socket.io 0.9. It was one of the
+The Socket.IO transport was written against Socket.IO 0.9.x. It was one of the
 first real-time servers written on Node.js and is one of the most used modules
-in Node.js. It uses multiple transports to connect the server. To use socket.io
+in Node.js. It uses multiple transports to connect the server. To use Socket.IO
 you need to install the `socket.io` module:
 
 ```
@@ -455,6 +485,27 @@ var Socket = primus.Socket;
 
 As you can see from the examples above, it doesn't matter how you write the name
 of the transformer, we just `toLowerCase()` everything.
+
+### Transformer inconsistencies
+
+- Browserchannel does not give you access to the `remotePort` of the incoming
+  connection. So when you access `spark.address` the `port` property will be set
+  to `1337` by default.
+- Browserchannel and SockJS do not support connections with query strings. You
+  can still supply a query string in the `new Primus('http://localhost:80?q=s')`
+  but it will not be accessible in the `spark.query` property.
+- Browserchannel is the only transformer that does not support cross domain
+  connections.
+- SockJS and Browserchannel are originally written in CoffeeScript which can
+  make it harder to debug when their internals are failing.
+- Engine.IO and SockJS do not ship their client-side library with their server
+  side component. We're bundling a snapshot of these libraries inside of Primus.
+  We will always be targeting the latest version of these transformers when we
+  bundle the library.
+- There are small bugs in Engine.IO that are causing our tests to fail. I've
+  submitted patches for these bugs, but they have been reject for silly reasons.
+  The bug causes closed connections to say open. If you're experiencing this you
+  can apply this [patch](/3rd-Eden/engine.io/commit/0cf81270e9d5700).
 
 ### Versioning
 
