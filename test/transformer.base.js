@@ -295,6 +295,21 @@ module.exports = function base(transformer) {
 
         var socket = new Socket('http://localhost:'+ server.portnumber);
       });
+
+      it('uses x-forwarded headers over the connection ip address', function (done) {
+        primus.on('connection', function (spark) {
+          spark.headers['x-forwarded-for'] = '13.3.37.1,12.12.12.12';
+          spark.headers['x-forwarded-port'] = '9083,1334';
+
+          expect(spark.address.ip).to.equal('13.3.37.1');
+          expect(spark.address.port).to.equal(9083);
+
+          spark.end();
+          done();
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+      });
     });
   });
 };
