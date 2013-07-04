@@ -5,6 +5,7 @@ describe('Primus', function () {
     , Primus = common.Primus
     , http = require('http')
     , expect = common.expect
+    , fs = require('fs')
     , server
     , primus;
 
@@ -200,6 +201,23 @@ describe('Primus', function () {
     it('includes the decoders', function () {
       expect(primus.library()).to.include(primus.encoder.toString());
       expect(primus.library()).to.include(primus.decoder.toString());
+    });
+  });
+
+  describe('#save', function () {
+    it('saves the library in the specified location', function (done) {
+      var async = __dirname + '/primus.save.async.js'
+        , sync = __dirname + '/primus.save.sync.js';
+
+      primus.save(sync);
+      expect(fs.readFileSync(sync, 'utf-8')).to.equal(primus.library());
+
+      primus.save(async, function (err) {
+        if (err) return done(err);
+
+        expect(fs.readFileSync(async, 'utf-8')).to.equal(primus.library());
+        done();
+      });
     });
   });
 });

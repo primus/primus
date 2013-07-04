@@ -186,6 +186,20 @@ Primus.prototype.library = function compile(noframework) {
   return client + ' return Primus; });' + (noframework ? '' : library);
 };
 
+/**
+ * Save the library to disk.
+ *
+ * @param {String} dir The location that we need to save the library.
+ * @param {function} fn Optional callback, if you want an async save.
+ * @api public
+ */
+Primus.prototype.save = function save(path, fn) {
+  if (!fn) fs.writeFileSync(path, this.library(), 'utf-8');
+  else fs.writeFile(path, this.library(), 'utf-8', fn);
+
+  return this;
+};
+
 //
 // Expose the constructors of our Spark and Transformer so it can be extended by
 // a third party if needed.

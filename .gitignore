@@ -1,3 +1,5 @@
 node_modules
 .tern-port
 npm-debug.log
+test/primus.save.async.js
+test/primus.save.sync.js
