@@ -282,6 +282,19 @@ module.exports = function base(transformer) {
           done();
         });
       });
+
+      it('correctly parses the ip address', function (done) {
+        primus.on('connection', function (spark) {
+          var address = spark.address;
+          expect(address.port).to.not.equal(0);
+          expect(address.port).to.not.equal(server.portnumber);
+
+          spark.end();
+          done();
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+      });
     });
   });
 };
