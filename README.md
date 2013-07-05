@@ -134,10 +134,10 @@ connection. This depends on the module you are using.
 
 #### spark.address
 
-The `spark.address` property contains the `remoteAddress` and `remotePort` of the
-connection. If you're running your server behind a reverse proxy it will be
-useless to you and you should probably be checking the `spark.headers` for
-`x-fowarded-xxx` headers instead.
+The `spark.address` property contains the `ip` and `port` of the
+connection. If you're running your server behind a reverse proxy it will
+automatically use the `x-forwarded-for` headers. This way you will always have
+the address of the connecting client and not the ip address of your proxy.
 
 #### spark.query
 
