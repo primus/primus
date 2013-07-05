@@ -1,7 +1,3 @@
-```
-FYI: Consider this module broken, dead until 1.0 is released.
-```
-
 # Primus
 
 [![Build Status](https://travis-ci.org/3rd-Eden/primus.png)](https://travis-ci.org/3rd-Eden/primus)
