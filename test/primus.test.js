@@ -135,6 +135,24 @@ describe('Primus', function () {
     });
   });
 
+  it('throws a human readable error for an unsupported transformer', function () {
+    try {
+      new Primus(server, { transformer: 'cowsack' });
+    } catch (e) {
+      expect(e).to.be.instanceOf(Error);
+      expect(e.message).to.include('cowsack');
+    }
+  });
+
+  it('throws a human readable error for an unsupported parser', function () {
+    try {
+      new Primus(server, { parser: 'cowsack' });
+    } catch (e) {
+      expect(e).to.be.instanceOf(Error);
+      expect(e.message).to.include('cowsack');
+    }
+  });
+
   describe('#forEach', function () {
     it('iterates over all active connections', function (done) {
       var spark = new primus.Spark()

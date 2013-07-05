@@ -1,0 +1,22 @@
+{
+  "websockets": {
+    "server": "ws",
+    "client": "ws"
+  },
+  "engine.io": {
+    "server": "engine.io",
+    "client": "engine.io-client"
+  },
+  "socket.io": {
+    "server": "socket.io",
+    "client": "socket.io-client"
+  },
+  "browserchannel": {
+    "server": "browserchannel",
+    "client": "browserchannel"
+  },
+  "sockjs": {
+    "server": "sockjs",
+    "client": "sockjs-client-node"
+  }
+}

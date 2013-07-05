@@ -62,6 +62,50 @@ Object.defineProperty(Primus.prototype, 'Socket', {
 //
 Primus.prototype.version = require('./package.json').version;
 
+//
+// A list of supported transformers and the required Node.js modules.
+//
+Primus.transformers = require('./transformers.json');
+Primus.parsers = require('./parsers.json');
+
+/**
+ * Simple function to output common errors.
+ *
+ * @param {String} what What is missing.
+ * @param {Object} where Either Primus.parsers or Primus.transformers.
+ * @returns {Object}
+ * @api private
+ */
+Primus.prototype.is = function is(what, where) {
+  var missing = Primus.parsers !== where
+      ? 'transformer'
+      : 'parser'
+    , dependency = where[what];
+
+  return {
+    missing: function write() {
+      console.error('Primus:');
+      console.error('Primus: Missing required npm dependency for '+ what);
+      console.error('Primus: Please run the following command and try again:');
+      console.error('Primus:');
+      console.error('Primus:   npm install --save %s', dependency.server);
+      console.error('Primus:');
+
+      return 'Missing dependencies for '+ missing +': "'+ what + '"';
+    },
+    unknown: function write() {
+      console.error('Primus:');
+      console.error('Primus: Unsupported %s: "%s"', missing, what);
+      console.error('Primus: We only support the following %ss:', what);
+      console.error('Primus:');
+      console.error('Primus:   %s', Object.keys(where).join(', '));
+      console.error('Primus:');
+
+      return 'Unsupported '+ missing +': "'+ what +'"';
+    }
+  };
+};
+
 /**
  * Initialise the real-time transport that was chosen.
  *
@@ -70,16 +114,31 @@ Primus.prototype.version = require('./package.json').version;
  */
 Primus.prototype.initialise = function initialise(Transformer) {
   Transformer = Transformer || 'websockets';
+  var transformer;
 
   if ('string' === typeof Transformer) {
-    Transformer = require('./transformers/'+ Transformer.toLowerCase());
+    Transformer = transformer = Transformer.toLowerCase();
+
+    //
+    // This is a unknown transporter, it could be people made a typo.
+    //
+    if (!(Transformer in Primus.transformers)) {
+      throw new Error(this.is(Transformer, Primus.transformers).unknown());
+    }
+
+    try {
+      Transformer = require('./transformers/'+ transformer);
+      this.transformer = new Transformer(this);
+    } catch (e) {
+      throw new Error(this.is(transformer, Primus.transformers).missing());
+    }
   }
 
   if ('function' !== typeof Transformer) {
     throw new Error('The given transformer is not a constructor');
   }
 
-  this.transformer = new Transformer(this);
+  this.transformer = this.transformer || new Transformer(this);
 
   this.on('connection', function connection(stream) {
     this.connected++;
@@ -116,11 +175,23 @@ Primus.prototype.parsers = function parsers(parser) {
   parser = parser || 'json';
 
   if ('string' === typeof parser) {
-    parser = require('./parsers/'+ parser.toLowerCase());
+    parser = parser.toLowerCase();
+
+    //
+    // This is a unknown parser, it could be people made a typo.
+    //
+    if (!(parser in Primus.parsers)) {
+      throw new Error(this.is(parser, Primus.parsers).unknown());
+    }
+
+    try { parser = require('./parsers/'+ parser); }
+    catch (e) {
+      throw new Error(this.is(parser, Primus.parsers).missing());
+    }
   }
 
   if ('object' !== typeof parser) {
-    throw new Error('The given parser is not an Object');
+    throw new Error('The given parser is not an Object.');
   }
 
   this.encoder = parser.encoder;
