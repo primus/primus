@@ -1,0 +1,26 @@
+{
+  "name": "primus-jitsu",
+  "version": "0.0.0",
+  "description": "Primus test server running on the Nodejitsu platform.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "index.js"
+  },
+  "repository": "",
+  "author": "Arnout Kazemier",
+  "license": "MIT",
+  "dependencies": {
+    "argh": "~0.1.0",
+    "primus": "~1.0.0",
+    "engine.io": "~0.6.3",
+    "sockjs": "~0.3.7",
+    "socket.io": "~0.9.16",
+    "ws": "~0.4.27",
+    "jsonh": "0.0.3"
+  },
+  "subdomain": "primus",
+  "engines": {
+    "node": "0.8.x"
+  }
+}
