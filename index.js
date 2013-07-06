@@ -271,6 +271,19 @@ Primus.prototype.save = function save(path, fn) {
   return this;
 };
 
+/**
+ * Use the given plugin `fn()`.
+ *
+ * @param {Function} fn
+ * @return {Primus} self
+ * @api public
+ */
+
+Primus.use = function(fn){
+  fn(this);
+  return this;
+};
+
 //
 // Expose the constructors of our Spark and Transformer so it can be extended by
 // a third party if needed.
