@@ -371,3 +371,20 @@ Primus.prototype.client = null; // @import {primus::transport};
 Primus.prototype.encoder = null; // @import {primus::encoder};
 Primus.prototype.decoder = null; // @import {primus::decoder};
 Primus.prototype.version = null; // @import {primus::version};
+
+if ('undefined' !== typeof document && document.addEventListener) {
+  //
+  // Hack 1: If you press ESC in FireFox it will close all active connections.
+  // Normally this makes sense, when your page is still loading. But versions
+  // before FireFox 22 will close all connections including WebSocket connections
+  // after page load. One way to prevent this is to do a `preventDefault()` and
+  // cancel the operation before it bubbles up to the browsers's default handler.
+  // It needs to be added as `keydown` event, if it's added keyup it will not be
+  // able to prevent the connection from being closed.
+  //
+  document.addEventListener('keydown', function keydown(e) {
+    if (e.keyCode !== 27 || !e.preventDefault) return;
+
+    e.preventDefault();
+  }, false);
+}
