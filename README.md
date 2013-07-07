@@ -567,7 +567,7 @@ semver as closely as possible but this is how we use our version numbering:
 ### Community plugins.
 
 These are plugins created by our amazing community. Do you have a module that
-you want to have listed here? Make sure it has test suite and runs on Travis CI.
+you want to have listed here? Make sure it has test suite and runs on [Travis CI].
 After that open a pull request where you added your module to this README and
 see it be merged automatically.
 
@@ -587,7 +587,7 @@ see it be merged automatically.
   </dd>
 </dl>
 
-[TravisCI]:
+[Travis CI]: https://travis-ci.org/
 
 ### License
 
