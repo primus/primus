@@ -1,6 +1,7 @@
 # Primus
 
 [![Build Status](https://travis-ci.org/3rd-Eden/primus.png)](https://travis-ci.org/3rd-Eden/primus)
+[![NPM version](https://badge.fury.io/js/primus.png)](http://badge.fury.io/js/primus)
 
 Primus, the creator god of transformers but now also known as universal wrapper
 for real-time frameworks. There are a lot of real-time frameworks available for
@@ -562,6 +563,31 @@ semver as closely as possible but this is how we use our version numbering:
     </p>
   </dd>
 </dl>
+
+### Community plugins.
+
+These are plugins created by our amazing community. Do you have a module that
+you want to have listed here? Make sure it has test suite and runs on Travis CI.
+After that open a pull request where you added your module to this README and
+see it be merged automatically.
+
+<dl>
+  <dt><a href="/cayasso/primus-rooms">primus-rooms</a></dt>
+  <dd>
+    A module that adds rooms capabilities to Primus. It's based on the rooms
+    implementation of Socket.IO.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/cayasso/primus-rooms">
+      <img src="https://travis-ci.org/cayasso/primus-rooms.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-rooms">
+      <img src="https://badge.fury.io/js/primus-rooms.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+[TravisCI]:
 
 ### License
 
