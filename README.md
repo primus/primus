@@ -25,7 +25,25 @@ Primus is released in `npm` and can be installed using:
 npm install primus --save
 ```
 
-### Getting started
+### Table of Contents
+
+- [Introduction](#primus)
+  - [Highlights](#highlights)
+- [Installation](#installation)
+- [Getting Started](#getting-started)
+- [Connecting from the browser](#connecting-from-the-browser)
+- [Supported real-time frameworks](#supported-real-time-frameworks)
+  - [Engine.IO](#engineio)
+  - [WebSockets](#websockets)
+  - [Browserchannel](#browserchannel)
+  - [SockJS](#sockjs)
+  - [Socket.IO](#socketio)
+- [Transformer Inconsistencies](#transformer-inconsistencies)
+- [Versioning](#versioning)
+- [Community Plugins](#community-plugins)
+- [License](#license)
+
+### Getting Started
 
 Primus doesn't ship with real-time frameworks as dependencies, it assumes that
 you as user adds them your self as a dependency. This is done to keep the module
@@ -216,7 +234,7 @@ primus.on('connection', function (spark) {
 })
 ```
 
-### Connecting from the browser.
+### Connecting from the Browser.
 
 Primus comes with it's client framework which can be compiled using
 `primus.library()` as mentioned above. To create a connection you can simply
@@ -363,11 +381,11 @@ primus.on('data', function (message) {
 primus.write('hello world');
 ```
 
-### Supported real-time frameworks
+### Supported Real-time Frameworks
 
 The following transformers/transports are supported in Primus:
 
-#### engine.io
+#### Engine.IO
 
 Engine.io is the low level transport functionality of Socket.io 1.0. It supports
 multiple transports for creating a real-time connection. It uses transport
@@ -514,7 +532,7 @@ var Socket = primus.Socket;
 As you can see from the examples above, it doesn't matter how you write the name
 of the transformer, we just `toLowerCase()` everything.
 
-### Transformer inconsistencies
+### Transformer Inconsistencies
 
 - Browserchannel does not give you access to the `remotePort` of the incoming
   connection. So when you access `spark.address` the `port` property will be set
@@ -564,7 +582,7 @@ semver as closely as possible but this is how we use our version numbering:
   </dd>
 </dl>
 
-### Community plugins.
+### Community Plugins
 
 These are plugins created by our amazing community. Do you have a module that
 you want to have listed here? Make sure it has test suite and runs on [Travis CI].
@@ -572,12 +590,13 @@ After that open a pull request where you added your module to this README and
 see it be merged automatically.
 
 <dl>
-  <dt><a href="/cayasso/primus-rooms">primus-rooms</a></dt>
+  <dt><a href="http://github.com/cayasso/primus-rooms">primus-rooms</a></dt>
   <dd>
     A module that adds rooms capabilities to Primus. It's based on the rooms
     implementation of Socket.IO.
   </dd>
   <dd>
+    <strong>Build status</strong>
     <a href="https://travis-ci.org/cayasso/primus-rooms">
       <img src="https://travis-ci.org/cayasso/primus-rooms.png?branch=master" alt="Build Status" />
     </a>

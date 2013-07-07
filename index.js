@@ -93,6 +93,7 @@ Primus.prototype.is = function is(what, where) {
 
       return 'Missing dependencies for '+ missing +': "'+ what + '"';
     },
+
     unknown: function write() {
       console.error('Primus:');
       console.error('Primus: Unsupported %s: "%s"', missing, what);
@@ -149,6 +150,8 @@ Primus.prototype.initialise = function initialise(Transformer) {
     this.connected--;
     delete this.connections[stream.id];
   });
+
+  this.emit('initialised', this.transformer);
 };
 
 /**
@@ -197,6 +200,8 @@ Primus.prototype.parsers = function parsers(parser) {
   this.encoder = parser.encoder;
   this.decoder = parser.decoder;
   this.parser = parser;
+
+  this.emit('parser', parser);
 
   return this;
 };
