@@ -10,13 +10,19 @@
 var proxies = [
   {
     ip: 'x-forwarded-for',
-    port: 'x-forwarded-port'
+    port: 'x-forwarded-port',
+    proto: 'x-forwarded-proto'
   }, {
     ip: 'z-forwarded-for',
-    port: 'z-forwarded-port'
+    port: 'z-forwarded-port',   // Estimated guess, no standard header available.
+    proto: 'z-forwarded-proto'  // Estimated guess, no standard header available.
   }, {
     ip: 'forwarded',
-    port: 'forwarded-port'
+    port: 'forwarded-port',
+    proto: 'forwarded-proto'    // Estimated guess, no standard header available.
+  }, {
+    ip: 'x-real-ip',
+    port: 'x-real-port'         // Estimated guess, no standard header available.
   }
 ];
 
