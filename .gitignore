@@ -3,3 +3,4 @@ node_modules
 npm-debug.log
 test/primus.save.async.js
 test/primus.save.sync.js
+.DS_Store
