@@ -19,15 +19,15 @@ describe('primus.js', function () {
 
   describe('#on', function () {
     it('adds an "foo" event', function () {
-      assert.ok(!('foo' in primus.events));
+      assert.ok(!('foo' in primus._events));
 
       function foo() { }
       primus.on('foo', foo);
 
-      assert.ok('foo' in primus.events);
-      assert.is('array', primus.events.foo);
-      assert.ok(primus.events.foo.length);
-      assert.ok(primus.events.foo[0] === foo);
+      assert.ok('foo' in primus._events);
+      assert.is('array', primus._events.foo);
+      assert.ok(primus._events.foo.length);
+      assert.ok(primus._events.foo[0] === foo);
     });
 
     it('is chaining', function () {
