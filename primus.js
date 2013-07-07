@@ -26,10 +26,6 @@ function Primus(url, options) {
   this.initialise().open();
 }
 
-Primus.OPENING = 0;   // We're opening the connection.
-Primus.CLOSED  = 1;   // No active connection.
-Primus.OPEN    = 2;   // The connection is open.
-
 //
 // It's possible that we're running in Node.js or in a Node.js compatible
 // environment such as browserify. In these cases we want to use some build in
@@ -50,6 +46,26 @@ try {
     return a;
   };
 }
+
+/**
+ * Primus readyStates, used internally to set the correct ready state.
+ *
+ * @type {Number}
+ * @private
+ */
+Primus.OPENING = 0;   // We're opening the connection.
+Primus.CLOSED  = 1;   // No active connection.
+Primus.OPEN    = 2;   // The connection is open.
+
+/**
+ * Are we working with a potentially broken WebSockets implementation? This
+ * boolean can be used by transformers to remove `WebSockets` from their
+ * supported transports.
+ *
+ * @type {Boolean}
+ * @api private
+ */
+Primus.prototype.AVOID_WEBSOCKETS = false;
 
 /**
  * Initialise the Primus and setup all parsers and internal listeners.
@@ -372,7 +388,10 @@ Primus.prototype.encoder = null; // @import {primus::encoder};
 Primus.prototype.decoder = null; // @import {primus::decoder};
 Primus.prototype.version = null; // @import {primus::version};
 
-if ('undefined' !== typeof document && document.addEventListener) {
+if (
+     'undefined' !== typeof document
+  && 'undefined' !== typeof navigator
+) {
   //
   // Hack 1: If you press ESC in FireFox it will close all active connections.
   // Normally this makes sense, when your page is still loading. But versions
@@ -382,9 +401,31 @@ if ('undefined' !== typeof document && document.addEventListener) {
   // It needs to be added as `keydown` event, if it's added keyup it will not be
   // able to prevent the connection from being closed.
   //
-  document.addEventListener('keydown', function keydown(e) {
-    if (e.keyCode !== 27 || !e.preventDefault) return;
+  if (document.addEventListener) {
+    document.addEventListener('keydown', function keydown(e) {
+      if (e.keyCode !== 27 || !e.preventDefault) return;
 
-    e.preventDefault();
-  }, false);
+      e.preventDefault();
+    }, false);
+  }
+
+  //
+  // Hack 2: This is a Mac/Apple bug only, when you're behind a reverse proxy or
+  // have you network settings set to `automatic proxy discovery` the safari
+  // browser will crash when the WebSocket constructor is initialised. There is
+  // no way to detect the usage of these proxies available in JavaScript so we
+  // need to do some nasty browser sniffing. This only affects Safari versions
+  // lower then 5.1.4
+  //
+  var ua = (navigator.userAgent || '').toLowerCase()
+    , parsed = ua.match(/.+(?:rv|it|ra|ie)[\/: ](\d+)\.(\d+)(?:\.(\d+))?/) || []
+    , version = +[parsed[1], parsed[2]].join('.');
+
+  if (
+       !~ua.indexOf('chrome')
+    && ~ua.indexOf('safari')
+    && version < 534.54
+  ) {
+    Primus.prototype.AVOID_WEBSOCKETS = true;
+  }
 }
