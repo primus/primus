@@ -289,9 +289,11 @@ Primus.prototype.save = function save(path, fn) {
  * @return {Primus} self
  * @api public
  */
+Primus.use = function use(fn) {
+  var args = Array.prototype.slice.call(arguments, 1);
+  args.unshift(this);
 
-Primus.use = function(fn){
-  fn(this);
+  fn.apply(this, args);
   return this;
 };
 

@@ -164,6 +164,25 @@ describe('Primus', function () {
     }
   });
 
+  describe('.use', function () {
+    it('calls the given function with Primus and returns Primus', function () {
+      var x = Primus.use(function (P) {
+        expect(P).to.equal(Primus);
+      });
+
+      expect(x).to.equal(Primus);
+    });
+
+    it('Passes the options in as argument to the function', function (done) {
+      Primus.use(function (P, opts) {
+        expect(opts.foo).to.equal('bar');
+        expect(P).to.equal(Primus);
+
+        done();
+      }, { foo: 'bar' });
+    });
+  });
+
   describe('#forEach', function () {
     it('iterates over all active connections', function (done) {
       var spark = new primus.Spark()
