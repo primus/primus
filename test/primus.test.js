@@ -53,6 +53,17 @@ describe('Primus', function () {
     expect(new Primus(server, { pathname: '/foo' }).pathname).to.equal('/foo');
   });
 
+  it('emits an `initialised` event when the server is fully constructed', function (done) {
+    var primus = new Primus(server);
+
+    primus.on('initialised', function (transformer, parser) {
+      expect(transformer).to.equal(primus.transformer);
+      expect(parser).to.equal(primus.parser);
+
+      done();
+    });
+  });
+
   it('accepts custom message parsers', function () {
     var primus = new Primus(server, { parser: 'jsonh' });
 

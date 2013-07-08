@@ -97,7 +97,7 @@ Primus.prototype.is = function is(what, where) {
     unknown: function write() {
       console.error('Primus:');
       console.error('Primus: Unsupported %s: "%s"', missing, what);
-      console.error('Primus: We only support the following %ss:', what);
+      console.error('Primus: We only support the following %ss:', missing);
       console.error('Primus:');
       console.error('Primus:   %s', Object.keys(where).join(', '));
       console.error('Primus:');
@@ -115,7 +115,9 @@ Primus.prototype.is = function is(what, where) {
  */
 Primus.prototype.initialise = function initialise(Transformer) {
   Transformer = Transformer || 'websockets';
-  var transformer;
+
+  var primus = this
+    , transformer;
 
   if ('string' === typeof Transformer) {
     Transformer = transformer = Transformer.toLowerCase();
@@ -151,7 +153,13 @@ Primus.prototype.initialise = function initialise(Transformer) {
     delete this.connections[stream.id];
   });
 
-  this.emit('initialised', this.transformer);
+  //
+  // Emit the initialised event after the next tick so we have some time to
+  // attach listeners.
+  //
+  process.nextTick(function tock() {
+    primus.emit('initialised', primus.transformer, primus.parser);
+  });
 };
 
 /**
@@ -200,8 +208,6 @@ Primus.prototype.parsers = function parsers(parser) {
   this.encoder = parser.encoder;
   this.decoder = parser.decoder;
   this.parser = parser;
-
-  this.emit('parser', parser);
 
   return this;
 };
