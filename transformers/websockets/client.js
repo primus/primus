@@ -1,5 +1,5 @@
 'use strict';
-/* globals MozWebSocket */
+/*globals MozWebSocket */
 
 /**
  * Minimum viable WebSocket client. This function is stringified and written in
@@ -32,7 +32,14 @@ module.exports = function client() {
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    socket = new Factory(primus.uri('ws', true));
+    //
+    // FireFox will throw an error when we try to establish a connection from
+    // a secure page to an unsecured WebSocket connection. This is inconsistent
+    // behaviour between different browsers. This should ideally be solved in
+    // primus when we connect.
+    //
+    try { socket = new Factory(primus.uri('ws', true)); }
+    catch (e) { primus.emit('error', e); }
 
     //
     // Setup the Event handlers.
