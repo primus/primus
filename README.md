@@ -551,7 +551,7 @@ of the transformer, we just `toLowerCase()` everything.
 - There are small bugs in Engine.IO that are causing our tests to fail. I've
   submitted patches for these bugs, but they have been reject for silly reasons.
   The bug causes closed connections to say open. If you're experiencing this you
-  can apply this [patch](/3rd-Eden/engine.io/commit/0cf81270e9d5700).
+  can apply this [patch](http://github.com/3rd-Eden/engine.io/commit/0cf81270e9d5700).
 
 ### Versioning
 
