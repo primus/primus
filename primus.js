@@ -4,6 +4,10 @@
  * Primus in a real-time library agnostic framework for establishing real-time
  * connections with servers.
  *
+ * Options:
+ * - reconnect, configuration for the reconnect process.
+ * - websockets, force the use of websockets, even when you should avoid them.
+ *
  * @constructor
  * @param {String} url The url of your server.
  * @param {Object} options The configuration.
@@ -21,7 +25,12 @@ function Primus(url, options) {
   this.backoff = options.reconnect || {}; // Stores the backoff configuration.
   this.readyState = Primus.CLOSED;        // The readyState of the connection.
 
-  if (Stream) Stream.call(this);          // Initialize a stream interface.
+  // Initialize a stream interface, if we have any.
+  if (Stream) Stream.call(this);
+
+  // Force the use of WebSockets, even when we've detected some potential
+  // broken WebSocket implementation.
+  if (options.websockets) this.AVOID_WEBSOCKETS = false;
 
   this.initialise().open();
 }
