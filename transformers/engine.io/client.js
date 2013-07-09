@@ -32,7 +32,10 @@ module.exports = function client() {
     if (socket) socket.close();
 
     socket = factory(primus.uri('ws', true), {
-      path: this.pathname
+      path: this.pathname,
+      transports: !primus.AVOID_WEBSOCKETS
+        ? ['polling', 'websocket']
+        : ['polling']
     });
 
     //
