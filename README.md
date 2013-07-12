@@ -414,6 +414,20 @@ a server side client.
      , client = new Socket('http://localhost:8080');
   ```
 
+  If you do not know which transformers, parsers are used on the server, we
+  expose a small JSON "spec" file that exposes this information. The
+  specification can be reached on the `/<pathname>/spec` and will output the
+  following JSON document:
+
+  ```json
+  {
+    "version":"1.0.1",
+    "pathname":"/primus",
+    "parser":"json",
+    "transformer":"websockets"
+  }
+  ```
+
 ### Supported Real-time Frameworks
 
 The following transformers/transports are supported in Primus:
