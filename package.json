@@ -27,20 +27,6 @@
     "extendable": "0.0.x",
     "load": "0.1.x"
   },
-  "testling": {
-    "harness": "mocha-bdd",
-    "files": "test/*.browser.js",
-    "browsers": [
-      "ie/6..latest",
-      "chrome/22..latest",
-      "firefox/16..latest",
-      "safari/latest",
-      "opera/11.0..latest",
-      "iphone/6",
-      "ipad/6",
-      "android-browser/latest"
-    ]
-  },
   "devDependencies": {
     "browserchannel": "1.0.x",
     "chai": "1.7.x",
@@ -52,7 +38,6 @@
     "socket.io": "0.9.x",
     "socket.io-client": "0.9.x",
     "sockjs": "0.3.x",
-    "testling": "*",
     "ws": "0.4.x",
     "sockjs-client-node": "0.0.0",
     "request": "~2.21.0"
