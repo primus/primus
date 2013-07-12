@@ -212,9 +212,9 @@ module.exports = function base(transformer) {
       });
     });
 
-    describe('.createClient', function () {
+    describe('.createSocket', function () {
       it('can connect to the server', function (done) {
-        var PSocket = Primus.createClient({ transformer: transformer })
+        var PSocket = Primus.createSocket({ transformer: transformer })
           , socket = new PSocket('http://localhost:'+ server.portnumber);
 
         socket.on('open', function () {

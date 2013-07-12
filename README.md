@@ -32,6 +32,7 @@ npm install primus --save
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 - [Connecting from the browser](#connecting-from-the-browser)
+- [Connecting from the server](#connecting-from-the-server)
 - [Supported real-time frameworks](#supported-real-time-frameworks)
   - [Engine.IO](#engineio)
   - [WebSockets](#websockets)
@@ -380,6 +381,38 @@ primus.on('data', function (message) {
 
 primus.write('hello world');
 ```
+
+### Connecting from the server
+
+The client-side library has been made compatible with Node.js so the same code
+base can be re-used for server side connections. There are two ways of creating
+a server side client.
+
+1. When you've created your `primus` instance you can access the `Socket`
+   property on it. This `Socket` is automatically configured to connect to the
+   correct pathname, using the same `transformer` and `parser` that you've
+   specified when you created your `primus` instance.
+
+   ```js
+   var primus = new Primus(server, { transformer: transformer, parser: parser })
+     , Socket = primus.Socket;
+
+   var client = new Socket('http://localhost:8080');
+   //
+   // It has the same interface as the client, so you can just socket.write or
+   // listen for the `open` events etc.
+   //
+   ```
+2. You might need to connect from a different node process where you don't have
+   access to your `primus` instance and the compatible `Socket` instance. For
+   these cases there a special `createSocket` method where you can specify the
+   `transformer` and `parser` that you are using on your server to create
+   another compatible socket.
+
+   ```js
+   var Socket = Primus.createSocket({ transformer: transformer, parser: parser })
+     , client = new Socket('http://localhost:8080');
+  ```
 
 ### Supported Real-time Frameworks
 

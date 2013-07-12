@@ -299,11 +299,11 @@ Primus.use = function use(fn) {
 };
 
 /**
- * Add a create client interface so we can create a Server client with the
+ * Add a createSocket interface so we can create a Server client with the
  * specified `transformer` and `parser`.
  *
  * ```js
- * var Socket = Primus.createClient({ transformer: transformer, parser: parser })
+ * var Socket = Primus.createSocket({ transformer: transformer, parser: parser })
  *   , socket = new Socket(url);
  * ```
  *
@@ -311,7 +311,7 @@ Primus.use = function use(fn) {
  * @returns {Socket}
  * @api public
  */
-Primus.createClient = function createClient(options) {
+Primus.createSocket = function createSocket(options) {
   options = options || {};
 
   var primus = new Primus(new EventEmitter(), options);
