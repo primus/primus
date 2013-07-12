@@ -1,6 +1,7 @@
 'use strict';
 
-var Transformer = require('./transformer')
+var EventEmitter = require('events').EventEmitter
+  , Transformer = require('./transformer')
   , Spark = require('./spark')
   , fs = require('fs');
 
@@ -33,7 +34,7 @@ function Primus(server, options) {
   this.initialise(options.transformer || options.transport);
 }
 
-Primus.prototype.__proto__ = require('events').EventEmitter.prototype;
+Primus.prototype.__proto__ = EventEmitter.prototype;
 
 //
 // Lazy read the primus.js JavaScript client.
@@ -295,6 +296,26 @@ Primus.use = function use(fn) {
 
   fn.apply(this, args);
   return this;
+};
+
+/**
+ * Add a create client interface so we can create a Server client with the
+ * specified `transformer` and `parser`.
+ *
+ * ```js
+ * var Socket = Primus.createClient({ transformer: transformer, parser: parser })
+ *   , socket = new Socket(url);
+ * ```
+ *
+ * @param {Object} options The transformer / parser we need.
+ * @returns {Socket}
+ * @api public
+ */
+Primus.createClient = function createClient(options) {
+  options = options || {};
+
+  var primus = new Primus(new EventEmitter(), options);
+  return primus.Socket;
 };
 
 //

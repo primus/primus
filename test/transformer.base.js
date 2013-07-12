@@ -212,6 +212,18 @@ module.exports = function base(transformer) {
       });
     });
 
+    describe('.createClient', function () {
+      it('can connect to the server', function (done) {
+        var PSocket = Primus.createClient({ transformer: transformer })
+          , socket = new PSocket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function () {
+          socket.end();
+          done();
+        });
+      });
+    });
+
     describe('Server', function () {
       it('emits `end` when the connection is closed', function (done) {
         primus.on('connection', function (spark) {
