@@ -25,6 +25,7 @@ function Primus(server, options) {
   this.sparks = 0;                        // Increment id for connection ids
   this.connected = 0;                     // Connection counter;
   this.connections = Object.create(null); // Connection storage.
+  this.ark = Object.create(null);         // Plugin storage.
 
   this.server = server;
   this.pathname = options.pathname || '/primus';
@@ -79,15 +80,6 @@ Primus.transformers = require('./transformers.json');
 Primus.parsers = require('./parsers.json');
 
 /**
- * The Ark contains all our plugins definitions. It's namespaced by
- * name=>plugin.
- *
- * @type {Object}
- * @private
- */
-Primus.prototype.ark = Object.create(null);
-
-/**
  * Simple function to output common errors.
  *
  * @param {String} what What is missing.
@@ -137,9 +129,7 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
   Transformer = Transformer || 'websockets';
 
   var primus = this
-    , transformer
-    , plugin
-    , name;
+    , transformer;
 
   if ('string' === typeof Transformer) {
     Transformer = transformer = Transformer.toLowerCase();
@@ -156,7 +146,11 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
       Transformer = require('./transformers/'+ transformer);
       this.transformer = new Transformer(this);
     } catch (e) {
-      throw new Error(this.is(transformer, Primus.transformers).missing());
+      if (e.code === 'MODULE_NOT_FOUND') {
+        throw new Error(this.is(transformer, Primus.transformers).missing());
+      } else {
+        throw e;
+      }
     }
   } else {
     this.spec.transformer = 'custom';
@@ -178,18 +172,20 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
     delete this.connections[stream.id];
   });
 
-  for (name in this.ark) {
-    plugin = this.ark[name];
-
-    if (!plugin.server) continue;
-    plugin.server.call(this, this, options);
-  }
-
   //
   // Emit the initialised event after the next tick so we have some time to
   // attach listeners.
   //
   process.nextTick(function tock() {
+    var name, plugin;
+
+    for (name in primus.ark) {
+      plugin = primus.ark[name];
+
+      if (!plugin.server) continue;
+      plugin.server.call(primus, primus, options);
+    }
+
     primus.emit('initialised', primus.transformer, primus.parser);
   });
 };
@@ -341,9 +337,23 @@ Primus.prototype.save = function save(path, fn) {
  * @api public
  */
 Primus.prototype.use = function use(name, energon) {
-  if (!name) throw new Error('Plugins should be specified with a name');
+  if ('object' === typeof name && !energon) {
+    energon = name;
+    name = energon.name;
+  }
+
+  if (!name) throw new Error('Plugin should be specified with a name');
   if ('string' !== typeof name) throw new Error('Plugin names should be a string');
   if ('object' !== typeof energon) throw new Error('Plugin should be a object');
+
+  //
+  // Plugin require a client, server or both to be specified in the object.
+  //
+  if (!('server' in energon || 'client' in energon)) {
+    throw new Error('The plugin in missing a client or server function');
+  }
+
+  if (name in this.ark) throw new Error('The plugin name was already defined');
 
   this.ark[name] = energon;
   return this;
@@ -353,22 +363,6 @@ Primus.prototype.use = function use(name, energon) {
 // Register globally, for every Primus instance. It takes the same arguments as
 // the `primus.use` method.
 //
-Primus.use = Primus.prototype.use.bind(Primus.prototype);
-
-/**
- * Use the given plugin `fn()`.
- *
- * @param {Function} fn
- * @return {Primus} self
- * @api public
- */
-Primus.use = function use(fn) {
-  var args = Array.prototype.slice.call(arguments, 1);
-  args.unshift(this);
-
-  fn.apply(this, args);
-  return this;
-};
 
 /**
  * Add a createSocket interface so we can create a Server client with the

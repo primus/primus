@@ -160,26 +160,90 @@ describe('Primus', function () {
       new Primus(server, { parser: 'cowsack' });
     } catch (e) {
       expect(e).to.be.instanceOf(Error);
-      expect(e.message).to.include('cowsack');
+      return expect(e.message).to.include('cowsack');
     }
+
+    throw new Error('Should have thrown');
   });
 
   describe('.use', function () {
-    it('calls the given function with Primus and returns Primus', function () {
-      var x = Primus.use(function (P) {
-        expect(P).to.equal(Primus);
-      });
+    it('throws an error if no valid name is provided', function () {
+      try { primus.use({}); }
+      catch (e) {
+        expect(e).to.be.instanceOf(Error);
+        expect(e.message).to.include('Plugin');
+        return expect(e.message).to.include('a name');
+      }
 
-      expect(x).to.equal(Primus);
+      throw new Error('Should have thrown');
     });
 
-    it('Passes the options in as argument to the function', function (done) {
-      Primus.use(function (P, opts) {
-        expect(opts.foo).to.equal('bar');
-        expect(P).to.equal(Primus);
+    it('should check if the name is a string', function () {
+      try { primus.use(function () {}); }
+      catch (e) {
+        expect(e).to.be.instanceOf(Error);
+        expect(e.message).to.include('Plugin');
+        return expect(e.message).to.include('string');
+      }
 
-        done();
-      }, { foo: 'bar' });
+      throw new Error('Should have thrown');
+    });
+
+    it('doesnt allow duplicate definitions', function () {
+      primus.use('foo', { client: function () {} });
+
+      try { primus.use('foo', { client: function () {} }); }
+      catch (e) {
+        expect(e).to.be.instanceOf(Error);
+        expect(e.message).to.include('plugin');
+        return expect(e.message).to.include('defined');
+      }
+
+      throw new Error('Should have thrown');
+    });
+
+    it('should have a client or server function', function () {
+      var called = 0;
+
+      try { primus.use('cow', { foo: 'bar' }); }
+      catch (e) {
+        expect(e).to.be.instanceOf(Error);
+        expect(e.message).to.include('missing');
+        expect(e.message).to.include('client');
+        expect(e.message).to.include('server');
+        called++;
+      }
+
+      expect(called).to.equal(1);
+
+      primus.use('client', { client: function () {} });
+      primus.use('server', { server: function () {} });
+      primus.use('both', { server: function () {}, client: function () {} });
+    });
+
+    it('returns this', function () {
+      var x = primus.use('foo', { client: function () {}});
+
+      expect(x).to.equal(primus);
+    });
+
+    it('should have no plugins', function () {
+      expect(Object.keys(primus.ark)).to.have.length(0);
+    });
+
+    it('calls the supplied server plugin', function (done) {
+      var primus = new Primus(server, { foo: 'bar' });
+
+      primus.use('test', {
+        server: function server(pri, options) {
+          expect(options).to.be.a('object');
+          expect(options.foo).to.equal('bar');
+          expect(pri).to.equal(primus);
+          expect(this).to.equal(pri);
+
+          done();
+        }
+      });
     });
   });
 
@@ -249,6 +313,24 @@ describe('Primus', function () {
     it('includes the decoders', function () {
       expect(primus.library()).to.include(primus.encoder.toString());
       expect(primus.library()).to.include(primus.decoder.toString());
+    });
+
+    it('includes the client plugins', function () {
+      var primus = new Primus(server)
+        , library;
+
+      function client() {
+        console.log();
+      }
+
+      primus.use('log', { client: function () {
+        console.log('i am a client plugin');
+      }});
+
+      library = primus.library();
+
+      expect(library).to.be.a('string');
+      expect(library).to.include('i am a client plugin');
     });
   });
 
