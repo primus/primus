@@ -19,6 +19,7 @@ function Transformer(primus) {
   this.Spark = primus.Spark;    // Used by the Server to create a new connection.
   this.primus = primus;         // Reference to the primus instance.
   this.primusjs = null;         // Path to the client library.
+  this.specfile = null;         // Path to the Primus specification.
   this.service = null;          // Stores the real-time service.
   this.buffer = null;           // Buffer of the library.
 
@@ -83,11 +84,19 @@ Transformer.prototype.initialise = function initialise() {
   }
 
   //
-  // Create a client url, this where we respond with our library.
+  // Create a client url, this where we respond with our library. The path to
+  // the server specification which can be used to retrieve the transformer that
+  // was used.
   //
-  var pathname = this.primus.pathname.split('/').filter(Boolean);
-  pathname.push('primus.js');
-  this.primusjs = '/'+ pathname.join('/');
+  var pathname = this.primus.pathname.split('/').filter(Boolean)
+    , client = pathname.slice(0)
+    , spec = pathname.slice(0);
+
+  client.push('primus.js');
+  spec.push('spec');
+
+  this.primusjs = '/'+ client.join('/');
+  this.specfile = '/'+ spec.join('/');
 
   //
   // Listen for static requests.
@@ -97,6 +106,12 @@ Transformer.prototype.initialise = function initialise() {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
     res.end(this.buffer);
+  });
+
+  this.on('spec', function spec(req, res) {
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify(this.primus.spec));
   });
 };
 
@@ -111,6 +126,7 @@ Transformer.prototype.initialise = function initialise() {
 Transformer.prototype.request = function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
   if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
+  if (req.uri.pathname === this.specfile) return this.emit('spec', req, res);
 
   this.emit('request', req, res, noop);
 };

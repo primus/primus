@@ -340,6 +340,22 @@ module.exports = function base(transformer) {
 
         var socket = new Socket('http://localhost:'+ server.portnumber);
       });
+
+      it('exposes a spec file with the correct transformer', function (done) {
+        request(
+          'http://localhost:'+ server.portnumber +'/primus/spec',
+          function (err, res, body) {
+            if (err) return done(err);
+            body = JSON.parse(body);
+
+            expect(body.transformer).to.equal(transformer.toLowerCase());
+            expect(body.version).to.equal(primus.version);
+            expect(body.pathname).to.equal('/primus');
+            expect(body.parser).to.equal('json');
+            done();
+          }
+        );
+      });
     });
   });
 };

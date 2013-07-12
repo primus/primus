@@ -29,6 +29,15 @@ function Primus(server, options) {
   this.server = server;
   this.pathname = options.pathname || '/primus';
 
+  //
+  // Create a specification file with the information that people might need to
+  // connect to the server.
+  //
+  this.spec = {
+    version: this.version,
+    pathname: this.pathname
+  };
+
   this.parsers(options.parser);
   this.Spark = Spark.bind(Spark, this);
   this.initialise(options.transformer || options.transport);
@@ -122,6 +131,7 @@ Primus.prototype.initialise = function initialise(Transformer) {
 
   if ('string' === typeof Transformer) {
     Transformer = transformer = Transformer.toLowerCase();
+    this.spec.transformer = transformer;
 
     //
     // This is a unknown transporter, it could be people made a typo.
@@ -136,6 +146,8 @@ Primus.prototype.initialise = function initialise(Transformer) {
     } catch (e) {
       throw new Error(this.is(transformer, Primus.transformers).missing());
     }
+  } else {
+    this.spec.transformer = 'custom';
   }
 
   if ('function' !== typeof Transformer) {
@@ -188,6 +200,7 @@ Primus.prototype.parsers = function parsers(parser) {
 
   if ('string' === typeof parser) {
     parser = parser.toLowerCase();
+    this.spec.parser = parser;
 
     //
     // This is a unknown parser, it could be people made a typo.
@@ -200,6 +213,8 @@ Primus.prototype.parsers = function parsers(parser) {
     catch (e) {
       throw new Error(this.is(parser, Primus.parsers).missing());
     }
+  } else {
+    this.spec.parser = 'custom';
   }
 
   if ('object' !== typeof parser) {
