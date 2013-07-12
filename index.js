@@ -40,7 +40,7 @@ function Primus(server, options) {
 
   this.parsers(options.parser);
   this.Spark = Spark.bind(Spark, this);
-  this.initialise(options.transformer || options.transport);
+  this.initialise(options.transformer || options.transport, options);
 }
 
 Primus.prototype.__proto__ = EventEmitter.prototype;
@@ -77,6 +77,15 @@ Primus.prototype.version = require('./package.json').version;
 //
 Primus.transformers = require('./transformers.json');
 Primus.parsers = require('./parsers.json');
+
+/**
+ * The Ark contains all our plugins definitions. It's namespaced by
+ * name=>plugin.
+ *
+ * @type {Object}
+ * @private
+ */
+Primus.prototype.ark = Object.create(null);
 
 /**
  * Simple function to output common errors.
@@ -121,13 +130,16 @@ Primus.prototype.is = function is(what, where) {
  * Initialise the real-time transport that was chosen.
  *
  * @param {Mixed} Transformer The name of the transformer or a constructor;
+ * @param {Object} options Options.
  * @api private
  */
-Primus.prototype.initialise = function initialise(Transformer) {
+Primus.prototype.initialise = function initialise(Transformer, options) {
   Transformer = Transformer || 'websockets';
 
   var primus = this
-    , transformer;
+    , transformer
+    , plugin
+    , name;
 
   if ('string' === typeof Transformer) {
     Transformer = transformer = Transformer.toLowerCase();
@@ -165,6 +177,13 @@ Primus.prototype.initialise = function initialise(Transformer) {
     this.connected--;
     delete this.connections[stream.id];
   });
+
+  for (name in this.ark) {
+    plugin = this.ark[name];
+
+    if (!plugin.server) continue;
+    plugin.server.call(this, this, options);
+  }
 
   //
   // Emit the initialised event after the next tick so we have some time to
@@ -231,14 +250,14 @@ Primus.prototype.parsers = function parsers(parser) {
 /**
  * Generate a client library.
  *
- * @param {Boolean} noframework Don't include the library.
+ * @param {Boolean} nodejs Don't include the library, as we're running on Node.js.
  * @returns {String} The client library.
  * @api public
  */
-Primus.prototype.library = function compile(noframework) {
+Primus.prototype.library = function compile(nodejs) {
   var encoder = this.encoder.client || this.encoder
     , decoder = this.decoder.client || this.decoder
-    , library = this.transformer.library || ''
+    , library = [ !nodejs ? this.transformer.library : null ]
     , transport = this.transformer.client
     , parser = this.parser.library || '';
 
@@ -275,13 +294,29 @@ Primus.prototype.library = function compile(noframework) {
   if (parser && parser.length) client += parser;
 
   //
+  // Iterate over the parsers, and register the client side plugins. If there's
+  // a library bundled, add it the library array as there were some issues with
+  // frameworks that get included in module wrapper as it forces strict mode.
+  //
+  var name, plugin;
+  for (name in this.ark) {
+    plugin = this.ark[name];
+    name = JSON.stringify(name);
+
+    if (!plugin.client) continue;
+    if (plugin.library) library.push(plugin.library);
+
+    client += 'Primus.prototype.ark['+ name +'] = '+ plugin.client.toString() + '\n';
+  }
+
+  //
   // Close the export wrapper and return the client. If we need to add
   // a library, we should add them after we've created our closure and module
   // exports. Some libraries seem to fail hard once they are wrapped in our
   // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client + ' return Primus; });' + (noframework ? '' : library);
+  return client +' return Primus; });'+ library.filter(Boolean).join('\n');
 };
 
 /**
@@ -297,6 +332,28 @@ Primus.prototype.save = function save(path, fn) {
 
   return this;
 };
+
+/**
+ * Register a new Primus plugin.
+ *
+ * @param {String} name The name of the plugin.
+ * @param {Object} energon The plugin that contains client and server extensions.
+ * @api public
+ */
+Primus.prototype.use = function use(name, energon) {
+  if (!name) throw new Error('Plugins should be specified with a name');
+  if ('string' !== typeof name) throw new Error('Plugin names should be a string');
+  if ('object' !== typeof energon) throw new Error('Plugin should be a object');
+
+  this.ark[name] = energon;
+  return this;
+};
+
+//
+// Register globally, for every Primus instance. It takes the same arguments as
+// the `primus.use` method.
+//
+Primus.use = Primus.prototype.use.bind(Primus.prototype);
 
 /**
  * Use the given plugin `fn()`.

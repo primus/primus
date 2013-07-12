@@ -15,6 +15,7 @@
  */
 function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url);
+
   options = options || {};
 
   this.buffer = [];                       // Stores premature send data.
@@ -32,7 +33,7 @@ function Primus(url, options) {
   // broken WebSocket implementation.
   if (options.websockets) this.AVOID_WEBSOCKETS = false;
 
-  this.initialise().open();
+  this.initialise(options).open();
 }
 
 //
@@ -77,11 +78,21 @@ Primus.OPEN    = 2;   // The connection is open.
 Primus.prototype.AVOID_WEBSOCKETS = false;
 
 /**
+ * The Ark contains all our plugins definitions. It's namespaced by
+ * name=>plugin.
+ *
+ * @type {Object}
+ * @private
+ */
+Primus.prototype.ark = {};
+
+/**
  * Initialise the Primus and setup all parsers and internal listeners.
  *
+ * @param {Object} options The original object.
  * @api private
  */
-Primus.prototype.initialise = function initalise() {
+Primus.prototype.initialise = function initalise(options) {
   var primus = this;
 
   this.on('outgoing::open', function opening() {
@@ -140,6 +151,13 @@ Primus.prototype.initialise = function initalise() {
   // Setup the real-time client.
   //
   this.client();
+
+  //
+  // Process the potential plugins.
+  //
+  for (var plugin in this.ark) {
+    this.ark[plugin].call(this, this, options);
+  }
 
   return this;
 };
