@@ -147,14 +147,13 @@ Spark.prototype.emits = function emits(event, parser) {
  */
 Spark.prototype.write = function write(data) {
   var primus = this.primus
-    , spark = this
     , transform
     , packet;
 
   for (transform in primus.transformers.outgoing) {
     packet = { data: data };
 
-    if (false === primus.transformers.outgoing[transform].call(spark, packet)) {
+    if (false === primus.transformers.outgoing[transform].call(this, packet)) {
       //
       // When false is returned by an incoming transformer it means that's
       // being handled by the transformer and we should not emit the `data`
@@ -166,7 +165,21 @@ Spark.prototype.write = function write(data) {
     data = packet.data;
   }
 
-  spark.primus.encoder(data, function encoded(err, packet) {
+  this._write(data);
+  return true;
+};
+
+/**
+ * The actual message writer.
+ *
+ * @param {Mixed} data The message that needs to be written.
+ * @api private
+ */
+Spark.prototype._write = function _write(data) {
+  var primus = this.primus
+    , spark = this;
+
+  primus.encoder(data, function encoded(err, packet) {
     //
     // Do a "save" emit('error') when we fail to parse a message. We don't
     // want to throw here as listening to errors should be optional.
@@ -174,8 +187,6 @@ Spark.prototype.write = function write(data) {
     if (err) return spark.listeners('error').length && spark.emit('error', err);
     spark.emit('outgoing::data', packet);
   });
-
-  return true;
 };
 
 /**
@@ -187,13 +198,12 @@ Spark.prototype.write = function write(data) {
 Spark.prototype.end = function end(data) {
   if (data) this.write(data);
 
-  //
-  // Tell our connection that this is a intended close and that is shouldn't do
-  // any reconnect operations.
-  //
-  this.write('primus::server::close');
-
   var spark = this;
+
+  //
+  // Bypass the .write method as this message should not be transformed.
+  //
+  this._write('primus::server::close') ;
 
   process.nextTick(function tick() {
     spark.emit('outgoing::end');

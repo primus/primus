@@ -217,10 +217,16 @@ module.exports = function base(transformer) {
 
       describe('#transform', function () {
         it('thrown an error if an invalid type is given', function (done) {
-          try { primus.transform('cowsack', function () {}); }
+          var socket = new Socket('http://localhost:'+ server.portnumber);
+
+          primus.on('connection', function (spark) {
+            spark.end();
+            done();
+          });
+
+          try { socket.transform('cowsack', function () {}); }
           catch (e) {
             expect(e.message).to.contain('transformer');
-            done();
           }
         });
 
@@ -295,6 +301,27 @@ module.exports = function base(transformer) {
 
               socket.end();
               done();
+            });
+          });
+
+          it('prevents the message from being emitted', function (done) {
+            var socket = new Socket('http://localhost:'+ server.portnumber);
+
+            primus.on('connection', function (spark) {
+              spark.write('foo');
+            });
+
+            socket.transform('incoming', function (data) {
+              setTimeout(function () {
+                socket.end();
+                done();
+              }, 0);
+
+              return false;
+            });
+
+            socket.on('data', function () {
+              throw new Error('return false should prevent this emit');
             });
           });
         });
@@ -444,6 +471,47 @@ module.exports = function base(transformer) {
             done();
           }
         );
+      });
+
+      describe('#transform', function () {
+        it('thrown an error if an invalid type is given', function (done) {
+          try { primus.transform('cowsack', function () {}); }
+          catch (e) {
+            expect(e.message).to.contain('transformer');
+            done();
+          }
+        });
+
+        describe('outgoing', function () {
+          it('rewrites the outgoing message', function (done) {
+            primus.transform('outgoing', function (data) {
+              expect(data).to.be.a('object');
+              expect(data.data).to.equal('foo');
+
+              data.data = {
+                message: 'foo',
+                meta: 'meta'
+              };
+            });
+
+            primus.on('connection', function (spark) {
+              setTimeout(function () {
+                spark.write('foo');
+              }, 10);
+            });
+
+            var socket = new Socket('http://localhost:'+ server.portnumber);
+
+            socket.on('data', function (data) {
+              expect(data).to.be.a('object');
+              expect(data.meta).to.equal('meta');
+              expect(data.message).to.equal('foo');
+
+              socket.end();
+              done();
+            });
+          });
+        });
       });
     });
   });
