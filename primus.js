@@ -452,7 +452,6 @@ Primus.prototype.emits = function emits(event, parser) {
  */
 Primus.prototype.transform = function transform(type, fn) {
   if (!(type in this.transformers)) throw new Error('Invalid transformer type');
-  if (~this.transformers[type].indexOf(fn)) return this;
 
   this.transformers[type].push(fn);
   return this;

@@ -36,6 +36,10 @@ module.exports = function base(transformer) {
     });
 
     afterEach(function afterEach(done) {
+      primus.forEach(function (spark) {
+        spark.end();
+      });
+
       server.close(done);
     });
 
@@ -208,6 +212,91 @@ module.exports = function base(transformer) {
           });
 
           done();
+        });
+      });
+
+      describe('#transform', function () {
+        it('thrown an error if an invalid type is given', function (done) {
+          try { primus.transform('cowsack', function () {}); }
+          catch (e) {
+            expect(e.message).to.contain('transformer');
+            done();
+          }
+        });
+
+        describe('outgoing', function () {
+          it('rewrites the outgoing message', function (done) {
+            var socket = new Socket('http://localhost:'+ server.portnumber);
+
+            primus.on('connection', function (spark) {
+              spark.on('data', function (data) {
+                expect(data).to.be.a('object');
+                expect(data.meta).to.equal('meta');
+                expect(data.message).to.equal('foo');
+
+                spark.end();
+                done();
+              });
+            });
+
+            socket.transform('outgoing', function (data) {
+              expect(data).to.be.a('object');
+              expect(data.data).to.equal('foo');
+
+              data.data = {
+                message: 'foo',
+                meta: 'meta'
+              };
+            });
+
+            socket.write('foo');
+          });
+
+          it('prevents the message from being written', function (done) {
+            var socket = new Socket('http://localhost:'+ server.portnumber);
+
+            socket.transform('outgoing', function (data) {
+              setTimeout(function () {
+                socket.end();
+                done();
+              }, 0);
+
+              return false;
+            });
+
+            socket.on('outgoing::data', function () {
+              throw new Error('return false should prevent this emit');
+            }).write('foo');
+          });
+        });
+
+        describe('incoming', function () {
+          it('rewrites the incoming message', function (done) {
+            var socket = new Socket('http://localhost:'+ server.portnumber);
+
+            primus.on('connection', function (spark) {
+              spark.write('foo');
+            });
+
+            socket.transform('incoming', function (data) {
+              expect(data).to.be.a('object');
+              expect(data.data).to.equal('foo');
+
+              data.data = {
+                message: 'foo',
+                meta: 'meta'
+              };
+            });
+
+            socket.on('data', function (data) {
+              expect(data).to.be.a('object');
+              expect(data.meta).to.equal('meta');
+              expect(data.message).to.equal('foo');
+
+              socket.end();
+              done();
+            });
+          });
         });
       });
     });
