@@ -511,6 +511,75 @@ module.exports = function base(transformer) {
               done();
             });
           });
+
+          it('prevents the message from being written', function (done) {
+            primus.transform('outgoing', function () {
+              setTimeout(function () {
+                socket.end();
+                done();
+              }, 0);
+
+              return false;
+            });
+
+            primus.on('connection', function (spark) {
+              spark.on('outgoing::data', function () {
+                throw new Error('return false should prevent this emit');
+              });
+
+              spark.write('foo');
+            });
+
+            var socket = new Socket('http://localhost:'+ server.portnumber);
+          });
+        });
+
+        describe('incoming', function () {
+          it('rewrites the incoming message', function (done) {
+            primus.transform('incoming', function (data) {
+              expect(data).to.be.a('object');
+              expect(data.data).to.equal('foo');
+
+              data.data = {
+                message: 'foo',
+                meta: 'meta'
+              };
+            });
+
+            primus.on('connection', function (spark) {
+              spark.on('data', function (data) {
+                expect(data).to.be.a('object');
+                expect(data.meta).to.equal('meta');
+                expect(data.message).to.equal('foo');
+
+                spark.end();
+                done();
+              });
+            });
+
+            var socket = new Socket('http://localhost:'+ server.portnumber);
+            socket.write('foo');
+          });
+
+          it('prevents the message from being emitted', function (done) {
+            primus.transform('incoming', function (data) {
+              setTimeout(function () {
+                socket.end();
+                done();
+              }, 0);
+
+              return false;
+            });
+
+            primus.on('connection', function (spark) {
+              spark.on('data', function () {
+                throw new Error('return false should prevent this emit');
+              });
+            });
+
+            var socket = new Socket('http://localhost:'+ server.portnumber);
+            socket.write('foo');
+          });
         });
       });
     });
