@@ -59,13 +59,30 @@ Spark.prototype.initialise = function initialise() {
   // We've received new data from our client, decode and emit it.
   //
   spark.on('incoming::data', function message(raw) {
-    primus.decoder(raw, function decoding(err, packet) {
+    primus.decoder(raw, function decoding(err, data) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
       if (err) return spark.listeners('error').length && spark.emit('error', err);
-      spark.emit('data', packet, raw);
+
+      var transform, result, packet;
+      for (transform in primus.transformers.incoming) {
+        packet = { data: data };
+
+        if (false === primus.transformers.incoming[transform].call(spark, packet)) {
+          //
+          // When false is returned by an incoming transformer it means that's
+          // being handled by the transformer and we should not emit the `data`
+          // event.
+          //
+          return;
+        }
+
+        data = packet.data;
+      }
+
+      spark.emit('data', data, raw);
     });
   });
 
@@ -129,7 +146,25 @@ Spark.prototype.emits = function emits(event, parser) {
  * @api public
  */
 Spark.prototype.write = function write(data) {
-  var spark = this;
+  var primus = this.primus
+    , spark = this
+    , transform
+    , packet;
+
+  for (transform in primus.transformers.outgoing) {
+    packet = { data: data };
+
+    if (false === primus.transformers.outgoing[transform].call(spark, packet)) {
+      //
+      // When false is returned by an incoming transformer it means that's
+      // being handled by the transformer and we should not emit the `data`
+      // event.
+      //
+      return;
+    }
+
+    data = packet.data;
+  }
 
   spark.primus.encoder(data, function encoded(err, packet) {
     //

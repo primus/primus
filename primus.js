@@ -25,6 +25,10 @@ function Primus(url, options) {
   this.url = this.parse(url);             // Parse the url to a readable format.
   this.backoff = options.reconnect || {}; // Stores the backoff configuration.
   this.readyState = Primus.CLOSED;        // The readyState of the connection.
+  this.transformers = {                   // Message transformers.
+    outgoing: [],
+    incoming: []
+  };
 
   // Initialize a stream interface, if we have any.
   if (Stream) Stream.call(this);
@@ -113,14 +117,41 @@ Primus.prototype.initialise = function initalise(options) {
   });
 
   this.on('incoming::data', function message(raw) {
-    primus.decoder(raw, function decoding(err, packet) {
+    primus.decoder(raw, function decoding(err, data) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
       if (err) return primus.listeners('error').length && primus.emit('error', err);
-      if ('primus::server::close' === packet) return primus.emit('incoming::end', packet);
-      primus.emit('data', packet, raw);
+
+      //
+      // The server is closing the connection, forcefully disconnect so we don't
+      // reconnect again.
+      //
+      if ('primus::server::close' === data) {
+        return primus.emit('incoming::end', data);
+      }
+
+      var transform, result, packet;
+      for (transform in primus.transformers.incoming) {
+        packet = { data: data };
+
+        if (false === primus.transformers.incoming[transform].call(primus, packet)) {
+          //
+          // When false is returned by an incoming transformer it means that's
+          // being handled by the transformer and we should not emit the `data`
+          // event.
+          //
+          return;
+        }
+
+        data = packet.data;
+      }
+
+      //
+      // The transformers can
+      //
+      primus.emit('data', data, raw);
     });
   });
 
@@ -181,9 +212,26 @@ Primus.prototype.open = function open() {
  * @api public
  */
 Primus.prototype.write = function write(data) {
-  var primus = this;
+  var primus = this
+    , transform
+    , packet;
 
-  if (this.readyState === Primus.OPEN) {
+  if (Primus.OPEN === this.readyState) {
+    for (transform in primus.transformers.outgoing) {
+      packet = { data: data };
+
+      if (false === primus.transformers.outgoing[transform].call(primus, packet)) {
+        //
+        // When false is returned by an incoming transformer it means that's
+        // being handled by the transformer and we should not emit the `data`
+        // event.
+        //
+        return;
+      }
+
+      data = packet.data;
+    }
+
     this.encoder(data, function encoded(err, packet) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
@@ -391,6 +439,23 @@ Primus.prototype.emits = function emits(event, parser) {
       primus.emit('incoming::'+ event, data);
     }, 0);
   };
+};
+
+/**
+ * Register a new message transformer. This allows you to easily manipulate incoming
+ * and outgoing data which is particulairy handy for plugins that want to send
+ * meta data together with the messages.
+ *
+ * @param {String} type Incoming or outgoing
+ * @param {Function} fn A new message transformer.
+ * @api public
+ */
+Primus.prototype.transform = function transform(type, fn) {
+  if (!(type in this.transformers)) throw new Error('Invalid transformer type');
+  if (~this.transformers[type].indexOf(fn)) return this;
+
+  this.transformers[type].push(fn);
+  return this;
 };
 
 /**

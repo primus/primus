@@ -22,10 +22,14 @@ function Primus(server, options) {
   this.transformer = null;                // Reference to the real-time engine instance.
   this.encoder = null;                    // Shorthand to the parser's encoder.
   this.decoder = null;                    // Shorthand to the parser's decoder.
-  this.sparks = 0;                        // Increment id for connection ids
-  this.connected = 0;                     // Connection counter;
+  this.sparks = 0;                        // Increment id for connection ids.
+  this.connected = 0;                     // Connection counter.
   this.connections = Object.create(null); // Connection storage.
   this.ark = Object.create(null);         // Plugin storage.
+  this.transformers = {                   // Message transformers.
+    outgoing: [],
+    incoming: []
+  };
 
   this.server = server;
   this.pathname = options.pathname || '/primus';
@@ -244,6 +248,23 @@ Primus.prototype.parsers = function parsers(parser) {
 };
 
 /**
+ * Register a new message transformer. This allows you to easily manipulate incoming
+ * and outgoing data which is particulairy handy for plugins that want to send
+ * meta data together with the messages.
+ *
+ * @param {String} type Incoming or outgoing
+ * @param {Function} fn A new message transformer.
+ * @api public
+ */
+Primus.prototype.transform = function transform(type, fn) {
+  if (!(type in this.transformers)) throw new Error('Invalid transformer type');
+  if (~this.transformers[type].indexOf(fn)) return this;
+
+  this.transformers[type].push(fn);
+  return this;
+};
+
+/**
  * Generate a client library.
  *
  * @param {Boolean} nodejs Don't include the library, as we're running on Node.js.
@@ -331,6 +352,29 @@ Primus.prototype.save = function save(path, fn) {
 
 /**
  * Register a new Primus plugin.
+ *
+ * ```js
+ * primus.use('ack', {
+ *   //
+ *   // Only ran on the server.
+ *   //
+ *   server: function (primus, options) {
+ *      // do stuff
+ *   },
+ *
+ *   //
+ *   // Runs on the client, it's automatically bundled.
+ *   //
+ *   client: function (primus, options) {
+ *      // do client stuff
+ *   },
+ *
+ *   //
+ *   // Optional library that needs to be bundled on the client (should be a string)
+ *   //
+ *   library: ''
+ * });
+ * ```
  *
  * @param {String} name The name of the plugin.
  * @param {Object} energon The plugin that contains client and server extensions.
