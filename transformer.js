@@ -60,7 +60,8 @@ Transformer.prototype.log = function log(type) {
 Transformer.prototype.initialise = function initialise() {
   if (this.server) this.server();
 
-  var server = this.primus.server;
+  var server = this.primus.server
+    , transformer = this;
 
   server.listeners('request').map(this.on.bind(this, 'previous::request'));
   server.listeners('upgrade').map(this.on.bind(this, 'previous::upgrade'));
@@ -71,6 +72,13 @@ Transformer.prototype.initialise = function initialise() {
   //
   server.removeAllListeners('request');
   server.removeAllListeners('upgrade');
+
+  //
+  // Emit a close event.
+  //
+  server.on('close', function () {
+    transformer.emit('close');
+  });
 
   //
   // Start listening for incoming requests if we have a listener assigned to us.
