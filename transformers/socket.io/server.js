@@ -15,7 +15,7 @@ module.exports = function server() {
   //
   // Listen to upgrade requests.
   //
-  this.service = new Engine(this, {
+  var service = this.service = new Engine(this, {
     'resource': primus.pathname,
     'destroy upgrade': false,
     'browser client': false,

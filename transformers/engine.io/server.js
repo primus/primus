@@ -12,7 +12,7 @@ module.exports = function server() {
     , Spark = this.Spark
     , primus = this.primus;
 
-  this.service = new Engine();
+  var service = this.service = new Engine();
 
   //
   // We've received a new connection, create a new Spark. The Spark will
@@ -53,5 +53,8 @@ module.exports = function server() {
     };
 
     this.service.handleRequest(req, res);
+  }).on('close', function close() {
+    service.close();
+    if (service.ws) service.ws.close();
   });
 };

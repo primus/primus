@@ -14,7 +14,10 @@ module.exports = function server() {
     , primus = this.primus
     , Spark = this.Spark;
 
-  this.service = new WebSocketServer({ noServer: true, clientTracking: false });
+  var service = this.service = new WebSocketServer({
+    noServer: true,
+    clientTracking: false
+  });
 
   //
   // Listen to upgrade requests
@@ -36,5 +39,9 @@ module.exports = function server() {
       socket.on('close', spark.emits('end'));
       socket.on('message', spark.emits('data'));
     });
+  });
+
+  this.on('close', function close() {
+    service.close();
   });
 };
