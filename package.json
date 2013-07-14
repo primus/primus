@@ -4,8 +4,8 @@
   "description": "Primus is a simple abstraction around real-time frameworks. It allows you to easily switch between different frameworks without any code changes.",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.test.js')",
-    "browser": "./node_modules/.bin/testling ."
+    "integration": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.integration.js')",
+    "test": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.test.js')"
   },
   "repository": {
     "type": "git",
