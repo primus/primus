@@ -1,0 +1,51 @@
+describe('Plugin', function () {
+  'use strict';
+
+  var common = require('./common')
+    , Primus = common.Primus
+    , http = require('http')
+    , expect = common.expect;
+
+  it('works with this simple event emitter plugin', function (done) {
+    var server = http.createServer()
+      , primus = new Primus(server)
+      , port = common.port;
+
+    primus.use('emit', {
+      server: function (primus) {
+        primus.transform('incoming', function (packet) {
+          var data = packet.data;
+          if (!('object' === typeof data && 'event' in data && 'args' in data)) return;
+
+          this.emit.apply(this, [data.event].concat(data.args));
+          return false;
+        });
+      },
+
+      client: function (primus) {
+        primus.$emit = function trigger(event) {
+          return this.write({
+            event: event,
+            args: Array.prototype.slice.call(arguments, 1)
+          });
+        };
+      }
+    });
+
+    primus.on('connection', function (spark) {
+      spark.on('custom event', function (data) {
+        expect(data).to.equal('custom data');
+
+        spark.end();
+        server.close(done);
+      });
+    });
+
+    server.listen(port, function () {
+      var Socket = primus.Socket
+        , socket = new Socket('http://localhost:'+ port);
+
+      socket.$emit('custom event', 'custom data');
+    });
+  });
+});
