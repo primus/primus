@@ -44,6 +44,7 @@ npm install primus --save
   - [Extending the Spark/socket](#extending-the-spark--socket)
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
   - [Community Plugins](#community-plugins)
+- [Scaling](#scaling)
 - [Versioning](#versioning)
 - [License](#license)
 
@@ -737,6 +738,17 @@ see it be merged automatically.
 </dl>
 
 [Travis CI]: https://travis-ci.org/
+
+### Scaling
+
+Scaling Primus is as simple as sticking it behind a load balancer that supports
+sticky sessions and run multiple versions of your application. This is a vital
+feature that your load balancer needs to support. This ensures that the incoming
+requests always go back to the same server. If your load balancer does not
+support sticky sessions, get an other one. I highly recommend
+[HAProxy](http://haproxy.1wt.eu/). According to my own testing it the fastest
+and best proxy available that supports WebSockets. See
+https://github.com/observing/balancerbattle for more detailed information.
 
 ### Versioning
 
