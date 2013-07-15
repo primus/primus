@@ -41,9 +41,9 @@ npm install primus --save
   - [Socket.IO](#socketio)
 - [Transformer Inconsistencies](#transformer-inconsistencies)
 - [Plugins](#plugins)
-  - [Extending the Spark/socket](#extending-the-spark-socket)
+  - [Extending the Spark/socket](#extending-the-spark--socket)
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
-- [Community Plugins](#community-plugins)
+  - [Community Plugins](#community-plugins)
 - [Versioning](#versioning)
 - [License](#license)
 
@@ -713,7 +713,7 @@ primus.use('name', {
 });
 ```
 
-### Community Plugins
+#### Community Plugins
 
 These are plugins created by our amazing community. Do you have a module that
 you want to have listed here? Make sure it has test suite and runs on [Travis CI].
