@@ -40,8 +40,11 @@ npm install primus --save
   - [SockJS](#sockjs)
   - [Socket.IO](#socketio)
 - [Transformer Inconsistencies](#transformer-inconsistencies)
-- [Versioning](#versioning)
+- [Plugins](#plugins)
+  - [Extending the Spark/socket](#extending-the-spark-socket)
+  - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
 - [Community Plugins](#community-plugins)
+- [Versioning](#versioning)
 - [License](#license)
 
 ### Getting Started
@@ -600,6 +603,141 @@ of the transformer, we just `toLowerCase()` everything.
   The bug causes closed connections to say open. If you're experiencing this you
   can apply this [patch](http://github.com/3rd-Eden/engine.io/commit/0cf81270e9d5700).
 
+### Plugins
+
+Primus was build as low level interface where you can build your applications
+upon. At it's core, it's nothing more than something that passes messages back
+and forth between the client and server. To make it easier for developers to
+switch to Primus we've developed a simple but effective plugin system that
+allows you to extend primus's functionality.
+
+Plugins are added on the server side in the form of an `Object`:
+
+```js
+primus.use('name', {
+  server: function (primus, options) {},
+  client: function (primus, options) {},
+  library: 'client side library'
+});
+```
+
+The server function is only executed on the server side and receives 2
+arguments:
+
+1. A reference to the initialized primus server.
+2. The options that we're passed in to the `new Primus(server, { options })`
+   constructor. So the plugins can be configured through the same interface.
+
+The client receives the same arguments:
+
+1. A reference to the initialized primus client.
+2. The options that we're passed in the `new Primus(url, { options })`
+   constructor. So the plugin in configured through the same interface.
+
+The only thing you need to remember is that the client is stored in the library
+using `toString()` so it cannot have any references out side the client's
+closure. But luckly, there's a `library` property that will also be included on
+the client side when it's specified.
+
+#### Extending the Spark / Socket
+
+The server has a `.Spark` property that can be extended. This allows you to
+easily add new functionality to the socket. For example adding join room
+function would be as easy as:
+
+```js
+primus.use('rooms', {
+  server: function (primus) {
+    var Spark = primus.Spark;
+
+    Spark.prototype.join = function () {
+      // implement room functionality.
+    };
+  }
+});
+```
+
+#### Transforming and intercepting messages
+
+Intercepting and transforming messages in something that a lot of plugins
+require. When your building an `EventEmitter` plugin or something else you
+probably don't want the default `data` event to be emitted but your custom
+event. There are 2 different types of messages that can be transformed:
+
+1. `incoming` These messages are being received by the server.
+2. `outgoing` These messages are being send to the client.
+
+The transformer is available on both the client and the server and share, like
+you would have expected the same identical API. Adding a new transformer is
+relatively straight forward:
+
+```js
+primus.transform('incoming', function (packet) {
+  //
+  // The packet.data contains the actual message that either received or
+  // transformed.
+  //
+  
+  // This would transform all incoming messages to foo;
+  packet.data = 'foo';
+
+  // If you are handling the message and want to prevent the `data` event from
+  // happening, simply `return false` at the end of your function. No new
+  // transformers will be called, and the event won't be emitted.
+});
+```
+
+These transformations can easily be done in the plugins:
+
+```js
+primus.use('name', {
+  server: function (primus) {
+    primus.transform('outgoing', function (packet) {
+      packet.data = 'foo';
+    });
+
+    primus.transform('incoming', function (packet) {
+      if (packet.data === 'foo') packet.data = 'bar';
+    });
+  },
+
+  client: function (primus) {
+    primus.transform('outgoing', function (packet) {
+      packet.data = 'foo';
+    });
+
+    primus.transform('incoming', function (packet) {
+      if (packet.data === 'foo') packet.data = 'bar';
+    });
+  }
+});
+```
+
+### Community Plugins
+
+These are plugins created by our amazing community. Do you have a module that
+you want to have listed here? Make sure it has test suite and runs on [Travis CI].
+After that open a pull request where you added your module to this README and
+see it be merged automatically.
+
+<dl>
+  <dt><a href="http://github.com/cayasso/primus-rooms">primus-rooms</a></dt>
+  <dd>
+    A module that adds rooms capabilities to Primus. It's based on the rooms
+    implementation of Socket.IO.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/cayasso/primus-rooms">
+      <img src="https://travis-ci.org/cayasso/primus-rooms.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-rooms">
+      <img src="https://badge.fury.io/js/primus-rooms.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+[Travis CI]: https://travis-ci.org/
+
 ### Versioning
 
 All `0.x.x` releases should be considered unstable and not ready for production.
@@ -628,32 +766,6 @@ semver as closely as possible but this is how we use our version numbering:
     </p>
   </dd>
 </dl>
-
-### Community Plugins
-
-These are plugins created by our amazing community. Do you have a module that
-you want to have listed here? Make sure it has test suite and runs on [Travis CI].
-After that open a pull request where you added your module to this README and
-see it be merged automatically.
-
-<dl>
-  <dt><a href="http://github.com/cayasso/primus-rooms">primus-rooms</a></dt>
-  <dd>
-    A module that adds rooms capabilities to Primus. It's based on the rooms
-    implementation of Socket.IO.
-  </dd>
-  <dd>
-    <strong>Build status</strong>
-    <a href="https://travis-ci.org/cayasso/primus-rooms">
-      <img src="https://travis-ci.org/cayasso/primus-rooms.png?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-rooms">
-      <img src="https://badge.fury.io/js/primus-rooms.png" alt="NPM version" />
-    </a>
-  </dd>
-</dl>
-
-[Travis CI]: https://travis-ci.org/
 
 ### License
 
