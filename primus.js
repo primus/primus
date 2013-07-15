@@ -1,6 +1,123 @@
 'use strict';
 
 /**
+ * Minimal EventEmitter interface that is molded against the Node.js
+ * EventEmitter interface.
+ *
+ * @constructor
+ * @api public
+ */
+function EventEmitter() {
+  this._events = {};
+}
+
+/**
+ * Return a list of assigned event listeners.
+ *
+ * @param {String} event The events that should be listed.
+ * @returns {Array}
+ * @api public
+ */
+EventEmitter.prototype.listeners = function listeners(event) {
+  return (this._events[event] || []).slice(0);
+};
+
+/**
+ * Emit an event to all registered event listeners.
+ *
+ * @param {String} event The name of the event.
+ * @returns {Boolean} Indication if we've emitted an event.
+ * @api public
+ */
+EventEmitter.prototype.emit = function emit(event) {
+  if (!(event in this._events)) return false;
+
+  var args = Array.prototype.slice.call(arguments, 1)
+    , length = this._events[event].length
+    , i = 0;
+
+  for (; i < length; i++) {
+    this._events[event][i].apply(this, args);
+  }
+
+  return true;
+};
+
+/**
+ * Register a new EventListener for the given event.
+ *
+ * @param {String} event Name of the event.
+ * @param {Functon} fn Callback function.
+ * @api public
+ */
+EventEmitter.prototype.on = function on(event, fn) {
+  if (!(event in this._events)) this._events[event] = [];
+  this._events[event].push(fn);
+
+  return this;
+};
+
+/**
+ * Add an EventListener that's only called once.
+ *
+ * @param {String} event Name of the event.
+ * @param {Function} fn Callback function.
+ * @api public
+ */
+EventEmitter.prototype.once = function once(event, fn) {
+  var ee = this;
+
+  function eject() {
+    ee.removeListener(event, eject);
+    fn.apply(ee, arguments);
+  }
+
+  eject.fn = fn;
+  return this.on(event, eject);
+};
+
+/**
+ * Remove event listeners.
+ *
+ * @param {String} event The event we want to remove.
+ * @param {Function} fn The listener that we need to find.
+ * @api public
+ */
+EventEmitter.prototype.removeListener = function removeListener(event, fn) {
+  if (!this._events || !(event in this._events)) return this;
+
+  var listeners = this._events[event]
+    , events = [];
+
+  for (var i = 0, length = listeners.length; i < length; i++) {
+    if (!fn || listeners[i] === fn || listeners[i].fn === fn) continue;
+
+    events.push(listeners[i]);
+  }
+
+  //
+  // Reset the array, or remove it completely if we have no more listeners.
+  //
+  if (events.length) this._events[event] = events;
+  else delete this._events[event];
+
+  return this;
+};
+
+/**
+ * Remove all listeners or only the listeners for the specified event.
+ *
+ * @param {String} event The event want to remove all listeners for.
+ * @api public
+ */
+EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
+  if (event) delete this._events[event];
+  else this._events = {};
+
+  return this;
+};
+
+/**
  * Primus in a real-time library agnostic framework for establishing real-time
  * connections with servers.
  *
@@ -19,7 +136,6 @@ function Primus(url, options) {
   options = options || {};
 
   this.buffer = [];                       // Stores premature send data.
-  this._events = {};                      // Stores the events.
   this.writable = true;                   // Silly stream compatibility.
   this.readable = true;                   // Silly stream compatibility.
   this.url = this.parse(url);             // Parse the url to a readable format.
@@ -32,6 +148,7 @@ function Primus(url, options) {
 
   // Initialize a stream interface, if we have any.
   if (Stream) Stream.call(this);
+  else EventEmitter.call(this);
 
   // Force the use of WebSockets, even when we've detected some potential
   // broken WebSocket implementation.
@@ -53,6 +170,13 @@ try {
 
   Primus.prototype = new Stream();
 } catch (e) {
+  Primus.prototype = new EventEmitter();
+
+  //
+  // In the browsers we can leverage the DOM to parse the URL for us. It will
+  // automatically default to host of the current server when we supply it path
+  // etc.
+  //
   parse = function parse(url) {
     var a = document.createElement('a');
     a.href = url;
@@ -342,80 +466,6 @@ Primus.prototype.uri = function uri(protocol, querystring) {
 };
 
 /**
- * Return a list of assigned event listeners.
- *
- * @param {String} event The events that should be listed.
- * @returns {Array}
- * @api public
- */
-Primus.prototype.listeners = function listeners(event) {
-  return (this._events[event] || []).slice(0);
-};
-
-/**
- * Emit an event to all registered event listeners.
- *
- * @param {String} event The name of the event.
- * @returns {Boolean} Indication if we've emitted an event.
- * @api public
- */
-Primus.prototype.emit = function emit(event) {
-  if (!(event in this._events)) return false;
-
-  var args = Array.prototype.slice.call(arguments, 1)
-    , length = this._events[event].length
-    , i = 0;
-
-  for (; i < length; i++) {
-    this._events[event][i].apply(this, args);
-  }
-
-  return true;
-};
-
-/**
- * Register a new EventListener for the given event.
- *
- * @param {String} event Name of the event.
- * @param {Functon} fn Callback function.
- * @api public
- */
-Primus.prototype.on = function on(event, fn) {
-  if (!(event in this._events)) this._events[event] = [];
-  this._events[event].push(fn);
-
-  return this;
-};
-
-/**
- * Remove event listeners.
- *
- * @param {String} event The event we want to remove.
- * @param {Function} fn The listener that we need to find.
- * @api public
- */
-Primus.prototype.removeListener = function removeListener(event, fn) {
-  if (!this._events || !(event in this._events)) return this;
-
-  var listeners = this._events[event]
-    , events = [];
-
-  for (var i = 0, length = listeners.length; i < length; i++) {
-    if (!fn || listeners[i] === fn) continue;
-
-    events.push(listeners[i]);
-  }
-
-  //
-  // Reset the array, or remove it completely if we have no more listeners.
-  //
-  if (events.length) this._events[event] = events;
-  else delete this._events[event];
-
-  return this;
-};
-
-/**
  * Simple emit wrapper that returns a function that emits an event once it's
  * called. This makes it easier for transports to emit specific events. The
  * scope of this function is limited as it will only emit one single argument.
@@ -468,6 +518,11 @@ Primus.prototype.transform = function transform(type, fn) {
 Primus.connect = function connect(url, options) {
   return new Primus(url, options);
 };
+
+//
+// Expose the EventEmitter so it can be re-used by wrapping libraries.
+//
+Primus.EventEmitter = EventEmitter;
 
 //
 // These libraries are automatically are automatically inserted at the
