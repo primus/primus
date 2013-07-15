@@ -48,4 +48,30 @@ describe('Plugin', function () {
       socket.$emit('custom event', 'custom data');
     });
   });
+
+  it('extends the Spark with overriding the global spark', function (done) {
+    var server = http.createServer()
+      , primus = new Primus(server)
+      , port = common.port;
+
+    primus.use('spark', {
+      server: function (primus) {
+        var Spark = primus.Spark;
+
+        Spark.prototype.join = function join() {};
+        expect(Spark.prototype.join).to.not.equal(Primus.Spark.prototype.join);
+      }
+    });
+
+    primus.on('connection', function (spark) {
+      expect(spark.join).to.be.a('function');
+      spark.end();
+      server.close(done);
+    });
+
+    server.listen(port, function () {
+      var Socket = primus.Socket
+        , socket = new Socket('http://localhost:'+ port);
+    });
+  });
 });

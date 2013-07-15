@@ -18,6 +18,7 @@ function Primus(server, options) {
   if (!(this instanceof Primus)) return new Primus(server, options);
 
   options = options || {};
+  var primus = this;
 
   this.transformer = null;                // Reference to the real-time engine instance.
   this.encoder = null;                    // Shorthand to the parser's encoder.
@@ -43,8 +44,26 @@ function Primus(server, options) {
     pathname: this.pathname
   };
 
+  //
+  // Create a pre-bound Spark constructor. Doing a Spark.bind(Spark, this) doesn't
+  // work as we cannot extend the constructor of it anymore. The added benefit of
+  // approach listed below is that the prototype extensions are only applied to
+  // the Spark of this Primus instance.
+  //
+  this.Spark = function Sparky(headers, address, query, id) {
+    Spark.call(this, primus, headers, address, query, id);
+  };
+
+  this.Spark.prototype = Object.create(Spark.prototype, {
+    constructor: {
+      value: this.Spark,
+      writable: true,
+      enumerable: false,
+      configurable: true
+    }
+  });
+
   this.parsers(options.parser);
-  this.Spark = Spark.bind(Spark, this);
   this.initialise(options.transformer || options.transport, options);
 }
 
@@ -258,6 +277,7 @@ Primus.prototype.parsers = function parsers(parser) {
  */
 Primus.prototype.transform = function transform(type, fn) {
   if (!(type in this.transformers)) throw new Error('Invalid transformer type');
+  if (~this.transformers[type].indexOf(fn)) return this;
 
   this.transformers[type].push(fn);
   return this;
