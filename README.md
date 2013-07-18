@@ -320,9 +320,23 @@ server. This all happens transparently and it's just a way for you to know when
 these reconnects are actually happening.
 
 ```js
-primus.on('reconnecting', function () {
-  console.log('reconnecting');
-})
+primus.on('reconnect', function () {
+  console.log('Reconnect attempt started');
+});
+```
+
+### primus.on('reconnecting')
+
+Looks a lot like the `reconnect` event mentioned above, but it's emitted when
+we've detected that connection went/is down and we're going to start a reconnect
+operation. This event would be ideal to update your application's UI that you're
+connection is down and you are trying to reconnect in x seconds.
+
+```js
+primus.on('reconnect', function (opts) {
+  console.log('Reconnecting in %d ms', opts.timeout);
+  console.log('This is attempt %d out of %d', opts.attempt, opts.retries);
+});
 ```
 
 #### primus.on('end')
@@ -333,7 +347,7 @@ reconnecting. But it's also emitted when the server closes the connection.
 
 ```js
 primus.on('end', function () {
-  console.log('connection closed');
+  console.log('Connection closed');
 });
 ```
 

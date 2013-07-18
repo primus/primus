@@ -140,6 +140,7 @@ function Primus(url, options) {
   this.readable = true;                   // Silly stream compatibility.
   this.url = this.parse(url);             // Parse the url to a readable format.
   this.backoff = options.reconnect || {}; // Stores the backoff configuration.
+  this.attempt = null;                    // Current backoff attempt.
   this.readyState = Primus.CLOSED;        // The readyState of the connection.
   this.transformers = {                   // Message transformers.
     outgoing: [],
@@ -223,11 +224,13 @@ Primus.prototype.ark = {};
 Primus.prototype.initialise = function initalise(options) {
   var primus = this;
 
-  this.on('outgoing::open', function opening() {
+  primus.on('outgoing::open', function opening() {
+    if (primus.attempt) primus.attempt = null;
+
     primus.readyState = Primus.OPENING;
   });
 
-  this.on('incoming::open', function opened() {
+  primus.on('incoming::open', function opened() {
     primus.readyState = Primus.OPEN;
     primus.emit('open');
 
@@ -240,7 +243,7 @@ Primus.prototype.initialise = function initalise(options) {
     }
   });
 
-  this.on('incoming::data', function message(raw) {
+  primus.on('incoming::data', function message(raw) {
     primus.decoder(raw, function decoding(err, data) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
@@ -279,7 +282,7 @@ Primus.prototype.initialise = function initalise(options) {
     });
   });
 
-  this.on('incoming::end', function end(intentional) {
+  primus.on('incoming::end', function end(intentional) {
     if (primus.readyState === Primus.CLOSED) return;
     primus.readyState = Primus.CLOSED;
 
@@ -290,8 +293,12 @@ Primus.prototype.initialise = function initalise(options) {
     //
     if ('primus::server::close' === intentional) return primus.emit('end');
 
-    this.reconnect(function reconnect(fail, backoff) {
-      primus.backoff = backoff; // Save the opts again of this backoff.
+    primus.attempt = primus.attempt || primus.clone(primus.backoff);
+
+    primus.reconnect(function reconnect(fail, backoff) {
+      // Save the opts again of this backoff, so they re-used.
+      primus.attempt = backoff;
+
       if (fail) return primus.emit('end');
 
       //
@@ -299,22 +306,22 @@ Primus.prototype.initialise = function initalise(options) {
       //
       primus.emit('reconnect', backoff);
       primus.emit('outgoing::reconnect');
-    }, primus.backoff);
+    }, primus.attempt);
   });
 
   //
   // Setup the real-time client.
   //
-  this.client();
+  primus.client();
 
   //
   // Process the potential plugins.
   //
-  for (var plugin in this.ark) {
-    this.ark[plugin].call(this, this, options);
+  for (var plugin in primus.ark) {
+    primus.ark[plugin].call(primus, primus, options);
   }
 
-  return this;
+  return primus;
 };
 
 /**
@@ -416,16 +423,24 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
   // Prevent duplicate backoff attempts.
   opts.backoff = true;
 
+  //
   // Calculate the timeout, but make it randomly so we don't retry connections
   // at the same interval and defeat the purpose. This exponential backoff is
   // based on the work of:
   //
   // http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
+  //
   opts.timeout = opts.attempt !== 1
     ? Math.min(Math.round(
         (Math.random() * 1) * opts.minDelay * Math.pow(opts.factor, opts.attempt)
       ), opts.maxDelay)
     : opts.minDelay;
+
+  //
+  // Emit a `reconnecting` event with current reconnect options. This allows
+  // them to update the UI and provide their users with feedback.
+  //
+  this.emit('reconnecting', opts);
 
   setTimeout(function delay() {
     opts.backoff = false;
@@ -433,6 +448,24 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
   }, opts.timeout);
 
   return this;
+};
+
+/**
+ * Create a shallow clone of a given object.
+ *
+ * @param {Object} obj The object that needs to be cloned.
+ * @returns {Object} Copy.
+ * @api private
+ */
+Primus.prototype.clone = function clone(obj) {
+  var copy = {}
+    , key;
+
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) copy[key] = obj[key];
+  }
+
+  return copy;
 };
 
 /**
