@@ -225,12 +225,12 @@ Primus.prototype.initialise = function initalise(options) {
   var primus = this;
 
   primus.on('outgoing::open', function opening() {
-    if (primus.attempt) primus.attempt = null;
-
     primus.readyState = Primus.OPENING;
   });
 
   primus.on('incoming::open', function opened() {
+    if (primus.attempt) primus.attempt = null;
+
     primus.readyState = Primus.OPEN;
     primus.emit('open');
 
