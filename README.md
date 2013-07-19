@@ -102,7 +102,7 @@ primus.save(__dirname +'/primus.js');
 ```
 
 This will store the compiled library in your current directory. If you want to
-save it asyncronously, you can supply the method with an callback method:
+save it asynchronously, you can supply the method with an callback method:
 
 ```js
 primus.save(__dirname +'/primus.js', function save(err) {
@@ -121,7 +121,7 @@ page add:
 ```
 
 If you've configured a different `pathname` in the options deploy on a different
-domain then your primus server you would ofcourse need to update the `src`
+domain then your primus server you would of course need to update the `src`
 attribute to the correct location. It's always available at:
 
 ```
@@ -140,7 +140,7 @@ primus.on('connection', function (spark) {
 Disconnects are announced using a `disconnection` event:
 
 ```js
-primus.on('disconnection', funciton (spark) {
+primus.on('disconnection', function (spark) {
   // the spark that disconnected
 });
 ```
@@ -168,7 +168,7 @@ the address of the connecting client and not the ip address of your proxy.
 The `spark.query` contains the query string you used to connect to server. It's
 parsed to a object. Please note that this is not available for all supported
 transformers, but it's proven to be to useful to not implement it because one
-silly tranformer refuses to support it. Yes.. I'm looking at you,
+silly transformer refuses to support it. Yes.. I'm looking at you,
 browserchannel.
 
 #### spark.id
@@ -228,7 +228,7 @@ primus.on('connection', function (spark) {
   console.log('connection id', spark.id);
 
   spark.on('data', function (data) {
-    console.log('recieved data from the client', data);
+    console.log('received data from the client', data);
 
     if ('foo' !== data.secrethandshake) spark.end();
     spark.write({ foo: 'bar' });
@@ -309,7 +309,7 @@ a message or we failed to create a connection.
 
 ```js
 primus.on('error', function error(err) {
-  console.error('Something horrible has happend', err, err.message);
+  console.error('Something horrible has happened', err, err.message);
 });
 ```
 
@@ -392,7 +392,7 @@ want to read http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distribute
 var primus = Primus.connect(url);
 
 primus.on('data', function (message) {
-  console.log('recieved a message', message);
+  console.log('received a message', message);
 
   primus.write({ echo: message });
 });
@@ -651,7 +651,7 @@ The client receives the same arguments:
 
 The only thing you need to remember is that the client is stored in the library
 using `toString()` so it cannot have any references out side the client's
-closure. But luckly, there's a `library` property that will also be included on
+closure. But luckily, there's a `library` property that will also be included on
 the client side when it's specified.
 
 #### Extending the Spark / Socket
@@ -767,7 +767,7 @@ https://github.com/observing/balancerbattle for more detailed information.
 ### Versioning
 
 All `0.x.x` releases should be considered unstable and not ready for production.
-The version number is layed out as: `major.minor.patch` and tries to follow
+The version number is laid out as: `major.minor.patch` and tries to follow
 semver as closely as possible but this is how we use our version numbering:
 
 <dl>
@@ -781,7 +781,7 @@ semver as closely as possible but this is how we use our version numbering:
   <dt>minor</dt>
   <dd>
     <p>
-      New features are added or a big change has happend with one of the
+      New features are added or a big change has happened with one of the
       real-time libraries that we've supporting.
     </p>
   </dd>
