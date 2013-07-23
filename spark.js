@@ -1,7 +1,9 @@
 'use strict';
 
 var parse = require('querystring').parse
-  , forwarded = require('./forwarded');
+  , forwarded = require('./forwarded')
+  , u2028 = /\u2028/g
+  , u2029 = /\u2029/g;
 
 /**
  * The Spark is an indefinable, indescribable energy or soul of a transformer
@@ -185,6 +187,18 @@ Spark.prototype._write = function _write(data) {
     // want to throw here as listening to errors should be optional.
     //
     if (err) return spark.listeners('error').length && spark.emit('error', err);
+    if (!packet) return;
+
+    //
+    // Hack 1: \u2028 and \u2029 are allowed inside string in JSON. But JavaScript
+    // defines them as newline separators. Because no literal newlines are allowed
+    // in a string this causes a ParseError. We work around this issue by replacing
+    // these characters with a properly escaped version for those chars. This can
+    // cause errors with JSONP requests or if the string is just evaluated.
+    //
+    //
+    if (~packet.indexOf('\u2028')) packet = packet.replace(u2028, '\\u2028');
+    if (~packet.indexOf('\u2029')) packet = packet.replace(u2029, '\\u2029');
     spark.emit('outgoing::data', packet);
   });
 };
