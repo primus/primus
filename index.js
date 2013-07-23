@@ -27,6 +27,7 @@ function Primus(server, options) {
   this.connected = 0;                     // Connection counter.
   this.connections = Object.create(null); // Connection storage.
   this.ark = Object.create(null);         // Plugin storage.
+  this.options = options;                 // The configuration.
   this.transformers = {                   // Message transformers.
     outgoing: [],
     incoming: []
@@ -200,16 +201,7 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
   // attach listeners.
   //
   process.nextTick(function tock() {
-    var name, plugin;
-
-    for (name in primus.ark) {
-      plugin = primus.ark[name];
-
-      if (!plugin.server) continue;
-      plugin.server.call(primus, primus, options);
-    }
-
-    primus.emit('initialised', primus.transformer, primus.parser);
+    primus.emit('initialised', primus.transformer, primus.parser, options);
   });
 };
 
@@ -419,6 +411,9 @@ Primus.prototype.use = function use(name, energon) {
   if (name in this.ark) throw new Error('The plugin name was already defined');
 
   this.ark[name] = energon;
+  if (!energon.server) return this;
+
+  energon.server.call(this, this, this.options);
   return this;
 };
 

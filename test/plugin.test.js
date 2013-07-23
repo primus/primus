@@ -74,4 +74,20 @@ describe('Plugin', function () {
         , socket = new Socket('http://localhost:'+ port);
     });
   });
+
+  it('can instantly modify the prototype', function () {
+    var server = http.createServer()
+      , primus = new Primus(server)
+      , port = common.port;
+
+    expect(primus.channel).to.be.a('undefined');
+
+    primus.use('spark', {
+      server: function (primus) {
+        primus.channel = function channel() {};
+      }
+    });
+
+    expect(primus.channel).to.be.a('function');
+  });
 });
