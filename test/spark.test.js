@@ -164,6 +164,23 @@ describe('Spark', function () {
       expect(spark.write(data)).to.equal(true);
     });
 
+    it('escapes the data', function (done) {
+      var spark = new primus.Spark()
+        , data = ['\u2028\u2029'];
+
+      spark.on('outgoing::data', function (msg) {
+        expect(msg).to.be.a('string');
+        expect(msg).to.not.equal(JSON.stringify(data));
+        expect(msg).to.equal('["\\u2028\\u2029"]');
+
+        done();
+      }).on('error', function (err) {
+        throw err;
+      });
+
+      expect(spark.write(data)).to.equal(true);
+    });
+
     it('emits an error when it cannot encode the data', function (done) {
       var spark = new primus.Spark()
         , data = { foo: 'bar' };
