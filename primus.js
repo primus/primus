@@ -559,7 +559,7 @@ Primus.EventEmitter = EventEmitter;
 
 //
 // These libraries are automatically are automatically inserted at the
-// serverside using the Primus#library method.
+// server-side using the Primus#library method.
 //
 Primus.prototype.pathname = null; // @import {primus::pathname};
 Primus.prototype.client = null; // @import {primus::transport};
@@ -567,12 +567,48 @@ Primus.prototype.encoder = null; // @import {primus::encoder};
 Primus.prototype.decoder = null; // @import {primus::decoder};
 Primus.prototype.version = null; // @import {primus::version};
 
+//
+// Hack 1: \u2028 and \u2029 are allowed inside string in JSON. But JavaScript
+// defines them as newline separators. Because no literal newlines are allowed
+// in a string this causes a ParseError. We work around this issue by replacing
+// these characters with a properly escaped version for those chars. This can
+// cause errors with JSONP requests or if the string is just evaluated.
+//
+// This could have been solved by replacing the data during the "outgoing::data"
+// event. But as it affects the JSON encoding in general i've opted for a global
+// patch instead so all JSON.stringify operations are save.
+//
+if (
+    'object' === typeof JSON
+ && 'function' === typeof JSON.stringify
+ && JSON.stringify(['\u2028\u2029']) === '["\u2028\u2029"]'
+) {
+  JSON.stringify = function replace(stringify) {
+    var u2028 = /\u2028/g
+      , u2029 = /\u2029/g;
+
+    return function patched(value, replacer, spaces) {
+      var result = stringify.call(this, value, replacer, spaces);
+
+      //
+      // Replace the bad chars.
+      //
+      if (result) {
+        if (~result.indexOf('\u2028')) result = result.replace(u2028, '\\u2028');
+        if (~result.indexOf('\u2029')) result = result.replace(u2029, '\\u2029');
+      }
+
+      return result;
+    };
+  }(JSON.stringify);
+}
+
 if (
      'undefined' !== typeof document
   && 'undefined' !== typeof navigator
 ) {
   //
-  // Hack 1: If you press ESC in FireFox it will close all active connections.
+  // Hack 2: If you press ESC in FireFox it will close all active connections.
   // Normally this makes sense, when your page is still loading. But versions
   // before FireFox 22 will close all connections including WebSocket connections
   // after page load. One way to prevent this is to do a `preventDefault()` and
@@ -589,7 +625,7 @@ if (
   }
 
   //
-  // Hack 2: This is a Mac/Apple bug only, when you're behind a reverse proxy or
+  // Hack 3: This is a Mac/Apple bug only, when you're behind a reverse proxy or
   // have you network settings set to `automatic proxy discovery` the safari
   // browser will crash when the WebSocket constructor is initialised. There is
   // no way to detect the usage of these proxies available in JavaScript so we
