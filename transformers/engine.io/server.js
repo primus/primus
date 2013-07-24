@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * Minimum viable WebSocket server for Node.js that works through the primus
+ * Minimum viable Engine.IO server for Node.js that works through the primus
  * interface.
  *
  * @runat server
