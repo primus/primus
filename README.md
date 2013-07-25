@@ -751,6 +751,36 @@ see it be merged automatically.
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="http://github.com/cayasso/primus-multiplex">primus-multiplex</a></dt>
+  <dd>
+    A module that adds multiplexing capabilities to Primus.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/cayasso/primus-multiplex">
+      <img src="https://travis-ci.org/cayasso/primus-multiplex.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-multiplex">
+      <img src="https://badge.fury.io/js/primus-multiplex.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/cayasso/primus-emitter">primus-emitter</a></dt>
+  <dd>
+    A module that adds emitter capabilities to Primus.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/cayasso/primus-emitter">
+      <img src="https://travis-ci.org/cayasso/primus-emitter.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-emitter">
+      <img src="https://badge.fury.io/js/primus-emitter.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
 [Travis CI]: https://travis-ci.org/
 
 ### Scaling
