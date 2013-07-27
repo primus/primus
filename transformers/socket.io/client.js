@@ -2,7 +2,7 @@
 /*globals io*/
 
 /**
- * Minimum viable WebSocket client. This function is stringified and written in
+ * Minimum viable Socket.IO client. This function is stringified and written in
  * to our client side library.
  *
  * @runat client
@@ -13,7 +13,7 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available Socket.io constructor.
+  // Selects an available Socket.IO constructor.
   //
   var factory = (function factory() {
     if ('undefined' !== typeof io && io.connect) return io.connect;
@@ -26,14 +26,16 @@ module.exports = function client() {
   if (!factory) return this.emit('error', new Error('No Socket.IO client factory'));
 
   //
-  // Connect to the given url.
+  // Connect to the given URL.
   //
   primus.on('outgoing::open', function open() {
     if (socket) socket.disconnect();
 
     //
-    // We need to remove the pathname here as socket.io will assume that we want
-    // to connect to a namespace instead.
+    // We need to remove the pathname here as Socket.IO will assume that we want
+    // to connect to a namespace instead. The name spaces in Socket.IO are known
+    // source of issues and cluster failure so we want to do our best in
+    // avoiding them.
     //
     socket = factory(primus.uri('http', true).replace(primus.pathname.slice(1), ''), {
       'resource': primus.pathname.slice(1),
@@ -46,6 +48,7 @@ module.exports = function client() {
     //
     socket.on('connect', primus.emits('open'));
     socket.on('connect_failed', primus.emits('error'));
+    socket.on('error', primus.emits('error'));
     socket.on('message', primus.emits('data'));
     socket.on('disconnect', primus.emits('end', function parser(kind) {
       return kind === 'booted' ? 'primus::server::close' : false;
