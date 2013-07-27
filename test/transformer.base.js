@@ -5,42 +5,31 @@ module.exports = function base(transformer) {
     var common = require('./common')
       , request = common.request
       , Primus = common.Primus
-      , http = require('http')
       , expect = common.expect
+      , create = common.create
+      , destroy
       , Socket
       , server
       , primus;
 
     beforeEach(function beforeEach(done) {
-      server = http.createServer(function (req, res) {
-        console.error('Uncaught request', req.url);
-        if (req.url !== '/nothrow') throw new Error('I should never be called');
+      var services = create(transformer, done);
 
-        res.end('original listener');
-      });
-
-      primus = new Primus(server, { transformer: transformer });
-      Socket = primus.Socket;
-
-      primus.on('connection', function (spark) {
-        spark.on('data', function data(packet) {
-          if (packet.echo) spark.write(packet.echo);
-          if (packet.pipe) require('fs').createReadStream(__filename).pipe(spark, {
-            autoClose: false
-          });
-        });
-      });
-
-      server.portnumber = common.port;
-      server.listen(server.portnumber, done);
+      destroy = services.destroy;
+      Socket = services.Socket;
+      server = services.server;
+      primus = services.primus;
     });
 
     afterEach(function afterEach(done) {
+      server.close(done);
+
       primus.forEach(function (spark) {
         spark.end();
       });
 
-      server.close(done);
+      try { destroy(); }
+      catch (e) {}
     });
 
     describe('.Socket', function () {
@@ -57,10 +46,22 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should not throw an error when we connect to a dead server', function (done) {
+        var socket = new Socket('http://localhost:1024');
+
+        socket.on('error', function () {
+          done();
+        });
+      });
+
       it('should change readyStates', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
-        expect(socket.readyState).to.equal(Socket.OPENING);
+        expect(socket.readyState).to.equal(Socket.CLOSED);
+
+        setTimeout(function () {
+          expect(socket.readyState).to.equal(Socket.OPENING);
+        }, 0);
 
         socket.on('open', function () {
           expect(socket.readyState).to.equal(Socket.OPEN);
@@ -212,6 +213,50 @@ module.exports = function base(transformer) {
           });
 
           done();
+        });
+      });
+
+      it('shoud reset the reconnect details after a succesful reconnect', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber, {
+          reconnect: {
+            minDelay: 100,
+            maxDelay: 2000
+          }
+        });
+
+        expect(!socket.attempt).to.equal(true);
+        this.timeout(5000);
+
+        socket.once('reconnect', function () {
+          expect(!!socket.attempt).to.equal(true);
+          expect(socket.attempt.attempt).to.be.above(0);
+          expect(socket.attempt.minDelay).to.equal(100);
+          expect(socket.attempt.maxDelay).to.equal(2000);
+          expect(socket.attempt.timeout).to.be.below(2000);
+        });
+
+        socket.once('open', function () {
+          try { server.close(); destroy(); }
+          catch (e) { return done(e); }
+
+          setTimeout(function () {
+            var services = create(transformer, function () {}, server.portnumber);
+
+            destroy = services.destroy;
+            Socket = services.Socket;
+            server = services.server;
+            primus = services.primus;
+          }, 100);
+
+          socket.once('open', function () {
+            socket.removeAllListeners('end');
+            socket.end();
+            done();
+          });
+        });
+
+        socket.on('end', function () {
+          done(new Error('I shouldnt end'));
         });
       });
 
