@@ -239,6 +239,31 @@ Primus.prototype.ark = {};
 Primus.prototype.initialise = function initalise(options) {
   var primus = this;
 
+  /**
+   * Start a new reconnect procedure.
+   *
+   * @api private
+   */
+  function reconnect() {
+    primus.attempt = primus.attempt || primus.clone(primus.backoff);
+
+    primus.reconnect(function reconnect(fail, backoff) {
+      // Save the opts again of this back off, so they re-used.
+      primus.attempt = backoff;
+
+      if (fail) {
+        primus.attempt = null;
+        return primus.emit('end');
+      }
+
+      //
+      // Try to re-open the connection again.
+      //
+      primus.emit('reconnect', backoff);
+      primus.emit('outgoing::reconnect');
+    }, primus.attempt);
+  }
+
   primus.on('outgoing::open', function opening() {
     primus.readyState = Primus.OPENING;
   });
@@ -259,6 +284,12 @@ Primus.prototype.initialise = function initalise(options) {
   });
 
   primus.on('incoming::error', function error(e) {
+    //
+    // We're still doing a reconnect attempt, it could be that we failed to
+    // connect because the server was down. Failing connect attempts should
+    // always emit an `error` event instead of a `open` event.
+    //
+    if (primus.attempt) return reconnect();
     if (primus.listeners('error').length) primus.emit('error', e);
   });
 
@@ -302,7 +333,7 @@ Primus.prototype.initialise = function initalise(options) {
   });
 
   primus.on('incoming::end', function end(intentional) {
-    if (primus.readyState === Primus.CLOSED) return;
+    if (primus.readyState !== Primus.OPEN) return;
     primus.readyState = Primus.CLOSED;
 
     //
@@ -310,22 +341,15 @@ Primus.prototype.initialise = function initalise(options) {
     // reason why it closed etc. we should explicitly check if WE send an
     // intentional message.
     //
-    if ('primus::server::close' === intentional) return primus.emit('end');
+    if ('primus::server::close' === intentional) {
+      return primus.emit('end');
+    }
 
-    primus.attempt = primus.attempt || primus.clone(primus.backoff);
-
-    primus.reconnect(function reconnect(fail, backoff) {
-      // Save the opts again of this back off, so they re-used.
-      primus.attempt = backoff;
-
-      if (fail) return primus.emit('end');
-
-      //
-      // Try to re-open the connection again.
-      //
-      primus.emit('reconnect', backoff);
-      primus.emit('outgoing::reconnect');
-    }, primus.attempt);
+    //
+    // The disconnect was unintentional, probably because the server shut down.
+    // So we should just start a reconnect procedure.
+    //
+    reconnect();
   });
 
   //
