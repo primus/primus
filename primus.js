@@ -123,10 +123,10 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
  *
  * Options:
  * - reconnect, configuration for the reconnect process.
- * - websockets, force the use of websockets, even when you should avoid them.
+ * - websockets, force the use of WebSockets, even when you should avoid them.
  *
  * @constructor
- * @param {String} url The url of your server.
+ * @param {String} url The URL of your server.
  * @param {Object} options The configuration.
  * @api private
  */
@@ -134,28 +134,43 @@ function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url);
 
   options = options || {};
+  var primus = this;
 
   this.buffer = [];                       // Stores premature send data.
   this.writable = true;                   // Silly stream compatibility.
   this.readable = true;                   // Silly stream compatibility.
-  this.url = this.parse(url);             // Parse the url to a readable format.
-  this.backoff = options.reconnect || {}; // Stores the backoff configuration.
-  this.attempt = null;                    // Current backoff attempt.
+  this.url = this.parse(url);             // Parse the URL to a readable format.
+  this.backoff = options.reconnect || {}; // Stores the back off configuration.
+  this.attempt = null;                    // Current back off attempt.
   this.readyState = Primus.CLOSED;        // The readyState of the connection.
   this.transformers = {                   // Message transformers.
     outgoing: [],
     incoming: []
   };
 
-  // Initialize a stream interface, if we have any.
+  //
+  // Initialize a stream interface, if we have any or default to our own
+  // EventEmitter instance.
+  //
   if (Stream) Stream.call(this);
   else EventEmitter.call(this);
 
+  //
   // Force the use of WebSockets, even when we've detected some potential
   // broken WebSocket implementation.
+  //
   if (options.websockets) this.AVOID_WEBSOCKETS = false;
 
-  this.initialise(options).open();
+  //
+  // Check if the user wants to manually initialise a connection. If they don't,
+  // we want to do it after a really small timeout so we give the users enough
+  // time to listen for `error` events etc.
+  //
+  if (!options.manual) setTimeout(function open() {
+    primus.open();
+  }, 0);
+
+  this.initialise(options);
 }
 
 //
@@ -218,7 +233,7 @@ Primus.prototype.ark = {};
 /**
  * Initialise the Primus and setup all parsers and internal listeners.
  *
- * @param {Object} options The original object.
+ * @param {Object} options The original options object.
  * @api private
  */
 Primus.prototype.initialise = function initalise(options) {
@@ -241,6 +256,10 @@ Primus.prototype.initialise = function initalise(options) {
 
       primus.buffer.length = 0;
     }
+  });
+
+  primus.on('incoming::error', function error(e) {
+    if (primus.listeners('error').length) primus.emit('error', e);
   });
 
   primus.on('incoming::data', function message(raw) {
@@ -288,7 +307,7 @@ Primus.prototype.initialise = function initalise(options) {
 
     //
     // Some transformers emit garbage when they close the connection. Like the
-    // reason why it closed etc, we should explicitly check if WE send an
+    // reason why it closed etc. we should explicitly check if WE send an
     // intentional message.
     //
     if ('primus::server::close' === intentional) return primus.emit('end');
@@ -296,7 +315,7 @@ Primus.prototype.initialise = function initalise(options) {
     primus.attempt = primus.attempt || primus.clone(primus.backoff);
 
     primus.reconnect(function reconnect(fail, backoff) {
-      // Save the opts again of this backoff, so they re-used.
+      // Save the opts again of this back off, so they re-used.
       primus.attempt = backoff;
 
       if (fail) return primus.emit('end');
@@ -325,9 +344,11 @@ Primus.prototype.initialise = function initalise(options) {
 };
 
 /**
- * Establish a connection with the server.
+ * Establish a connection with the server. When this function is called we
+ * assume that we don't have any open connections. If you do call it when you
+ * have a connection open, it could cause duplicate connections.
  *
- * @api private
+ * @api public
  */
 Primus.prototype.open = function open() {
   this.emit('outgoing::open');
@@ -398,7 +419,7 @@ Primus.prototype.end = function end(data) {
 };
 
 /**
- * Exponential backoff algorithm for retry operations. It uses an randomized
+ * Exponential back off algorithm for retry operations. It uses an randomized
  * retry so we don't DDOS our server when it goes down under pressure.
  *
  * @param {Function} callback Callback to be called after the timeout.
@@ -412,7 +433,7 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
   opts.minDelay = opts.minDelay || 500;       // Minimum delay.
   opts.retries = opts.retries || 10;          // Amount of allowed retries.
   opts.attempt = (+opts.attempt || 0) + 1;    // Current attempt.
-  opts.factor = opts.factor || 2;             // Backoff factor.
+  opts.factor = opts.factor || 2;             // Back off factor.
 
   // Bailout if we are about to make to much attempts. Please note that we use
   // `>` because we already incremented the value above.
@@ -420,12 +441,12 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
     return callback(new Error('Unable to retry'), opts);
   }
 
-  // Prevent duplicate backoff attempts.
+  // Prevent duplicate back off attempts.
   opts.backoff = true;
 
   //
   // Calculate the timeout, but make it randomly so we don't retry connections
-  // at the same interval and defeat the purpose. This exponential backoff is
+  // at the same interval and defeat the purpose. This exponential back off is
   // based on the work of:
   //
   // http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
@@ -471,18 +492,18 @@ Primus.prototype.clone = function clone(obj) {
 /**
  * Parse the connection string.
  *
- * @param {String} url Connection url.
+ * @param {String} url Connection URL.
  * @returns {Object} Parsed connection.
  * @api public
  */
 Primus.prototype.parse = parse;
 
 /**
- * Generates a connection uri.
+ * Generates a connection URI.
  *
- * @param {String} protocol The protocol that should used to crate the uri.
- * @param {Boolean} querystring Do we need to include a querystring.
- * @returns {String} The url.
+ * @param {String} protocol The protocol that should used to crate the URI.
+ * @param {Boolean} querystring Do we need to include a query string.
+ * @returns {String} The URL.
  * @api private
  */
 Primus.prototype.uri = function uri(protocol, querystring) {
@@ -526,7 +547,7 @@ Primus.prototype.emits = function emits(event, parser) {
 
 /**
  * Register a new message transformer. This allows you to easily manipulate incoming
- * and outgoing data which is particulairy handy for plugins that want to send
+ * and outgoing data which is particularity handy for plugins that want to send
  * meta data together with the messages.
  *
  * @param {String} type Incoming or outgoing
@@ -543,7 +564,7 @@ Primus.prototype.transform = function transform(type, fn) {
 /**
  * Syntax sugar, adopt a Socket.IO like API.
  *
- * @param {String} url The url we want to connect to.
+ * @param {String} url The URL we want to connect to.
  * @param {Object} options Connection options.
  * @returns {Primus}
  * @api public
@@ -575,7 +596,7 @@ Primus.prototype.version = null; // @import {primus::version};
 // cause errors with JSONP requests or if the string is just evaluated.
 //
 // This could have been solved by replacing the data during the "outgoing::data"
-// event. But as it affects the JSON encoding in general i've opted for a global
+// event. But as it affects the JSON encoding in general I've opted for a global
 // patch instead so all JSON.stringify operations are save.
 //
 if (
