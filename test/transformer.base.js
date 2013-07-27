@@ -54,6 +54,21 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should not open the socket if we set out state to manual', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber, {
+          manual: true
+        });
+
+        socket.on('open', function () {
+          throw new Error('I should be closed');
+        });
+
+        setTimeout(function () {
+          socket.end();
+          done();
+        }, 100);
+      });
+
       it('should change readyStates', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
