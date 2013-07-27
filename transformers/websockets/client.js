@@ -27,7 +27,7 @@ module.exports = function client() {
   if (!Factory) return this.emit('error', new Error('No WebSocket factory'));
 
   //
-  // Connect to the given url.
+  // Connect to the given URL.
   //
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
@@ -36,10 +36,10 @@ module.exports = function client() {
     // FireFox will throw an error when we try to establish a connection from
     // a secure page to an unsecured WebSocket connection. This is inconsistent
     // behaviour between different browsers. This should ideally be solved in
-    // primus when we connect.
+    // Primus when we connect.
     //
     try { socket = new Factory(primus.uri('ws', true)); }
-    catch (e) { primus.emit('error', e); }
+    catch (e) { return primus.emit('error', e); }
 
     //
     // Setup the Event handlers.
