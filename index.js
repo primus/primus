@@ -66,6 +66,14 @@ function Primus(server, options) {
 
   this.parsers(options.parser);
   this.initialise(options.transformer || options.transport, options);
+
+  //
+  // If the plugins are supplied through the options, also initialise them. This
+  // allows us to do `primus.createSocket({})` to also use plugins.
+  //
+  if ('object' === typeof options.plugin) for (var key in options.plugin) {
+    this.use(key, options.plugin[key]);
+  }
 }
 
 Primus.prototype.__proto__ = EventEmitter.prototype;
@@ -399,6 +407,7 @@ Primus.prototype.use = function use(name, energon) {
 
   if (!name) throw new Error('Plugin should be specified with a name');
   if ('string' !== typeof name) throw new Error('Plugin names should be a string');
+  if ('string' === typeof energon) energon = require(energon);
   if ('object' !== typeof energon) throw new Error('Plugin should be a object');
 
   //

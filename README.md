@@ -424,8 +424,8 @@ a server side client.
 2. You might need to connect from a different node process where you don't have
    access to your `primus` instance and the compatible `Socket` instance. For
    these cases there a special `createSocket` method where you can specify the
-   `transformer` and `parser` that you are using on your server to create
-   another compatible socket.
+   `transformer`, `parser`, `plugin` that you are using on your server to create
+   another compatible socket. 
 
    ```js
    var Socket = Primus.createSocket({ transformer: transformer, parser: parser })
@@ -634,6 +634,18 @@ primus.use('name', {
   client: function (primus, options) {},
   library: 'client side library'
 });
+```
+
+Or you can pass the plugin `Object` directly in to the constructor:
+
+```js
+var primus = new Primus(server, { plugin: {
+  name: {
+    server: function (primus, options) {},
+    client: function (primus, options) {},
+    library: 'client side library'
+  }
+}})
 ```
 
 The server function is only executed on the server side and receives 2

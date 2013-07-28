@@ -1,6 +1,27 @@
 'use strict';
 
 module.exports = function base(transformer) {
+  var emitter = {
+    server: function (primus) {
+      primus.transform('incoming', function (packet) {
+        var data = packet.data;
+        if (!('object' === typeof data && 'event' in data && 'args' in data)) return;
+
+        this.emit.apply(this, [data.event].concat(data.args));
+        return false;
+      });
+    },
+
+    client: function (primus) {
+      primus.$emit = function trigger(event) {
+        return this.write({
+          event: event,
+          args: Array.prototype.slice.call(arguments, 1)
+        });
+      };
+    }
+  };
+
   describe('Transformer: '+ transformer, function () {
     var common = require('./common')
       , request = common.request
@@ -393,6 +414,22 @@ module.exports = function base(transformer) {
         var PSocket = Primus.createSocket({ transformer: transformer })
           , socket = new PSocket('http://localhost:'+ server.portnumber);
 
+        socket.on('open', function () {
+          socket.end();
+          done();
+        });
+      });
+
+      it('should accept plugins', function (done) {
+        var PSocket = Primus.createSocket({
+              transformer: transformer,
+              plugin: {
+                emit: emitter
+              }
+            })
+          , socket = new PSocket('http://localhost:'+ server.portnumber);
+
+        expect(socket.$emit).to.be.a('function');
         socket.on('open', function () {
           socket.end();
           done();
