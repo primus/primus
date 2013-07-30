@@ -154,7 +154,7 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
   // @see jmatthewsr-ms/node-slab-memory-issues
   //
   var buffy = new Buffer(head.length);
-  head.copy(upgrade);
+  head.copy(buffy);
 
   if (!this.test(req)) return this.emit('previous::upgrade', req, socket, buffy);
   this.emit('upgrade', req, socket, buffy, noop);
