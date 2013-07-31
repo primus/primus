@@ -136,14 +136,15 @@ function Primus(url, options) {
   options = options || {};
   var primus = this;
 
-  this.buffer = [];                       // Stores premature send data.
-  this.writable = true;                   // Silly stream compatibility.
-  this.readable = true;                   // Silly stream compatibility.
-  this.url = this.parse(url);             // Parse the URL to a readable format.
-  this.backoff = options.reconnect || {}; // Stores the back off configuration.
-  this.attempt = null;                    // Current back off attempt.
-  this.readyState = Primus.CLOSED;        // The readyState of the connection.
-  this.transformers = {                   // Message transformers.
+  this.buffer = [];                          // Stores premature send data.
+  this.writable = true;                      // Silly stream compatibility.
+  this.readable = true;                      // Silly stream compatibility.
+  this.url = this.parse(url);                // Parse the URL to a readable format.
+  this.auth = this.url.auth;                 // Grab auth if given
+  this.backoff = options.reconnect || {};    // Stores the back off configuration.
+  this.attempt = null;                       // Current back off attempt.
+  this.readyState = Primus.CLOSED;           // The readyState of the connection.
+  this.transformers = {                      // Message transformers.
     outgoing: [],
     incoming: []
   };
@@ -192,6 +193,7 @@ try {
   // In the browsers we can leverage the DOM to parse the URL for us. It will
   // automatically default to host of the current server when we supply it path
   // etc.
+  // Remark: will this work for handling auth as well?
   //
   parse = function parse(url) {
     var a = document.createElement('a');
@@ -534,7 +536,7 @@ Primus.prototype.uri = function uri(protocol, querystring) {
   var server = [];
 
   server.push(this.url.protocol === 'https:' ? protocol +'s:' : protocol +':', '');
-  server.push(this.url.host, this.pathname.slice(1));
+  server.push(this.auth ? this.auth + '@' + this.url.host : this.url.host, this.pathname.slice(1));
 
   //
   // Optionally add a search query.
