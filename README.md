@@ -169,7 +169,7 @@ The `spark.query` contains the query string you used to connect to server. It's
 parsed to a object. Please note that this is not available for all supported
 transformers, but it's proven to be to useful to not implement it because one
 silly transformer refuses to support it. Yes.. I'm looking at you,
-browserchannel.
+browserchannel and SockJS.
 
 #### spark.id
 

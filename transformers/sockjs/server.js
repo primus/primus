@@ -23,7 +23,7 @@ module.exports = function server() {
     var spark = new Spark(
         socket.headers                      // HTTP request headers.
       , socket                              // IP address location.
-      , {}                                  // Optional query string.
+      , {}                                  // Query string, not allowed by SockJS.
       , socket.id                           // Unique connection id.
     );
 
