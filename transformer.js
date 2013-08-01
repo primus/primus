@@ -4,7 +4,7 @@ var querystring = require('querystring').parse
   , url = require('url').parse;
 
 //
-// Used to fake middleware's
+// Used to fake middleware's as we don't have a next callback.
 //
 function noop() {}
 
@@ -12,12 +12,12 @@ function noop() {}
  * Transformer skeletons
  *
  * @constructor
- * @param {Primus} primus Reference to the primus.
+ * @param {Primus} primus Reference to the Primus.
  * @api public
  */
 function Transformer(primus) {
   this.Spark = primus.Spark;    // Used by the Server to create a new connection.
-  this.primus = primus;         // Reference to the primus instance.
+  this.primus = primus;         // Reference to the Primus instance.
   this.primusjs = null;         // Path to the client library.
   this.specfile = null;         // Path to the Primus specification.
   this.service = null;          // Stores the real-time service.
@@ -53,7 +53,7 @@ Transformer.prototype.log = function log(type) {
 };
 
 /**
- * Create the server and attach the apropriate event listeners.
+ * Create the server and attach the appropriate event listeners.
  *
  * @api private
  */
@@ -92,7 +92,7 @@ Transformer.prototype.initialise = function initialise() {
   }
 
   //
-  // Create a client url, this where we respond with our library. The path to
+  // Create a client URL, this where we respond with our library. The path to
   // the server specification which can be used to retrieve the transformer that
   // was used.
   //

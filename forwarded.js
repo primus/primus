@@ -2,7 +2,7 @@
 
 /**
  * List of possible proxy headers that should be checked for the original client
- * ip address and forwarded port.
+ * IP address and forwarded port.
  *
  * @type {Array}
  * @private
@@ -42,7 +42,7 @@ var defaults = {
  * Search the headers for a possible match against a known proxy header.
  *
  * @param {Object} headers The received HTTP headers.
- * @returns {String|Undefined} A ip address or nothing.
+ * @returns {String|Undefined} A IP address or nothing.
  * @api private
  */
 function forwarded(headers) {
@@ -51,11 +51,11 @@ function forwarded(headers) {
 
     //
     // We've gotten a match on a HTTP header, we need to parse it further as it
-    // could consist of multiple hops. The pattern for multipe hops is:
+    // could consist of multiple hops. The pattern for multiple hops is:
     //
-    //   client, proxy, proxy, proxy, etc
+    //   client, proxy, proxy, proxy, etc.
     //
-    // So extracting the first ip should be suffecient.
+    // So extracting the first IP should be sufficient.
     //
     return {
       port: +(headers[proxies[i].port] || '').split(',').shift() || defaults.port,
@@ -67,7 +67,7 @@ function forwarded(headers) {
 /**
  * Parse out the address information..
  *
- * @param {Object} obj A socket like object that could contain a remoteAddress.
+ * @param {Object} obj A socket like object that could contain a `remoteAddress`.
  * @param {Object} headers The received HTTP headers.
  * @returns {String} The IP address.
  * @api private

@@ -25,8 +25,8 @@ function Spark(primus, headers, address, query, id) {
   this.query = query || {};     // The query string.
   this.id = id || this.uuid();  // Unique id for socket.
 
-  this.writable = true;         // Silly stream compatiblity.
-  this.readable = true;         // Silly stream compatiblity.
+  this.writable = true;         // Silly stream compatibility.
+  this.readable = true;         // Silly stream compatibility.
 
   //
   // Parse our query string.
@@ -39,7 +39,7 @@ function Spark(primus, headers, address, query, id) {
 Spark.prototype.__proto__ = require('stream').prototype;
 
 //
-// Lazy parse interface for ip address information. As nobody is always
+// Lazy parse interface for IP address information. As nobody is always
 // interested in this, we're going to defer parsing until it's actually needed.
 //
 Object.defineProperty(Spark.prototype, 'address', {

@@ -228,6 +228,20 @@ Primus.prototype.forEach = function forEach(fn) {
 };
 
 /**
+ * Broadcast the message to all connections.
+ *
+ * @param {Mixed} data The data you want to send.
+ * @api public
+ */
+Primus.prototype.write = function write(data) {
+  this.forEach(function forEach(spark) {
+    spark.write(data);
+  });
+
+  return this;
+};
+
+/**
  * Install message parsers.
  *
  * @param {Mixed} parser Parse name or parser Object.
@@ -268,7 +282,7 @@ Primus.prototype.parsers = function parsers(parser) {
 
 /**
  * Register a new message transformer. This allows you to easily manipulate incoming
- * and outgoing data which is particulairy handy for plugins that want to send
+ * and outgoing data which is particularity handy for plugins that want to send
  * meta data together with the messages.
  *
  * @param {String} type Incoming or outgoing
@@ -298,7 +312,7 @@ Primus.prototype.library = function compile(nodejs) {
     , parser = this.parser.library || '';
 
   //
-  // Add a simple export wrapper so it can be used as Node.js, amd or browser
+  // Add a simple export wrapper so it can be used as Node.js, AMD or browser
   // client.
   //
   var client = [
