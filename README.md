@@ -333,7 +333,7 @@ operation. This event would be ideal to update your application's UI that you're
 connection is down and you are trying to reconnect in x seconds.
 
 ```js
-primus.on('reconnect', function (opts) {
+primus.on('reconnecting', function (opts) {
   console.log('Reconnecting in %d ms', opts.timeout);
   console.log('This is attempt %d out of %d', opts.attempt, opts.retries);
 });
