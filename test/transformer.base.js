@@ -475,6 +475,17 @@ module.exports = function base(transformer) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
       });
 
+      if (transformer.toLowerCase() === 'websockets')
+      it('should connect using basic auth', function (done) {
+        primus.on('connection', function (spark) {
+          expect(spark.headers.authorization).to.equal('QmFzaWMgdXNyOnBhc3M=');
+          socket.end();
+        });
+
+        var socket = new Socket('http://usr:pass@localhost:'+ server.portnumber +'/?foo=bar');
+        socket.on('end', done);
+      });
+
       it('should receive querystrings', function (done) {
         primus.on('connection', function (spark) {
           expect(spark.query).to.be.a('object');
