@@ -503,6 +503,44 @@ module.exports = function base(transformer) {
         socket.on('end', done);
       });
 
+      it('support accepted authorization', function (done) {
+        primus.authorize(function auth(req, next) {
+          expect(req.headers).to.be.a('object');
+
+          next();
+        });
+
+        primus.on('connection', function (spark) {
+          spark.end();
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('end', done);
+        socket.on('reconnect', function () {
+          throw new Error('fuck');
+        });
+      });
+
+      it('support declined authorization', function (done) {
+        primus.authorize(function auth(req, next) {
+          expect(req.headers).to.be.a('object');
+
+          next(new Error('I failed'));
+        });
+
+        primus.on('connection', function (spark) {
+          throw new Error('Auth should be called');
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('end', done);
+        socket.on('reconnect', function () {
+          throw new Error('fuck');
+        });
+      });
+
       it('should not trigger a reconnect when we end the connection', function (done) {
         primus.on('connection', function (spark) {
           spark.end();

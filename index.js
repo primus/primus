@@ -23,6 +23,7 @@ function Primus(server, options) {
   this.transformer = null;                // Reference to the real-time engine instance.
   this.encoder = null;                    // Shorthand to the parser's encoder.
   this.decoder = null;                    // Shorthand to the parser's decoder.
+  this.auth = null;                       // Do we have an authorization handler.
   this.sparks = 0;                        // Increment id for connection ids.
   this.connected = 0;                     // Connection counter.
   this.connections = Object.create(null); // Connection storage.
@@ -211,6 +212,20 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
   process.nextTick(function tock() {
     primus.emit('initialised', primus.transformer, primus.parser, options);
   });
+};
+
+/**
+ * Add a new authorization handler.
+ *
+ * @param {Function} auth The authorization handler.
+ * @api public
+ */
+Primus.prototype.authorize = function authorize(auth) {
+  if ('function' !== typeof auth) throw new Error('Authorize only accepts functions.');
+  if (auth.length < 2) throw new Error('Authorize function requires more arguments.');
+
+  this.auth = auth;
+  return this;
 };
 
 /**
