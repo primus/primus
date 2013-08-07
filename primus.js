@@ -140,7 +140,6 @@ function Primus(url, options) {
   this.writable = true;                      // Silly stream compatibility.
   this.readable = true;                      // Silly stream compatibility.
   this.url = this.parse(url);                // Parse the URL to a readable format.
-  this.auth = this.url.auth;                 // Grab auth if given
   this.backoff = options.reconnect || {};    // Stores the back off configuration.
   this.attempt = null;                       // Current back off attempt.
   this.readyState = Primus.CLOSED;           // The readyState of the connection.
@@ -198,6 +197,14 @@ try {
   parse = function parse(url) {
     var a = document.createElement('a');
     a.href = url;
+
+    //
+    // Browsers do not parse auth information, so we need to extract that from
+    // the URL.
+    //
+    if (~url.indexOf('@') && !a.auth) {
+      a.auth = a.href.slice(a.protocol.length + 2, a.href.indexOf(a.pathname)).split('@')[0];
+    }
 
     return a;
   };
@@ -536,7 +543,7 @@ Primus.prototype.uri = function uri(protocol, querystring) {
   var server = [];
 
   server.push(this.url.protocol === 'https:' ? protocol +'s:' : protocol +':', '');
-  server.push(this.auth ? this.auth + '@' + this.url.host : this.url.host, this.pathname.slice(1));
+  server.push(this.url.auth ? this.url.auth + '@' + this.url.host : this.url.host, this.pathname.slice(1));
 
   //
   // Optionally add a search query.
