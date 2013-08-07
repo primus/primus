@@ -478,7 +478,7 @@ module.exports = function base(transformer) {
       if (transformer.toLowerCase() === 'websockets')
       it('should connect using basic auth', function (done) {
         primus.on('connection', function (spark) {
-          expect(spark.headers.authorization).to.equal('QmFzaWMgdXNyOnBhc3M=');
+          expect(spark.headers.authorization).to.equal('Basic dXNyOnBhc3M=');
           socket.end();
         });
 
