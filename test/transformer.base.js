@@ -474,8 +474,7 @@ module.exports = function base(transformer) {
           expect(spark.query).to.be.a('object');
 
           if (
-               transformer.toLowerCase() !== 'browserchannel'
-            && transformer.toLowerCase() !== 'sockjs'
+            transformer.toLowerCase() !== 'sockjs'
           ) {
             expect(spark.query.foo).to.equal('bar');
           }
