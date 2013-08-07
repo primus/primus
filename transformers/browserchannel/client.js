@@ -2,7 +2,7 @@
 /*globals BCSocket*/
 
 /**
- * Minimum viable Browserclient client. This function is stringified and written in
+ * Minimum viable BrowserChannel client. This function is stringified and written in
  * to our client side library.
  *
  * @runat client
@@ -13,7 +13,7 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available Browserchannel factory.
+  // Selects an available BrowserChannel factory.
   //
   var Factory = (function factory() {
     if ('undefined' !== typeof BCSocket) return BCSocket;
@@ -26,12 +26,17 @@ module.exports = function client() {
   if (!Factory) return this.emit('error', new Error('No Browserchannel client factory'));
 
   //
-  // Connect to the given url.
+  // Connect to the given URL.
   //
   primus.on('outgoing::open', function connect() {
     if (socket) socket.close();
 
-    socket = new Factory(primus.uri('http'), { reconnect: false });
+    var url = primus.uri('http');
+
+    socket = new Factory(url, {
+      extraParams: primus.querystring(primus.uri('http', true).replace(url, '')),
+      reconnect: false,
+    });
 
     //
     // Setup the Event handlers.
@@ -50,7 +55,7 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It asumes that the `close` event is
+  // Attempt to reconnect the socket. It assumes that the `close` event is
   // called if it failed to disconnect.
   //
   primus.on('outgoing::reconnect', function reconnect() {
@@ -64,14 +69,16 @@ module.exports = function client() {
   primus.on('outgoing::end', function close() {
     if (socket) {
       //
-      // Browserscope cannot close the connection if it's already connecting. By
-      // passing behaviour by checking the readyState and defer the close call.
+      // Bug: BrowserChannel cannot close the connection if it's already
+      // connecting. By passing behaviour by checking the readyState and defer
+      // the close call.
       //
       if (socket.readyState === socket.CONNECTING) {
         return socket.onopen = function () {
           primus.emit('outgoing::end');
         };
       }
+
       socket.close();
       socket = null;
     }
