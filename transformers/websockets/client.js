@@ -60,7 +60,7 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It asumes that the `close` event is
+  // Attempt to reconnect the socket. It assumes that the `close` event is
   // called if it failed to disconnect.
   //
   primus.on('outgoing::reconnect', function reconnect() {

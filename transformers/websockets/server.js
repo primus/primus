@@ -15,8 +15,8 @@ module.exports = function server() {
     , Spark = this.Spark;
 
   var service = this.service = new WebSocketServer({
-    noServer: true,
-    clientTracking: false
+    clientTracking: false,
+    noServer: true
   });
 
   //
@@ -26,7 +26,7 @@ module.exports = function server() {
     this.service.handleUpgrade(req, socket, head, function create(socket) {
       var spark = new Spark(
           socket.upgradeReq.headers               // HTTP request headers.
-        , socket.upgradeReq                       // Ip address location.
+        , socket.upgradeReq                       // IP address location.
         , parse(socket.upgradeReq.url).query      // Optional query string.
       );
 
