@@ -453,24 +453,24 @@ Primus is build upon the Stream and EventEmitter interfaces. This is a summary
 of the events emitted by Primus.
 
 Event                 | Usage       | Location      | Description
-======================|=============|===============|==============================
+----------------------|-------------|---------------|----------------------------------------
 `outgoing::reconnect` | private     | client        | Transformer should reconnect.
-`reconnecting`        | public      | client        | We're scheduling a reconnect.
-`reconnect`           | public      | client        | Reconnect attempt is about to be made.
+`reconnecting`        | **public**  | client        | We're scheduling a reconnect.
+`reconnect`           | **public**  | client        | Reconnect attempt is about to be made.
 `outgoing::open`      | private     | client/spark  | Transformer should connect.
 `incoming::open`      | private     | client/spark  | Transformer has connected.
-`open`                | public      | client        | Connection is open.
+`open`                | **public**  | client        | Connection is open.
 `incoming::error`     | private     | client        | Transformer received error.
-`error`               | public      | client/spark  | An error happened.
+`error`               | **public**  | client/spark  | An error happened.
 `incoming::data`      | private     | client/server | Transformer received data.
 `outgoing::data`      | private     | client        | Transformer should write data.
-`data`                | public      | client        | We received data.
+`data`                | **public**  | client        | We received data.
 `incoming::end`       | private     | client        | Transformer closed the connection.
 `outgoing::end`       | private     | client        | Transformer should close connection.
-`end`                 | public      | client        | The connection has closed.
-`connection`          | public      | server        | We received a new connection.
-`disconnection`       | public      | server        | A connection closed.
-`initialised`         | public      | server        | The server is initialised.
+`end`                 | **public**  | client        | The connection has closed.
+`connection`          | **public**  | server        | We received a new connection.
+`disconnection`       | **public**  | server        | A connection closed.
+`initialised`         | **public**  | server        | The server is initialised.
 
 ### Supported Real-time Frameworks
 
