@@ -149,11 +149,11 @@ function Primus(url, options) {
   };
 
   //
-  // Initialize a stream interface, if we have any or default to our own
-  // EventEmitter instance.
+  // Only initialise the EventEmitter interface if we're running in a plain
+  // browser environment. The Stream interface is inherited differently when it
+  // runs on browserify and on Node.js.
   //
-  if (Stream) Stream.call(this);
-  else EventEmitter.call(this);
+  if (!Stream) EventEmitter.call(this);
 
   //
   // Force the use of WebSockets, even when we've detected some potential
@@ -184,7 +184,15 @@ try {
   parse = require('url').parse;
   Stream = require('stream');
 
-  Primus.prototype = new Stream();
+  //
+  // Normally inheritance is done in the same way as we do in our catch
+  // statement. But due to changes to the EventEmitter interface in Node 0.10
+  // this will trigger annoying memory leak warnings and other potential issues
+  // outlined in the issue linked below.
+  //
+  // @see https://github.com/joyent/node/issues/4971
+  //
+  require('util').inherits(Primus, Stream);
 } catch (e) {
   Primus.prototype = new EventEmitter();
 
@@ -192,15 +200,14 @@ try {
   // In the browsers we can leverage the DOM to parse the URL for us. It will
   // automatically default to host of the current server when we supply it path
   // etc.
-  // Remark: will this work for handling auth as well?
   //
   parse = function parse(url) {
     var a = document.createElement('a');
     a.href = url;
 
     //
-    // Browsers do not parse auth information, so we need to extract that from
-    // the URL.
+    // Browsers do not parse authorization information, so we need to extract
+    // that from the URL.
     //
     if (~url.indexOf('@') && !a.auth) {
       a.auth = a.href.slice(a.protocol.length + 2, a.href.indexOf(a.pathname)).split('@')[0];
