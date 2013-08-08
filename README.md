@@ -463,10 +463,10 @@ Event                 | Usage       | Location      | Description
 `incoming::error`     | private     | client        | Transformer received error.
 `error`               | **public**  | client/spark  | An error happened.
 `incoming::data`      | private     | client/server | Transformer received data.
-`outgoing::data`      | private     | client        | Transformer should write data.
-`data`                | **public**  | client        | We received data.
-`incoming::end`       | private     | client        | Transformer closed the connection.
-`outgoing::end`       | private     | client        | Transformer should close connection.
+`outgoing::data`      | private     | client/spark  | Transformer should write data.
+`data`                | **public**  | client/spark  | We received data.
+`incoming::end`       | private     | client/spark  | Transformer closed the connection.
+`outgoing::end`       | private     | client/spark  | Transformer should close connection.
 `end`                 | **public**  | client        | The connection has closed.
 `connection`          | **public**  | server        | We received a new connection.
 `disconnection`       | **public**  | server        | A connection closed.
