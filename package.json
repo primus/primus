@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "integration": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.integration.js')",
-    "test": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.test.js')"
+    "test": "NODE_ENV=testing ./node_modules/.bin/mocha $(find test -name '*.test.js')",
+    "browserify": "browserify example/primus.js -o example/primus.browserify.js --standalone Primus"
   },
   "repository": {
     "type": "git",

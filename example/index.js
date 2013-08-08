@@ -64,6 +64,12 @@ primus.on('connection', function connection(spark) {
 });
 
 //
+// Save the compiled file to the hard disk so it can also be distributed over
+// cdn's or just be served by something else than the build-in path.
+//
+primus.save('primus.js');
+
+//
 // Everything is ready, listen to a port number to start the server.
 //
 server.listen(+argh.port || 8080);
