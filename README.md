@@ -33,6 +33,7 @@ npm install primus --save
 - [Getting Started](#getting-started)
 - [Connecting from the browser](#connecting-from-the-browser)
 - [Connecting from the server](#connecting-from-the-server)
+- [Broadcasting](#broadcasting) 
 - [Events](#events)
 - [Supported real-time frameworks](#supported-real-time-frameworks)
   - [Engine.IO](#engineio)
@@ -446,6 +447,23 @@ a server side client.
     "transformer":"websockets"
   }
   ```
+### Broadcasting
+
+Broadcasting allows you to write a message to every connected `Spark` on your server. There are 2 different ways of doing broadcasting in Primus. The easiest way is to use the `Primus#write` method which will write a message to every connected user:
+
+```js
+primus.write(message);
+```
+
+There are cases where you only want to broadcast a message to a smaller group of users. To make it easier to do this, we've added a `Primus#forEach` method which allows you to iterate over all active connections.
+
+```js
+primus.forEach(function (spark, id, connections) {
+  if (spark.query.foo !== 'bar') return;
+
+  spark.write('message');
+});
+```
 
 ### Events
 
