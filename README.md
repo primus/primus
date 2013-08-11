@@ -449,13 +449,17 @@ a server side client.
   ```
 ### Broadcasting
 
-Broadcasting allows you to write a message to every connected `Spark` on your server. There are 2 different ways of doing broadcasting in Primus. The easiest way is to use the `Primus#write` method which will write a message to every connected user:
+Broadcasting allows you to write a message to every connected `Spark` on your server. 
+There are 2 different ways of doing broadcasting in Primus. The easiest way is to 
+use the `Primus#write` method which will write a message to every connected user:
 
 ```js
 primus.write(message);
 ```
 
-There are cases where you only want to broadcast a message to a smaller group of users. To make it easier to do this, we've added a `Primus#forEach` method which allows you to iterate over all active connections.
+There are cases where you only want to broadcast a message to a smaller group of 
+users. To make it easier to do this, we've added a `Primus#forEach` method which 
+allows you to iterate over all active connections.
 
 ```js
 primus.forEach(function (spark, id, connections) {
@@ -569,7 +573,7 @@ And tell `Primus` that you want to use `browserchannel` as transformer:
 var primus = new Primus(server, { transformer: 'browserchannel' });
 ```
 
-The `browserchannel` transformer comes with build in client support and can be
+The `browserchannel` transformer comes with build in node client support and can be
 accessed using:
 
 ```js
@@ -597,7 +601,7 @@ If yo want to use the client interface inside of Node.js you also need to
 install the `sockjs-client-node` module:
 
 ```
-npm install socket.io-client --save
+npm install sockjs-client-node --save
 ```
 
 And then you can access it from your server instance:
