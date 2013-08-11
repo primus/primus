@@ -165,6 +165,10 @@ connection. If you're running your server behind a reverse proxy it will
 automatically use the `x-forwarded-for` headers. This way you will always have
 the address of the connecting client and not the ip address of your proxy.
 
+*Please note that the `port` is probably out of date by the time you're going
+to read it as it's retrieved from an old request, not the request that is
+active at the time you access this property.*
+
 #### spark.query
 
 The `spark.query` contains the query string you used to connect to server. It's
