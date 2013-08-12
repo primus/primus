@@ -209,7 +209,7 @@ try {
     // Browsers do not parse authorization information, so we need to extract
     // that from the URL.
     //
-    if (~url.indexOf('@') && !a.auth) {
+    if (~a.href.indexOf('@') && !a.auth) {
       a.auth = a.href.slice(a.protocol.length + 2, a.href.indexOf(a.pathname)).split('@')[0];
     }
 
