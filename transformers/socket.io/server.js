@@ -44,4 +44,13 @@ module.exports = function server() {
     socket.on('disconnect', spark.emits('end'));
     socket.on('message', spark.emits('data'));
   });
+
+  this.once('close', function close() {
+    service.sockets.clients().forEach(function shutdown(socket) {
+      socket.disconnect();
+    });
+
+    service.store.destroy();
+    service.store.removeAllListeners();
+  });
 };

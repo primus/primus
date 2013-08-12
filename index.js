@@ -440,6 +440,80 @@ Primus.prototype.use = function use(name, energon) {
   return this;
 };
 
+/**
+ * Destroy the created Primus instance.
+ *
+ * Options:
+ * - close (boolean)  Close the given server.
+ * - end (boolean)    Shut down all active connections.
+ * - timeout (number) Forcefully close all connections after a given x MS.
+ *
+ * @param {Object} options Destruction instructions.
+ * @param {Function} fn Callback.
+ * @api public
+ */
+Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) {
+  if ('function' === typeof options) {
+    fn = options;
+    options = null;
+  }
+
+  options = options || {};
+
+  /**
+   * Clean up connections that are left open.
+   *
+   * @api private
+   */
+  function cleanup() {
+    if (options.end !== false) {
+      primus.forEach(function shutdown(spark) {
+        spark.end();
+      });
+    }
+
+    //
+    // Emit some final closing events right before we remove all listener
+    // references from all the event emitters.
+    //
+    primus.emit('close', options);
+    primus.transformer.emit('close', options);
+
+    primus.transformer.removeAllListeners();
+    primus.removeAllListeners();
+
+    //
+    // Null some potentially heavy objects to free some more memory instantly
+    //
+    primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
+    primus.transformer = primus.encoder = primus.decoder = primus.server = null;
+    primus.sparks = primus.connected = 0;
+
+    primus.connections = Object.create(null);
+    primus.ark = Object.create(null);
+
+    if (fn && options.close === false) fn();
+  }
+
+  var primus = this;
+
+  if (options.close !== false) {
+    primus.server.close(function closed() {
+      if (fn) fn.apply(primus, arguments);
+    });
+
+    primus.server.removeAllListeners();
+  }
+
+  if (+options.timeout) {
+    setTimeout(cleanup, +options.timeout);
+  } else {
+    cleanup();
+  }
+
+  return this;
+};
+
 //
 // Register globally, for every Primus instance. It takes the same arguments as
 // the `primus.use` method.

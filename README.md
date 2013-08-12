@@ -31,14 +31,15 @@ npm install primus --save
   - [Highlights](#highlights)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
-- [Connecting from the browser](#connecting-from-the-browser)
 - [Connecting from the server](#connecting-from-the-server)
-- [Broadcasting](#broadcasting) 
+  - [Broadcasting](#broadcasting)
+  - [Destruction](#destruction)
+- [Connecting from the browser](#connecting-from-the-browser)
 - [Events](#events)
 - [Supported real-time frameworks](#supported-real-time-frameworks)
   - [Engine.IO](#engineio)
   - [WebSockets](#websockets)
-  - [Browserchannel](#browserchannel)
+  - [BrowserChannel](#browserchannel)
   - [SockJS](#sockjs)
   - [Socket.IO](#socketio)
 - [Transformer Inconsistencies](#transformer-inconsistencies)
@@ -123,12 +124,16 @@ page add:
 ```
 
 If you've configured a different `pathname` in the options deploy on a different
-domain then your primus server you would of course need to update the `src`
+domain then your Primus server you would of course need to update the `src`
 attribute to the correct location. It's always available at:
 
 ```
 <protocol>://<server location>/<pathname>/primus.js
 ```
+
+The client is cross domain compatible so you don't have to serve it from the
+same domain you're running Primus on. But please note, that the real-time
+framework you're using might be tied to same domain restrictions.
 
 Once you're all set up you can start listening for connections. These
 connections are announced through the `connection` event.
@@ -163,7 +168,7 @@ connection. This depends on the module you are using.
 The `spark.address` property contains the `ip` and `port` of the
 connection. If you're running your server behind a reverse proxy it will
 automatically use the `x-forwarded-for` headers. This way you will always have
-the address of the connecting client and not the ip address of your proxy.
+the address of the connecting client and not the IP address of your proxy.
 
 *Please note that the `port` is probably out of date by the time you're going
 to read it as it's retrieved from an old request, not the request that is
@@ -175,7 +180,7 @@ The `spark.query` contains the query string you used to connect to server. It's
 parsed to a object. Please note that this is not available for all supported
 transformers, but it's proven to be to useful to not implement it because one
 silly transformer refuses to support it. Yes.. I'm looking at you,
-browserchannel and SockJS.
+BrowserChannel and SockJS.
 
 #### spark.id
 
@@ -236,6 +241,9 @@ primus.on('connection', function (spark) {
   spark.on('data', function (data) {
     console.log('received data from the client', data);
 
+    //
+    // Always close the connection if we didn't receive our secret imaginary handshake.
+    //
     if ('foo' !== data.secrethandshake) spark.end();
     spark.write({ foo: 'bar' });
     spark.write('banana');
@@ -243,6 +251,47 @@ primus.on('connection', function (spark) {
 
   spark.write('Hello world');
 })
+```
+
+### Broadcasting
+
+Broadcasting allows you to write a message to every connected `Spark` on your server. 
+There are 2 different ways of doing broadcasting in Primus. The easiest way is to 
+use the `Primus#write` method which will write a message to every connected user:
+
+```js
+primus.write(message);
+```
+
+There are cases where you only want to broadcast a message to a smaller group of 
+users. To make it easier to do this, we've added a `Primus#forEach` method which 
+allows you to iterate over all active connections.
+
+```js
+primus.forEach(function (spark, id, connections) {
+  if (spark.query.foo !== 'bar') return;
+
+  spark.write('message');
+});
+```
+
+### Destruction
+
+In rare cases you might need to destroy the Primus instance you've created. You
+can use the `primus.destroy()` or `primus.end()` method for this. This method
+accepts an Object which allows you to configure how you want the connections to
+be destroyed:
+
+- `close` Close the HTTP server that Primus received. Defaults to `true`.
+- `end` End all active connections. Defaults to `true`.
+- `timeout` Clean up the server and optionally, it's active connections after
+  the specified amount of timeout. Defaults to `0`.
+
+The timeout is especially useful if you want gracefully shutdown your server but
+really don't want to wait an infinite amount of time.
+
+```js
+primus.destroy({ timeout: 10000 });
 ```
 
 ### Connecting from the Browser.
@@ -262,7 +311,7 @@ var primus = Primus.connect(url, { options });
 
 #### primus.write(message)
 
-Once you've created your primus instance you're ready to go. When you want to
+Once you've created your Primus instance you're ready to go. When you want to
 write data to your server you can just call the `.write` method:
 
 ```js
@@ -451,27 +500,6 @@ a server side client.
     "transformer":"websockets"
   }
   ```
-### Broadcasting
-
-Broadcasting allows you to write a message to every connected `Spark` on your server. 
-There are 2 different ways of doing broadcasting in Primus. The easiest way is to 
-use the `Primus#write` method which will write a message to every connected user:
-
-```js
-primus.write(message);
-```
-
-There are cases where you only want to broadcast a message to a smaller group of 
-users. To make it easier to do this, we've added a `Primus#forEach` method which 
-allows you to iterate over all active connections.
-
-```js
-primus.forEach(function (spark, id, connections) {
-  if (spark.query.foo !== 'bar') return;
-
-  spark.write('message');
-});
-```
 
 ### Events
 
