@@ -321,9 +321,7 @@ Primus.prototype.initialise = function initalise(options) {
       // The server is closing the connection, forcefully disconnect so we don't
       // reconnect again.
       //
-      if ('primus::server::close' === data) {
-        return primus.emit('incoming::end', data);
-      }
+      if ('primus::server::close' === data) return primus.end();
 
       var transform, result, packet;
       for (transform in primus.transformers.incoming) {
