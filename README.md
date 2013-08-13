@@ -47,7 +47,9 @@ npm install primus --save
   - [Extending the Spark/socket](#extending-the-spark--socket)
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
   - [Community Plugins](#community-plugins)
-- [Scaling](#scaling)
+- [FAQ](#FAQ)
+  - [Scaling](#scaling)
+  - [Express](#express)
 - [Versioning](#versioning)
 - [License](#license)
 
@@ -877,7 +879,9 @@ see it be merged automatically.
 
 [Travis CI]: https://travis-ci.org/
 
-### Scaling
+### FAQ
+
+#### Scaling
 
 Scaling Primus is as simple as sticking it behind a load balancer that supports
 sticky sessions and run multiple versions of your application. This is a vital
@@ -887,6 +891,29 @@ support sticky sessions, get an other one. I highly recommend
 [HAProxy](http://haproxy.1wt.eu/). According to my own testing it the fastest
 and best proxy available that supports WebSockets. See
 https://github.com/observing/balancerbattle for more detailed information.
+
+#### Express
+
+Express 3's `express()` instance isn't a valid HTTP server. In order to make it
+work with `Primus` and other real-time transformers you need to feed the instance
+to a real `http` server and supply this server. See example below:
+
+```js
+'use strict';
+
+var express = require('express')
+  , Primus = require('primus')
+  , app = express();
+
+//
+// Do your express magic.
+//
+
+var server = require('http').createServer(app)
+  , primus = new Primus(server, { options });
+  
+server.listen(port);
+```
 
 ### Versioning
 
