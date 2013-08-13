@@ -43,11 +43,7 @@ module.exports = function base(transformer) {
     });
 
     afterEach(function afterEach(done) {
-      server.close(done);
-
-      primus.forEach(function (spark) {
-        spark.end();
-      });
+      primus.destroy(done);
 
       try { destroy(); }
       catch (e) {}

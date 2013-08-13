@@ -459,6 +459,7 @@ Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) 
   }
 
   options = options || {};
+  var primus = this;
 
   /**
    * Clean up connections that are left open.
@@ -479,26 +480,25 @@ Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) 
     primus.emit('close', options);
     primus.transformer.emit('close', options);
 
-    primus.transformer.removeAllListeners();
-    primus.removeAllListeners();
-
-    //
-    // Null some potentially heavy objects to free some more memory instantly
-    //
-    primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
-    primus.transformer = primus.encoder = primus.decoder = primus.server = null;
-    primus.sparks = primus.connected = 0;
-
-    primus.connections = Object.create(null);
-    primus.ark = Object.create(null);
-
     if (fn && options.close === false) fn();
   }
 
-  var primus = this;
-
   if (options.close !== false) {
     primus.server.close(function closed() {
+      primus.transformer.removeAllListeners();
+      primus.server.removeAllListeners();
+      primus.removeAllListeners();
+
+      //
+      // Null some potentially heavy objects to free some more memory instantly
+      //
+      primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
+      primus.transformer = primus.encoder = primus.decoder = primus.server = null;
+      primus.sparks = primus.connected = 0;
+
+      primus.connections = Object.create(null);
+      primus.ark = Object.create(null);
+
       if (fn) fn();
     });
   }
