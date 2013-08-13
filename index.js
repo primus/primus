@@ -499,10 +499,8 @@ Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) 
 
   if (options.close !== false) {
     primus.server.close(function closed() {
-      if (fn) fn.apply(primus, arguments);
+      if (fn) fn();
     });
-
-    primus.server.removeAllListeners();
   }
 
   if (+options.timeout) {
