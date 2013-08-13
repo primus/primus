@@ -179,8 +179,7 @@ active at the time you access this property.*
 The `spark.query` contains the query string you used to connect to server. It's
 parsed to a object. Please note that this is not available for all supported
 transformers, but it's proven to be to useful to not implement it because one
-silly transformer refuses to support it. Yes.. I'm looking at you,
-BrowserChannel and SockJS.
+silly transformer refuses to support it. Yes.. I'm looking at you SockJS.
 
 #### spark.id
 
@@ -588,11 +587,11 @@ var Socket = primus.Socket;
   , socket = new Socket('url');
 ```
 
-#### Browserchannel
+#### BrowserChannel
 
-Browserchannel was the original technology that GMail used for their real-time
+BrowserChannel was the original technology that GMail used for their real-time
 communication. It's designed for same domain communication and does not use
-WebSockets. To use browserchannel you need to install the `browserchannel`
+WebSockets. To use BrowserChannel you need to install the `browserchannel`
 module:
 
 ```
@@ -612,6 +611,9 @@ accessed using:
 var Socket = primus.Socket;
   , socket = new Socket('url');
 ```
+
+Please note that you should use at least version `1.0.6` which contains support
+for query strings.
 
 #### SockJS
 
@@ -679,15 +681,15 @@ of the transformer, we just `toLowerCase()` everything.
 
 ### Transformer Inconsistencies
 
-- Browserchannel does not give you access to the `remotePort` of the incoming
+- BrowserChannel does not give you access to the `remotePort` of the incoming
   connection. So when you access `spark.address` the `port` property will be set
   to `1337` by default.
-- Browserchannel and SockJS do not support connections with query strings. You
-  can still supply a query string in the `new Primus('http://localhost:80?q=s')`
-  but it will not be accessible in the `spark.query` property.
-- Browserchannel is the only transformer that does not support cross domain
+- SockJS does not support connections with query strings. You can still supply a
+  query string in the `new Primus('http://localhost:80?q=s')` but it will not be
+  accessible in the `spark.query` property. As it will be an empty object.
+- BrowserChannel is the only transformer that does not support cross domain
   connections.
-- SockJS and Browserchannel are originally written in CoffeeScript which can
+- SockJS and BrowserChannel are originally written in CoffeeScript which can
   make it harder to debug when their internals are failing.
 - Engine.IO and SockJS do not ship their client-side library with their server
   side component. We're bundling a snapshot of these libraries inside of Primus.
@@ -704,7 +706,7 @@ Primus was build as low level interface where you can build your applications
 upon. At it's core, it's nothing more than something that passes messages back
 and forth between the client and server. To make it easier for developers to
 switch to Primus we've developed a simple but effective plugin system that
-allows you to extend primus's functionality.
+allows you to extend Primus's functionality.
 
 Plugins are added on the server side in the form of an `Object`:
 
@@ -731,13 +733,13 @@ var primus = new Primus(server, { plugin: {
 The server function is only executed on the server side and receives 2
 arguments:
 
-1. A reference to the initialized primus server.
+1. A reference to the initialized Primus server.
 2. The options that we're passed in to the `new Primus(server, { options })`
    constructor. So the plugins can be configured through the same interface.
 
 The client receives the same arguments:
 
-1. A reference to the initialized primus client.
+1. A reference to the initialized Primus client.
 2. The options that we're passed in the `new Primus(url, { options })`
    constructor. So the plugin in configured through the same interface.
 
@@ -824,7 +826,7 @@ primus.use('name', {
 
 These are plugins created by our amazing community. Do you have a module that
 you want to have listed here? Make sure it has test suite and runs on [Travis CI].
-After that open a pull request where you added your module to this README and
+After that open a pull request where you added your module to this README.md and
 see it be merged automatically.
 
 <dl>
