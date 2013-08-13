@@ -67,11 +67,13 @@ exports.create = function create(transformer, fn, port) {
 
   function destroy() {
     upgrades.forEach(function destroy(socket) {
-      socket.destroy();
+      try { socket.destroy(); }
+      catch (e) {}
     });
 
     requests.forEach(function end(res) {
-      res.end('');
+      try { res.end(''); }
+      catch (e) {}
     });
 
     upgrades.length = requests.length = 0;
