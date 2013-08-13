@@ -9,9 +9,8 @@
  */
 module.exports = function server() {
   var browserchannel = require('browserchannel')
-    , Spark = this.Spark
     , primus = this.primus
-    , query = {};
+    , Spark = this.Spark;
 
   //
   // We've received a new connection, create a new Spark. The Spark will
@@ -27,7 +26,7 @@ module.exports = function server() {
           remoteAddress: socket.address,
           remotePort: 1337
         }
-      , query             // Query string, not allowed by browser channel.
+      , socket.query      // Optional query string.
       , socket.id         // Unique connection id.
     );
 

@@ -537,6 +537,28 @@ Primus.prototype.clone = function clone(obj) {
 Primus.prototype.parse = parse;
 
 /**
+ * Parse a querystring.
+ *
+ * @param {String} query The querystring that needs to be parsed.
+ * @returns {Object} Parsed query string.
+ * @api public
+ */
+Primus.prototype.querystring = function querystring(query) {
+  var parser = /([^=?&]+)=([^&]*)/g
+    , result = {}
+    , part;
+
+  //
+  // Little nifty parsing hack, leverage the fact that RegExp.exec increments
+  // the lastIndex property so we can continue executing this loop until we've
+  // parsed all results.
+  //
+  for (; part = parser.exec(query); result[part[1]] = part[2]);
+
+  return result;
+};
+
+/**
  * Generates a connection URI.
  *
  * @param {String} protocol The protocol that should used to crate the URI.
