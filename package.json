@@ -40,7 +40,9 @@
     "socket.io-client": "0.9.x",
     "sockjs": "0.3.x",
     "ws": "0.4.x",
-    "sockjs-client-node": "0.0.0",
-    "request": "~2.21.0"
+    "sockjs-client-node": "0.0.x",
+    "request": "2.21.x",
+    "js-binarypack": "git://github.com/jcrugzz/js-binarypack.git#make-requireable",
+    "binarypack": "0.0.x"
   }
 }
