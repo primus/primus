@@ -137,14 +137,16 @@ function Primus(url, options) {
   options = options || {};
   var primus = this;
 
-  this.buffer = [];                          // Stores premature send data.
-  this.writable = true;                      // Silly stream compatibility.
-  this.readable = true;                      // Silly stream compatibility.
-  this.url = this.parse(url);                // Parse the URL to a readable format.
-  this.backoff = options.reconnect || {};    // Stores the back off configuration.
-  this.attempt = null;                       // Current back off attempt.
-  this.readyState = Primus.CLOSED;           // The readyState of the connection.
-  this.transformers = {                      // Message transformers.
+  this.buffer = [];                           // Stores premature send data.
+  this.writable = true;                       // Silly stream compatibility.
+  this.readable = true;                       // Silly stream compatibility.
+  this.url = this.parse(url);                 // Parse the URL to a readable format.
+  this.backoff = options.reconnect || {};     // Stores the back off configuration.
+  this.attempt = null;                        // Current back off attempt.
+  this.readyState = Primus.CLOSED;            // The readyState of the connection.
+  this.connection = +options.timeout || 10e3; // Connection timeout duration.
+  this.timer = null;                          // The connection timeout timer.
+  this.transformers = {                       // Message transformers.
     outgoing: [],
     incoming: []
   };
@@ -404,9 +406,51 @@ Primus.prototype.initialise = function initalise(options) {
  * @api public
  */
 Primus.prototype.open = function open() {
-  this.emit('outgoing::open');
+  //
+  // Only start a `connection timeout` procedure if we're not reconnecting as
+  // that shouldn't count as an initial connection. This should be started
+  // before the connection is opened to capture failing connections and kill the
+  // timeout.
+  //
+  if (!this.attempt && this.connection) this.timeout();
 
-  return this;
+  return this.emit('outgoing::open');
+};
+
+/**
+ * Start a connection timeout
+ *
+ * @api private
+ */
+Primus.prototype.timeout = function timeout() {
+  var primus = this;
+
+  /**
+   * Remove all references to the timeout listener as we've received an event
+   * that can be used to determine state.
+   *
+   * @api privatek
+   */
+  function remove() {
+    primus.removeListener('error', remove);
+    primus.removeListener('open', remove);
+    primus.removeListener('end', remove);
+
+    clearTimeout(primus.timer);
+    primus.timer = null;
+  }
+
+  this.timer = setTimeout(function setTimeout() {
+    remove(); // Clean up old references.
+
+    if (Primus.readyState === Primus.OPEN || primus.attempt) return;
+
+    primus.emit('timeout');
+  }, this.connection);
+
+  return this.on('error', remove)
+    .on('open', remove)
+    .on('end', remove);
 };
 
 /**
@@ -459,7 +503,7 @@ Primus.prototype.write = function write(data) {
  * @api public
  */
 Primus.prototype.end = function end(data) {
-  if (this.readyState === Primus.CLOSED) return this;
+  if (this.readyState === Primus.CLOSED && !this.timer) return this;
   if (data) this.write(data);
 
   this.writable = false;
@@ -708,7 +752,7 @@ if (
   // Normally this makes sense, when your page is still loading. But versions
   // before FireFox 22 will close all connections including WebSocket connections
   // after page load. One way to prevent this is to do a `preventDefault()` and
-  // cancel the operation before it bubbles up to the browsers's default handler.
+  // cancel the operation before it bubbles up to the browsers default handler.
   // It needs to be added as `keydown` event, if it's added keyup it will not be
   // able to prevent the connection from being closed.
   //
