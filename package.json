@@ -42,7 +42,6 @@
     "ws": "0.4.x",
     "sockjs-client-node": "0.0.x",
     "request": "2.21.x",
-    "js-binarypack": "git://github.com/jcrugzz/js-binarypack.git#make-requireable",
-    "binarypack": "0.0.x"
+    "binary-pack": "0.0.x"
   }
 }

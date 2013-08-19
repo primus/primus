@@ -1,7 +1,6 @@
 'use strict';
 
-var BinaryPack = require('binarypack')
-  , fs = require('fs');
+var BinaryPack = require('binary-pack');
 
 /**
  * Message encoder.
@@ -32,8 +31,8 @@ exports.decoder = function decoder(data, fn) {
 //
 exports.library = [
   'var BinaryPack = (function () {',
-  '  try { return require("binarypack"); }',
+  '  try { return require("binary-pack"); }',
   '  catch (e) {}',
-  fs.readFileSync(require.resolve('js-binarypack'), 'utf-8'),
+  BinaryPack.BrowserSource,
   '})();'
 ].join('\n');

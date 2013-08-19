@@ -7,6 +7,6 @@
     "server": "e-json"
   },
   "binary": {
-    "server": "binarypack js-binarypack"
+    "server": "binary-pack"
   }
 }
