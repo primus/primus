@@ -25,7 +25,6 @@ module.exports = function client() {
     return undefined;
   })();
 
-  console.log(Factory, 'factory');
   if (!Factory) return this.emit('error', new Error('No WebSocket factory'));
 
   //
