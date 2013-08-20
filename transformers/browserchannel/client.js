@@ -17,7 +17,8 @@ module.exports = function client() {
   //
   var Factory = (function factory() {
     if ('undefined' !== typeof BCSocket) return BCSocket;
-    try { return require('browserchannel').BCSocket; }
+
+    try { return Primus.require('browserchannel').BCSocket; }
     catch (e) {}
 
     return undefined;

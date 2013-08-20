@@ -1,3 +1,4 @@
+/*globals require, define */
 'use strict';
 
 /**
@@ -173,6 +174,20 @@ function Primus(url, options) {
   this.initialise(options);
 }
 
+/**
+ * Simple require wrapper to make browserify, node and require.js play nice.
+ *
+ * @param {String} name The module to require.
+ * @api private
+ */
+Primus.require = function requires(name) {
+  if ('function' !== typeof require) return undefined;
+
+  return !('function' === typeof define && define.amd)
+    ? require(name)
+    : undefined;
+};
+
 //
 // It's possible that we're running in Node.js or in a Node.js compatible
 // environment such as browserify. In these cases we want to use some build in
@@ -181,8 +196,8 @@ function Primus(url, options) {
 var Stream, parse;
 
 try {
-  parse = require('url').parse;
-  Stream = require('stream');
+  parse = Primus.require('url').parse;
+  Stream = Primus.require('stream');
 
   //
   // Normally inheritance is done in the same way as we do in our catch
@@ -192,7 +207,7 @@ try {
   //
   // @see https://github.com/joyent/node/issues/4971
   //
-  require('util').inherits(Primus, Stream);
+  Primus.require('util').inherits(Primus, Stream);
 } catch (e) {
   Primus.prototype = new EventEmitter();
 

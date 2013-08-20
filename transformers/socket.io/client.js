@@ -17,7 +17,8 @@ module.exports = function client() {
   //
   var factory = (function factory() {
     if ('undefined' !== typeof io && io.connect) return io.connect;
-    try { return require('socket.io-client').connect; }
+
+    try { return Primus.require('socket.io-client').connect; }
     catch (e) {}
 
     return undefined;
@@ -63,7 +64,7 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It asumes that the `close` event is
+  // Attempt to reconnect the socket. It assumes that the `close` event is
   // called if it failed to disconnect. Bypass the namespaces and use
   // socket.socket.
   //

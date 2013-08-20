@@ -13,11 +13,12 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available Engine.io factory.
+  // Selects an available Engine.IO factory.
   //
   var factory = (function factory() {
     if ('undefined' !== typeof eio) return eio;
-    try { return require('engine.io-client'); }
+
+    try { return Primus.require('engine.io-client'); }
     catch (e) {}
 
     return undefined;
@@ -26,7 +27,7 @@ module.exports = function client() {
   if (!factory) return this.emit('error', new Error('No Engine.IO client factory'));
 
   //
-  // Connect to the given url.
+  // Connect to the given URL.
   //
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
@@ -57,7 +58,7 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It asumes that the `close` event is
+  // Attempt to reconnect the socket. It assumes that the `close` event is
   // called if it failed to disconnect.
   //
   primus.on('outgoing::reconnect', function reconnect() {

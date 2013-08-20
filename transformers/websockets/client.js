@@ -18,12 +18,14 @@ module.exports = function client() {
   var Factory = (function factory() {
     if ('undefined' !== typeof WebSocket) return WebSocket;
     if ('undefined' !== typeof MozWebSocket) return MozWebSocket;
-    try { return require('ws'); }
+
+    try { return Primus.require('ws'); }
     catch (e) {}
 
     return undefined;
   })();
 
+  console.log(Factory, 'factory');
   if (!Factory) return this.emit('error', new Error('No WebSocket factory'));
 
   //
