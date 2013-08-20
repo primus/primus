@@ -44,6 +44,7 @@ module.exports = function client() {
     //
     // Setup the Event handlers.
     //
+    socket.binaryType = 'arraybuffer';
     socket.onopen = primus.emits('open');
     socket.onerror = primus.emits('error');
     socket.onclose = primus.emits('end');
