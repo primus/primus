@@ -1,11 +1,10 @@
-describe('Primus parsers', function () {
+describe('Parsers', function () {
   'use strict';
 
   var common = require('./common')
     , Primus = common.Primus
     , http = require('http')
     , expect = common.expect
-    , fs = require('fs')
     , server
     , primus;
 
@@ -15,10 +14,29 @@ describe('Primus parsers', function () {
     server.listen(server.portnumber, done);
   });
 
-  it('connects with the binary parser', function () {
-    var primus = new Primus(server, { parser: 'binary' });
-    var Socket = primus.Socket;
+  describe('binary', function () {
+    it('connects with the parser', function (done) {
+      var primus = new Primus(server, { parser: 'binary' })
+        , Socket = primus.Socket;
 
-    var socket = new Socket('http://localhost:' + server.portnumber);
+      var socket = new Socket('http://localhost:' + server.portnumber);
+
+      socket.on('open', function () {
+        primus.destroy(done);
+      });
+    });
   });
-})
+
+  describe('ejson', function () {
+    it('connects with the parser', function (done) {
+      var primus = new Primus(server, { parser: 'ejson' })
+        , Socket = primus.Socket;
+
+      var socket = new Socket('http://localhost:' + server.portnumber);
+
+      socket.on('open', function () {
+        primus.destroy(done);
+      });
+    });
+  });
+});

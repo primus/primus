@@ -263,7 +263,11 @@ Primus.prototype.parsers = function parsers(parser) {
 
     try { parser = require('./parsers/'+ parser); }
     catch (e) {
-      throw new Error(this.is(parser, Primus.parsers).missing());
+      if (e.code === 'MODULE_NOT_FOUND') {
+        throw new Error(this.is(parser, Primus.parsers).missing());
+      } else {
+        throw e;
+      }
     }
   } else {
     this.spec.parser = 'custom';
