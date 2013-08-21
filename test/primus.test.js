@@ -221,6 +221,28 @@ describe('Primus', function () {
       primus.use('both', { server: function () {}, client: function () {} });
     });
 
+    it('should accept function as second argument', function () {
+      var Room = function () {}
+      Room.server = function (p) { p.foo = 'bar'; };
+      Room.client = function () {};
+
+      primus.use('room', Room);
+
+      expect(primus.foo).to.equal('bar');
+    });
+
+    it('should check if energon is an object or a function', function () {
+      try { primus.use('room'); }
+      catch (e) {
+        expect(e).to.be.instanceOf(Error);
+        expect(e.message).to.include('Plugin');
+        expect(e.message).to.include('object');
+        return expect(e.message).to.include('function');
+      }
+
+      throw new Error('Should have thrown');
+    });
+
     it('returns this', function () {
       var x = primus.use('foo', { client: function () {}});
 
