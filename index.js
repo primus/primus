@@ -426,7 +426,11 @@ Primus.prototype.use = function use(name, energon) {
   if (!name) throw new Error('Plugin should be specified with a name');
   if ('string' !== typeof name) throw new Error('Plugin names should be a string');
   if ('string' === typeof energon) energon = require(energon);
-  if ('object' !== typeof energon) throw new Error('Plugin should be a object');
+
+  //
+  // Plugin accepts an object or a function only.
+  //
+  if (!/^(object|function)$/.test(typeof energon)) throw new Error('Plugin should be an object or function');
 
   //
   // Plugin require a client, server or both to be specified in the object.
