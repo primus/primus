@@ -231,6 +231,26 @@ describe('Primus', function () {
       expect(primus.foo).to.equal('bar');
     });
 
+    it('should accept instances as second argument', function () {
+      var A = function () {};
+      A.prototype.server = function (p) { p.foo = 'bar'; };
+      A.prototype.client = function () {};
+
+      var B = function () {};
+      B.prototype.server = function (p) { p.bar = 'foo'; };
+      B.prototype.client = function () {};
+
+      var a = new A;
+      var b = Object.create(B.prototype);
+
+      primus
+      .use('a', a)
+      .use('b', b);
+
+      expect(primus.foo).to.equal('bar');
+      expect(primus.bar).to.equal('foo');
+    });
+
     it('should check if energon is an object or a function', function () {
       try { primus.use('room'); }
       catch (e) {
