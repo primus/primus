@@ -49,7 +49,8 @@
       <span class="help-block">
         Sending <code>"end"</code> will close the connection, <code>{ echo: "data" }</code>
         will respond with the data you're sending and <code>{ pipe: true }</code>
-        sends the whole html file using the `.pipe` method.
+        sends the whole html file using the `.pipe` method. Or if you just want to see the
+        reconnect in action, issue a <code>"kill"</code> command to nuke the server.
       </span>
     </div>
     <div class="col-md-1">
@@ -88,7 +89,7 @@
     document.getElementById('connect').onclick = function click() {
       if (primus) primus.end();
 
-      primus = new Primus('http://primus-example.nodejitsu.com/');
+      primus = new Primus();
 
       primus.on('reconnect', function reconnect(opts) {
         log('reconnect', 'Reconnecting', 'We are <strong>scheduling</strong> a new reconnect attempt. This is attempt <strong>'+ opts.attempt +'</strong> and will trigger a reconnect operation in <strong>'+ opts.timeout +'</strong> ms.');

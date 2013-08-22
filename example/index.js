@@ -67,6 +67,14 @@ primus.on('connection', function connection(spark) {
     if (packet.pipe) fs.createReadStream(__dirname + '/index.html').pipe(spark, {
       autoClose: false
     });
+
+    //
+    // Major server kill;
+    //
+    if (packet !== 'kill') return;
+
+    primus.write('Spark: '+spark.id +' asked for a full server kill. Server will be killed within 5 seconds');
+    setTimeout(process.exit, 5000);
   });
 });
 
