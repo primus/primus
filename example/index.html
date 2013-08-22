@@ -13,11 +13,14 @@
     .btn-outline-inverse { background: transparent; color: #F4CC05; border-color: #F4CC05; border-width: 2px }
       .btn-outline-inverse:hover { color: #73146E; background: #F4CC05 }
 
+    #output { border-bottom: 115px solid #FFF }
     .output { margin: 1px 0; padding: 15px 30px 15px 15px; border-left: 5px solid #EEE }
       .output.output-reconnect { border-color: #C09853; background: #FCF8E3 }
       .output.output-error { border-color: #B94A48; background: #F2DEDE }
       .output.output-open { border-color: #468848; background: #DFF0D8 }
       .output.output-end { border-color: #333; background: #EEE }
+
+    #action { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px 0; background: #FFF; border-top: 2px solid #EEE }
   </style>
 </head>
 <body>
@@ -40,6 +43,20 @@
   <div id="output">
   </div>
 
+  <form id="action" action="#action" class="form-inline" role="form">
+    <div class="col-md-11">
+      <input type="text" class="form-control" placeholder="{ echo: 'foo' }" id="data" />
+      <span class="help-block">
+        Sending <code>"end"</code> will close the connection, <code>{ echo: "data" }</code>
+        will respond with the data you're sending and <code>{ pipe: true }</code>
+        sends the whole html file using the `.pipe` method.
+      </span>
+    </div>
+    <div class="col-md-1">
+      <button type="submit" class="btn btn-default btn-block">Submit</button>
+    </div>
+  </form>
+
   <script>
     var primus;
 
@@ -56,6 +73,18 @@
       window.scroll(0, document.body.offsetHeight);
     }
 
+    document.getElementById('action').onsubmit = function submit() {
+      if (!primus) {
+        log('error', 'Not connected', 'You need to press the `connect` button before you can send data');
+        return false;
+      }
+
+      try { primus.write((Function('return '+ document.getElementById('data').value))()); }
+      catch (e) { log('error', 'JavaScript Error', e.message); }
+
+      return false;
+    };
+
     document.getElementById('connect').onclick = function click() {
       if (primus) primus.end();
 
@@ -63,6 +92,7 @@
 
       primus.on('reconnect', function reconnect(opts) {
         log('reconnect', 'Reconnecting', 'We are <strong>scheduling</strong> a new reconnect attempt. This is attempt <strong>'+ opts.attempt +'</strong> and will trigger a reconnect operation in <strong>'+ opts.timeout +'</strong> ms.');
+        document.getElementById('connect').innerHTML = 'reconnecting';
       });
 
       primus.on('reconnect', function reconnect() {
@@ -71,6 +101,7 @@
 
       primus.on('open', function open() {
         log('open', 'Open', 'The connection has been established.');
+        document.getElementById('connect').innerHTML = 'connected';
       });
 
       primus.on('error', function error(err) {
@@ -83,6 +114,7 @@
 
       primus.on('end', function end() {
         log('end', 'End', 'The connection has closed.');
+        document.getElementById('connect').innerHTML = 'connect';
       });
     }
   </script>
