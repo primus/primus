@@ -4,32 +4,84 @@
   <meta charset="utf-8">
   <title>Primus</title>
   <script src="/primus/primus.js"></script>
+  <link rel="stylesheet" href="http://getbootstrap.com/dist/css/bootstrap.css" />
+  <style type="text/css">
+    .jumbotron { background: #73146E; color: #FFF }
+      .jumbotron h1 { font-size: 100px }
+      .jumbotron .lead { color: rgba(255, 255, 255, .8) }
+
+    .btn-outline-inverse { background: transparent; color: #F4CC05; border-color: #F4CC05; border-width: 2px }
+      .btn-outline-inverse:hover { color: #73146E; background: #F4CC05 }
+
+    .output { margin: 1px 0; padding: 15px 30px 15px 15px; border-left: 5px solid #EEE }
+      .output.output-reconnect { border-color: #C09853; background: #FCF8E3 }
+      .output.output-error { border-color: #B94A48; background: #F2DEDE }
+      .output.output-open { border-color: #468848; background: #DFF0D8 }
+      .output.output-end { border-color: #333; background: #EEE }
+  </style>
 </head>
 <body>
-  <p>
-    Welcome to Primus example.
-  </p>
+  <div class="jumbotron">
+    <div class="container">
+      <h1>Primus</h1>
+      <p class="lead">
+        This Primus example allows you to experiment with the API's and see how
+        all components interact with each other.
+      </p>
+
+      <p>
+        <a href="#" id="connect" class="btn btn-outline-inverse btn-lg">
+          connect
+        </a>
+      </p>
+    </div>
+  </div>
+
+  <div id="output">
+  </div>
 
   <script>
-    var primus = new Primus('http://localhost:8080/?query=string');
+    var primus;
 
-    primus.on('reconnect', function () {
-      console.log('primus: reconnect event happend');
-    });
+    function log(name, header, message) {
+      var div = document.createElement('div');
+      div.className = 'output output-'+ name;
 
-    primus.on('open', function () {
-      console.log('primus: connection established');
-    });
+      div.innerHTML = [
+        '<h4>'+ header +'</h4>',
+        message ? '<p>'+ message +'</p>' : ''
+      ].join('');
 
-    primus.on('error', function (err) {
-      console.log('primus: error event', err);
-    });
+      document.getElementById('output').appendChild(div);
+    }
 
-    primus.on('data', function (data) {
-      console.log('primus: received data', data);
-    });
+    document.getElementById('connect').onclick = function click() {
+      if (primus) primus.end();
 
-    primus.on('end', function () {
-      console.log('primus: connection closed');
-    });
+      primus = new Primus('/?query=string');
+
+      primus.on('reconnect', function reconnect(opts) {
+        log('reconnect', 'Reconnecting', 'We are <strong>scheduling</strong> a new reconnect attempt. This is attempt <strong>'+ opts.attempt +'</strong> and will trigger a reconnect operation in <strong>'+ opts.timeout +'</strong> ms.');
+      });
+
+      primus.on('reconnect', function reconnect() {
+        log('reconnect', 'Reconnect', 'Starting the reconnect attempt, hopefully we get a connection!');
+      });
+
+      primus.on('open', function open() {
+        log('open', 'Open', 'The connection has been established.');
+      });
+
+      primus.on('error', function error(err) {
+        log('error', 'Erorr', 'An unknown error has occured <code>'+ e.message +'</code>');
+      });
+
+      primus.on('data', function incoming(data) {
+        log('data', 'Received data', 'string' === typeof data ? data : '<pre><code>'+ JSON.stringify(data, null, 2) +'</code></pre>');
+      });
+
+      primus.on('end', function end() {
+        log('end', 'End', 'The connection has closed.');
+      });
+    }
   </script>
