@@ -47,6 +47,7 @@ npm install primus --save
   - [Extending the Spark/socket](#extending-the-spark--socket)
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
   - [Community Plugins](#community-plugins)
+- [Example](#example)
 - [FAQ](#FAQ)
   - [Scaling](#scaling)
   - [Express](#express)
@@ -878,6 +879,25 @@ see it be merged automatically.
 </dl>
 
 [Travis CI]: https://travis-ci.org/
+
+### Example
+
+There is a small example folder included in this repository which allows to
+easily play with the real-time connection. The code in the example is heavily
+commented for your reading plesures. The example does require some extra
+dependencies so don't forget to run `npm install .` in the folder. The example
+can be ran using `npm start` or if you want to customize the
+parsers/transformers you can use:
+
+```
+node index.js --transformer <name> --parser <name> --port <number>
+```
+
+The example is also hosted on [Nodejitsu] an can be accessed at:
+
+http://primus-example.nodejitsu.com/
+
+[Nodejitsu]: https://www.nodejitsu.com/
 
 ### FAQ
 
