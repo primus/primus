@@ -318,6 +318,12 @@ Primus.prototype.initialise = function initalise(options) {
 
   primus.on('incoming::error', function error(e) {
     //
+    // We received an error while connecting, this most likely the result of an
+    // unauthorized access to the server.
+    //
+    if (primus.timer) primus.end();
+
+    //
     // We're still doing a reconnect attempt, it could be that we failed to
     // connect because the server was down. Failing connect attempts should
     // always emit an `error` event instead of a `open` event.
@@ -364,8 +370,13 @@ Primus.prototype.initialise = function initalise(options) {
   });
 
   primus.on('incoming::end', function end(intentional) {
-    if (primus.readyState !== Primus.OPEN) return;
+    var readyState = primus.readyState;
+
+    //
+    // Always set the readyState to closed.
+    //
     primus.readyState = Primus.CLOSED;
+    if (readyState !== Primus.OPEN) return;
 
     //
     // Some transformers emit garbage when they close the connection. Like the
@@ -446,6 +457,8 @@ Primus.prototype.timeout = function timeout() {
     if (Primus.readyState === Primus.OPEN || primus.attempt) return;
 
     primus.emit('timeout');
+    primus.end(); // This extra event ensures that the connection is really closed.
+
   }, this.connection);
 
   return this.on('error', remove)
