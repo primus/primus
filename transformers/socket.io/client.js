@@ -38,7 +38,7 @@ module.exports = function client() {
     // source of issues and cluster failure so we want to do our best in
     // avoiding them.
     //
-    socket = factory(primus.uri('http', true).replace(primus.pathname.slice(1), ''), {
+    primus.socket = socket = factory(primus.uri('http', true).replace(primus.pathname.slice(1), ''), {
       'resource': primus.pathname.slice(1),
       'force new connection': true,
       'reconnect': false

@@ -34,7 +34,7 @@ module.exports = function client() {
 
     var url = primus.uri('http');
 
-    socket = new Factory(url, {
+    primus.socket = socket = new Factory(url, {
       extraParams: primus.querystring(primus.uri('http', true).replace(url, '')),
       reconnect: false,
     });

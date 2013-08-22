@@ -63,6 +63,16 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('exposes a .socket property', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function () {
+          expect(!!socket.socket).to.equal(true);
+          socket.end();
+          done();
+        });
+      });
+
       it('should not throw an error when we connect to a dead server', function (done) {
         var socket = new Socket('http://localhost:1024');
 

@@ -32,7 +32,7 @@ module.exports = function client() {
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    socket = new Factory(primus.uri('http', false), null, {
+    primus.socket = socket = new Factory(primus.uri('http', false), null, {
       websocket: !primus.AVOID_WEBSOCKETS
     });
 
