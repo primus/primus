@@ -302,6 +302,17 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('can force websocket avoidance', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber, {
+          websockets: false
+        });
+
+        expect(socket.AVOID_WEBSOCKETS).to.equal(true);
+        socket.end();
+
+        done();
+      });
+
       describe('#transform', function () {
         it('thrown an error if an invalid type is given', function (done) {
           var socket = new Socket('http://localhost:'+ server.portnumber);
