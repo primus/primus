@@ -511,6 +511,18 @@ module.exports = function base(transformer) {
         var socket = new Socket('http://usr:pass@localhost:'+ server.portnumber +'/?foo=bar');
         socket.on('end', done);
       });
+
+      it('should emit a timeout event if it cannot connect in a timely manner', function (done) {
+        primus.authorize(function (req, next) {
+          setTimeout(next, 1000);
+        });
+
+        var socket = new Socket('http://usr:pass@localhost:'+ server.portnumber +'/?foo=bar', {
+          timeout: 500
+        });
+
+        socket.on('timeout', done);
+      });
     });
 
     describe('Server', function () {
