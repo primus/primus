@@ -319,7 +319,8 @@ Primus.prototype.initialise = function initalise(options) {
   primus.on('incoming::error', function error(e) {
     //
     // We received an error while connecting, this most likely the result of an
-    // unauthorized access to the server.
+    // unauthorized access to the server. But this something that is only
+    // triggered for Node based connections. Browsers trigger the error event.
     //
     if (primus.timer) primus.end();
 
@@ -376,6 +377,7 @@ Primus.prototype.initialise = function initalise(options) {
     // Always set the readyState to closed.
     //
     primus.readyState = Primus.CLOSED;
+    if (primus.timer) primus.end();
     if (readyState !== Primus.OPEN) return;
 
     //
