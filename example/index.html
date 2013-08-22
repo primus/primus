@@ -106,7 +106,7 @@
       });
 
       primus.on('error', function error(err) {
-        log('error', 'Erorr', 'An unknown error has occured <code>'+ e.message +'</code>');
+        log('error', 'Erorr', 'An unknown error has occured <code>'+ err.message +'</code>');
       });
 
       primus.on('data', function incoming(data) {
