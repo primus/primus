@@ -222,7 +222,7 @@ describe('Primus', function () {
     });
 
     it('should accept function as second argument', function () {
-      var Room = function () {}
+      function Room() {}
       Room.server = function (p) { p.foo = 'bar'; };
       Room.client = function () {};
 
