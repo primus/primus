@@ -162,7 +162,9 @@ function Primus(url, options) {
   // Force the use of WebSockets, even when we've detected some potential
   // broken WebSocket implementation.
   //
-  if (options.websockets) this.AVOID_WEBSOCKETS = false;
+  if ('websockets' in options) {
+    this.AVOID_WEBSOCKETS = !options.websockets;
+  }
 
   //
   // Check if the user wants to manually initialise a connection. If they don't,
