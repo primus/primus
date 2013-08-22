@@ -135,8 +135,16 @@ Transformer.prototype.request = function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
   if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
   if (req.uri.pathname === this.specfile) return this.emit('spec', req, res);
+  if (!this.primus.auth) return this.emit('request', req, res, noop);
 
-  this.emit('request', req, res, noop);
+  var transformer = this;
+  this.primus.auth(req, function authorized(err) {
+    if (!err) return transformer.emit('request', req, res, noop);
+
+    res.statusCode = 401;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ error: err.message || err }));
+  });
 };
 
 /**
@@ -157,7 +165,14 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
   head.copy(buffy);
 
   if (!this.test(req)) return this.emit('previous::upgrade', req, socket, buffy);
-  this.emit('upgrade', req, socket, buffy, noop);
+  if (!this.primus.auth) return this.emit('upgrade', req, socket, buffy, noop);
+
+  var transformer = this;
+  this.primus.auth(req, function authorized(err) {
+    if (!err) return transformer.emit('upgrade', req, socket, buffy, noop);
+
+    socket.destroy();
+  });
 };
 
 /**

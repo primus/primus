@@ -443,6 +443,88 @@ module.exports = function base(transformer) {
       });
     });
 
+    describe('Authorization', function () {
+      it('support declined authorization', function (done) {
+        primus.authorize(function auth(req, next) {
+          expect(req.headers).to.be.a('object');
+
+          next(new Error('I failed'));
+        });
+
+        primus.on('connection', function (spark) {
+          throw new Error('Auth should be called');
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('end', done);
+        socket.on('reconnect', function () {
+          throw new Error('fuck');
+        });
+      });
+
+      it('support accepted authorization', function (done) {
+        primus.authorize(function auth(req, next) {
+          expect(req.headers).to.be.a('object');
+
+          next();
+        });
+
+        primus.on('connection', function (spark) {
+          spark.end();
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('end', done);
+        socket.on('reconnect', function () {
+          throw new Error('fuck');
+        });
+      });
+
+      it('communicates over an authorized connection', function (done) {
+        primus.authorize(function auth(req, next) {
+          expect(req.headers).to.be.a('object');
+
+          next();
+        });
+
+        primus.on('connection', function (spark) {
+          spark.on('data', function (data) {
+            expect(data).to.equal('balls');
+            spark.end();
+            done();
+          });
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+        socket.write('balls');
+      });
+
+      if (transformer.toLowerCase() === 'websockets')
+      it('should connect using basic auth', function (done) {
+        primus.on('connection', function (spark) {
+          expect(spark.headers.authorization).to.equal('Basic dXNyOnBhc3M=');
+          socket.end();
+        });
+
+        var socket = new Socket('http://usr:pass@localhost:'+ server.portnumber +'/?foo=bar');
+        socket.on('end', done);
+      });
+
+      it('should emit a timeout event if it cannot connect in a timely manner', function (done) {
+        primus.authorize(function (req, next) {
+          setTimeout(next, 1000);
+        });
+
+        var socket = new Socket('http://usr:pass@localhost:'+ server.portnumber +'/?foo=bar', {
+          timeout: 500
+        });
+
+        socket.on('timeout', done);
+      });
+    });
+
     describe('Server', function () {
       it('emits `end` when the connection is closed', function (done) {
         primus.on('connection', function (spark) {

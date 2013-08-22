@@ -513,6 +513,7 @@ Event                 | Usage       | Location      | Description
 `outgoing::reconnect` | private     | client        | Transformer should reconnect.
 `reconnecting`        | **public**  | client        | We're scheduling a reconnect.
 `reconnect`           | **public**  | client        | Reconnect attempt is about to be made.
+`timeout`             | **public**  | client        | Failed to connect to server.
 `outgoing::open`      | private     | client/spark  | Transformer should connect.
 `incoming::open`      | private     | client/spark  | Transformer has connected.
 `open`                | **public**  | client        | Connection is open.
