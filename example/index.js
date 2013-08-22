@@ -11,9 +11,16 @@
 // --port <value>         (the port number we want to listen to)
 //
 var argh = require('argh').argv
-  , Primus = require('../')
+  , Primus
   , server
   , primus;
+
+//
+// Default to the repository, but when we're deployed on a server use the latest
+// Primus instance.
+//
+try { Primus = require('../'); }
+catch (e) { Primus = require('primus'); }
 
 //
 // Some build in Node.js modules that we need:
