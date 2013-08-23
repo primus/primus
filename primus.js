@@ -533,7 +533,7 @@ Primus.prototype.timeout = function timeout() {
  * @param {String} ..args.. The names of the timeout's we need clear.
  * @api private
  */
-Primus.prototype.clearTimeout = function clearTimeout() {
+Primus.prototype.clearTimeout = function clear() {
   for (var args = arguments, i = 0, l = args.length; i < l; i++) {
     if (this.timers[args[i]]) clearTimeout(this.timers[args[i]]);
     delete this.timers[args[i]];
