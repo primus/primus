@@ -125,6 +125,7 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
  * Options:
  * - reconnect, configuration for the reconnect process.
  * - websockets, force the use of WebSockets, even when you should avoid them.
+ * - timeout, connect timeout, server didn't respond in a timely manner.
  *
  * @constructor
  * @param {String} url The URL of your server.
@@ -142,10 +143,13 @@ function Primus(url, options) {
   this.readable = true;                       // Silly stream compatibility.
   this.url = this.parse(url);                 // Parse the URL to a readable format.
   this.backoff = options.reconnect || {};     // Stores the back off configuration.
-  this.attempt = null;                        // Current back off attempt.
   this.readyState = Primus.CLOSED;            // The readyState of the connection.
   this.connection = +options.timeout || 10e3; // Connection timeout duration.
-  this.timer = null;                          // The connection timeout timer.
+  this.ping = +options.ping || 25e3;          // Heartbeat ping interval.
+  this.pong = +options.pong || 25e3;          // Heartbeat pong response timeout.
+  this.timers = {};                           // Contains all our timers.
+  this.attempt = null;                        // Current back off attempt.
+  this.socket = null;                         // Reference to the internal connection.
   this.transformers = {                       // Message transformers.
     outgoing: [],
     incoming: []
@@ -328,6 +332,10 @@ Primus.prototype.initialise = function initalise(options) {
     primus.readyState = Primus.OPEN;
     primus.emit('open');
 
+    if (primus.interval) {
+      primus.clearTimeout('ping', 'pong').heartbeat();
+    }
+
     if (primus.buffer.length) {
       for (var i = 0, length = primus.buffer.length; i < length; i++) {
         primus.write(primus.buffer[i]);
@@ -343,7 +351,7 @@ Primus.prototype.initialise = function initalise(options) {
     // unauthorized access to the server. But this something that is only
     // triggered for Node based connections. Browsers trigger the error event.
     //
-    if (primus.timer) primus.end();
+    if (primus.timers.connect) primus.end();
 
     //
     // We're still doing a reconnect attempt, it could be that we failed to
@@ -367,6 +375,13 @@ Primus.prototype.initialise = function initalise(options) {
       // reconnect again.
       //
       if ('primus::server::close' === data) return primus.end();
+
+      //
+      // We received a pong message from the server, return the id.
+      //
+      if ('string' === typeof data && data.indexOf('primus::pong::') === 0) {
+        return primus.emit('incoming::pong', data.slice(14));
+      }
 
       var transform, result, packet;
       for (transform in primus.transformers.incoming) {
@@ -398,7 +413,7 @@ Primus.prototype.initialise = function initalise(options) {
     // Always set the readyState to closed.
     //
     primus.readyState = Primus.CLOSED;
-    if (primus.timer) primus.end();
+    if (primus.timers.connect) primus.end();
     if (readyState !== Primus.OPEN) return;
 
     //
@@ -452,6 +467,31 @@ Primus.prototype.open = function open() {
 };
 
 /**
+ * Send a new heartbeat over the connection to ensure that we're still
+ * connected and our internet connection didn't drop. We cannot use server side
+ * heartbeats for this unfortunately.
+ *
+ * @TODO custom timeout of the pong.
+ * @TODO reconnect instead of timeout.
+ * @api private
+ */
+Primus.prototype.heartbeat = function heartbeat() {
+  var primus = this;
+
+  function pong() {
+    primus.clearTimeout('pong');
+    primus.end();
+  }
+
+  function ping() {
+    primus.clearTimeout('ping').write('primus::ping::'+ new Date);
+    primus.timers.pong = setTimeout(pong, primus.pong);
+  }
+
+  this.timers.ping = setTimeout(ping, this.ping);
+};
+
+/**
  * Start a connection timeout
  *
  * @api private
@@ -466,15 +506,13 @@ Primus.prototype.timeout = function timeout() {
    * @api privatek
    */
   function remove() {
-    primus.removeListener('error', remove);
-    primus.removeListener('open', remove);
-    primus.removeListener('end', remove);
-
-    clearTimeout(primus.timer);
-    primus.timer = null;
+    primus.removeListener('error', remove)
+          .removeListener('open', remove)
+          .removeListener('end', remove)
+          .clearTimeout('connect');
   }
 
-  this.timer = setTimeout(function setTimeout() {
+  this.timers.connect = setTimeout(function setTimeout() {
     remove(); // Clean up old references.
 
     if (Primus.readyState === Primus.OPEN || primus.attempt) return;
@@ -487,6 +525,21 @@ Primus.prototype.timeout = function timeout() {
   return this.on('error', remove)
     .on('open', remove)
     .on('end', remove);
+};
+
+/**
+ * Properly clean up all `setTimeout` references.
+ *
+ * @param {String} ..args.. The names of the timeout's we need clear.
+ * @api private
+ */
+Primus.prototype.clearTimeout = function clearTimeout() {
+  for (var args = arguments, i = 0, l = args.length; i < l; i++) {
+    if (this.timers[args[i]]) clearTimeout(this.timers[args[i]]);
+    delete this.timers[args[i]];
+  }
+
+  return this;
 };
 
 /**
@@ -539,11 +592,15 @@ Primus.prototype.write = function write(data) {
  * @api public
  */
 Primus.prototype.end = function end(data) {
-  if (this.readyState === Primus.CLOSED && !this.timer) return this;
+  if (this.readyState === Primus.CLOSED && !this.timers.connect) return this;
   if (data) this.write(data);
 
   this.writable = false;
   this.readyState = Primus.CLOSED;
+
+  for (var timeout in this.timers) {
+    this.clearTimeout(timeout);
+  }
 
   this.emit('outgoing::end');
   this.emit('end');
