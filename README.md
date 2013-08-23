@@ -635,7 +635,7 @@ And tell `Primus` that you want to use `sockjs` as transformer:
 var primus = new Primus(server, { transformer: 'sockjs' });
 ```
 
-If yo want to use the client interface inside of Node.js you also need to
+If you want to use the client interface inside of Node.js you also need to
 install the `sockjs-client-node` module:
 
 ```
