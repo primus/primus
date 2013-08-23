@@ -132,7 +132,7 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
  * @api private
  */
 function Primus(url, options) {
-  if (!(this instanceof Primus)) return new Primus(url);
+  if (!(this instanceof Primus)) return new Primus(url, options);
 
   options = options || {};
   var primus = this;

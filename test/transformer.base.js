@@ -73,6 +73,19 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('initialises without `new`', function (done) {
+        var socket = Socket('http://localhost:'+ server.portnumber, {
+          timeout: 50000
+        });
+
+        expect(socket.connection).to.equal(50000);
+
+        socket.on('open', function () {
+          socket.end();
+          done();
+        });
+      });
+
       it('should not throw an error when we connect to a dead server', function (done) {
         var socket = new Socket('http://localhost:1024');
 

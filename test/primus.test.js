@@ -335,7 +335,7 @@ describe('Primus', function () {
     });
 
     it('includes the prism client library', function () {
-      expect(primus.library()).to.include('Primus(url)');
+      expect(primus.library()).to.include('Primus(url, options);');
     });
 
     it('includes the configuration details', function () {
