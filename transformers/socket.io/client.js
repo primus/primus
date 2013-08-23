@@ -82,7 +82,12 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
-      socket.socket.disconnect();
+      //
+      // This method can throw an error if it failed to connect to the server.
+      //
+      try { socket.socket.disconnect(); }
+      catch (e) {}
+
       socket = null;
     }
   });
