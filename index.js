@@ -464,6 +464,25 @@ Primus.prototype.use = function use(name, energon) {
 };
 
 /**
+ * Return the given plugin.
+ *
+ * @param {String} name The name of the plugin.
+ * @returns {Mixed}
+ * @api public
+ */
+Primus.prototype.plugin = function plugin(name) {
+  if (name) return this.ark[name];
+
+  var plugins = {};
+
+  for (name in this.ark) {
+    plugins[name] = this.ark[name];
+  }
+
+  return plugins;
+};
+
+/**
  * Destroy the created Primus instance.
  *
  * Options:

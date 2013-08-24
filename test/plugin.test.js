@@ -77,8 +77,7 @@ describe('Plugin', function () {
 
   it('can instantly modify the prototype', function () {
     var server = http.createServer()
-      , primus = new Primus(server)
-      , port = common.port;
+      , primus = new Primus(server);
 
     expect(primus.channel).to.be.a('undefined');
 
@@ -89,5 +88,28 @@ describe('Plugin', function () {
     });
 
     expect(primus.channel).to.be.a('function');
+  });
+
+  describe('#plugin', function () {
+    it('returns the plugin for the given name', function () {
+      var server = http.createServer()
+        , primus = new Primus(server);
+
+      var plugin = {
+        server: function (primus) {}
+      };
+
+      primus.use('spark', plugin);
+      expect(primus.plugin('spark')).to.equal(plugin);
+      expect(primus.plugin('undef')).to.equal(undefined);
+    });
+
+    it('returns an empty Object', function () {
+      var server = http.createServer()
+        , primus = new Primus(server);
+
+      expect(primus.plugin()).to.be.a('object');
+      expect(Object.keys(primus.plugin())).to.have.length(0);
+    });
   });
 });

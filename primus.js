@@ -266,6 +266,25 @@ Primus.prototype.AVOID_WEBSOCKETS = false;
 Primus.prototype.ark = {};
 
 /**
+ * Return the given plugin.
+ *
+ * @param {String} name The name of the plugin.
+ * @returns {Mixed}
+ * @api public
+ */
+Primus.prototype.plugin = function plugin(name) {
+  if (name) return this.ark[name];
+
+  var plugins = {};
+
+  for (name in this.ark) {
+    plugins[name] = this.ark[name];
+  }
+
+  return plugins;
+};
+
+/**
  * Initialise the Primus and setup all parsers and internal listeners.
  *
  * @param {Object} options The original options object.
