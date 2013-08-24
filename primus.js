@@ -331,10 +331,7 @@ Primus.prototype.initialise = function initalise(options) {
 
     primus.readyState = Primus.OPEN;
     primus.emit('open');
-
-    if (primus.interval) {
-      primus.clearTimeout('ping', 'pong').heartbeat();
-    }
+    primus.clearTimeout('ping', 'pong').heartbeat();
 
     if (primus.buffer.length) {
       for (var i = 0, length = primus.buffer.length; i < length; i++) {
@@ -343,6 +340,10 @@ Primus.prototype.initialise = function initalise(options) {
 
       primus.buffer.length = 0;
     }
+  });
+
+  primus.on('incoming::pong', function pong(time) {
+    primus.clearInterval('pong').heartbeat();
   });
 
   primus.on('incoming::error', function error(e) {
@@ -471,20 +472,32 @@ Primus.prototype.open = function open() {
  * connected and our internet connection didn't drop. We cannot use server side
  * heartbeats for this unfortunately.
  *
- * @TODO custom timeout of the pong.
- * @TODO reconnect instead of timeout.
  * @api private
  */
 Primus.prototype.heartbeat = function heartbeat() {
   var primus = this;
 
+  if (!primus.interval) return this;
+
+  /**
+   * Exterminate the connection as we've timed out.
+   *
+   * @api private
+   */
   function pong() {
     primus.clearTimeout('pong');
-    primus.end();
+    primus.emit('end');
+    primus.emit('incoming::end');
   }
 
+  /**
+   * We should send a ping message to the server.
+   *
+   * @api private
+   */
   function ping() {
     primus.clearTimeout('ping').write('primus::ping::'+ new Date);
+    primus.emit('outgoing::ping');
     primus.timers.pong = setTimeout(pong, primus.pong);
   }
 
