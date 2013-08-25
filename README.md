@@ -257,16 +257,16 @@ primus.on('connection', function (spark) {
 
 ### Broadcasting
 
-Broadcasting allows you to write a message to every connected `Spark` on your server. 
-There are 2 different ways of doing broadcasting in Primus. The easiest way is to 
+Broadcasting allows you to write a message to every connected `Spark` on your server.
+There are 2 different ways of doing broadcasting in Primus. The easiest way is to
 use the `Primus#write` method which will write a message to every connected user:
 
 ```js
 primus.write(message);
 ```
 
-There are cases where you only want to broadcast a message to a smaller group of 
-users. To make it easier to do this, we've added a `Primus#forEach` method which 
+There are cases where you only want to broadcast a message to a smaller group of
+users. To make it easier to do this, we've added a `Primus#forEach` method which
 allows you to iterate over all active connections.
 
 ```js
@@ -276,6 +276,39 @@ primus.forEach(function (spark, id, connections) {
   spark.write('message');
 });
 ```
+
+### Authorization
+
+Primus has a built in auth hook that allows you to leverage the basic auth header to validate
+the connection. To setup the optional auth hook, use the `Primus#authorize` method:
+
+```js
+var authParser = require('basic-auth-parser');
+
+//
+// Add hook on server
+//
+primus.authorize(function (req, done) {
+  var auth;
+
+  try { auth = authParser(req.headers['authorization']) }
+  catch (ex) { /* Sad face */ }
+
+  //
+  // Do some async auth check
+  //
+  authCheck(auth, done);
+});
+
+primus.on('connection', function (spark) {
+  //
+  // You only get here if you make it through the auth hook!
+  //
+});
+```
+
+In this particular case, if an error is returned from the `authCheck` function,
+the connection attempt will never make it to the `primus.on('connection')`.
 
 ### Destruction
 
@@ -482,7 +515,7 @@ a server side client.
    access to your `primus` instance and the compatible `Socket` instance. For
    these cases there a special `createSocket` method where you can specify the
    `transformer`, `parser`, `plugin` that you are using on your server to create
-   another compatible socket. 
+   another compatible socket.
 
    ```js
    var Socket = Primus.createSocket({ transformer: transformer, parser: parser })
@@ -790,7 +823,7 @@ primus.transform('incoming', function (packet) {
   // The packet.data contains the actual message that either received or
   // transformed.
   //
-  
+
   // This would transform all incoming messages to foo;
   packet.data = 'foo';
 
@@ -932,7 +965,7 @@ var express = require('express')
 
 var server = require('http').createServer(app)
   , primus = new Primus(server, { options });
-  
+
 server.listen(port);
 ```
 
