@@ -65,7 +65,7 @@ primus.on('connection', function connection(spark) {
     // Pipe in some data.
     //
     if (packet.pipe) fs.createReadStream(__dirname + '/index.html').pipe(spark, {
-      autoClose: false
+      end: false
     });
 
     //
