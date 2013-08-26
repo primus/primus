@@ -52,6 +52,7 @@ npm install primus --save
   - [Scaling](#scaling)
   - [Express](#express)
 - [Versioning](#versioning)
+  - [Release cycle](#release-cycle)
 - [License](#license)
 
 ### Getting Started
@@ -997,6 +998,17 @@ semver as closely as possible but this is how we use our version numbering:
     </p>
   </dd>
 </dl>
+
+#### Release cycle
+
+There isn't a steady or monthly release cycle. I usually release a new 
+version when:
+
+1. A critical bug is discovered.
+2. There has been a lot of minor changes.
+3. A framework did a incompatible update.
+4. A new framework is added
+5. People ask for it.
 
 ### License
 
