@@ -89,7 +89,7 @@
     document.getElementById('connect').onclick = function click() {
       if (primus) primus.end();
 
-      primus = new Primus('http://primus-example.nodejitsu.com/');
+      primus = new Primus();
 
       primus.on('reconnect', function reconnect(opts) {
         log('reconnect', 'Reconnecting', 'We are <strong>scheduling</strong> a new reconnect attempt. This is attempt <strong>'+ opts.attempt +'</strong> and will trigger a reconnect operation in <strong>'+ opts.timeout +'</strong> ms.');
