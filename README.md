@@ -562,6 +562,8 @@ Event                 | Usage       | Location      | Description
 `connection`          | **public**  | server        | We received a new connection.
 `disconnection`       | **public**  | server        | A connection closed.
 `initialised`         | **public**  | server        | The server is initialised.
+`incoming::pong`      | private     | server        | We received a pong message.
+`outgoing::pong`      | private     | server        | We're sending a ping message.
 
 ### Supported Real-time Frameworks
 
