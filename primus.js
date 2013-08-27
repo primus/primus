@@ -126,6 +126,8 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
  * - reconnect, configuration for the reconnect process.
  * - websockets, force the use of WebSockets, even when you should avoid them.
  * - timeout, connect timeout, server didn't respond in a timely manner.
+ * - ping, The heartbeat interval for sending a ping packet to the server.
+ * - pong, The heartbeat timeout for receiving a response to the ping.
  *
  * @constructor
  * @param {String} url The URL of your server.
@@ -246,9 +248,9 @@ try {
  * @type {Number}
  * @private
  */
-Primus.OPENING = 0;   // We're opening the connection.
-Primus.CLOSED  = 1;   // No active connection.
-Primus.OPEN    = 2;   // The connection is open.
+Primus.OPENING = 1;   // We're opening the connection.
+Primus.CLOSED  = 2;   // No active connection.
+Primus.OPEN    = 3;   // The connection is open.
 
 /**
  * Are we working with a potentially broken WebSockets implementation? This
@@ -297,31 +299,6 @@ Primus.prototype.plugin = function plugin(name) {
 Primus.prototype.initialise = function initalise(options) {
   var primus = this;
 
-  /**
-   * Start a new reconnect procedure.
-   *
-   * @api private
-   */
-  function reconnect() {
-    primus.attempt = primus.attempt || primus.clone(primus.backoff);
-
-    primus.reconnect(function reconnect(fail, backoff) {
-      // Save the opts again of this back off, so they re-used.
-      primus.attempt = backoff;
-
-      if (fail) {
-        primus.attempt = null;
-        return primus.emit('end');
-      }
-
-      //
-      // Try to re-open the connection again.
-      //
-      primus.emit('reconnect', backoff);
-      primus.emit('outgoing::reconnect');
-    }, primus.attempt);
-  }
-
   primus.on('outgoing::open', function opening() {
     primus.readyState = Primus.OPENING;
   });
@@ -343,7 +320,7 @@ Primus.prototype.initialise = function initalise(options) {
   });
 
   primus.on('incoming::pong', function pong(time) {
-    primus.clearInterval('pong').heartbeat();
+    primus.clearTimeout('pong').heartbeat();
   });
 
   primus.on('incoming::error', function error(e) {
@@ -359,7 +336,7 @@ Primus.prototype.initialise = function initalise(options) {
     // connect because the server was down. Failing connect attempts should
     // always emit an `error` event instead of a `open` event.
     //
-    if (primus.attempt) return reconnect();
+    if (primus.attempt) return primus.reconnect();
     if (primus.listeners('error').length) primus.emit('error', e);
   });
 
@@ -430,7 +407,7 @@ Primus.prototype.initialise = function initalise(options) {
     // The disconnect was unintentional, probably because the server shut down.
     // So we should just start a reconnect procedure.
     //
-    reconnect();
+    primus.reconnect(readyState);
   });
 
   //
@@ -468,6 +445,49 @@ Primus.prototype.open = function open() {
 };
 
 /**
+ * Send a new message.
+ *
+ * @param {Mixed} data The data that needs to be written.
+ * @returns {Boolean} Always returns true.
+ * @api public
+ */
+Primus.prototype.write = function write(data) {
+  var primus = this
+    , transform
+    , packet;
+
+  if (Primus.OPEN === this.readyState) {
+    for (transform in primus.transformers.outgoing) {
+      packet = { data: data };
+
+      if (false === primus.transformers.outgoing[transform].call(primus, packet)) {
+        //
+        // When false is returned by an incoming transformer it means that's
+        // being handled by the transformer and we should not emit the `data`
+        // event.
+        //
+        return;
+      }
+
+      data = packet.data;
+    }
+
+    this.encoder(data, function encoded(err, packet) {
+      //
+      // Do a "save" emit('error') when we fail to parse a message. We don't
+      // want to throw here as listening to errors should be optional.
+      //
+      if (err) return primus.listeners('error').length && primus.emit('error', err);
+      primus.emit('outgoing::data', packet);
+    });
+  } else {
+    primus.buffer.push(data);
+  }
+
+  return true;
+};
+
+/**
  * Send a new heartbeat over the connection to ensure that we're still
  * connected and our internet connection didn't drop. We cannot use server side
  * heartbeats for this unfortunately.
@@ -477,7 +497,7 @@ Primus.prototype.open = function open() {
 Primus.prototype.heartbeat = function heartbeat() {
   var primus = this;
 
-  if (!primus.interval) return this;
+  if (!primus.ping) return this;
 
   /**
    * Exterminate the connection as we've timed out.
@@ -486,7 +506,6 @@ Primus.prototype.heartbeat = function heartbeat() {
    */
   function pong() {
     primus.clearTimeout('pong');
-    primus.emit('end');
     primus.emit('incoming::end');
   }
 
@@ -496,7 +515,7 @@ Primus.prototype.heartbeat = function heartbeat() {
    * @api private
    */
   function ping() {
-    primus.clearTimeout('ping').write('primus::ping::'+ new Date);
+    primus.clearTimeout('ping').write('primus::ping::'+ (+new Date));
     primus.emit('outgoing::ping');
     primus.timers.pong = setTimeout(pong, primus.pong);
   }
@@ -556,72 +575,6 @@ Primus.prototype.clearTimeout = function clear() {
 };
 
 /**
- * Send a new message.
- *
- * @param {Mixed} data The data that needs to be written.
- * @returns {Boolean} Always returns true.
- * @api public
- */
-Primus.prototype.write = function write(data) {
-  var primus = this
-    , transform
-    , packet;
-
-  if (Primus.OPEN === this.readyState) {
-    for (transform in primus.transformers.outgoing) {
-      packet = { data: data };
-
-      if (false === primus.transformers.outgoing[transform].call(primus, packet)) {
-        //
-        // When false is returned by an incoming transformer it means that's
-        // being handled by the transformer and we should not emit the `data`
-        // event.
-        //
-        return;
-      }
-
-      data = packet.data;
-    }
-
-    this.encoder(data, function encoded(err, packet) {
-      //
-      // Do a "save" emit('error') when we fail to parse a message. We don't
-      // want to throw here as listening to errors should be optional.
-      //
-      if (err) return primus.listeners('error').length && primus.emit('error', err);
-      primus.emit('outgoing::data', packet);
-    });
-  } else {
-    primus.buffer.push(data);
-  }
-
-  return true;
-};
-
-/**
- * Close the connection.
- *
- * @param {Mixed} data last packet of data.
- * @api public
- */
-Primus.prototype.end = function end(data) {
-  if (this.readyState === Primus.CLOSED && !this.timers.connect) return this;
-  if (data) this.write(data);
-
-  this.writable = false;
-  this.readyState = Primus.CLOSED;
-
-  for (var timeout in this.timers) {
-    this.clearTimeout(timeout);
-  }
-
-  this.emit('outgoing::end');
-  this.emit('end');
-
-  return this;
-};
-
-/**
  * Exponential back off algorithm for retry operations. It uses an randomized
  * retry so we don't DDOS our server when it goes down under pressure.
  *
@@ -629,7 +582,7 @@ Primus.prototype.end = function end(data) {
  * @param {Object} opts Options for configuring the timeout.
  * @api private
  */
-Primus.prototype.reconnect = function reconnect(callback, opts) {
+Primus.prototype.exponentialBackoff = function backoff(callback, opts) {
   opts = opts || {};
 
   opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
@@ -644,7 +597,9 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
     return callback(new Error('Unable to retry'), opts);
   }
 
-  // Prevent duplicate back off attempts.
+  //
+  // Prevent duplicate back off attempts using the same options object.
+  //
   opts.backoff = true;
 
   //
@@ -670,6 +625,61 @@ Primus.prototype.reconnect = function reconnect(callback, opts) {
     opts.backoff = false;
     callback(undefined, opts);
   }, opts.timeout);
+
+  return this;
+};
+
+/**
+ * Start a new reconnect procedure.
+ *
+ * @api private
+ */
+Primus.prototype.reconnect = function reconnect(readyState) {
+  readyState = readyState || this.readyState;
+
+  var primus = this;
+
+  //
+  // Try to re-use the existing attempt.
+  //
+  this.attempt = this.attempt || this.clone(primus.backoff);
+
+  this.exponentialBackoff(function attempt(fail, backoff) {
+    // Save the opts again of this back off, so they re-used.
+    primus.attempt = backoff;
+
+    if (fail) {
+      primus.attempt = null;
+      return primus.emit('end');
+    }
+
+    //
+    // Try to re-open the connection again.
+    //
+    primus.emit('reconnect', backoff);
+    primus.emit('outgoing::reconnect');
+  }, this.attempt);
+};
+
+/**
+ * Close the connection.
+ *
+ * @param {Mixed} data last packet of data.
+ * @api public
+ */
+Primus.prototype.end = function end(data) {
+  if (this.readyState === Primus.CLOSED && !this.timers.connect) return this;
+  if (data) this.write(data);
+
+  this.writable = false;
+  this.readyState = Primus.CLOSED;
+
+  for (var timeout in this.timers) {
+    this.clearTimeout(timeout);
+  }
+
+  this.emit('outgoing::end');
+  this.emit('end');
 
   return this;
 };
