@@ -611,7 +611,7 @@ Primus.prototype.exponentialBackoff = function backoff(callback, opts) {
   //
   opts.timeout = opts.attempt !== 1
     ? Math.min(Math.round(
-        (Math.random() * 1) * opts.minDelay * Math.pow(opts.factor, opts.attempt)
+        (Math.random() + 1) * opts.minDelay * Math.pow(opts.factor, opts.attempt)
       ), opts.maxDelay)
     : opts.minDelay;
 
