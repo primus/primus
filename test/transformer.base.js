@@ -288,6 +288,7 @@ module.exports = function base(transformer) {
           expect(socket.attempt.minDelay).to.equal(100);
           expect(socket.attempt.maxDelay).to.equal(2000);
           expect(socket.attempt.timeout).to.be.below(2000);
+          expect(socket.attempt.timeout).to.be.above(99);
         });
 
         socket.once('open', function () {

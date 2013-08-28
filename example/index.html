@@ -19,6 +19,7 @@
       .output.output-error { border-color: #B94A48; background: #F2DEDE }
       .output.output-open { border-color: #468848; background: #DFF0D8 }
       .output.output-end { border-color: #333; background: #EEE }
+      .output.output-network{ border-color: #D0E3F0; background: #F0F7FD }
 
     #action { position: fixed; bottom: 0; left: 0; width: 100%; padding: 10px 0; background: #FFF; border-top: 2px solid #EEE }
   </style>
@@ -98,6 +99,14 @@
 
       primus.on('reconnect', function reconnect() {
         log('reconnect', 'Reconnect', 'Starting the reconnect attempt, hopefully we get a connection!');
+      });
+
+      primus.on('online', function online() {
+        log('network', 'Online', 'We have regained control over our internet connection');
+      });
+
+      primus.on('offline', function online() {
+        log('network', 'Offline', 'We lost our internet connection');
       });
 
       primus.on('open', function open() {
