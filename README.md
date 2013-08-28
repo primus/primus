@@ -422,6 +422,9 @@ access will try to reconect again**.
 We automatically disable this for you when you've setup the authorization before
 you save the library.
 
+[reconnect]: #reconnect
+[strategy]: #strategy
+
 #### primus.write(message)
 
 Once you've created your Primus instance you're ready to go. When you want to
