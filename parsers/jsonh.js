@@ -10,8 +10,12 @@ var JSONH = require('jsonh');
  * @api public
  */
 exports.encoder = function encoder(data, fn) {
-  try { fn(undefined, JSONH.stringify(data)); }
-  catch (e) { fn(e); }
+var err;
+
+  try { data = JSONH.stringify(data); }
+  catch (e) { err = e; }
+
+  fn(err, data);
 };
 
 /**
@@ -22,8 +26,12 @@ exports.encoder = function encoder(data, fn) {
  * @api public
  */
 exports.decoder = function decoder(data, fn) {
-  try { fn(undefined, JSONH.parse(data)); }
-  catch (e) { fn(e); }
+  var err;
+
+  try { data = JSONH.parse(data); }
+  catch (e) { err = e; }
+
+  fn(err, data);
 };
 
 //

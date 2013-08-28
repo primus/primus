@@ -10,8 +10,12 @@ var EJSON = require('e-json');
  * @api public
  */
 exports.encoder = function encoder(data, fn) {
-  try { fn(undefined, EJSON.stringify(data)); }
-  catch (e) { fn(e); }
+  var err;
+
+  try { data = EJSON.stringify(data); }
+  catch (e) { err = e; }
+
+  fn(err, data);
 };
 
 /**
@@ -22,8 +26,12 @@ exports.encoder = function encoder(data, fn) {
  * @api public
  */
 exports.decoder = function decoder(data, fn) {
-  try { fn(undefined, EJSON.parse(data)); }
-  catch (e) { fn(e); }
+  var err;
+
+  try { data = EJSON.parse(data); }
+  catch (e) { err = e; }
+
+  fn(err, data);
 };
 
 //

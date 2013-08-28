@@ -203,8 +203,10 @@ Spark.prototype._write = function _write(data) {
     // these characters with a properly escaped version for those chars. This can
     // cause errors with JSONP requests or if the string is just evaluated.
     //
-    if (~packet.indexOf('\u2028')) packet = packet.replace(u2028, '\\u2028');
-    if (~packet.indexOf('\u2029')) packet = packet.replace(u2029, '\\u2029');
+    if ('string' == typeof packet) {
+      if (~packet.indexOf('\u2028')) packet = packet.replace(u2028, '\\u2028');
+      if (~packet.indexOf('\u2029')) packet = packet.replace(u2029, '\\u2029');
+    }
 
     spark.emit('outgoing::data', packet);
   });
