@@ -564,6 +564,8 @@ Event                 | Usage       | Location      | Description
 `initialised`         | **public**  | server        | The server is initialised.
 `incoming::pong`      | private     | server        | We received a pong message.
 `outgoing::pong`      | private     | server        | We're sending a ping message.
+`online`              | **public**  | client        | We've regained a network connection
+`offline`             | **public**  | client        | We've lost our internet connection
 
 ### Supported Real-time Frameworks
 
