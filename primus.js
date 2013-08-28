@@ -129,7 +129,8 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
  * - timeout, connect timeout, server didn't respond in a timely manner.
  * - ping, The heartbeat interval for sending a ping packet to the server.
  * - pong, The heartbeat timeout for receiving a response to the ping.
- * - network, Use network events as leading
+ * - network, Use network events as leading method for network connection drops.
+ * - strategy, Reconnection strategies
  *
  * @constructor
  * @param {String} url The URL of your server.
@@ -139,18 +140,20 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
 function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url, options);
 
-  options = options || {};
   var primus = this;
+
+  options = options || {};
+  options.timeout = +options.timeout || 10e3;   // Connection timeout duration.
+  options.reconnect = options.reconnect || {};  // Stores the back off configuration.
+  options.ping = +options.ping || 25e3;         // Heartbeat ping interval.
+  options.pong = +options.pong || 10e3;         // Heartbeat pong response timeout.
+  options.strategy = options.strategy || [];    // Reconnect strategies.
 
   primus.buffer = [];                           // Stores premature send data.
   primus.writable = true;                       // Silly stream compatibility.
   primus.readable = true;                       // Silly stream compatibility.
   primus.url = primus.parse(url);               // Parse the URL to a readable format.
-  primus.backoff = options.reconnect || {};     // Stores the back off configuration.
   primus.readyState = Primus.CLOSED;            // The readyState of the connection.
-  primus.connection = +options.timeout || 10e3; // Connection timeout duration.
-  primus.ping = +options.ping || 25e3;          // Heartbeat ping interval.
-  primus.pong = +options.pong || 25e3;          // Heartbeat pong response timeout.
   primus.options = options;                     // Reference to the supplied options.
   primus.timers = {};                           // Contains all our timers.
   primus.attempt = null;                        // Current back off attempt.
@@ -159,6 +162,26 @@ function Primus(url, options) {
     outgoing: [],
     incoming: []
   };
+
+  //
+  // Parse the reconnection strategy. It can have the following strategies:
+  //
+  // - timeout: Reconnect when we have a network timeout.
+  // - disconnect: Reconnect when we have an unexpected disconnect.
+  // - online: Reconnect when we're back online
+  //
+  if ('string' === typeof options.strategy) options.strategy = options.strategy.split(/\s?\,\s?/g);
+  if (!options.strategy.length) {
+    options.strategy.push('disconnect', 'online');
+
+    //
+    // Timeout based reconnection should only be enabled conditionally. When
+    // authorization is enabled it could trigger
+    //
+    if (!this.authorization) options.strategy.push('timeout');
+  }
+
+  options.strategy = options.strategy.join(',').toLowerCase();
 
   //
   // Only initialise the EventEmitter interface if we're running in a plain
@@ -188,8 +211,8 @@ function Primus(url, options) {
   // we want to do it after a really small timeout so we give the users enough
   // time to listen for `error` events etc.
   //
-  if (!options.manual) setTimeout(function open() {
-    primus.open();
+  if (!options.manual) primus.timers.open = setTimeout(function open() {
+    primus.clearTimeout('open').open();
   }, 0);
 
   primus.initialise(options);
@@ -350,12 +373,7 @@ Primus.prototype.initialise = function initalise(options) {
   });
 
   primus.on('incoming::error', function error(e) {
-    //
-    // We received an error while connecting, this most likely the result of an
-    // unauthorized access to the server. But this something that is only
-    // triggered for Node based connections. Browsers trigger the error event.
-    //
-    if (primus.timers.connect) primus.end();
+    var connect = primus.timers.connect;
 
     //
     // We're still doing a reconnect attempt, it could be that we failed to
@@ -364,6 +382,16 @@ Primus.prototype.initialise = function initalise(options) {
     //
     if (primus.attempt) return primus.reconnect();
     if (primus.listeners('error').length) primus.emit('error', e);
+
+    //
+    // We received an error while connecting, this most likely the result of an
+    // unauthorized access to the server. But this something that is only
+    // triggered for Node based connections. Browsers trigger the error event.
+    //
+    if (connect) {
+      if (~primus.options.strategy.indexOf('timeout')) primus.reconnect();
+      else primus.end();
+    }
   });
 
   primus.on('incoming::data', function message(raw) {
@@ -433,7 +461,7 @@ Primus.prototype.initialise = function initalise(options) {
     // The disconnect was unintentional, probably because the server shut down.
     // So we should just start a reconnect procedure.
     //
-    primus.reconnect(readyState);
+    if (~primus.options.strategy.indexOf('disconnect')) primus.reconnect();
   });
 
   //
@@ -471,7 +499,8 @@ Primus.prototype.initialise = function initalise(options) {
 
   window.addEventListener('online', function online() {
     primus.emit('online');
-    primus.reconnect();
+
+    if (~primus.options.strategy.indexOf('online')) primus.reconnect();
   }, false);
 
   return primus;
@@ -491,7 +520,7 @@ Primus.prototype.open = function open() {
   // before the connection is opened to capture failing connections and kill the
   // timeout.
   //
-  if (!this.attempt && this.connection) this.timeout();
+  if (!this.attempt && this.options.timeout) this.timeout();
 
   return this.emit('outgoing::open');
 };
@@ -549,7 +578,7 @@ Primus.prototype.write = function write(data) {
 Primus.prototype.heartbeat = function heartbeat() {
   var primus = this;
 
-  if (!primus.ping) return primus;
+  if (!primus.options.ping) return primus;
 
   /**
    * Exterminate the connection as we've timed out.
@@ -570,10 +599,10 @@ Primus.prototype.heartbeat = function heartbeat() {
   function ping() {
     primus.clearTimeout('ping').write('primus::ping::'+ (+new Date));
     primus.emit('outgoing::ping');
-    primus.timers.pong = setTimeout(pong, primus.pong);
+    primus.timers.pong = setTimeout(pong, primus.options.pong);
   }
 
-  primus.timers.ping = setTimeout(ping, primus.ping);
+  primus.timers.ping = setTimeout(ping, primus.options.ping);
 };
 
 /**
@@ -588,7 +617,7 @@ Primus.prototype.timeout = function timeout() {
    * Remove all references to the timeout listener as we've received an event
    * that can be used to determine state.
    *
-   * @api privatek
+   * @api private
    */
   function remove() {
     primus.removeListener('error', remove)
@@ -603,9 +632,13 @@ Primus.prototype.timeout = function timeout() {
     if (Primus.readyState === Primus.OPEN || primus.attempt) return;
 
     primus.emit('timeout');
-    primus.end(); // This extra event ensures that the connection is really closed.
 
-  }, primus.connection);
+    //
+    // We failed to connect to the server.
+    //
+    if (~primus.options.strategy.indexOf('timeout')) primus.reconnect();
+    else primus.end();
+  }, primus.options.timeout);
 
   return primus.on('error', remove)
     .on('open', remove)
@@ -635,7 +668,7 @@ Primus.prototype.clearTimeout = function clear() {
  * @param {Object} opts Options for configuring the timeout.
  * @api private
  */
-Primus.prototype.exponentialBackoff = function backoff(callback, opts) {
+Primus.prototype.backoff = function backoff(callback, opts) {
   opts = opts || {};
 
   var primus = this;
@@ -646,9 +679,18 @@ Primus.prototype.exponentialBackoff = function backoff(callback, opts) {
   opts.attempt = (+opts.attempt || 0) + 1;    // Current attempt.
   opts.factor = opts.factor || 2;             // Back off factor.
 
+  //
+  // Bailout when we already have a backoff process running. We shouldn't call
+  // the callback then as it might cause an unexpected `end` event as another
+  // reconnect process is already running.
+  //
+  if (opts.backoff) return;
+
+  //
   // Bailout if we are about to make to much attempts. Please note that we use
   // `>` because we already incremented the value above.
-  if (opts.attempt > opts.retries || opts.backoff) {
+  //
+  if (opts.attempt > opts.retries) {
     return callback(new Error('Unable to retry'), opts);
   }
 
@@ -697,9 +739,9 @@ Primus.prototype.reconnect = function reconnect() {
   //
   // Try to re-use the existing attempt.
   //
-  primus.attempt = primus.attempt || primus.clone(primus.backoff);
+  primus.attempt = primus.attempt || primus.clone(primus.options.reconnect);
 
-  primus.exponentialBackoff(function attempt(fail, backoff) {
+  primus.backoff(function attempt(fail, backoff) {
     // Save the opts again of this back off, so they re-used.
     primus.attempt = backoff;
 
@@ -874,6 +916,7 @@ Primus.EventEmitter = EventEmitter;
 // These libraries are automatically are automatically inserted at the
 // server-side using the Primus#library method.
 //
+Primus.prototype.authorization = null; // @import {primus::auth};
 Primus.prototype.pathname = null; // @import {primus::pathname};
 Primus.prototype.client = null; // @import {primus::transport};
 Primus.prototype.encoder = null; // @import {primus::encoder};
