@@ -10,8 +10,12 @@ var BinaryPack = require('binary-pack');
  * @api public
  */
 exports.encoder = function encoder(data, fn) {
-  try { fn(undefined, BinaryPack.pack(data)); }
-  catch (e) { fn(e); }
+  var err;
+
+  try { data = BinaryPack.pack(data); }
+  catch (e) { err = e; }
+
+  fn(err, data);
 };
 
 /**
@@ -22,8 +26,12 @@ exports.encoder = function encoder(data, fn) {
  * @api public
  */
 exports.decoder = function decoder(data, fn) {
-  try { fn(undefined, BinaryPack.unpack(data)); }
-  catch (e) { fn(e); }
+  var err;
+
+  try { data = BinaryPack.unpack(data); }
+  catch (e) { err = e; }
+
+  fn(err, data);
 };
 
 //

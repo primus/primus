@@ -8,8 +8,12 @@
  * @api public
  */
 exports.encoder = function encoder(data, fn) {
-  try { fn(undefined, JSON.stringify(data)); }
-  catch (e) { fn(e); }
+  var err;
+
+  try { data = JSON.stringify(data); }
+  catch (e) { err = e; }
+
+  fn(err, data);
 };
 
 /**
@@ -20,6 +24,10 @@ exports.encoder = function encoder(data, fn) {
  * @api public
  */
 exports.decoder = function decoder(data, fn) {
-  try { fn(undefined, JSON.parse(data)); }
-  catch (e) { fn(e); }
+  var err;
+
+  try { data = JSON.parse(data); }
+  catch (e) { err = e; }
+
+  fn(err, data);
 };
