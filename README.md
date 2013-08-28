@@ -345,6 +345,83 @@ var primus = new Primus(url, { options });
 var primus = Primus.connect(url, { options });
 ```
 
+The following options can be provided:
+
+Name                | Description                             | Default       
+--------------------|-----------------------------------------|---------------
+[reconnect]         | Configures the exponential back off     | `{}`
+timeout             | Connect time out                        | `10000` ms
+ping                | Ping interval to test connection        | `25000` ms
+pong                | Time the server has to respond to ping  | `10000` ms
+[strategy]          | Our reconnect strategies                | `"disconnect,online,timeout"`
+manual              | Manually open the connection            | `false`
+websockets          | Should we AVOID the usage of WebSockets | Boolean, is detected.
+network             | Use native `online`/`offline` detection | Boolean, is feature detected.
+
+There are 2 important options that we're going to look a bit closer at.
+
+##### Reconnect
+
+As said above, the reconnect option allows you to configure the randomized
+exponential back-off algorithm that we're using to restore connectivity. It has
+a couple of options that can be configured:
+
+Name                | Description                             | Default       
+--------------------|-----------------------------------------|---------------
+maxDelay            | The maximum delay of a reconnect        | `Infinity`
+minDelay            | The minium delay of the reconnect       | `500`
+retries             | Amount of allowed reconnects.           | 10
+
+When you're going to customize the delays do take in to account they they will
+grow exponentially e.g. `500 -> 1000 -> 2000 -> 4000 -> 8000` and are randomized
+so the actual values might be slightly higher or lower then this.
+
+##### Strategy
+
+The strategy allows you to configure when you want a `reconnect` operation to
+kick in. We're providing some **sane** defaults for this but we still want to
+provide users with highest level of customization:
+
+<dl>
+  <dt>disconnect</dt>
+  <dd>
+    Reconnect when we detect an unintential disconnect in the connection.
+  </dd>
+  <dt>online</dt>
+  <dd>
+    Reconnect when the browser went from an offline event to an online event.
+  </dd>
+  <dt>timeout</dt>
+  <dd>
+    Reconnect when we failed to establish our initial connection. This can
+    happen because we took to long to connect or because there was an error
+    while we tried to connect (which happens when you connect to a dead server)
+  </dd>
+</dl>
+
+You can supply these options as a comma separated `String`:
+
+```js
+var primus = new Primus(url, { strategy: 'online, timeout ,diScoNNect' })
+```
+
+Or as an `Array`:
+
+```js
+var primus = new Primus(url, { strategy: [ 'online', 'timeout', 'diScoNNect' ]});
+```
+
+We'll try to normalize everything as much as possible, we `toLowerCase` everything
+and join it back to a readable string.
+
+**If you are using authentication you should disable the `timeout` strategy as
+there is no way of detecting the difference between a failed authorization and a
+failed connect. If you leave this enabled with authorization every unauthorized
+access will try to reconect again**.
+
+We automatically disable this for you when you've setup the authorization before
+you save the library.
+
 #### primus.write(message)
 
 Once you've created your Primus instance you're ready to go. When you want to
