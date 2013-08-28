@@ -78,7 +78,7 @@ module.exports = function base(transformer) {
           timeout: 50000
         });
 
-        expect(socket.connection).to.equal(50000);
+        expect(socket.options.timeout).to.equal(50000);
 
         socket.on('open', function () {
           socket.end();
