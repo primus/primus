@@ -128,6 +128,7 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
  * - timeout, connect timeout, server didn't respond in a timely manner.
  * - ping, The heartbeat interval for sending a ping packet to the server.
  * - pong, The heartbeat timeout for receiving a response to the ping.
+ * - network, Use network events as leading
  *
  * @constructor
  * @param {String} url The URL of your server.
@@ -149,6 +150,7 @@ function Primus(url, options) {
   this.connection = +options.timeout || 10e3; // Connection timeout duration.
   this.ping = +options.ping || 25e3;          // Heartbeat ping interval.
   this.pong = +options.pong || 25e3;          // Heartbeat pong response timeout.
+  this.options = options;                     // Reference to the supplied options.
   this.timers = {};                           // Contains all our timers.
   this.attempt = null;                        // Current back off attempt.
   this.socket = null;                         // Reference to the internal connection.
@@ -170,6 +172,14 @@ function Primus(url, options) {
   //
   if ('websockets' in options) {
     this.AVOID_WEBSOCKETS = !options.websockets;
+  }
+
+  //
+  // Force or disable the use of NETWORK events as leading client side
+  // disconnection detection.
+  //
+  if ('network' in options) {
+    this.NETWORK_EVENTS = options.network;
   }
 
   //
@@ -261,6 +271,21 @@ Primus.OPEN    = 3;   // The connection is open.
  * @api private
  */
 Primus.prototype.AVOID_WEBSOCKETS = false;
+
+/**
+ * Some browsers support registering emitting `online` and `offline` events when
+ * the connection has been dropped on the client. We're going to detect it in
+ * a simple `try {} catch (e) {}` statement so we don't have to do complicated
+ * feature detection.
+ *
+ * @type {Boolean}
+ * @api private
+ */
+Primus.prototype.NETWORK_EVENTS = false;
+
+try {
+  Primus.prototype.NETWORK_EVENTS =  'onLine' in navigator && window.addEventListener;
+} catch (e) { }
 
 /**
  * The Ark contains all our plugins definitions. It's namespaced by
@@ -422,6 +447,32 @@ Primus.prototype.initialise = function initalise(options) {
     primus.ark[plugin].call(primus, primus, options);
   }
 
+  //
+  // NOTE: The following code is only required if we're supporting network
+  // events as it requires access to browser globals. We can safely use the
+  // `window.addEventListener` as we've already feature detected it when we set
+  // the boolean. In addition to that, older version if Internet Explorer
+  // doesn't support these online/offline events.
+  //
+  // There are some small implementation details that we're ignoring here and
+  // that is that these events can be triggered when the user put's the browser
+  // in "offline" mode. There is also a small bug in IE8 where these events do
+  // not bubble up to the `window` but only work on the `document.body` but
+  // other browsers do not work when you listen to the `document.body` so we're
+  // ignoring IE8's bug in favour of proper use this API.
+  //
+  if (!this.NETWORK_EVENTS) return primus;
+
+  window.addEventListener('offline', function offline() {
+    primus.emit('offline');
+    primus.end();
+  }, false);
+
+  window.addEventListener('online', function online() {
+    primus.emit('online');
+    primus.reconnect();
+  }, false);
+
   return primus;
 };
 
@@ -506,6 +557,7 @@ Primus.prototype.heartbeat = function heartbeat() {
    */
   function pong() {
     primus.clearTimeout('pong');
+    primus.emit('offline');
     primus.emit('incoming::end');
   }
 
@@ -585,6 +637,8 @@ Primus.prototype.clearTimeout = function clear() {
 Primus.prototype.exponentialBackoff = function backoff(callback, opts) {
   opts = opts || {};
 
+  var primus = this;
+
   opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
   opts.minDelay = opts.minDelay || 500;       // Minimum delay.
   opts.retries = opts.retries || 10;          // Amount of allowed retries.
@@ -621,8 +675,10 @@ Primus.prototype.exponentialBackoff = function backoff(callback, opts) {
   //
   this.emit('reconnecting', opts);
 
-  setTimeout(function delay() {
+  this.timers.reconnect = setTimeout(function delay() {
     opts.backoff = false;
+    primus.clearTimeout('reconnect');
+
     callback(undefined, opts);
   }, opts.timeout);
 
@@ -634,9 +690,7 @@ Primus.prototype.exponentialBackoff = function backoff(callback, opts) {
  *
  * @api private
  */
-Primus.prototype.reconnect = function reconnect(readyState) {
-  readyState = readyState || this.readyState;
-
+Primus.prototype.reconnect = function reconnect() {
   var primus = this;
 
   //
