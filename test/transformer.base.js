@@ -549,6 +549,31 @@ module.exports = function base(transformer) {
 
         socket.on('timeout', done);
       });
+
+      it('should reconnect after the timeout', function (done) {
+        primus.authorize(function (req, next) {
+          setTimeout(next, 1000);
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber, { timeout: 10 })
+          , pattern = [];
+
+        socket.on('timeout', function () {
+          pattern.push('timeout');
+        });
+
+        socket.once('reconnecting', function () {
+          pattern.push('reconnecting');
+        });
+
+        socket.once('reconnect', function () {
+          pattern.push('reconnect');
+          expect(pattern.join(',')).to.equal('timeout,reconnecting,reconnect');
+
+          socket.end();
+          done();
+        });
+      });
     });
 
     describe('Server', function () {
