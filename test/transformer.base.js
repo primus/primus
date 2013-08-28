@@ -480,7 +480,8 @@ module.exports = function base(transformer) {
           throw new Error('Auth should be called');
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var Socket = Primus.createSocket({ transformer: transformer, authorization: true })
+          , socket = new Socket('http://localhost:'+ server.portnumber);
 
         socket.on('end', done);
         socket.on('reconnect', function () {
