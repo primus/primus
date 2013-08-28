@@ -362,9 +362,11 @@ There are 2 important options that we're going to look a bit closer at.
 
 ##### Reconnect
 
-As said above, the reconnect option allows you to configure the randomized
-exponential back-off algorithm that we're using to restore connectivity. It has
-a couple of options that can be configured:
+When the connection goes down unexpectedly a automatic reconnect process is
+started. It's using a randomized exponential backoff algorithm to prevent
+clients to DDOS your server when you reboot as they will all be re-connecting at
+different times. The reconnection can be configured using the `options` argument
+in `Primus` and you should add these options to the `reconnect` property:
 
 Name                | Description                             | Default       
 --------------------|-----------------------------------------|---------------
@@ -372,9 +374,26 @@ maxDelay            | The maximum delay of a reconnect        | `Infinity`
 minDelay            | The minium delay of the reconnect       | `500`
 retries             | Amount of allowed reconnects.           | 10
 
+```js
+primus = Primus.connect(url, {
+  reconnect: {
+      maxDelay: Infinity // Number: The max delay for a reconnect retry.
+    , minDelay: 500 // Number: The minimum delay before we reconnect.
+    , retries: 10 // Number: How many times should we attempt to reconnect.
+  }
+});
+```
+
 When you're going to customize the delays do take in to account they they will
 grow exponentially e.g. `500 -> 1000 -> 2000 -> 4000 -> 8000` and are randomized
 so the actual values might be slightly higher or lower then this.
+
+Please do note when we reconnect, you will receive a new `connection` event on
+the server. As the previous connection was completely dead and should there for
+be considered a new connection as well as an `open` event on the client.
+
+If you are interested in learning more about the backoff algorithm you might
+want to read http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
 
 ##### Strategy
 
@@ -531,44 +550,6 @@ to talk with the server again.
 
 ```js
 primus.end();
-```
-
-#### Reconnecting
-
-When the connection goes down unexpectedly a automatic reconnect process is
-started. It's using a randomized exponential backoff algorithm to prevent
-clients to DDOS your server when you reboot as they will all be re-connecting at
-different times. The reconnection can be configured using the `options` argument
-in `Primus` and you should add these options to the `backoff` property:
-
-```js
-primus = Primus.connect(url, {
-  backoff: {
-    maxDelay: Infinity // Number: The max delay for a reconnect retry.
-  , minDelay: 500 // Number: The minimum delay before we reconnect.
-  , retries: 10 // Number: How many times should we attempt to reconnect.
-  , factor: 2 // Number The backoff factor.
-  }
-});
-```
-
-Please do note when we reconnect, you will receive a new `connection` event on
-the server. As the previous connection was completely dead and should there for
-be considered a new connection.
-
-If you are interested in learning more about the backoff algorithm you might
-want to read http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
-
-```js
-var primus = Primus.connect(url);
-
-primus.on('data', function (message) {
-  console.log('received a message', message);
-
-  primus.write({ echo: message });
-});
-
-primus.write('hello world');
 ```
 
 ### Connecting from the server
