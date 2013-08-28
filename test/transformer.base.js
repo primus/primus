@@ -733,8 +733,8 @@ module.exports = function base(transformer) {
             });
 
             primus.on('connection', function (spark) {
-              spark.on('outgoing::data', function () {
-                throw new Error('return false should prevent this emit');
+              spark.on('outgoing::data', function (data) {
+                if (~data.indexOf('foo')) throw new Error('return false should prevent this emit');
               });
 
               spark.write('foo');
