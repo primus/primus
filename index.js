@@ -20,16 +20,16 @@ function Primus(server, options) {
   options = options || {};
   var primus = this;
 
-  this.transformer = null;                // Reference to the real-time engine instance.
-  this.encoder = null;                    // Shorthand to the parser's encoder.
-  this.decoder = null;                    // Shorthand to the parser's decoder.
-  this.auth = null;                       // Do we have an authorization handler.
-  this.sparks = 0;                        // Increment id for connection ids.
-  this.connected = 0;                     // Connection counter.
-  this.connections = Object.create(null); // Connection storage.
-  this.ark = Object.create(null);         // Plugin storage.
-  this.options = options;                 // The configuration.
-  this.transformers = {                   // Message transformers.
+  this.transformer = null;                    // Reference to the real-time engine instance.
+  this.encoder = null;                        // Shorthand to the parser's encoder.
+  this.decoder = null;                        // Shorthand to the parser's decoder.
+  this.auth = options.authorization || null;  // Do we have an authorization handler.
+  this.sparks = 0;                            // Increment id for connection ids.
+  this.connected = 0;                         // Connection counter.
+  this.connections = Object.create(null);     // Connection storage.
+  this.ark = Object.create(null);             // Plugin storage.
+  this.options = options;                     // The configuration.
+  this.transformers = {                       // Message transformers.
     outgoing: [],
     incoming: []
   };
@@ -354,6 +354,7 @@ Primus.prototype.library = function compile(nodejs) {
     .replace('null; // @import {primus::pathname}', '"'+ this.pathname.toString() +'"')
     .replace('null; // @import {primus::version}', '"'+ this.version +'"')
     .replace('null; // @import {primus::transport}', transport.toString())
+    .replace('null; // @import {primus::auth}', (!!this.auth).toString())
     .replace('null; // @import {primus::encoder}', encoder.toString())
     .replace('null; // @import {primus::decoder}', decoder.toString());
 
