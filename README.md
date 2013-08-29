@@ -623,6 +623,7 @@ Event                 | Usage       | Location      | Description
 `connection`          | **public**  | server        | We received a new connection.
 `disconnection`       | **public**  | server        | A connection closed.
 `initialised`         | **public**  | server        | The server is initialised.
+`close`               | **public**  | server        | The server has been destroyed.
 `incoming::pong`      | private     | server        | We received a pong message.
 `outgoing::pong`      | private     | server        | We're sending a ping message.
 `online`              | **public**  | client        | We've regained a network connection
