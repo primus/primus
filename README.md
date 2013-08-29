@@ -52,6 +52,8 @@ npm install primus --save
   - [Scaling](#scaling)
   - [Express](#express)
 - [Versioning](#versioning)
+  - [History](#history)
+  - [Convention](#convention)
   - [Release cycle](#release-cycle)
 - [License](#license)
 
@@ -1036,6 +1038,13 @@ server.listen(port);
 ```
 
 ### Versioning
+
+#### History
+
+[You can discover the version history and changelogs on the Releases Page](https://github.com/3rd-Eden/primus/releases)
+
+
+#### Convention
 
 All `0.x.x` releases should be considered unstable and not ready for production.
 The version number is laid out as: `major.minor.patch` and tries to follow
