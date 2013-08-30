@@ -1,6 +1,6 @@
 {
   "name": "example",
-  "version": "0.0.2",
+  "version": "0.0.2-3",
   "description": "Example application written for Primus",
   "main": "index.js",
   "scripts": {

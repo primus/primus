@@ -306,9 +306,14 @@ Primus.prototype.AVOID_WEBSOCKETS = false;
  * @api private
  */
 Primus.prototype.NETWORK_EVENTS = false;
+Primus.prototype.online = true;
 
 try {
-  Primus.prototype.NETWORK_EVENTS =  'onLine' in navigator && window.addEventListener;
+  if (Primus.prototype.NETWORK_EVENTS = 'onLine' in navigator && window.addEventListener) {
+    if (!navigator.onLine) {
+      Primus.prototype.online = false;
+    }
+  }
 } catch (e) { }
 
 /**
@@ -369,6 +374,7 @@ Primus.prototype.initialise = function initalise(options) {
   });
 
   primus.on('incoming::pong', function pong(time) {
+    primus.online = true;
     primus.clearTimeout('pong').heartbeat();
   });
 
@@ -493,11 +499,13 @@ Primus.prototype.initialise = function initalise(options) {
   if (!primus.NETWORK_EVENTS) return primus;
 
   window.addEventListener('offline', function offline() {
+    primus.online = false;
     primus.emit('offline');
     primus.end();
   }, false);
 
   window.addEventListener('online', function online() {
+    primus.online = true;
     primus.emit('online');
 
     if (~primus.options.strategy.indexOf('online')) primus.reconnect();
@@ -587,6 +595,13 @@ Primus.prototype.heartbeat = function heartbeat() {
    */
   function pong() {
     primus.clearTimeout('pong');
+
+    //
+    // The network events already captured the offline event.
+    //
+    if (primus.online) return;
+
+    primus.online = false;
     primus.emit('offline');
     primus.emit('incoming::end');
   }

@@ -630,6 +630,7 @@ Event                 | Usage       | Location      | Description
 `outgoing::pong`      | private     | server        | We're sending a ping message.
 `online`              | **public**  | client        | We've regained a network connection
 `offline`             | **public**  | client        | We've lost our internet connection
+`log`                 | **public**  | server        | Log messages.
 
 ### Supported Real-time Frameworks
 
