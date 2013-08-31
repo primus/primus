@@ -648,7 +648,7 @@ module:
 npm install engine.io --save
 ```
 
-And tell `Primus` that you want to us `engine.io` as transformer:
+And tell `Primus` that you want to use `engine.io` as transformer:
 
 ```js
 var primus = new Primus(server, { transformer: 'engine.io' });
