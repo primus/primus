@@ -1,6 +1,6 @@
 # Primus
 
-[![Build Status](https://travis-ci.org/3rd-Eden/primus.png)](https://travis-ci.org/3rd-Eden/primus)
+[![Build Status](https://travis-ci.org/primus/primus.png)](https://travis-ci.org/primus/primus)
 [![NPM version](https://badge.fury.io/js/primus.png)](http://badge.fury.io/js/primus)
 
 Primus, the creator god of transformers but now also known as universal wrapper
@@ -1043,8 +1043,7 @@ server.listen(port);
 
 #### History
 
-[You can discover the version history and changelogs on the Releases Page](https://github.com/3rd-Eden/primus/releases)
-
+[You can discover the version history and changelogs on the Releases Page](https://github.com/primus/primus/releases)
 
 #### Convention
 
