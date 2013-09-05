@@ -32,6 +32,13 @@ module.exports = function client() {
   primus.on('outgoing::open', function open() {
     if (socket) socket.disconnect();
 
+    var transports = io.transports;
+
+    if (primus.AVOID_WEBSOCKETS) {
+        transports.splice(transports.indexOf('websocket'), 1);
+    }
+
+    console.log(transports);
     //
     // We need to remove the pathname here as Socket.IO will assume that we want
     // to connect to a namespace instead. The name spaces in Socket.IO are known
@@ -42,7 +49,7 @@ module.exports = function client() {
       'resource': primus.pathname.slice(1),
       'force new connection': true,
       'reconnect': false,
-      'transports': primus.AVOID_WEBSOCKETS ? ['flashsocket','xhr-polling'] : null
+      'transports': transports
     });
 
     //
