@@ -41,7 +41,8 @@ module.exports = function client() {
     primus.socket = socket = factory(primus.uri('http', true).replace(primus.pathname.slice(1), ''), {
       'resource': primus.pathname.slice(1),
       'force new connection': true,
-      'reconnect': false
+      'reconnect': false,
+      'transports': primus.AVOID_WEBSOCKETS ? ['flashsocket','xhr-polling'] : null
     });
 
     //
