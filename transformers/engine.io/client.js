@@ -32,7 +32,7 @@ module.exports = function client() {
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    primus.socket = socket = factory(primus.uri('ws', true), {
+    primus.socket = socket = factory(primus.uri({ protocol: 'ws', query: true }), {
       path: this.pathname,
       transports: !primus.AVOID_WEBSOCKETS
         ? ['polling', 'websocket']

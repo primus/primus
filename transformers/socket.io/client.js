@@ -15,16 +15,16 @@ module.exports = function client() {
   //
   // Selects an available Socket.IO constructor.
   //
-  var factory = (function factory() {
-    if ('undefined' !== typeof io && io.connect) return io.connect;
+  var Factory = (function factory() {
+    if ('undefined' !== typeof io && io.connect) return io.Socket;
 
-    try { return Primus.require('socket.io-client').connect; }
+    try { return Primus.require('socket.io-client').Socket; }
     catch (e) {}
 
     return undefined;
   })();
 
-  if (!factory) return this.emit('error', new Error('No Socket.IO client factory'));
+  if (!Factory) return this.emit('error', new Error('No Socket.IO client factory'));
 
   //
   // Connect to the given URL.
@@ -33,16 +33,15 @@ module.exports = function client() {
     if (socket) socket.disconnect();
 
     //
-    // We need to remove the pathname here as Socket.IO will assume that we want
-    // to connect to a namespace instead. The name spaces in Socket.IO are known
-    // source of issues and cluster failure so we want to do our best in
-    // avoiding them.
+    // We need to directly use the parsed URL details here to generate the
+    // correct urls for Socket.IO to use.
     //
-    primus.socket = socket = factory(primus.uri('http', true).replace(primus.pathname.slice(1), ''), {
+    primus.socket = socket = (new Factory(primus.merge({}, primus.url, primus.uri({ protocol: 'http', object: true }), {
       'resource': primus.pathname.slice(1),
       'force new connection': true,
+      'flash policy port': 843,
       'reconnect': false
-    });
+    }))).of(''); // Force namespace
 
     //
     // Setup the Event handlers.
@@ -69,10 +68,12 @@ module.exports = function client() {
   // socket.socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
-    if (socket) {
+    if (socket && socket.socket) {
       socket.socket.disconnect();
       socket.connected = socket.socket.connecting = socket.socket.reconnecting = false;
       socket.socket.connect();
+    } else {
+      primus.emit('outgoing::open');
     }
   });
 

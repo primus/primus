@@ -39,7 +39,7 @@ module.exports = function client() {
     // behaviour between different browsers. This should ideally be solved in
     // Primus when we connect.
     //
-    try { primus.socket = socket = new Factory(primus.uri('ws', true)); }
+    try { primus.socket = socket = new Factory(primus.uri({ protocol: 'ws', query: true })); }
     catch (e) { return primus.emit('error', e); }
 
     //
