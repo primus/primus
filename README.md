@@ -982,6 +982,21 @@ see it be merged automatically.
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="http://github.com/swissmanu/primus-responder">primus-responder</a></dt>
+  <dd>
+    Client and server plugin that adds a request/response cycle to Primus.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/swissmanu/primus-responder">
+      <img src="https://travis-ci.org/swissmanu/primus-responder.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-responder">
+      <img src="https://badge.fury.io/js/primus-responder.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
 [Travis CI]: https://travis-ci.org/
 
 ### Example
