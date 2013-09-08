@@ -884,17 +884,12 @@ Primus.prototype.uri = function uri(options, querystring) {
 
   options = options || {};
   options.protocol = 'protocol' in options ? options.protocol : 'http';
-  options.query = 'query' in options ? options.query : false;
+  options.query = url.search && 'query' in options ? (url.search.charAt(0) === '?' ? url.search.slice(1) : url.search) : false;
   options.secure = 'secure' in options ? options.secure : url.protocol === 'https:';
   options.auth = 'auth' in options ? options.auth : url.auth;
   options.pathname = 'pathname' in options ? options.pathname : this.pathname.slice(1);
   options.port = 'port' in options ? options.port : url.port || (options.secure ? 443 : 80);
   options.host = 'host' in options ? options.host : url.hostname || url.host.replace(':'+ url.port, '');
-
-  //
-  // Don't generate an URL, we need the configured options.
-  //
-  if (options.object === true) return options;
 
   //
   // Automatically suffix the protocol so we can supply `ws` and `http` and it gets
@@ -915,7 +910,9 @@ Primus.prototype.uri = function uri(options, querystring) {
   // Optionally add a search query, again, not supported by all Transformers.
   // SockJS is known to throw errors when a query string is included.
   //
-  if (url.search && options.query) server.push(url.search);
+  if (options.query) server.push('?'+ options.search);
+
+  if (options.object) return options;
   return server.join('/');
 };
 
