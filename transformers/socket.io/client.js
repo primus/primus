@@ -36,7 +36,11 @@ module.exports = function client() {
     // We need to directly use the parsed URL details here to generate the
     // correct urls for Socket.IO to use.
     //
-    primus.socket = socket = (new Factory(primus.merge({}, primus.url, primus.uri({ protocol: 'http', object: true }), {
+    primus.socket = socket = (new Factory(primus.merge({}, primus.url, primus.uri({
+      protocol: 'http',
+      query: true,
+      object: true
+    }), {
       'resource': primus.pathname.slice(1),
       'force new connection': true,
       'flash policy port': 843,
