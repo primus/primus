@@ -686,7 +686,7 @@ And tell `Primus` that you want to use `WebSockets` as transformer:
 var primus = new Primus(server, { transformer: 'websockets' });
 ```
 
-The `WebSockets` transformer comes with build in client support and can be
+The `WebSockets` transformer comes with built-in client support and can be
 accessed using:
 
 ```js
