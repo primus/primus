@@ -334,18 +334,16 @@ Primus.prototype.library = function compile(nodejs) {
   // Add a simple export wrapper so it can be used as Node.js, AMD or browser
   // client.
   //
-  var client = [
-    '(function (name, context, definition) {',
-    '  if (typeof module !== "undefined" && module.exports) {',
-    '    module.exports = definition();',
-    '  } else if (typeof define == "function" && define.amd) {',
-    '    define(definition);',
-    '  } else {',
-    '    context[name] = definition();',
-    '  }',
-    '})("Primus", this, function PRIMUS() {',
-    this.client
-  ].join('\n');
+  var client = '(function (name, context, definition) {'
+    + '  if (typeof module !== "undefined" && module.exports) {'
+    + '    module.exports = definition();'
+    + '  } else if (typeof define == "function" && define.amd) {'
+    + '    define(definition);'
+    + '  } else {'
+    + '    context[name] = definition();'
+    + '  }'
+    + '})("Primus", this, function PRIMUS() {'
+    + this.client;
 
   //
   // Replace some basic content.
