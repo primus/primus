@@ -334,7 +334,7 @@ primus.destroy({ timeout: 10000 });
 
 ### Connecting from the Browser.
 
-Primus comes with it's client framework which can be compiled using
+Primus comes with its client framework which can be compiled using
 `primus.library()` as mentioned above. To create a connection you can simply
 create a new Primus instance:
 
