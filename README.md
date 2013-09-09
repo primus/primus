@@ -1078,7 +1078,7 @@ semver as closely as possible but this is how we use our version numbering:
   <dd>
     <p>
       New features are added or a big change has happened with one of the
-      real-time libraries that we've supporting.
+      real-time libraries that we're supporting.
     </p>
   </dd>
   <dt>patch</dt>
