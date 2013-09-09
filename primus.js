@@ -806,14 +806,28 @@ Primus.prototype.end = function end(data) {
  * @api private
  */
 Primus.prototype.clone = function clone(obj) {
-  var copy = {}
-    , key;
+  return this.merge({}, obj);
+};
 
-  for (key in obj) {
-    if (obj.hasOwnProperty(key)) copy[key] = obj[key];
+/**
+ * Merge different objects in to one target object.
+ *
+ * @param {Object} target The object where everything should be merged in.
+ * @returns {Object} target
+ * @api private
+ */
+Primus.prototype.merge = function merge(target) {
+  var args = Array.prototype.slice.call(arguments, 1);
+
+  for (var i = 0, l = args.length, key, obj; i < l; i++) {
+    obj = args[i];
+
+    for (key in obj) {
+      if (obj.hasOwnProperty(key)) target[key] = obj[key];
+    }
   }
 
-  return copy;
+  return target;
 };
 
 /**
@@ -852,19 +866,53 @@ Primus.prototype.querystring = function querystring(query) {
  *
  * @param {String} protocol The protocol that should used to crate the URI.
  * @param {Boolean} querystring Do we need to include a query string.
- * @returns {String} The URL.
+ * @returns {String|options} The URL.
  * @api private
  */
-Primus.prototype.uri = function uri(protocol, querystring) {
-  var server = [];
-
-  server.push(this.url.protocol === 'https:' ? protocol +'s:' : protocol +':', '');
-  server.push(this.url.auth ? this.url.auth + '@' + this.url.host : this.url.host, this.pathname.slice(1));
+Primus.prototype.uri = function uri(options, querystring) {
+  var url = this.url
+    , server = [];
 
   //
-  // Optionally add a search query.
+  // Backwards compatible with Primus 1.4.0
+  // @TODO Remove me for Primus 2.0
   //
-  if (this.url.search && querystring) server.push(this.url.search);
+  if ('string' === typeof options) {
+    options = { protocol: options };
+    if (querystring) options.query = querystring;
+  }
+
+  options = options || {};
+  options.protocol = 'protocol' in options ? options.protocol : 'http';
+  options.query = url.search && 'query' in options ? (url.search.charAt(0) === '?' ? url.search.slice(1) : url.search) : false;
+  options.secure = 'secure' in options ? options.secure : url.protocol === 'https:';
+  options.auth = 'auth' in options ? options.auth : url.auth;
+  options.pathname = 'pathname' in options ? options.pathname : this.pathname.slice(1);
+  options.port = 'port' in options ? options.port : url.port || (options.secure ? 443 : 80);
+  options.host = 'host' in options ? options.host : url.hostname || url.host.replace(':'+ url.port, '');
+
+  //
+  // Automatically suffix the protocol so we can supply `ws` and `http` and it gets
+  // transformed correctly.
+  //
+  server.push(options.secure ? options.protocol +'s:' : options.protocol +':', '');
+
+  if (options.auth) server.push(options.auth +'@'+ url.host);
+  else server.push(url.host);
+
+  //
+  // Pathnames are optional as some Transformers would just use the pathname
+  // directly.
+  //
+  if (options.pathname) server.push(options.pathname);
+
+  //
+  // Optionally add a search query, again, not supported by all Transformers.
+  // SockJS is known to throw errors when a query string is included.
+  //
+  if (options.query) server.push('?'+ options.search);
+
+  if (options.object) return options;
   return server.join('/');
 };
 

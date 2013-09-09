@@ -32,10 +32,10 @@ module.exports = function client() {
   primus.on('outgoing::open', function connect() {
     if (socket) socket.close();
 
-    var url = primus.uri('http');
+    var url = primus.uri({ protocol: 'http' });
 
     primus.socket = socket = new Factory(url, {
-      extraParams: primus.querystring(primus.uri('http', true).replace(url, '')),
+      extraParams: primus.querystring(primus.uri({ protocol: 'http', query: true }).replace(url, '')),
       reconnect: false,
     });
 
