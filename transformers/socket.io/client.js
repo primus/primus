@@ -35,10 +35,20 @@ module.exports = function client() {
     var transports = io.transports;
 
     if (primus.AVOID_WEBSOCKETS) {
-        transports.splice(transports.indexOf('websocket'), 1);
+      var found = false;
+
+      for (var index = 0; index < transports.length; index += 1) {
+        if (transports[index] === 'websocket') {
+          found = true;
+          break;
+        }
+      }
+
+      if (found) {
+        transports.splice(index, 1);
+      }
     }
 
-    console.log(transports);
     //
     // We need to remove the pathname here as Socket.IO will assume that we want
     // to connect to a namespace instead. The name spaces in Socket.IO are known
