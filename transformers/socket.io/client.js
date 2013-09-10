@@ -30,7 +30,8 @@ module.exports = function client() {
   // Connect to the given URL.
   //
   primus.on('outgoing::open', function open() {
-    if (socket) socket.disconnect();
+    if (socket) try { socket.disconnect(); }
+    catch (e) {}
 
     //
     // We need to directly use the parsed URL details here to generate the
@@ -72,11 +73,12 @@ module.exports = function client() {
   // socket.socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
-    if (socket && socket.socket) {
+    try {
       socket.socket.disconnect();
       socket.connected = socket.socket.connecting = socket.socket.reconnecting = false;
       socket.socket.connect();
-    } else {
+    } catch (e) {
+      socket = null;
       primus.emit('outgoing::open');
     }
   });
