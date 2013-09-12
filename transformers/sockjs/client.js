@@ -24,7 +24,7 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Factory) return this.emit('error', new Error('No SockJS client factory'));
+  if (!Factory) return primus.critical(new Error('Missing required `sockjs-client-node` module. Please run `npm install --save sockjs-client-node`'));
 
   //
   // Connect to the given URL.

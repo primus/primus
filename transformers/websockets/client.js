@@ -25,7 +25,8 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Factory) return this.emit('error', new Error('No WebSocket factory'));
+  if (!Factory) return primus.critical(new Error('Missing required `ws` module. Please run `npm install --save ws`'));
+
 
   //
   // Connect to the given URL.

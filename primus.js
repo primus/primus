@@ -959,6 +959,19 @@ Primus.prototype.transform = function transform(type, fn) {
 };
 
 /**
+ * A critical error has occured, if we have an `error` listener, emit it there.
+ * If not, throw it, so we get a stacktrace + proper error message.
+ *
+ * @param {Error} err The critical error.
+ * @api private
+ */
+Primus.prototype.critical = function critical(err) {
+  if (this.listeners('error').length) return this.emit('error', err);
+
+  throw err;
+};
+
+/**
  * Syntax sugar, adopt a Socket.IO like API.
  *
  * @param {String} url The URL we want to connect to.

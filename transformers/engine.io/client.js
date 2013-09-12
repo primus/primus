@@ -24,7 +24,7 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!factory) return this.emit('error', new Error('No Engine.IO client factory'));
+  if (!factory) return primus.critical(new Error('Missing required `engine.io-client` module. Please run `npm install --save engine.io-client`'));
 
   //
   // Connect to the given URL.

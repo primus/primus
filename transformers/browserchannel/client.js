@@ -24,7 +24,7 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Factory) return this.emit('error', new Error('No Browserchannel client factory'));
+  if (!Factory) return primus.critical(new Error('Missing required `browserchannel` module. Please run `npm install --save browserchannel`'));
 
   //
   // Connect to the given URL.

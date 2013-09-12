@@ -24,7 +24,7 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Factory) return this.emit('error', new Error('No Socket.IO client factory'));
+  if (!Factory) return primus.critical(new Error('Missing required `socket.io-client` module. Please run `npm install --save socket.io-client`'));
 
   //
   // Connect to the given URL.
