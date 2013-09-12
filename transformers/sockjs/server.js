@@ -20,8 +20,12 @@ module.exports = function server() {
   // the next tick).
   //
   this.service.on('connection', function connection(socket) {
+    var headers = socket.headers.via;
+    headers.via = headers._via;
+    socket.headers.via = null;
+
     var spark = new Spark(
-        socket.headers                      // HTTP request headers.
+        headers                             // HTTP request headers.
       , socket                              // IP address location.
       , {}                                  // Query string, not allowed by SockJS.
       , socket.id                           // Unique connection id.
@@ -40,8 +44,22 @@ module.exports = function server() {
   //
   // Listen to upgrade requests.
   //
-  this.service.installHandlers(this, {
+  var handle = this.service.listener({
     prefix: primus.pathname,
     log: this.logger.plain
+  }).getHandler();
+
+  this.on('upgrade', function upgrade(req, socket, head) {
+    var headers = req.headers;
+    headers._via = req.headers.via;
+    req.headers.via = headers;
+
+    handle.call(this, req, socket, head);
+  }).on('request', function request(req, res) {
+    var headers = req.headers;
+    headers._via = req.headers.via;
+    req.headers.via = headers;
+
+    handle.call(this, req, res);
   });
 };
