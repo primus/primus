@@ -49,6 +49,13 @@ module.exports = function server() {
     log: this.logger.plain
   }).getHandler();
 
+  //
+  // Here be demons. SockJS has this really horrible "security" feature where it
+  // limits the HTTP headers that you're allowed to see and use in your
+  // applications. I whole heartly disagree with this decision so we're hacking
+  // around this by storing the full header in an accepted header key and re-use
+  // that when we construct a Primus Spark.
+  //
   this.on('upgrade', function upgrade(req, socket, head) {
     var headers = req.headers;
     headers._via = req.headers.via;
