@@ -688,18 +688,18 @@ Primus.prototype.backoff = function backoff(callback, opts) {
 
   var primus = this;
 
-  opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
-  opts.minDelay = opts.minDelay || 500;       // Minimum delay.
-  opts.retries = opts.retries || 10;          // Amount of allowed retries.
-  opts.attempt = (+opts.attempt || 0) + 1;    // Current attempt.
-  opts.factor = opts.factor || 2;             // Back off factor.
-
   //
   // Bailout when we already have a backoff process running. We shouldn't call
   // the callback then as it might cause an unexpected `end` event as another
   // reconnect process is already running.
   //
   if (opts.backoff) return;
+
+  opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
+  opts.minDelay = opts.minDelay || 500;       // Minimum delay.
+  opts.retries = opts.retries || 10;          // Amount of allowed retries.
+  opts.attempt = (+opts.attempt || 0) + 1;    // Current attempt.
+  opts.factor = opts.factor || 2;             // Back off factor.
 
   //
   // Bailout if we are about to make to much attempts. Please note that we use
