@@ -625,6 +625,18 @@ module.exports = function base(transformer) {
         socket.on('end', done);
       });
 
+      it('should receive all headers', function (done) {
+        primus.on('connection', function (spark) {
+          expect(spark.headers).to.be.a('object');
+          expect(spark.headers).to.have.property('connection');
+
+          socket.end();
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber +'/?foo=bar');
+        socket.on('end', done);
+      });
+
       it('should not trigger a reconnect when we end the connection', function (done) {
         primus.on('connection', function (spark) {
           spark.end();
