@@ -161,7 +161,8 @@ primus.on('disconnection', function (spark) {
 The `spark` the actual real-time socket/connection. Sparks have a really low
 level interface and only expose a couple properties that are cross engine
 supported. The interface is modeled towards a Node.js stream compatible
-interface.
+interface. So this will include all methods that are available on the 
+[stream interface](http://nodejs.org/api/stream.html) including `Spark#pipe`.
 
 #### spark.headers
 
