@@ -271,6 +271,27 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should not increment the attempt if a backoff is running', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        var backoff = {}
+          , result = socket.backoff(function () {
+              socket.end();
+            }, backoff);
+
+        expect(backoff.attempt).to.equal(1);
+        expect(result).to.equal(socket);
+
+        result = socket.backoff(function () {
+          throw new Error('I should not be called yo');
+        }, backoff);
+
+        expect(backoff.attempt).to.equal(1);
+        expect(result).to.equal(socket);
+
+        socket.on('end', done);
+      });
+
       it('shoud reset the reconnect details after a succesful reconnect', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber, {
           reconnect: {

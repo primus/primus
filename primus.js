@@ -693,7 +693,7 @@ Primus.prototype.backoff = function backoff(callback, opts) {
   // the callback then as it might cause an unexpected `end` event as another
   // reconnect process is already running.
   //
-  if (opts.backoff) return;
+  if (opts.backoff) return primus;
 
   opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
   opts.minDelay = opts.minDelay || 500;       // Minimum delay.
@@ -706,7 +706,8 @@ Primus.prototype.backoff = function backoff(callback, opts) {
   // `>` because we already incremented the value above.
   //
   if (opts.attempt > opts.retries) {
-    return callback(new Error('Unable to retry'), opts);
+    callback(new Error('Unable to retry'), opts);
+    return primus;
   }
 
   //
