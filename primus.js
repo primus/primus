@@ -910,7 +910,7 @@ Primus.prototype.uri = function uri(options, querystring) {
   // Optionally add a search query, again, not supported by all Transformers.
   // SockJS is known to throw errors when a query string is included.
   //
-  if (options.query) server.push('?'+ options.search);
+  if (options.query) server.push('?'+ options.query);
 
   if (options.object) return options;
   return server.join('/');
