@@ -758,9 +758,6 @@ Primus.prototype.reconnect = function reconnect() {
   primus.attempt = primus.attempt || primus.clone(primus.options.reconnect);
 
   primus.backoff(function attempt(fail, backoff) {
-    // Save the opts again of this back off, so they re-used.
-    primus.attempt = backoff;
-
     if (fail) {
       primus.attempt = null;
       return primus.emit('end');
