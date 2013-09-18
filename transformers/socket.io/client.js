@@ -15,16 +15,16 @@ module.exports = function client() {
   //
   // Selects an available Socket.IO constructor.
   //
-  var Factory = (function factory() {
-    if ('undefined' !== typeof io && io.connect) return io.Socket;
+  var factory = (function factory() {
+    if ('undefined' !== typeof io && io.Socket) return io;
 
-    try { return Primus.require('socket.io-client').Socket; }
+    try { return Primus.require('socket.io-client'); }
     catch (e) {}
 
     return undefined;
   })();
 
-  if (!Factory) return primus.critical(new Error('Missing required `socket.io-client` module. Please run `npm install --save socket.io-client`'));
+  if (!factory) return primus.critical(new Error('Missing required `socket.io-client` module. Please run `npm install --save socket.io-client`'));
 
   //
   // Connect to the given URL.
@@ -33,11 +33,18 @@ module.exports = function client() {
     if (socket) try { socket.disconnect(); }
     catch (e) {}
 
+    var transports = factory.transports
+      , Socket = factory.Socket;
+
+    if (primus.AVOID_WEBSOCKETS || true) {
+      transports = transports.join(',').replace(/\,?websocket\,?/gim, '').split(',');
+    }
+
     //
     // We need to directly use the parsed URL details here to generate the
     // correct urls for Socket.IO to use.
     //
-    primus.socket = socket = (new Factory(primus.merge({}, primus.url, primus.uri({
+    primus.socket = socket = (new Socket(primus.merge({}, primus.url, primus.uri({
       protocol: 'http',
       query: true,
       object: true
@@ -45,6 +52,7 @@ module.exports = function client() {
       'resource': primus.pathname.slice(1),
       'force new connection': true,
       'flash policy port': 843,
+      'transports': transports,
       'reconnect': false
     }))).of(''); // Force namespace
 
