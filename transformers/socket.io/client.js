@@ -36,7 +36,7 @@ module.exports = function client() {
     var transports = factory.transports
       , Socket = factory.Socket;
 
-    if (primus.AVOID_WEBSOCKETS || true) {
+    if (primus.AVOID_WEBSOCKETS) {
       transports = transports.join(',').replace(/\,?websocket\,?/gim, '').split(',');
     }
 
