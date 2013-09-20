@@ -9,13 +9,28 @@ Node.js and they all have different opinions on how real-time should be done.
 Primus provides a common low level interface to communicate in real-time using
 various of real-time frameworks.
 
-### Highlights
+### Advantages
 
-1. Effortless switching between real-time frameworks and message parsers.
-2. Clean and stream compatible interface for client and server.
-3. Fixes bugs in frameworks and real-time communication where needed.
-4. Build with love and passion for real-time.
-5. Reconnect that actually works.
+1. Effortless switching between real-time frameworks by changing one single line
+   of code. No more API rewrites needed when your project requirements change,
+   the framework get abandoned or simply breaks down.
+2. Build-in reconnect, it just works. The reconnect is controlled by an
+   randomized exponential backoff algorithm to reduce server stress.
+3. Offline detection, Primus is smart enough to detect when a users drop their
+   internet connection (switching WIFI points/cell towers for example) and
+   reconnects when they are back online.
+4. Automatically encodes and decodes messages using custom parsers. Can be
+   easily switched for binary encoding for example.
+5. A clean and stream compatible interface for the client and server. You can
+   just `stream#pipe` data around. In addition to that, the client works on
+   Node.js as well, write once, run it everywhere.
+6. Fixes various of bugs in the supported frameworks and additions stability
+   patches to improve real-time communication.
+8. Comes with an amazing plugin interface to keep the core library as fast and
+   lean as possible while still allowing the server and the client to be
+   extended.
+9. Last but not least, Primus is build with love, passion and dedication to the
+   real-time web.
 
 ### Installation
 
