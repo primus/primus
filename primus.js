@@ -448,7 +448,9 @@ Primus.prototype.initialise = function initalise(options) {
     var readyState = primus.readyState;
 
     //
-    // Always set the readyState to closed.
+    // Always set the readyState to closed, and if we're still connecting, close
+    // the connection so we're sure that everything after this if statement block
+    // is only executed because our readyState is set to `open`
     //
     primus.readyState = Primus.CLOSED;
     if (primus.timers.connect) primus.end();
@@ -462,6 +464,13 @@ Primus.prototype.initialise = function initalise(options) {
     if ('primus::server::close' === intentional) {
       return primus.emit('end');
     }
+
+    //
+    // Always, call the `close` event as an indication of connection disruption.
+    // This also emitted by `primus#end` so for all cases above, it's still
+    // emitted.
+    //
+    primus.emit('close');
 
     //
     // The disconnect was unintentional, probably because the server shut down.
@@ -791,6 +800,7 @@ Primus.prototype.end = function end(data) {
   }
 
   this.emit('outgoing::end');
+  this.emit('close');
   this.emit('end');
 
   return this;

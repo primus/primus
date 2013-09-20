@@ -637,7 +637,8 @@ Event                 | Usage       | Location      | Description
 `data`                | **public**  | client/spark  | We received data.
 `incoming::end`       | private     | client/spark  | Transformer closed the connection.
 `outgoing::end`       | private     | client/spark  | Transformer should close connection.
-`end`                 | **public**  | client        | The connection has closed.
+`end`                 | **public**  | client        | Primus has ended.
+`close`               | **public**  | client        | The underlaying connection is closed, we might retry.
 `connection`          | **public**  | server        | We received a new connection.
 `disconnection`       | **public**  | server        | A connection closed.
 `initialised`         | **public**  | server        | The server is initialised.

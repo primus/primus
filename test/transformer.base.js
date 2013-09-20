@@ -135,6 +135,14 @@ module.exports = function base(transformer) {
         }).on('end', done);
       });
 
+      it('emits an `close` event when its closed', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function () {
+          socket.end();
+        }).on('close', done);
+      });
+
       it('only emits `end` once', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
@@ -298,7 +306,7 @@ module.exports = function base(transformer) {
             minDelay: 100,
             maxDelay: 2000
           }
-        });
+        }), closed = 0;
 
         expect(!socket.attempt).to.equal(true);
         this.timeout(5000);
@@ -328,8 +336,15 @@ module.exports = function base(transformer) {
           socket.once('open', function () {
             socket.removeAllListeners('end');
             socket.end();
+
+            // once from the reconnect, and once from the .end above
+            expect(closed).to.equal(2);
             done();
           });
+        });
+
+        socket.on('close', function () {
+          closed++;
         });
 
         socket.on('end', function () {
