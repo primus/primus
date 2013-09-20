@@ -102,11 +102,11 @@
       });
 
       primus.on('online', function online() {
-        log('network', 'Online', 'We have regained control over our internet connection');
+        log('network', 'Online', 'We have regained control over our internet connection.');
       });
 
       primus.on('offline', function online() {
-        log('network', 'Offline', 'We lost our internet connection');
+        log('network', 'Offline', 'We lost our internet connection.');
       });
 
       primus.on('open', function open() {
@@ -123,8 +123,12 @@
       });
 
       primus.on('end', function end() {
-        log('end', 'End', 'The connection has closed.');
+        log('end', 'End', 'The connection has ended.');
         document.getElementById('connect').innerHTML = 'connect';
+      });
+
+      primus.on('close', function end() {
+        log('close', 'close', 'We\'ve lost the connection to the server.');
       });
     }
   </script>
