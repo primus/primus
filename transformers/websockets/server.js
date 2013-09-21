@@ -11,6 +11,7 @@ var parse = require('url').parse;
  */
 module.exports = function server() {
   var WebSocketServer = require('ws').Server
+    , logger = this.logger
     , primus = this.primus
     , Spark = this.Spark;
 
@@ -18,6 +19,16 @@ module.exports = function server() {
     clientTracking: false,
     noServer: true
   });
+
+  /**
+   * Noop! Pointless, empty function that will actually be really useful.
+   *
+   * @param {Error} err We failed at something.
+   * @api private
+   */
+  function noop(err) {
+    logger.error(err);
+  }
 
   //
   // Listen to upgrade requests
@@ -33,9 +44,9 @@ module.exports = function server() {
       spark.on('outgoing::end', function end() {
         socket.close();
       }).on('outgoing::data', function write(data) {
-        if ('string' === typeof data) return socket.send(data);
+        if ('string' === typeof data) return socket.send(data, noop);
 
-        socket.send(data, { binary: true });
+        socket.send(data, { binary: true }, noop);
       });
 
       socket.on('close', spark.emits('end'));

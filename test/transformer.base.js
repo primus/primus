@@ -756,6 +756,25 @@ module.exports = function base(transformer) {
         );
       });
 
+      it('doesnt crash when we write to a closed connection', function (done) {
+        primus.on('connection', function (spark) {
+          spark.on('end', function () {
+            spark.write('I should not crash');
+
+            setTimeout(function () {
+              spark.write('the server should ignore me');
+
+              setTimeout(done, 10);
+            }, 10);
+          });
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+        socket.on('open', function () {
+          socket.end();
+        });
+      });
+
       describe('#transform', function () {
         it('thrown an error if an invalid type is given', function (done) {
           try { primus.transform('cowsack', function () {}); }

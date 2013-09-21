@@ -24,6 +24,7 @@ function Spark(primus, headers, address, query, id) {
   this.remote = address || {};  // The remote address location.
   this.query = query || {};     // The query string.
   this.id = id || this.uuid();  // Unique id for socket.
+  this.readyState = Spark.OPEN; // The readyState of the connection.
 
   this.writable = true;         // Silly stream compatibility.
   this.readable = true;         // Silly stream compatibility.
@@ -37,6 +38,9 @@ function Spark(primus, headers, address, query, id) {
 }
 
 Spark.prototype.__proto__ = require('stream').prototype;
+
+Spark.OPEN = 1;
+Spark.CLOSED = 2;
 
 //
 // Lazy parse interface for IP address information. As nobody is always
@@ -99,6 +103,7 @@ Spark.prototype.initialise = function initialise() {
   // The client has disconnected.
   //
   spark.on('incoming::end', function disconnect() {
+    spark.readyState = Spark.CLOSED;
     spark.emit('end');
   });
 
@@ -159,6 +164,11 @@ Spark.prototype.write = function write(data) {
     , transform
     , packet;
 
+  //
+  // The connection is closed, return false.
+  //
+  if (Spark.CLOSED === this.readyState) return false;
+
   for (transform in primus.transformers.outgoing) {
     packet = { data: data };
 
@@ -188,6 +198,14 @@ Spark.prototype._write = function _write(data) {
   var primus = this.primus
     , spark = this;
 
+  //
+  // The connection is closed, normally this would already be done in the
+  // `spark.write` method, but as `_write` is used internally, we should also
+  // add the same check here to prevent potential crashes by writing to a dead
+  // socket.
+  //
+  if (Spark.CLOSED === spark.readyState) return false;
+
   primus.encoder(data, function encoded(err, packet) {
     //
     // Do a "save" emit('error') when we fail to parse a message. We don't
@@ -203,7 +221,7 @@ Spark.prototype._write = function _write(data) {
     // these characters with a properly escaped version for those chars. This can
     // cause errors with JSONP requests or if the string is just evaluated.
     //
-    if ('string' == typeof packet) {
+    if ('string' === typeof packet) {
       if (~packet.indexOf('\u2028')) packet = packet.replace(u2028, '\\u2028');
       if (~packet.indexOf('\u2029')) packet = packet.replace(u2029, '\\u2029');
     }
@@ -219,14 +237,15 @@ Spark.prototype._write = function _write(data) {
  * @api public
  */
 Spark.prototype.end = function end(data) {
-  if (data) this.write(data);
-
   var spark = this;
+
+  if (data) spark.write(data);
 
   //
   // Bypass the .write method as this message should not be transformed.
   //
-  this._write('primus::server::close') ;
+  spark._write('primus::server::close');
+  spark.readyState = Spark.CLOSED;
 
   process.nextTick(function tick() {
     spark.emit('outgoing::end');
