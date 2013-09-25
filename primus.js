@@ -30,15 +30,52 @@ EventEmitter.prototype.listeners = function listeners(event) {
  * @returns {Boolean} Indication if we've emitted an event.
  * @api public
  */
-EventEmitter.prototype.emit = function emit(event) {
-  if (!(event in this._events)) return false;
+EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
+  if (!this._events[event]) return false;
 
-  var args = Array.prototype.slice.call(arguments, 1)
-    , length = this._events[event].length
-    , i = 0;
+  var listeners = this._events[event]
+    , length = listeners.length
+    , handler = listeners[0]
+    , len = arguments.length
+    , args
+    , i;
 
-  for (; i < length; i++) {
-    this._events[event][i].apply(this, args);
+  if (1 === length) {
+    switch (len) {
+      case 1:
+        handler.call(this);
+      break;
+      case 2:
+        handler.call(this, a1);
+      break;
+      case 3:
+        handler.call(this, a1, a2);
+      break;
+      case 4:
+        handler.call(this, a1, a2, a3);
+      break;
+      case 5:
+        handler.call(this, a1, a2, a3, a4);
+      break;
+      case 6:
+        handler.call(this, a1, a2, a3, a4, a5);
+      break;
+
+      default:
+        for (i = 1, args = new Array(len -1); i < len; i++) {
+          args[i - 1] = arguments[i];
+        }
+
+        handler.apply(this, args);
+    }
+  } else {
+    for (i = 1, args = new Array(len -1); i < len; i++) {
+      args[i - 1] = arguments[i];
+    }
+
+    for (i = 0; i < length; i++) {
+      listeners[i].apply(this, args);
+    }
   }
 
   return true;
@@ -52,7 +89,7 @@ EventEmitter.prototype.emit = function emit(event) {
  * @api public
  */
 EventEmitter.prototype.on = function on(event, fn) {
-  if (!(event in this._events)) this._events[event] = [];
+  if (!this._events[event]) this._events[event] = [];
   this._events[event].push(fn);
 
   return this;
@@ -85,22 +122,22 @@ EventEmitter.prototype.once = function once(event, fn) {
  * @api public
  */
 EventEmitter.prototype.removeListener = function removeListener(event, fn) {
-  if (!this._events || !(event in this._events)) return this;
+  if (!this._events || !this._events[event]) return this;
 
   var listeners = this._events[event]
     , events = [];
 
   for (var i = 0, length = listeners.length; i < length; i++) {
-    if (!fn || listeners[i] === fn || listeners[i].fn === fn) continue;
-
-    events.push(listeners[i]);
+    if (!(!fn || listeners[i] === fn || listeners[i].fn === fn)) {
+      events.push(listeners[i]);
+    }
   }
 
   //
   // Reset the array, or remove it completely if we have no more listeners.
   //
   if (events.length) this._events[event] = events;
-  else delete this._events[event];
+  else this._events[event] = null;
 
   return this;
 };
@@ -112,7 +149,7 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn) {
  * @api public
  */
 EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
-  if (event) delete this._events[event];
+  if (event) this._events[event] = null;
   else this._events = {};
 
   return this;
@@ -240,8 +277,8 @@ Primus.require = function requires(name) {
 var Stream, parse;
 
 try {
+  Primus.Stream = Stream = Primus.require('stream');
   parse = Primus.require('url').parse;
-  Stream = Primus.require('stream');
 
   //
   // Normally inheritance is done in the same way as we do in our catch
@@ -253,6 +290,7 @@ try {
   //
   Primus.require('util').inherits(Primus, Stream);
 } catch (e) {
+  Primus.Stream = EventEmitter;
   Primus.prototype = new EventEmitter();
 
   //
@@ -992,7 +1030,8 @@ Primus.connect = function connect(url, options) {
 };
 
 //
-// Expose the EventEmitter so it can be re-used by wrapping libraries.
+// Expose the EventEmitter so it can be re-used by wrapping libraries we're also
+// exposing the Stream interface.
 //
 Primus.EventEmitter = EventEmitter;
 
