@@ -335,12 +335,12 @@ Primus.prototype.library = function compile(nodejs) {
   // client.
   //
   var client = '(function (name, context, definition) {'
+    + '  context[name] = definition();'
     + '  if (typeof module !== "undefined" && module.exports) {'
-    + '    module.exports = definition();'
+    + '    module.exports = context[name];'
     + '  } else if (typeof define == "function" && define.amd) {'
     + '    define(definition);'
     + '  }'
-    + '  context[name] = definition();'
     + '})("Primus", this, function PRIMUS() {'
     + this.client;
 
