@@ -553,11 +553,6 @@ Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) 
   return this;
 };
 
-//
-// Register globally, for every Primus instance. It takes the same arguments as
-// the `primus.use` method.
-//
-
 /**
  * Add a createSocket interface so we can create a Server client with the
  * specified `transformer` and `parser`.
