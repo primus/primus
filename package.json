@@ -26,7 +26,7 @@
   "license": "MIT",
   "dependencies": {
     "extendable": "0.0.x",
-    "load": "0.1.x"
+    "load": "1.0.x"
   },
   "devDependencies": {
     "browserchannel": "1.0.x",

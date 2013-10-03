@@ -97,7 +97,7 @@ Object.defineProperty(Primus.prototype, 'Socket', {
     return require('load').compiler(this.library(true), 'primus.js', {
       __filename: 'primus.js',
       __dirname: __dirname
-    });
+    }).Primus;
   }
 });
 
