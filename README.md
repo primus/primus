@@ -1030,7 +1030,7 @@ provides the following plugins:
       <img src="https://travis-ci.org/primus/substream.png?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/substream">
-      <img src="https://badge.fury.io/js/substream" alt="NPM version" />
+      <img src="https://badge.fury.io/js/substream.png" alt="NPM version" />
     </a>
   </dd>
 </dl>
