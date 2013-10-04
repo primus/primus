@@ -298,8 +298,9 @@ primus.forEach(function (spark, id, connections) {
 
 ### Authorization
 
-Primus has a built in auth hook that allows you to leverage the basic auth header to validate
-the connection. To setup the optional auth hook, use the `Primus#authorize` method:
+Primus has a built in auth hook that allows you to leverage the basic auth
+header to validate the connection. To setup the optional auth hook, use the
+`Primus#authorize` method:
 
 ```js
 var authParser = require('basic-auth-parser');
@@ -1014,13 +1015,33 @@ see it be merged automatically.
   </dd>
 </dl>
 
+In addition to these community provided plugins, the Primus project also
+provides the following plugins:
+
+<dl>
+  <dt><a href="http://github.com/primus/substream">substream</a></dt>
+  <dd>
+    Substream is an opinionated but stream compatible connection multiplexer on
+    top of the Primus connections. These streams can be created without
+    pre-defining them on the server or client.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/substream">
+      <img src="https://travis-ci.org/primus/substream.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/substream">
+      <img src="https://badge.fury.io/js/substream" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
 [Travis CI]: https://travis-ci.org/
 
 ### Example
 
 There is a small example folder included in this repository which allows to
 easily play with the real-time connection. The code in the example is heavily
-commented for your reading plesures. The example does require some extra
+commented for your reading pleasures. The example does require some extra
 dependencies so don't forget to run `npm install .` in the folder. The example
 can be ran using `npm start` or if you want to customize the
 parsers/transformers you can use:
@@ -1071,11 +1092,24 @@ var server = require('http').createServer(app)
 server.listen(port);
 ```
 
+#### Require.js
+
+Require.js is supported to a certain degree. The `primus.js` core file should be
+compatible with require.js but it could be that the transformer of your choosing
+isn't compatible with require.js. For example `engine.io` uses `component` which
+introduces it's own `require` function that causes issues. In addition to that,
+there are plugins which might use these modules that break require.js. The
+general advice for this is drop require.js in favour for plain script loading or
+use browserify where possible. If you feel strongly about require.js we accept
+pull requests that improve this behaviour or helps us save guard against these
+issues.
+
 ### Versioning
 
 #### History
 
-[You can discover the version history and changelogs on the Releases Page](https://github.com/primus/primus/releases)
+You can discover the version history and change logs on the
+[Releases](https://github.com/primus/primus/releases) page
 
 #### Convention
 
