@@ -19,7 +19,7 @@ var argh = require('argh').argv
 // Default to the repository, but when we're deployed on a server use the latest
 // Primus instance.
 //
-try { Primus = require('../'); }
+try { Primus = require('../../'); }
 catch (e) { Primus = require('primus'); }
 
 //
