@@ -1,6 +1,7 @@
 'use strict';
 
 var EventEmitter = require('events').EventEmitter
+  , PrimusError = require('./errors').PrimusError
   , Transformer = require('./transformer')
   , Spark = require('./spark')
   , fs = require('fs');
@@ -172,7 +173,7 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
     // This is a unknown transporter, it could be people made a typo.
     //
     if (!(Transformer in Primus.transformers)) {
-      throw new Error(this.is(Transformer, Primus.transformers).unknown());
+      throw new PrimusError(this.is(Transformer, Primus.transformers).unknown(), this);
     }
 
     try {
@@ -180,7 +181,7 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
       this.transformer = new Transformer(this);
     } catch (e) {
       if (e.code === 'MODULE_NOT_FOUND') {
-        throw new Error(this.is(transformer, Primus.transformers).missing());
+        throw new PrimusError(this.is(transformer, Primus.transformers).missing(), this);
       } else {
         throw e;
       }
@@ -190,7 +191,7 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
   }
 
   if ('function' !== typeof Transformer) {
-    throw new Error('The given transformer is not a constructor');
+    throw new PrimusError('The given transformer is not a constructor', this);
   }
 
   this.transformer = this.transformer || new Transformer(this);
@@ -221,8 +222,13 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
  * @api public
  */
 Primus.prototype.authorize = function authorize(auth) {
-  if ('function' !== typeof auth) throw new Error('Authorize only accepts functions.');
-  if (auth.length < 2) throw new Error('Authorize function requires more arguments.');
+  if ('function' !== typeof auth) {
+    throw new PrimusError('Authorize only accepts functions', this);
+  }
+
+  if (auth.length < 2) {
+    throw new PrimusError('Authorize function requires more arguments', this);
+  }
 
   this.auth = auth;
   return this;
@@ -273,13 +279,13 @@ Primus.prototype.parsers = function parsers(parser) {
     // This is a unknown parser, it could be people made a typo.
     //
     if (!(parser in Primus.parsers)) {
-      throw new Error(this.is(parser, Primus.parsers).unknown());
+      throw new PrimusError(this.is(parser, Primus.parsers).unknown(), this);
     }
 
     try { parser = require('./parsers/'+ parser); }
     catch (e) {
       if (e.code === 'MODULE_NOT_FOUND') {
-        throw new Error(this.is(parser, Primus.parsers).missing());
+        throw new PrimusError(this.is(parser, Primus.parsers).missing(), this);
       } else {
         throw e;
       }
@@ -289,7 +295,7 @@ Primus.prototype.parsers = function parsers(parser) {
   }
 
   if ('object' !== typeof parser) {
-    throw new Error('The given parser is not an Object.');
+    throw new PrimusError('The given parser is not an Object', this);
   }
 
   this.encoder = parser.encoder;
@@ -309,7 +315,10 @@ Primus.prototype.parsers = function parsers(parser) {
  * @api public
  */
 Primus.prototype.transform = function transform(type, fn) {
-  if (!(type in this.transformers)) throw new Error('Invalid transformer type');
+  if (!(type in this.transformers)) {
+    throw new PrimusError('Invalid transformer type', this);
+  }
+
   if (~this.transformers[type].indexOf(fn)) return this;
 
   this.transformers[type].push(fn);
@@ -436,23 +445,33 @@ Primus.prototype.use = function use(name, energon) {
     name = energon.name;
   }
 
-  if (!name) throw new Error('Plugin should be specified with a name');
-  if ('string' !== typeof name) throw new Error('Plugin names should be a string');
+  if (!name) {
+    throw new PrimusError('Plugin should be specified with a name', this);
+  }
+
+  if ('string' !== typeof name) {
+    throw new PrimusError('Plugin names should be a string', this);
+  }
+
   if ('string' === typeof energon) energon = require(energon);
 
   //
   // Plugin accepts an object or a function only.
   //
-  if (!/^(object|function)$/.test(typeof energon)) throw new Error('Plugin should be an object or function');
+  if (!/^(object|function)$/.test(typeof energon)) {
+    throw new PrimusError('Plugin should be an object or function', this);
+  }
 
   //
   // Plugin require a client, server or both to be specified in the object.
   //
   if (!('server' in energon || 'client' in energon)) {
-    throw new Error('The plugin in missing a client or server function');
+    throw new PrimusError('The plugin in missing a client or server function', this);
   }
 
-  if (name in this.ark) throw new Error('The plugin name was already defined');
+  if (name in this.ark) {
+    throw new PrimusError('The plugin name was already defined', this);
+  }
 
   this.ark[name] = energon;
   if (!energon.server) return this;

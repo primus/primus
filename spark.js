@@ -1,6 +1,7 @@
 'use strict';
 
-var parse = require('querystring').parse
+var ParserError = require('./errors').ParserError
+  , parse = require('querystring').parse
   , forwarded = require('./forwarded')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
@@ -39,6 +40,9 @@ function Spark(primus, headers, address, query, id) {
 
 Spark.prototype.__proto__ = require('stream').prototype;
 
+//
+// Internal readyState's to prevent writes against close sockets.
+//
 Spark.OPEN = 1;
 Spark.CLOSED = 2;
 
@@ -70,7 +74,7 @@ Spark.prototype.initialise = function initialise() {
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
-      if (err) return spark.listeners('error').length && spark.emit('error', err);
+      if (err) return new ParserError('Failed to decode incoming data: '+ err.message, spark, err);
 
       //
       // Handle client-side heartbeats by answering them as fast as possible.
@@ -211,7 +215,7 @@ Spark.prototype._write = function _write(data) {
     // Do a "save" emit('error') when we fail to parse a message. We don't
     // want to throw here as listening to errors should be optional.
     //
-    if (err) return spark.listeners('error').length && spark.emit('error', err);
+    if (err) return new ParserError('Failed to encode outgoing data: '+ err.message, spark, err);
     if (!packet) return;
 
     //
