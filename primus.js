@@ -535,23 +535,35 @@ Primus.prototype.initialise = function initalise(options) {
   //
   if (!primus.NETWORK_EVENTS) return primus;
 
-  var onoffline = function() {
+  /**
+   * Handler for offline notifications.
+   *
+   * @api private
+   */
+  function offline() {
       primus.online = false;
       primus.emit('offline');
       primus.end();
-  }, ononline = function() {
+  }
+
+  /**
+   * Handler for online notifications.
+   *
+   * @api private
+   */
+  function online() {
     primus.online = true;
     primus.emit('online');
 
     if (~primus.options.strategy.indexOf('online')) primus.reconnect();
-  };
-  
+  }
+
   if (window.addEventListener) {
-    window.addEventListener('offline', onoffline, false);
-    window.addEventListener('online', ononline, false);
-  } else {
-    document.body.attachEvent('onoffline', onoffline);
-    document.body.attachEvent('ononline', ononline);
+    window.addEventListener('offline', offline, false);
+    window.addEventListener('online', online, false);
+  } else if (document.body.attachEvent){
+    document.body.attachEvent('onoffline', offline);
+    document.body.attachEvent('ononline', online);
   }
 
   return primus;
