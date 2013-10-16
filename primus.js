@@ -347,7 +347,7 @@ Primus.prototype.NETWORK_EVENTS = false;
 Primus.prototype.online = true;
 
 try {
-  if (Primus.prototype.NETWORK_EVENTS = 'onLine' in navigator && window.addEventListener) {
+  if (Primus.prototype.NETWORK_EVENTS = 'onLine' in navigator && (window.addEventListener || document.body.attachEvent)) {
     if (!navigator.onLine) {
       Primus.prototype.online = false;
     }
@@ -531,32 +531,28 @@ Primus.prototype.initialise = function initalise(options) {
 
   //
   // NOTE: The following code is only required if we're supporting network
-  // events as it requires access to browser globals. We can safely use the
-  // `window.addEventListener` as we've already feature detected it when we set
-  // the boolean. In addition to that, older version if Internet Explorer
-  // doesn't support these online/offline events.
-  //
-  // There are some small implementation details that we're ignoring here and
-  // that is that these events can be triggered when the user put's the browser
-  // in "offline" mode. There is also a small bug in IE8 where these events do
-  // not bubble up to the `window` but only work on the `document.body` but
-  // other browsers do not work when you listen to the `document.body` so we're
-  // ignoring IE8's bug in favour of proper use this API.
+  // events as it requires access to browser globals.
   //
   if (!primus.NETWORK_EVENTS) return primus;
 
-  window.addEventListener('offline', function offline() {
-    primus.online = false;
-    primus.emit('offline');
-    primus.end();
-  }, false);
-
-  window.addEventListener('online', function online() {
+  var onoffline = function() {
+      primus.online = false;
+      primus.emit('offline');
+      primus.end();
+  }, ononline = function() {
     primus.online = true;
     primus.emit('online');
 
     if (~primus.options.strategy.indexOf('online')) primus.reconnect();
-  }, false);
+  };
+  
+  if (window.addEventListener) {
+    window.addEventListener('offline', onoffline, false);
+    window.addEventListener('online', ononline, false);
+  } else {
+    document.body.attachEvent('onoffline', onoffline);
+    document.body.attachEvent('ononline', ononline);
+  }
 
   return primus;
 };
