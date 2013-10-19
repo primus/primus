@@ -1013,8 +1013,8 @@ Primus.prototype.transform = function transform(type, fn) {
 };
 
 /**
- * A critical error has occured, if we have an `error` listener, emit it there.
- * If not, throw it, so we get a stacktrace + proper error message.
+ * A critical error has occurred, if we have an `error` listener, emit it there.
+ * If not, throw it, so we get a stack trace + proper error message.
  *
  * @param {Error} err The critical error.
  * @api private

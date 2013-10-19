@@ -76,7 +76,7 @@ Transformer.prototype.initialise = function initialise() {
   //
   // Emit a close event.
   //
-  server.on('close', function () {
+  server.on('close', function close() {
     transformer.emit('close');
   });
 

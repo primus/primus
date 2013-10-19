@@ -43,7 +43,7 @@ Spark.prototype.__proto__ = require('stream').prototype;
 //
 // Internal readyState's to prevent writes against close sockets.
 //
-Spark.OPEN = 1;
+Spark.OPEN   = 1;
 Spark.CLOSED = 2;
 
 //
