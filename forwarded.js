@@ -1,5 +1,7 @@
 'use strict';
 
+var net = require('net');
+
 /**
  * List of possible proxy headers that should be checked for the original client
  * IP address and forwarded port.
@@ -42,12 +44,24 @@ var defaults = {
  * Search the headers for a possible match against a known proxy header.
  *
  * @param {Object} headers The received HTTP headers.
+ * @param {Array} whitelist White list of proxies that should be checked.
  * @returns {String|Undefined} A IP address or nothing.
  * @api private
  */
 function forwarded(headers) {
   for (var i = 0, length = proxies.length; i < length; i++) {
     if (!(proxies[i].ip in headers)) continue;
+
+    var ports = (headers[proxies[i].port] || '').split(',')
+      , ips = (headers[proxies[i].ip] || '').split(',');
+
+    //
+    // As these headers can potentially be set by a 1337H4X0R we need to ensure
+    // that all supplied values are valid IP addresses. If we receive a none
+    // IP value inside the IP header field we are going to assume that this
+    // header has been compromised and should be ignored
+    //
+    if (!ips.length || !ips.every(net.isIP)) return;
 
     //
     // We've gotten a match on a HTTP header, we need to parse it further as it
@@ -58,8 +72,8 @@ function forwarded(headers) {
     // So extracting the first IP should be sufficient.
     //
     return {
-      port: +(headers[proxies[i].port] || '').split(',').shift() || defaults.port,
-      ip: (headers[proxies[i].ip] || '').split(',').shift() || defaults.ip
+      port: +ports.shift() || defaults.port,
+      ip: ips.shift() || defaults.ip
     };
   }
 }
@@ -69,11 +83,12 @@ function forwarded(headers) {
  *
  * @param {Object} obj A socket like object that could contain a `remoteAddress`.
  * @param {Object} headers The received HTTP headers.
+ * @param {Array} whitelist White list
  * @returns {String} The IP address.
  * @api private
  */
-function parse(obj, headers) {
-  var proxied = forwarded(headers)
+function parse(obj, headers, whitelist) {
+  var proxied = forwarded(headers, whitelist)
     , connection = obj.connection
     , socket = connection
       ? connection.socket

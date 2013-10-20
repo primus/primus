@@ -52,7 +52,7 @@ Spark.CLOSED = 2;
 //
 Object.defineProperty(Spark.prototype, 'address', {
   get: function address() {
-    return forwarded(this.remote, this.headers);
+    return forwarded(this.remote, this.headers, this.primus.whitelist);
   }
 });
 

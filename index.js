@@ -26,9 +26,10 @@ function Primus(server, options) {
   this.decoder = null;                        // Shorthand to the parser's decoder.
   this.auth = options.authorization || null;  // Do we have an authorization handler.
   this.sparks = 0;                            // Increment id for connection ids.
-  this.connected = 0;                         // Connection counter.
+  this.connected = 0;                         // Connection counter .
   this.connections = Object.create(null);     // Connection storage.
   this.ark = Object.create(null);             // Plugin storage.
+  this.whitelist = [];                        // Forwarded-for whitelisting.
   this.options = options;                     // The configuration.
   this.transformers = {                       // Message transformers.
     outgoing: [],
