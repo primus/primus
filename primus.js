@@ -156,6 +156,21 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
 };
 
 /**
+ * Context assertation, ensure that some of our public Primus methods are called
+ * with the correct context to ensure that
+ *
+ * @api private
+ */
+function context(self, method) {
+  if (self instanceof Primus) return;
+
+  var failure = new Error('Primus#'+ method + '\'s context should called with a Primus instance');
+
+  if (!self.listeners('error').length) throw failure;
+  self.emit('error', failure);
+}
+
+/**
  * Primus in a real-time library agnostic framework for establishing real-time
  * connections with servers.
  *
@@ -207,7 +222,10 @@ function Primus(url, options) {
   // - disconnect: Reconnect when we have an unexpected disconnect.
   // - online: Reconnect when we're back online
   //
-  if ('string' === typeof options.strategy) options.strategy = options.strategy.split(/\s?\,\s?/g);
+  if ('string' === typeof options.strategy) {
+    options.strategy = options.strategy.split(/\s?\,\s?/g);
+  }
+
   if (!options.strategy.length) {
     options.strategy.push('disconnect', 'online');
 
@@ -371,6 +389,8 @@ Primus.prototype.ark = {};
  * @api public
  */
 Primus.prototype.plugin = function plugin(name) {
+  context(this, 'plugin');
+
   if (name) return this.ark[name];
 
   var plugins = {};
@@ -577,6 +597,8 @@ Primus.prototype.initialise = function initalise(options) {
  * @api public
  */
 Primus.prototype.open = function open() {
+  context(this, 'open');
+
   //
   // Only start a `connection timeout` procedure if we're not reconnecting as
   // that shouldn't count as an initial connection. This should be started
@@ -599,6 +621,8 @@ Primus.prototype.write = function write(data) {
   var primus = this
     , transform
     , packet;
+
+  context(primus, 'write');
 
   if (Primus.OPEN === primus.readyState) {
     for (transform in primus.transformers.outgoing) {
@@ -676,7 +700,7 @@ Primus.prototype.heartbeat = function heartbeat() {
 };
 
 /**
- * Start a connection timeout
+ * Start a connection timeout.
  *
  * @api private
  */
@@ -835,6 +859,8 @@ Primus.prototype.reconnect = function reconnect() {
  * @api public
  */
 Primus.prototype.end = function end(data) {
+  context(this, 'end');
+
   if (this.readyState === Primus.CLOSED && !this.timers.connect) return this;
   if (data) this.write(data);
 
@@ -894,9 +920,9 @@ Primus.prototype.merge = function merge(target) {
 Primus.prototype.parse = parse;
 
 /**
- * Parse a querystring.
+ * Parse a query string.
  *
- * @param {String} query The querystring that needs to be parsed.
+ * @param {String} query The query string that needs to be parsed.
  * @returns {Object} Parsed query string.
  * @api public
  */
@@ -1006,6 +1032,8 @@ Primus.prototype.emits = function emits(event, parser) {
  * @api public
  */
 Primus.prototype.transform = function transform(type, fn) {
+  context(this, 'transform');
+
   if (!(type in this.transformers)) throw new Error('Invalid transformer type');
 
   this.transformers[type].push(fn);
