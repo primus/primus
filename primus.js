@@ -156,9 +156,11 @@ EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
 };
 
 /**
- * Context assertation, ensure that some of our public Primus methods are called
+ * Context assertion, ensure that some of our public Primus methods are called
  * with the correct context to ensure that
  *
+ * @param {Primus} self The context of the function.
+ * @param {String} method The method name.
  * @api private
  */
 function context(self, method) {
@@ -182,7 +184,7 @@ function context(self, method) {
  * - ping, The heartbeat interval for sending a ping packet to the server.
  * - pong, The heartbeat timeout for receiving a response to the ping.
  * - network, Use network events as leading method for network connection drops.
- * - strategy, Reconnection strategies
+ * - strategy, Reconnection strategies.
  *
  * @constructor
  * @param {String} url The URL of your server.
@@ -220,7 +222,7 @@ function Primus(url, options) {
   //
   // - timeout: Reconnect when we have a network timeout.
   // - disconnect: Reconnect when we have an unexpected disconnect.
-  // - online: Reconnect when we're back online
+  // - online: Reconnect when we're back online.
   //
   if ('string' === typeof options.strategy) {
     options.strategy = options.strategy.split(/\s?\,\s?/g);
@@ -231,7 +233,7 @@ function Primus(url, options) {
 
     //
     // Timeout based reconnection should only be enabled conditionally. When
-    // authorization is enabled it could trigger
+    // authorization is enabled it could trigger.
     //
     if (!this.authorization) options.strategy.push('timeout');
   }
@@ -374,7 +376,7 @@ try {
 
 /**
  * The Ark contains all our plugins definitions. It's namespaced by
- * name=>plugin.
+ * name => plugin.
  *
  * @type {Object}
  * @private
@@ -496,7 +498,11 @@ Primus.prototype.initialise = function initalise(options) {
       }
 
       //
-      // The transformers can
+      // We always emit 2 arguments for the data event, the first argument is the
+      // parsed data and the second argument is the raw string that we received.
+      // This allows you to do some validation on the parsed data and then save
+      // the raw string in your database or what ever so you don't have the
+      // stringify overhead.
       //
       primus.emit('data', data, raw);
     });
@@ -508,7 +514,7 @@ Primus.prototype.initialise = function initalise(options) {
     //
     // Always set the readyState to closed, and if we're still connecting, close
     // the connection so we're sure that everything after this if statement block
-    // is only executed because our readyState is set to `open`
+    // is only executed because our readyState is set to `open`.
     //
     primus.readyState = Primus.CLOSED;
     if (primus.timers.connect) primus.end();
@@ -893,7 +899,7 @@ Primus.prototype.clone = function clone(obj) {
  * Merge different objects in to one target object.
  *
  * @param {Object} target The object where everything should be merged in.
- * @returns {Object} target
+ * @returns {Object} Original target with all merged objects.
  * @api private
  */
 Primus.prototype.merge = function merge(target) {
