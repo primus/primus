@@ -1,6 +1,8 @@
 'use strict';
 
 module.exports = function base(transformer) {
+  var EventEmitter = require('events').EventEmitter;
+
   var emitter = {
     server: function (primus) {
       primus.transform('incoming', function (packet) {
@@ -107,6 +109,23 @@ module.exports = function base(transformer) {
           socket.end();
           done();
         }, 100);
+      });
+
+      it('emits errors for incorrect context when theres a listner', function () {
+        var socket = new Socket('http://localhost:'+ server.portnumber, {
+          manual: true
+        }), calls = 0;
+
+        try {
+          socket.open.call(new EventEmitter());
+        } catch (err) {
+          expect(err).to.be.instanceOf(Error);
+          expect(err.message).to.contain('Primus#open');
+          expect(err.message).to.contain('context');
+          calls++;
+        }
+
+        expect(calls).to.equal(1);
       });
 
       it('should change readyStates', function (done) {
