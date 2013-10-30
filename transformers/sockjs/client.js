@@ -42,7 +42,12 @@ module.exports = function client() {
     socket.onopen = primus.emits('open');
     socket.onerror = primus.emits('error');
     socket.onclose = function (e) {
-      var event = e.code === 1002 ? 'error' : 'end';
+      var event = e && e.code === 1002 ? 'error' : 'end';
+
+      //
+      // The timeout replicates the behaviour of primus.emits so we're not
+      // affected by any timing bugs.
+      //
       setTimeout(function timeout() {
         primus.emit('incoming::'+ event, e);
       }, 0);
