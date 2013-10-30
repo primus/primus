@@ -41,7 +41,12 @@ module.exports = function client() {
     //
     socket.onopen = primus.emits('open');
     socket.onerror = primus.emits('error');
-    socket.onclose = primus.emits('end');
+    socket.onclose = function (e) {
+      var event = e.code === 1002 ? 'error' : 'end';
+      setTimeout(function timeout() {
+        primus.emit('incoming::'+ event, e);
+      }, 0);
+    };
     socket.onmessage = primus.emits('data', function parse(evt) {
       return evt.data;
     });
