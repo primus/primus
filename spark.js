@@ -84,10 +84,10 @@ Spark.prototype.initialise = function initialise() {
       }
 
       var transform, result, packet;
-      for (transform in primus.transformers.incoming) {
+      primus.transformers.incoming.forEach(function(transform) {
         packet = { data: data };
 
-        if (false === primus.transformers.incoming[transform].call(spark, packet)) {
+        if (false === transform.call(spark, packet)) {
           //
           // When false is returned by an incoming transformer it means that's
           // being handled by the transformer and we should not emit the `data`
@@ -97,7 +97,7 @@ Spark.prototype.initialise = function initialise() {
         }
 
         data = packet.data;
-      }
+      })
 
       spark.emit('data', data, raw);
     });
@@ -173,10 +173,10 @@ Spark.prototype.write = function write(data) {
   //
   if (Spark.CLOSED === this.readyState) return false;
 
-  for (transform in primus.transformers.outgoing) {
+  primus.transformers.outgoing.forEach(function(transform) {
     packet = { data: data };
 
-    if (false === primus.transformers.outgoing[transform].call(this, packet)) {
+    if (false === transform.call(this, packet)) {
       //
       // When false is returned by an incoming transformer it means that's
       // being handled by the transformer and we should not emit the `data`
@@ -186,7 +186,7 @@ Spark.prototype.write = function write(data) {
     }
 
     data = packet.data;
-  }
+  })
 
   this._write(data);
   return true;
