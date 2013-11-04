@@ -482,10 +482,10 @@ Primus.prototype.initialise = function initalise(options) {
       }
 
       var transform, result, packet;
-      for (transform in primus.transformers.incoming) {
+      primus.transformers.incoming.forEach(function(transform) {
         packet = { data: data };
 
-        if (false === primus.transformers.incoming[transform].call(primus, packet)) {
+        if (false === transform.call(primus, packet)) {
           //
           // When false is returned by an incoming transformer it means that's
           // being handled by the transformer and we should not emit the `data`
@@ -495,7 +495,7 @@ Primus.prototype.initialise = function initalise(options) {
         }
 
         data = packet.data;
-      }
+      })
 
       //
       // We always emit 2 arguments for the data event, the first argument is the
@@ -631,10 +631,10 @@ Primus.prototype.write = function write(data) {
   context(primus, 'write');
 
   if (Primus.OPEN === primus.readyState) {
-    for (transform in primus.transformers.outgoing) {
+    primus.transformers.outgoing.forEach(function(transform) {
       packet = { data: data };
 
-      if (false === primus.transformers.outgoing[transform].call(primus, packet)) {
+      if (false === transform.call(primus, packet)) {
         //
         // When false is returned by an incoming transformer it means that's
         // being handled by the transformer and we should not emit the `data`
@@ -644,7 +644,7 @@ Primus.prototype.write = function write(data) {
       }
 
       data = packet.data;
-    }
+    })
 
     primus.encoder(data, function encoded(err, packet) {
       //
