@@ -83,11 +83,10 @@ Spark.prototype.initialise = function initialise() {
         return spark.write('primus::pong::'+ data.slice(14));
       }
 
-      var transform, result, packet;
-      for (transform in primus.transformers.incoming) {
-        packet = { data: data };
+      for (var i = 0, length = primus.transformers.incoming.length; i < length; i++) {
+        var packet = { data: data };
 
-        if (false === primus.transformers.incoming[transform].call(spark, packet)) {
+        if (false === primus.transformers.incoming[i].call(spark, packet)) {
           //
           // When false is returned by an incoming transformer it means that's
           // being handled by the transformer and we should not emit the `data`
@@ -165,7 +164,6 @@ Spark.prototype.emits = function emits(event, parser) {
  */
 Spark.prototype.write = function write(data) {
   var primus = this.primus
-    , transform
     , packet;
 
   //
@@ -173,10 +171,10 @@ Spark.prototype.write = function write(data) {
   //
   if (Spark.CLOSED === this.readyState) return false;
 
-  for (transform in primus.transformers.outgoing) {
+  for (var i = 0, length = primus.transformers.outgoing.length; i < length; i++) {
     packet = { data: data };
 
-    if (false === primus.transformers.outgoing[transform].call(this, packet)) {
+    if (false === primus.transformers.outgoing[i].call(this, packet)) {
       //
       // When false is returned by an incoming transformer it means that's
       // being handled by the transformer and we should not emit the `data`
