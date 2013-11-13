@@ -43,7 +43,7 @@ npm install primus --save
 ### Table of Contents
 
 - [Introduction](#primus)
-  - [Highlights](#highlights)
+  - [Advantages](#advantages)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
 - [Connecting from the server](#connecting-from-the-server)
@@ -63,6 +63,7 @@ npm install primus --save
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
   - [Community Plugins](#community-plugins)
 - [Example](#example)
+   - [Community](#community)
 - [FAQ](#FAQ)
   - [Scaling](#scaling)
   - [Express](#express)
@@ -1054,7 +1055,22 @@ The example is also hosted on [Nodejitsu] an can be accessed at:
 
 http://primus-example.nodejitsu.com/
 
+Please note that the site can be down from time to time as it supports killing
+the server to trigger reconnects. So you can see what happens when you restart
+your server/application.
+
 [Nodejitsu]: https://www.nodejitsu.com/
+
+#### Community
+
+Using Primus in production or created an awesome demo using the technology?
+We've setup a special [wiki] page for it where you can show case your
+awesome creations or learn from demo and example applications on how to use
+Primus. Checkout the wiki page out at:
+
+https://github.com/primus/primus/wiki/Production
+
+[wiki]: https://github.com/primus/primus/wiki
 
 ### FAQ
 
@@ -1148,7 +1164,7 @@ version when:
 1. A critical bug is discovered.
 2. There has been a lot of minor changes.
 3. A framework did an incompatible update.
-4. A new framework is added
+4. A new framework is added.
 5. People ask for it.
 
 ### License
