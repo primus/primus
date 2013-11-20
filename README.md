@@ -14,9 +14,9 @@ various of real-time frameworks.
 1. Effortless switching between real-time frameworks by changing one single line
    of code. No more API rewrites needed when your project requirements change,
    the framework get abandoned or simply breaks down.
-2. Build-in reconnect, it just works. The reconnect is controlled by an
+2. Built-in reconnect, it just works. The reconnect is controlled by a
    randomized exponential backoff algorithm to reduce server stress.
-3. Offline detection, Primus is smart enough to detect when a users drop their
+3. Offline detection, Primus is smart enough to detect when users drop their
    internet connection (switching WIFI points/cell towers for example) and
    reconnects when they are back online.
 4. Automatically encodes and decodes messages using custom parsers. Can be
@@ -76,15 +76,15 @@ npm install primus --save
 ### Getting Started
 
 Primus doesn't ship with real-time frameworks as dependencies, it assumes that
-you as user adds them your self as a dependency. This is done to keep the module
-as light weight as possible. This works because `require` in will walk through
+you as user add them yourself as a dependency. This is done to keep the module
+as lightweight as possible. This works because `require` in will walk through
 your directories searching for `node_module` folders that have these matching
 dependencies.
 
 Primus needs to be "attached" to a HTTP compatible server. These includes the
-build in `http` and `https` servers but also the `spdy` module as it has the
-same API as node servers. Creating a new Primus instance is relatively straight
-forward:
+built-in `http` and `https` servers but also the `spdy` module as it has the
+same API as node servers. Creating a new Primus instance is relatively
+straightforward:
 
 ```js
 'use strict';
@@ -118,7 +118,7 @@ primus.library();
 
 Which returns the client-side library. It's not minified as that is out of the
 scope of this project. You can store this on a CDN or on your static server. Do
-what ever you want with it, but I would advice you to regenerate that file every
+whatever you want with it, but I would advice you to regenerate that file every
 time you redeploy so it always contains a client side library that is compatible
 with your back-end. To save the file you can use:
 
@@ -127,7 +127,7 @@ primus.save(__dirname +'/primus.js');
 ```
 
 This will store the compiled library in your current directory. If you want to
-save it asynchronously, you can supply the method with an callback method:
+save it asynchronously, you can supply the method with a callback method:
 
 ```js
 primus.save(__dirname +'/primus.js', function save(err) {
@@ -145,9 +145,9 @@ page add:
 <script src="/primus/primus.js"></script>
 ```
 
-If you've configured a different `pathname` in the options deploy on a different
-domain then your Primus server you would of course need to update the `src`
-attribute to the correct location. It's always available at:
+If you've configured a different `pathname` in the options you would of course
+need to update the `src` attribute to the correct location.
+It's always available at:
 
 ```
 <protocol>://<server location>/<pathname>/primus.js
@@ -190,7 +190,7 @@ connection. This depends on the module you are using.
 
 The `spark.address` property contains the `ip` and `port` of the
 connection. If you're running your server behind a reverse proxy it will
-automatically use the `x-forwarded-for` headers. This way you will always have
+automatically use the `x-forwarded-for` header. This way you will always have
 the address of the connecting client and not the IP address of your proxy.
 
 *Please note that the `port` is probably out of date by the time you're going
@@ -200,7 +200,7 @@ active at the time you access this property.*
 #### spark.query
 
 The `spark.query` contains the query string you used to connect to server. It's
-parsed to a object. Please note that this is not available for all supported
+parsed to an object. Please note that this is not available for all supported
 transformers, but it's proven to be to useful to not implement it because one
 silly transformer refuses to support it. Yes.. I'm looking at you SockJS.
 
@@ -384,7 +384,7 @@ There are 2 important options that we're going to look a bit closer at.
 
 When the connection goes down unexpectedly a automatic reconnect process is
 started. It's using a randomized exponential backoff algorithm to prevent
-clients to DDOS your server when you reboot as they will all be re-connecting at
+clients from DDoSing your server when you reboot as they will all be re-connecting at
 different times. The reconnection can be configured using the `options` argument
 in `Primus` and you should add these options to the `reconnect` property:
 
@@ -404,13 +404,13 @@ primus = Primus.connect(url, {
 });
 ```
 
-When you're going to customize the delays do take in to account they they will
-grow exponentially e.g. `500 -> 1000 -> 2000 -> 4000 -> 8000` and are randomized
-so the actual values might be slightly higher or lower then this.
+When you're going to customize `minDelay` please note that it will grow
+exponentially e.g. `500 -> 1000 -> 2000 -> 4000 -> 8000` and is randomized
+so expect to have the slightly higher or lower values.
 
-Please do note when we reconnect, you will receive a new `connection` event on
-the server. As the previous connection was completely dead and should there for
-be considered a new connection as well as an `open` event on the client.
+Please note that when we reconnect, we will receive a new `connection` event on
+the server and a new `open` event on the client, as the previous connection was
+completely dead and should therefore be considered as new connection.
 
 If you are interested in learning more about the backoff algorithm you might
 want to read http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
@@ -458,7 +458,7 @@ there is no way of detecting the difference between a failed authorization and a
 failed connect. If you leave this enabled with authorization every unauthorized
 access will try to reconect again**.
 
-We automatically disable this for you when you've setup the authorization before
+We automatically disable this for you when you've set the authorization before
 you save the library.
 
 [reconnect]: #reconnect
@@ -539,7 +539,7 @@ primus.on('reconnect', function () {
 
 Looks a lot like the `reconnect` event mentioned above, but it's emitted when
 we've detected that connection went/is down and we're going to start a reconnect
-operation. This event would be ideal to update your application's UI that you're
+operation. This event would be ideal to update your application's UI when the
 connection is down and you are trying to reconnect in x seconds.
 
 ```js
@@ -604,7 +604,7 @@ a server side client.
      , client = new Socket('http://localhost:8080');
   ```
 
-  If you do not know which transformers, parsers are used on the server, we
+  If you do not know which transformer and parser are used on the server, we
   expose a small JSON "spec" file that exposes this information. The
   specification can be reached on the `/<pathname>/spec` and will output the
   following JSON document:
@@ -645,15 +645,15 @@ Event                 | Usage       | Location      | Description
 `disconnection`       | **public**  | server        | A connection closed.
 `initialised`         | **public**  | server        | The server is initialised.
 `close`               | **public**  | server        | The server has been destroyed.
-`incoming::pong`      | private     | server        | We received a pong message.
-`outgoing::pong`      | private     | server        | We're sending a ping message.
+`incoming::pong`      | private     | client        | We received a pong message.
+`outgoing::ping`      | private     | client        | We're sending a ping message.
 `online`              | **public**  | client        | We've regained a network connection
 `offline`             | **public**  | client        | We've lost our internet connection
 `log`                 | **public**  | server        | Log messages.
 
 As a rule of thumb assume that every event that is prefixed with `incoming::` or
 `outgoing::` is reserved for internal use only and that emitting such events your
-self will mostlikely result in c̮̫̞͚͉̮̙͕̳̲͉̤̗̹̮̦̪̖̱h̛͍͙̖̟͕̹͕̙̦̣̲̠̪̯̳͖̝̩a̴̝̦͇̥̠̟͚̳̤̹̗̻̭͍͖͕͓̻o̥̹̮̙͔̗͍͚͓̗̦̹͈͙͕̘̮͖̝ș̗̲̤̗̮͈̙͈̹̼̣̹̖̱̤̼̺̤ ̻͙̗̥̠̱͇̱̝̟̺͍̺̼͆̅̓̓̇a̜̖͈͇͎͙̲̙̗͇̫̘̖̹͖͓͔̺̱n̹͓̮͇̯̜̤̗͍̯̰̫̫̖̰ͬ͌ͬͫd͚̪͚̭͚̥̰̤̟͎̝̲̯̭̹̭̙̼̤ ͖̞̙̹͈͚̥̦͚͉͖̼̬͓͚̳͉͙͎d̴͚̱̮̗͍̩̻̰̣̫͉͈̞̲͉̫̞͔ẻͩͦ̃͌̿̐ͪͩ̌̇͂̆̑͐ͣ ҉̲͉͔͎̤̼̘͇̮̥̻̜̹̥͚̲̻̖s̶̗̻̫̼̠̳̗̺̤̗̳͈̪̮̗̝͇͈t̙͇͕̺̱̼̤̗̰̬̣͌ͬͧ͊́ͧͩ͌r͌̐̓̃ͥ̄ͤ͑̈ͬ͆ͬ͂̇̿̅ ҉̙̼̳̭̙͍̻̱̠͈̮̺̣̝̱̙̺͉ư̳͎̻͔̯̪̝͕͚̣̜̼̞͇̠̘̠̪c̨̫͙͙̬̰̰̫̐͋͊͑̌̾̉͆t͚̗͕̝̤̗͕̲̮̝̼̺͙͚̟͓̣̥͍ĭ͙̘̩̖͇͎̆̍̿̾ͤ̔̉̈̂̾̈ͭo̬̠̝͈̺̙̮̬̗̪̤͕͇͕̰̮͖͉̬n̙̪̤̝̹͖͖̻̬̹͙̞̗͓̞̭̜̠̟
+self will most likely result in c̮̫̞͚͉̮̙͕̳̲͉̤̗̹̮̦̪̖̱h̛͍͙̖̟͕̹͕̙̦̣̲̠̪̯̳͖̝̩a̴̝̦͇̥̠̟͚̳̤̹̗̻̭͍͖͕͓̻o̥̹̮̙͔̗͍͚͓̗̦̹͈͙͕̘̮͖̝ș̗̲̤̗̮͈̙͈̹̼̣̹̖̱̤̼̺̤ ̻͙̗̥̠̱͇̱̝̟̺͍̺̼͆̅̓̓̇a̜̖͈͇͎͙̲̙̗͇̫̘̖̹͖͓͔̺̱n̹͓̮͇̯̜̤̗͍̯̰̫̫̖̰ͬ͌ͬͫd͚̪͚̭͚̥̰̤̟͎̝̲̯̭̹̭̙̼̤ ͖̞̙̹͈͚̥̦͚͉͖̼̬͓͚̳͉͙͎d̴͚̱̮̗͍̩̻̰̣̫͉͈̞̲͉̫̞͔ẻͩͦ̃͌̿̐ͪͩ̌̇͂̆̑͐ͣ ҉̲͉͔͎̤̼̘͇̮̥̻̜̹̥͚̲̻̖s̶̗̻̫̼̠̳̗̺̤̗̳͈̪̮̗̝͇͈t̙͇͕̺̱̼̤̗̰̬̣͌ͬͧ͊́ͧͩ͌r͌̐̓̃ͥ̄ͤ͑̈ͬ͆ͬ͂̇̿̅ ҉̙̼̳̭̙͍̻̱̠͈̮̺̣̝̱̙̺͉ư̳͎̻͔̯̪̝͕͚̣̜̼̞͇̠̘̠̪c̨̫͙͙̬̰̰̫̐͋͊͑̌̾̉͆t͚̗͕̝̤̗͕̲̮̝̼̺͙͚̟͓̣̥͍ĭ͙̘̩̖͇͎̆̍̿̾ͤ̔̉̈̂̾̈ͭo̬̠̝͈̺̙̮̬̗̪̤͕͇͕̰̮͖͉̬n̙̪̤̝̹͖͖̻̬̹͙̞̗͓̞̭̜̠̟
 
 ### Supported Real-time Frameworks
 
@@ -734,7 +734,7 @@ And tell `Primus` that you want to use `browserchannel` as transformer:
 var primus = new Primus(server, { transformer: 'browserchannel' });
 ```
 
-The `browserchannel` transformer comes with build in node client support and can be
+The `browserchannel` transformer comes with built-in node client support and can be
 accessed using:
 
 ```js
@@ -816,7 +816,7 @@ of the transformer, we just `toLowerCase()` everything.
   to `1337` by default.
 - SockJS does not support connections with query strings. You can still supply a
   query string in the `new Primus('http://localhost:80?q=s')` but it will not be
-  accessible in the `spark.query` property. As it will be an empty object.
+  accessible in the `spark.query` property as it will be an empty object.
 - BrowserChannel is the only transformer that does not support cross domain
   connections.
 - SockJS and BrowserChannel are originally written in CoffeeScript which can
@@ -826,13 +826,13 @@ of the transformer, we just `toLowerCase()` everything.
   We will always be targeting the latest version of these transformers when we
   bundle the library.
 - There are small bugs in Engine.IO that are causing our tests to fail. I've
-  submitted patches for these bugs, but they have been reject for silly reasons.
+  submitted patches for these bugs, but they have been rejected for silly reasons.
   The bug causes closed connections to say open. If you're experiencing this you
   can apply this [patch](http://github.com/3rd-Eden/engine.io/commit/0cf81270e9d5700).
 
 ### Plugins
 
-Primus was build as low level interface where you can build your applications
+Primus was built as a low level interface where you can build your applications
 upon. At it's core, it's nothing more than something that passes messages back
 and forth between the client and server. To make it easier for developers to
 switch to Primus we've developed a simple but effective plugin system that
@@ -848,7 +848,7 @@ primus.use('name', {
 });
 ```
 
-Or you can pass the plugin `Object` directly in to the constructor:
+Or you can pass the plugin `Object` directly into the constructor:
 
 ```js
 var primus = new Primus(server, { plugin: {
@@ -864,17 +864,17 @@ The server function is only executed on the server side and receives 2
 arguments:
 
 1. A reference to the initialized Primus server.
-2. The options that we're passed in to the `new Primus(server, { options })`
-   constructor. So the plugins can be configured through the same interface.
+2. The options that were passed in the `new Primus(server, { options })`
+   constructor. So the plugin can be configured through the same interface.
 
 The client receives the same arguments:
 
 1. A reference to the initialized Primus client.
-2. The options that we're passed in the `new Primus(url, { options })`
-   constructor. So the plugin in configured through the same interface.
+2. The options that were passed in the `new Primus(url, { options })`
+   constructor. So the plugin can be configured through the same interface.
 
 The only thing you need to remember is that the client is stored in the library
-using `toString()` so it cannot have any references out side the client's
+using `toString()` so it cannot have any references outside the client's
 closure. But luckily, there's a `library` property that will also be included on
 the client side when it's specified.
 
@@ -898,17 +898,17 @@ primus.use('rooms', {
 
 #### Transforming and intercepting messages
 
-Intercepting and transforming messages in something that a lot of plugins
+Intercepting and transforming messages is something that a lot of plugins
 require. When your building an `EventEmitter` plugin or something else you
 probably don't want the default `data` event to be emitted but your custom
 event. There are 2 different types of messages that can be transformed:
 
 1. `incoming` These messages are being received by the server.
-2. `outgoing` These messages are being send to the client.
+2. `outgoing` These messages are being sent to the client.
 
 The transformer is available on both the client and the server and share, like
 you would have expected the same identical API. Adding a new transformer is
-relatively straight forward:
+relatively straightforward:
 
 ```js
 primus.transform('incoming', function (packet) {
@@ -1046,9 +1046,9 @@ provides the following plugins:
 
 There is a small example folder included in this repository which allows to
 easily play with the real-time connection. The code in the example is heavily
-commented for your reading pleasures. The example does require some extra
+commented for your reading pleasure. The example requires some extra
 dependencies so don't forget to run `npm install .` in the folder. The example
-can be ran using `npm start` or if you want to customize the
+can be run using `npm start` or if you want to customize the
 parsers/transformers you can use:
 
 ```
@@ -1068,9 +1068,9 @@ your server/application.
 #### Community
 
 Using Primus in production or created an awesome demo using the technology?
-We've setup a special [wiki] page for it where you can show case your
-awesome creations or learn from demo and example applications on how to use
-Primus. Checkout the wiki page out at:
+We've set up a special [wiki] page for it where you can show your awesome
+creations or learn from demo and example applications how to use Primus.
+Checkout the wiki page out at:
 
 https://github.com/primus/primus/wiki/Production
 
@@ -1084,7 +1084,7 @@ Scaling Primus is as simple as sticking it behind a load balancer that supports
 sticky sessions and run multiple versions of your application. This is a vital
 feature that your load balancer needs to support. This ensures that the incoming
 requests always go back to the same server. If your load balancer does not
-support sticky sessions, get an other one. I highly recommend
+support sticky sessions, get another one. I highly recommend
 [HAProxy](http://haproxy.1wt.eu/). According to my own testing it the fastest
 and best proxy available that supports WebSockets. See
 https://github.com/observing/balancerbattle for more detailed information.
@@ -1119,8 +1119,8 @@ compatible with require.js but it could be that the transformer of your choosing
 isn't compatible with require.js. For example `engine.io` uses `component` which
 introduces it's own `require` function that causes issues. In addition to that,
 there are plugins which might use these modules that break require.js. The
-general advice for this is drop require.js in favour for plain script loading or
-use browserify where possible. If you feel strongly about require.js we accept
+general advice for this is to drop require.js in favour of plain script loading
+or use of browserify where possible. If you feel strong about require.js we accept
 pull requests that improve this behaviour or helps us save guard against these
 issues.
 
@@ -1166,7 +1166,7 @@ There isn't a steady or monthly release cycle. I usually release a new
 version when:
 
 1. A critical bug is discovered.
-2. There has been a lot of minor changes.
+2. There have been a lot of minor changes.
 3. A framework did an incompatible update.
 4. A new framework is added.
 5. People ask for it.
