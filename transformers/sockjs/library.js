@@ -219,6 +219,14 @@ utils.getOrigin = function(url) {
     return parts.join('/');
 };
 
+utils.isSameOriginScheme = function(url_a, url_b) {
+    if (!url_b) url_b = _window.location.href;
+
+    return (url_a.split(':')[0]
+                ===
+            url_b.split(':')[0]);
+};
+
 utils.isSameOriginUrl = function(url_a, url_b) {
     // location.origin would do, but it's not always available.
     if (!url_b) url_b = _window.location.href;
@@ -1185,6 +1193,12 @@ SockJS.prototype._applyInfo = function(info, rtt, protocols_whitelist) {
     that._options.info.null_origin = !_document.domain;
     var probed = utils.probeProtocols();
     that._protocols = utils.detectProtocols(probed, protocols_whitelist, info);
+    // Hack to avoid XDR when using different protocols
+    // We're on IE trying to do cross-protocol. jsonp only.
+    if (!utils.isSameOriginScheme(that._base_url) &&
+        2 === utils.isXHRCorsCapable()) {
+        that._protocols = ['jsonp-polling'];
+    }
 };
 //         [*] End of lib/sockjs.js
 
@@ -2010,7 +2024,12 @@ var createInfoReceiver = function(base_url) {
         // XHRLocalObject -> no_credentials=true
         return new InfoReceiver(base_url, utils.XHRLocalObject);
     case 2:
-        return new InfoReceiver(base_url, utils.XDRObject);
+        // XDR doesn't work across different schemes
+        // http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx
+        if (utils.isSameOriginScheme(base_url))
+            return new InfoReceiver(base_url, utils.XDRObject);
+        else
+            return new InfoReceiverFake();
     case 3:
         // Opera
         return new InfoReceiverIframe(base_url);
