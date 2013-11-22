@@ -1020,8 +1020,56 @@ see it be merged automatically.
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="http://github.com/mmalecki/primus-redis">primus-redis</a></dt>
+  <dd>
+    primus-redis is a Redis store for Primus. It takes care of distributing 
+    messages to other instances using Redis Pub/Sub.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/mmalecki/primus-redis">
+      <img src="https://travis-ci.org/mmalecki/primus-redis.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-redis">
+      <img src="https://badge.fury.io/js/primus-redis.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/mmalecki/primus-redis-rooms">primus-redis-rooms</a></dt>
+  <dd>
+    primus-redis-rooms is a Redis store for Primus and primus-rooms.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/mmalecki/primus-redis-rooms">
+      <img src="https://travis-ci.org/mmalecki/primus-redis-rooms.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-redis-rooms">
+      <img src="https://badge.fury.io/js/primus-redis-rooms.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/cayasso/primus-resource">primus-resource</a></dt>
+  <dd>
+    Define resources with auto-binded methods that can be called remotely on top of Primus. 
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/cayasso/primus-resource">
+      <img src="https://travis-ci.org/cayasso/primus-resource.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-resource">
+      <img src="https://badge.fury.io/js/primus-resource.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+
 In addition to these community provided plugins, the Primus project also
 provides the following plugins:
+
 
 <dl>
   <dt><a href="http://github.com/primus/substream">substream</a></dt>
