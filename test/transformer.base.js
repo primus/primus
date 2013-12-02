@@ -257,6 +257,67 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should clean up timers', function (done) {
+        primus.on('connection', function (spark) {
+          //
+          // Forcefully kill a connection to trigger a reconnect
+          //
+          switch (transformer.toLowerCase()) {
+            case 'socket.io':
+              primus.transformer.service.transports[spark.id].close();
+            break;
+
+            default:
+              spark.emit('outgoing::end');
+          }
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber,
+                                { strategy: 'none' });
+
+        socket.on('close', function () {
+          expect(Object.keys(socket.timers).length).to.equal(0);
+        });
+
+        socket.on('open', function () {
+          expect(Object.keys(socket.timers).length).to.be.above(0);
+          setTimeout(function () {
+            socket.end();
+            done();
+          }, 200);
+        });
+      });
+
+      it('should not reconnect when strategy is none', function (done) {
+        primus.on('connection', function (spark) {
+          //
+          // Forcefully kill a connection to trigger a reconnect
+          //
+          switch (transformer.toLowerCase()) {
+            case 'socket.io':
+              primus.transformer.service.transports[spark.id].close();
+            break;
+
+            default:
+              spark.emit('outgoing::end');
+          }
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber,
+                                { strategy: 'none' });
+
+        socket.on('reconnect', function (message) {
+          throw new Error('bad');
+        });
+
+        socket.on('open', function () {
+          setTimeout(function () {
+            socket.end();
+            done();
+          }, 200);
+        });
+      });
+
       it('should reconnect when the connection closes unexcpectingly', function (done) {
         primus.on('connection', function (spark) {
           if (!reconnected) {
