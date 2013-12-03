@@ -519,6 +519,13 @@ Primus.prototype.initialise = function initalise(options) {
     if (primus.timers.connect) primus.end();
     if (readyState !== Primus.OPEN) return;
 
+    // 
+    // Clear all timers in case we're not going to reconnect.
+    //
+    for (var timeout in this.timers) {
+      this.clearTimeout(timeout);
+    }
+
     //
     // Some transformers emit garbage when they close the connection. Like the
     // reason why it closed etc. we should explicitly check if WE send an
