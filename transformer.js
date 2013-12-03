@@ -171,6 +171,14 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
   this.primus.auth(req, function authorized(err) {
     if (!err) return transformer.emit('upgrade', req, socket, buffy, noop);
 
+    var message = JSON.stringify({ error: err.message || err });
+
+    socket.write('HTTP/' + req.httpVersion + ' 401 Unauthorized\r\n');
+    socket.write('Connection: close\r\n');
+    socket.write('Content-Type: application/json\r\n');
+    socket.write('Content-Length: ' + message.length + '\r\n');
+    socket.write('\r\n');
+    socket.write(message);
     socket.destroy();
   });
 };
