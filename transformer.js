@@ -141,7 +141,7 @@ Transformer.prototype.request = function request(req, res) {
   this.primus.auth(req, function authorized(err) {
     if (!err) return transformer.emit('request', req, res, noop);
 
-    res.statusCode = 401;
+    res.statusCode = err.statusCode || 401;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ error: err.message || err }));
   });
