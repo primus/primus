@@ -172,8 +172,10 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
     if (!err) return transformer.emit('upgrade', req, socket, buffy, noop);
 
     var message = JSON.stringify({ error: err.message || err });
+    var code = err.statusCode || 401;
 
-    socket.write('HTTP/' + req.httpVersion + ' 401 Unauthorized\r\n');
+    socket.write('HTTP/' + req.httpVersion + ' ');
+    socket.write(code + ' ' + require('http').STATUS_CODES[code] + '\r\n');
     socket.write('Connection: close\r\n');
     socket.write('Content-Type: application/json\r\n');
     socket.write('Content-Length: ' + message.length + '\r\n');

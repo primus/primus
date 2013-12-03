@@ -111,7 +111,7 @@ module.exports = function base(transformer) {
         }, 100);
       });
 
-      it('emits errors for incorrect context when theres a listner', function () {
+      it('emits errors for incorrect context when theres a listener', function () {
         var socket = new Socket('http://localhost:'+ server.portnumber, {
           manual: true
         }), calls = 0;
@@ -377,7 +377,12 @@ module.exports = function base(transformer) {
         });
 
         expect(socket.AVOID_WEBSOCKETS).to.equal(true);
-        socket.end();
+
+        // open is done in a setTimeout 0 so if we end it now then we'll
+        // miss the connection
+        socket.on('open', function () {
+            socket.end();
+        });
 
         done();
       });
@@ -538,6 +543,37 @@ module.exports = function base(transformer) {
         var Socket = Primus.createSocket({ transformer: transformer, authorization: true })
           , socket = new Socket('http://localhost:'+ server.portnumber);
 
+        socket.on('error', function (err) {
+          expect(err.message).to.contain('401');
+        });
+
+        socket.on('end', done);
+        socket.on('reconnect', function () {
+          throw new Error('fuck');
+        });
+      });
+
+      it('support declined authorization with status code', function (done) {
+        primus.authorize(function auth(req, next) {
+          expect(req.headers).to.be.a('object');
+
+          var err = new Error('I failed');
+          err.statusCode = 404;
+
+          next(err);
+        });
+
+        primus.on('connection', function (spark) {
+          throw new Error('Auth should be called');
+        });
+
+        var Socket = Primus.createSocket({ transformer: transformer, authorization: true })
+          , socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('error', function (err) {
+          expect(err.message).to.contain('404');
+        });
+
         socket.on('end', done);
         socket.on('reconnect', function () {
           throw new Error('fuck');
@@ -626,6 +662,8 @@ module.exports = function base(transformer) {
           expect(pattern.join(',')).to.equal('timeout,reconnecting,reconnect');
 
           socket.end();
+          // outgoing::reconnect is emitted after reconnect whatever we do
+          socket.removeAllListeners('outgoing::reconnect');
           done();
         });
       });
