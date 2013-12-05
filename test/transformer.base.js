@@ -119,7 +119,7 @@ module.exports = function base(transformer) {
         try {
           socket.open.call(new EventEmitter());
         } catch (err) {
-          expect(err).to.be.instanceOf(Error);
+          expect(Object.prototype.toString.call(err)).to.equal('[object Error]');
           expect(err.message).to.contain('Primus#open');
           expect(err.message).to.contain('context');
           calls++;
