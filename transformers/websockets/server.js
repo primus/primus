@@ -49,15 +49,8 @@ module.exports = function server() {
         socket.send(data, { binary: true }, noop);
       });
 
-      socket.on('error', function(err, code) {
-        if (!spark.listeners('error').length) return;
-        if ('string' === typeof err) {
-          err = new Error(err);
-          if (code) err.code = code;
-        }
-        spark.emit('error', err);
-      });
       socket.on('close', spark.emits('end'));
+      socket.on('error', spark.emits('error'));
       socket.on('message', spark.emits('data'));
     });
   });
