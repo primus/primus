@@ -327,7 +327,8 @@ try {
     // that from the URL.
     //
     if (~a.href.indexOf('@') && !a.auth) {
-      a.auth = a.href.slice(a.protocol.length + 2, a.href.indexOf(a.pathname)).split('@')[0];
+      var start = a.protocol.length + 2;
+      a.auth = a.href.slice(start, a.href.indexOf(a.pathname, start)).split('@')[0];
     }
 
     return a;
