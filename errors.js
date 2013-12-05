@@ -18,7 +18,7 @@ function PrimusError(message, logger) {
   this.name = this.constructor.name;
 
   if (logger) {
-    logger.emit('log', 'error', message, this);
+    logger.emit('log', 'error', this);
   }
 }
 
@@ -40,7 +40,7 @@ function ParserError(message, spark) {
 
   if (spark) {
     if (spark.listeners('error').length) spark.emit('error', this);
-    spark.primus.emit('log', 'error', message, this);
+    spark.primus.emit('log', 'error', this);
   }
 }
 

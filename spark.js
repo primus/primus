@@ -110,6 +110,21 @@ Spark.prototype.initialise = function initialise() {
     spark.emit('end');
   });
 
+  spark.on('incoming::error', function error(err) {
+    //
+    // Ensure that the error we emit is always an Error instance. There are
+    // transformers that used to emit only strings. A string is not an Error.
+    //
+    if ('string' === typeof err) {
+      err = new Error(err);
+    }
+
+    if (spark.listeners('error').length) spark.emit('error', err);
+    spark.primus.emit('log', 'error', err);
+
+    spark.end();
+  });
+
   //
   // End is triggered by both incoming and outgoing events.
   //
