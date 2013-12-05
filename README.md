@@ -1066,6 +1066,23 @@ see it be merged automatically.
   </dd>
 </dl>
 
+<dl>
+  <dt>
+    <a href="https://github.com/latentflip/hapi_primus_sessions">
+      hapi_primus_sessions
+    </a>
+  </dt>
+  <dd>
+    A hapi and primus plugin which extends primus' spark with a `getSession(cb)`
+    method which returns the current hapi session object.
+  </dd>
+  <dd>
+    <a href="http://badge.fury.io/js/hapi_primus_sessions">
+      <img src="https://badge.fury.io/js/hapi_primus_sessions.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
 
 In addition to these community provided plugins, the Primus project also
 provides the following plugins:
