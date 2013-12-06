@@ -27,7 +27,7 @@ module.exports = function server() {
    * @api private
    */
   function noop(err) {
-    if (err) logger.error(err.message, err);
+    if (err) logger.error(err);
   }
 
   //
