@@ -195,8 +195,9 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
 Transformer.prototype.test = function test(req) {
   req.uri = url(req.url);
 
-  var route = this.primus.pathname
-    , accepted = req.uri.pathname.slice(0, route.length) === route;
+  var pathname = req.uri.pathname || '/'
+    , route = this.primus.pathname
+    , accepted = pathname.slice(0, route.length) === route;
 
   if (!accepted) this.emit('unknown', req);
 
