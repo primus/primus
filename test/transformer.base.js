@@ -641,6 +641,59 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('support declined authorization with message and www-authenticate header', function (done) {
+        primus.authorize(function auth(req, next) {
+          expect(req.headers).to.be.a('object');
+ 
+          var err = new Error('I failed');
+          err.authenticate = 'Basic realm="primus"';
+
+          next(err);
+        });
+
+        primus.on('connection', function (spark) {
+          throw new Error('Auth should be called');
+        });
+
+        var Socket = Primus.createSocket({ transformer: transformer, authorization: true })
+          , socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('outgoing::open', function ()
+        {
+          socket.socket.on('unexpected-response', function (req, res)
+          {
+            expect(res.statusCode).to.equal(401);
+            expect(res.headers['www-authenticate']).to.equal('Basic realm="primus"');
+
+            var data = '';
+
+            res.on('data', function (v) {
+              data += v;
+            });
+
+            res.on('end', function () {
+              var obj = JSON.parse(data);
+              expect(obj).to.eql({error: 'I failed'});
+              socket.socket.emit('error', new Error(obj.error));
+            });
+          });
+        });
+
+        socket.on('error', function (err) {
+          if (transformer === 'WebSockets') {
+            expect(err.message).to.equal('I failed');
+          } else {
+            expect(err.message).to.contain('401');
+          }
+        });
+
+        socket.on('end', done);
+
+        socket.on('reconnect', function () {
+          throw new Error('reconnect should not be called');
+        });
+      });
+
       it('support accepted authorization', function (done) {
         primus.authorize(function auth(req, next) {
           expect(req.headers).to.be.a('object');
