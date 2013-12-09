@@ -32,6 +32,13 @@ various of real-time frameworks.
 9. Last but not least, Primus is build with love, passion and dedication to the
    real-time web.
 
+```
+If you have questions or need help with primus, come chat in our IRC room:
+
+   server: irc.freenode.net
+   room: #primus
+```
+
 ### Installation
 
 Primus is released in `npm` and can be installed using:
