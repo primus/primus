@@ -143,6 +143,11 @@ Transformer.prototype.request = function request(req, res) {
 
     res.statusCode = err.statusCode || 401;
     res.setHeader('Content-Type', 'application/json');
+
+    if ((res.statusCode === 401) && err.authenticate) {
+      res.setHeader('WWW-Authenticate', err.authenticate);
+    }
+
     res.end(JSON.stringify({ error: err.message || err }));
   });
 };
@@ -179,6 +184,11 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
     socket.write('Connection: close\r\n');
     socket.write('Content-Type: application/json\r\n');
     socket.write('Content-Length: ' + message.length + '\r\n');
+
+    if ((code === 401) && err.authenticate) {
+      socket.write('WWW-Authenticate: ' + err.authenticate + '\r\n');
+    }
+
     socket.write('\r\n');
     socket.write(message);
     socket.destroy();
