@@ -299,6 +299,8 @@ primus.forEach(function (spark, id, connections) {
 
 ### Authorization
 
+#### Server
+
 Primus has a built in auth hook that allows you to leverage the basic auth
 header to validate the connection. To setup the optional auth hook, use the
 `Primus#authorize` method:
@@ -313,7 +315,7 @@ primus.authorize(function (req, done) {
   var auth;
 
   try { auth = authParser(req.headers['authorization']) }
-  catch (ex) { /* Sad face */ }
+  catch (ex) { return done(ex) }
 
   //
   // Do some async auth check
@@ -328,8 +330,112 @@ primus.on('connection', function (spark) {
 });
 ```
 
-In this particular case, if an error is returned from the `authCheck` function,
-the connection attempt will never make it to the `primus.on('connection')`.
+In this particular case, if an error is passed to `done` by `authCheck` or
+the exception handler then the connection attempt will never make it to the
+`primus.on('connection')` handler.
+
+The error you pass can either be a string or an object. If an object, it can
+have the following properties which affect the response sent to the client:
+
+- `statusCode`: The HTTP status code returned to the client. Defaults to 401.
+- `authenticate`: If set and `statusCode` is 401 then a `WWW-Authenticate` header is added to the response, with a value equal to the `authenticate` property's value.
+- `message`: The error message returned to the client. The response body will be `{error: message}`, JSON-encoded.
+
+If the error you pass is a string then a 401 response is sent to the client
+with no `WWW-Authenticate` header and the string as the error message.
+
+For example to send 500 when an exception is caught, 403 for forbidden users
+and details of the basic auth scheme being used when authentication fails:
+
+```js
+primus.authorize(function (req, done) {
+  var auth;
+
+  if (req.headers.authorization) {
+    try { auth = authParser(req.headers.authorization) }
+    catch (ex) { 
+      ex.statusCode = 500;
+      return done(ex);
+    }
+
+    if ((auth.scheme === 'myscheme') &&
+        checkCredentials(auth.username, auth.password)) {
+      if (userAllowed(auth.username)) {
+        return done();
+      } else {
+        return done({ statusCode: 403, message: 'Go away!' });
+      }
+    }
+  }
+
+  done({
+    message: 'Authentication required',
+    authenticate: 'Basic realm="myscheme"'
+  });
+});
+```
+
+#### Client
+
+Unfortunately, the amount of detail you get in your client when authorization
+fails depends on the transformer in use. Most real-time frameworks supported
+by Primus don't expose the status code, headers or response body.
+
+The WebSocket transformer's underlying transport socket will fire an
+`unexpected-response` event with the HTTP request and response:
+
+```js
+client.on('outgoing::open', function ()
+{
+  client.socket.on('unexpected-response', function (req, res)
+  {
+    console.error(res.statusCode);
+    console.error(res.headers['www-authenticate']);
+
+    // it's up to us to close the request (although it will time out)
+    req.abort();
+
+    // it's also up to us to emit an error so primus can clean up
+    socket.socket.emit('error', 'authorization failed: ' + res.statusCode);
+  });
+});
+```
+
+If you want to read the response body then you can do something like this:
+
+```js
+client.on('outgoing::open', function ()
+{
+  client.socket.on('unexpected-response', function (req, res)
+  {
+    console.error(res.statusCode);
+    console.error(res.headers['www-authenticate']);
+
+    var data = '';
+
+    res.on('data', function (v) {
+      data += v;
+    });
+
+    res.on('end', function () {
+      // remember error message is in the 'error' property
+      socket.socket.emit('error', new Error(obj.error));
+    });
+  });
+});
+```
+
+If `unexpected-response` isn't caught (because the WebSocket transformer isn't
+being used or you don't listen for it) then you'll get an `error` event:
+
+```js
+primus.on('error', function error(err) {
+  console.error('Something horrible has happened', err, err.message);
+});
+```
+
+As noted above, `err` won't contain any details about the authorization failure
+so you won't be able to distinguish it from other errors.
 
 ### Destruction
 
