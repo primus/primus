@@ -605,7 +605,9 @@ module.exports = function base(transformer) {
           , socket = new Socket('http://localhost:'+ server.portnumber);
 
         socket.on('error', function (err) {
-          expect(err.message).to.contain('401');
+          if (transformer === 'WebSocket') {
+            expect(err.message).to.contain('401');
+          }
         });
 
         socket.on('end', done);
@@ -632,7 +634,9 @@ module.exports = function base(transformer) {
           , socket = new Socket('http://localhost:'+ server.portnumber);
 
         socket.on('error', function (err) {
-          expect(err.message).to.contain('404');
+          if (transformer === 'WebSocket') {
+            expect(err.message).to.contain('404');
+          }
         });
 
         socket.on('end', done);
@@ -682,8 +686,6 @@ module.exports = function base(transformer) {
         socket.on('error', function (err) {
           if (transformer === 'WebSockets') {
             expect(err.message).to.equal('I failed');
-          } else {
-            expect(err.message).to.contain('401');
           }
         });
 
