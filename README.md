@@ -213,8 +213,10 @@ silly transformer refuses to support it. Yes.. I'm looking at you SockJS.
 
 #### spark.id
 
-This is the connection id we use to identify the connection. This should not be
-seen as a "session id" and can change between disconnects and reconnects.
+This is an unique id that we use to identify this single connection with. Normally
+the frameworks refer to this as an `sessionid` which is confusing as it's only
+used for the duration of one single connection. You should not see this as an
+"session id" and expect it change to between disconnects and reconnects.
 
 #### spark.write(data)
 
