@@ -33,7 +33,9 @@ module.exports = function client() {
     if (socket) socket.close();
 
     primus.socket = socket = new Factory(primus.uri({ protocol: 'http' }), null, {
-      websocket: !primus.AVOID_WEBSOCKETS
+      info: {
+        websocket: !primus.AVOID_WEBSOCKETS
+      }
     });
 
     //
