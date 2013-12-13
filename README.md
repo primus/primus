@@ -991,7 +991,8 @@ The client receives the same arguments:
 The only thing you need to remember is that the client is stored in the library
 using `toString()` so it cannot have any references outside the client's
 closure. But luckily, there's a `library` property that will also be included on
-the client side when it's specified.
+the client side when it's specified. The `library` property should be an
+absolute path to the library file.
 
 #### Extending the Spark / Socket
 
