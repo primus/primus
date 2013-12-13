@@ -21,8 +21,8 @@ http.createServer(function handle(req, res) {
 // Create the HTTPS server where we can attach our primus server on.
 //
 var server = spdy.createServer({
-  key: fs.readFileSync(path.join(__dirname, '../../ssl/server.key')),
-  cert: fs.readFileSync(path.join(__dirname, '../../ssl/server.crt')),
+  key: fs.readFileSync(path.join(__dirname, '../../test/ssl/server.key')),
+  cert: fs.readFileSync(path.join(__dirname, '../../test/ssl/server.crt')),
   windowSize: 1024 * 1024,
   autoSpdy31: false
 }, function handle(req, res) {
