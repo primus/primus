@@ -319,19 +319,33 @@ try {
   // etc.
   //
   parse = function parse(url) {
-    var a = document.createElement('a');
+    var a = document.createElement('a')
+      , data = {}
+      , key;
+
     a.href = url;
+
+    //
+    // Transform it from a readOnly object to a read/writable object so we can
+    // change some parsed values. This is required if we ever want to override
+    // a port number etc (as browsers remove port 443 and 80 from the urls).
+    //
+    for (key in a) {
+      if (a[key] && ('string' === typeof a[key] || +a[key])) {
+        data[key] = a[key];
+      }
+    }
 
     //
     // Browsers do not parse authorization information, so we need to extract
     // that from the URL.
     //
-    if (~a.href.indexOf('@') && !a.auth) {
-      var start = a.protocol.length + 2;
-      a.auth = a.href.slice(start, a.href.indexOf(a.pathname, start)).split('@')[0];
+    if (~data.href.indexOf('@') && !data.auth) {
+      var start = data.protocol.length + 2;
+      data.auth = data.href.slice(start, data.href.indexOf(data.pathname, start)).split('@')[0];
     }
 
-    return a;
+    return data;
   };
 }
 
@@ -520,7 +534,7 @@ Primus.prototype.initialise = function initalise(options) {
     if (primus.timers.connect) primus.end();
     if (readyState !== Primus.OPEN) return;
 
-    // 
+    //
     // Clear all timers in case we're not going to reconnect.
     //
     for (var timeout in this.timers) {
