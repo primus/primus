@@ -32,12 +32,14 @@ module.exports = function client() {
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    primus.socket = socket = factory(primus.uri({ protocol: 'ws', query: true }), {
+    primus.socket = socket = factory(primus.merge({},
+      primus.url,
+      primus.uri({ protocol: 'http', query: true, object: true }), {
       path: this.pathname,
       transports: !primus.AVOID_WEBSOCKETS
         ? ['polling', 'websocket']
         : ['polling']
-    });
+    }));
 
     //
     // Setup the Event handlers.
