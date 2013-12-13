@@ -1,0 +1,34 @@
+<script src="https://localhost/primus/primus.js"></script>
+<script>
+  var primus = new Primus('https://localhost:443', {
+    timeout: 10000,
+    pong: 5000,
+    strategy: 'disconnect,online,timeout',
+    reconnect: {
+      maxDelay: Infinity, // The max delay for a reconnect retry.
+      minDelay: 500,      // The minimum delay before we reconnect.
+      retries: 10         // How many times should we attempt to reconnect.
+    }
+  });
+
+  primus.on('open', function open() {
+    console.log('Primus opened the connection');
+  });
+
+  primus.on('error', function error(err) {
+    console.error('Primus error', err, err.message);
+  });
+
+  primus.on('reconnect', function () {
+    console.log('Trying to reconnect to server');
+  });
+
+  primus.on('reconnecting', function (opts) {
+    console.log('Lost websocket connection to Argent, attempting to reconnect in %d ms', opts.timeout);
+    console.log('This is attempt %d out of %d', opts.attempt, opts.retries);
+  });
+
+  primus.on('end', function () {
+    console.log('Connection with server has terminated');
+  });
+</script>

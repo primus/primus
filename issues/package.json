@@ -1,0 +1,15 @@
+{
+  "name": "issues",
+  "version": "0.0.0",
+  "description": "Reproducible tests for github issues.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Arnout Kazemier",
+  "license": "MIT",
+  "dependencies": {
+    "argh": "~0.1.1",
+    "spdy": "~1.17.10"
+  }
+}
