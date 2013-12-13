@@ -40,8 +40,21 @@ module.exports = function client() {
     // behaviour between different browsers. This should ideally be solved in
     // Primus when we connect.
     //
-    try { primus.socket = socket = new Factory(primus.uri({ protocol: 'ws', query: true })); }
-    catch (e) { return primus.emit('error', e); }
+    try {
+      //
+      // Only allow primus.transport object in Node.js, it will throw in
+      // browsers with a TypeError if we supply to much arguments.
+      //
+      if (Factory.length === 3) {
+        primus.socket = socket = new Factory(
+          primus.uri({ protocol: 'ws', query: true }),  // URL
+          [],                                           // Sub protocols
+          primus.transport                              // options.
+        );
+      } else {
+        primus.socket = socket = new Factory(primus.uri({ protocol: 'ws', query: true }));
+      }
+    } catch (e) { return primus.emit('error', e); }
 
     //
     // Setup the Event handlers.

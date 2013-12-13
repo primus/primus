@@ -32,7 +32,7 @@ module.exports = function client() {
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    primus.socket = socket = factory(primus.merge({},
+    primus.socket = socket = factory(primus.merge(primus.transport,
       primus.url,
       primus.uri({ protocol: 'http', query: true, object: true }), {
       path: this.pathname,

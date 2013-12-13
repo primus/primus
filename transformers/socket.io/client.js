@@ -46,13 +46,14 @@ module.exports = function client() {
     //
     primus.socket = socket = (new Socket(primus.merge({},
       primus.url,
-      primus.uri({ protocol: 'http', query: true, object: true }), {
+      primus.uri({ protocol: 'http', query: true, object: true }),
+      primus.merge(primus.transport, {
       'resource': primus.pathname.slice(1),
       'force new connection': true,
       'flash policy port': 843,
       'transports': transports,
       'reconnect': false
-    }))).of(''); // Force namespace
+    })))).of(''); // Force namespace
 
     //
     // Setup the Event handlers.

@@ -32,11 +32,14 @@ module.exports = function client() {
   primus.on('outgoing::open', function opening() {
     if (socket) socket.close();
 
-    primus.socket = socket = new Factory(primus.uri({ protocol: 'http' }), null, {
+    primus.socket = socket = new Factory(
+      primus.uri({ protocol: 'http' }),
+      null,
+      primus.merge(primus.transport, {
       info: {
         websocket: !primus.AVOID_WEBSOCKETS
       }
-    });
+    }));
 
     //
     // Setup the Event handlers.

@@ -34,10 +34,10 @@ module.exports = function client() {
 
     var url = primus.uri({ protocol: 'http' });
 
-    primus.socket = socket = new Factory(url, {
+    primus.socket = socket = new Factory(url, primus.merge(primus.transport, {
       extraParams: primus.querystring(primus.uri({ protocol: 'http', query: true }).replace(url, '')),
       reconnect: false,
-    });
+    }));
 
     //
     // Setup the Event handlers.

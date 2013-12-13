@@ -185,6 +185,7 @@ function context(self, method) {
  * - pong, The heartbeat timeout for receiving a response to the ping.
  * - network, Use network events as leading method for network connection drops.
  * - strategy, Reconnection strategies.
+ * - transport, Transport options.
  *
  * @constructor
  * @param {String} url The URL of your server.
@@ -212,6 +213,7 @@ function Primus(url, options) {
   primus.timers = {};                           // Contains all our timers.
   primus.attempt = null;                        // Current back off attempt.
   primus.socket = null;                         // Reference to the internal connection.
+  primus.transport = options.transport || {};   // Transport options.
   primus.transformers = {                       // Message transformers.
     outgoing: [],
     incoming: []
