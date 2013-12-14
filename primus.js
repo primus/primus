@@ -1,6 +1,22 @@
 /*globals require, define */
 'use strict';
 
+//
+// Sets the default connection URL.
+//
+var defaultUrl;
+try {
+  if (window.location.origin) {
+    // Most web browsers.
+    defaultUrl = window.location.origin;
+  } else {
+    // Internet Explorer fix.
+    defaultUrl = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+  }
+} catch (e) { // Should throw a ReferenceError if using Node.
+  defaultUrl  = "http://127.0.0.1";
+}
+
 /**
  * Minimal EventEmitter interface that is molded against the Node.js
  * EventEmitter interface.
@@ -206,7 +222,7 @@ function Primus(url, options) {
   primus.buffer = [];                           // Stores premature send data.
   primus.writable = true;                       // Silly stream compatibility.
   primus.readable = true;                       // Silly stream compatibility.
-  primus.url = primus.parse(url);               // Parse the URL to a readable format.
+  primus.url = primus.parse(url || defaultUrl); // Parse the URL to a readable format.
   primus.readyState = Primus.CLOSED;            // The readyState of the connection.
   primus.options = options;                     // Reference to the supplied options.
   primus.timers = {};                           // Contains all our timers.
