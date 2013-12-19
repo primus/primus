@@ -105,7 +105,7 @@
         log('network', 'Online', 'We have regained control over our internet connection.');
       });
 
-      primus.on('offline', function online() {
+      primus.on('offline', function offline() {
         log('network', 'Offline', 'We lost our internet connection.');
       });
 
