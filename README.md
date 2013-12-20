@@ -492,6 +492,7 @@ pong                | Time the server has to respond to ping  | `10000` ms
 manual              | Manually open the connection            | `false`
 websockets          | Should we AVOID the usage of WebSockets | Boolean, is detected.
 network             | Use native `online`/`offline` detection | Boolean, is feature detected.
+transport           | Transport specific configuration        | `{}`
 
 There are 2 important options that we're going to look a bit closer at.
 
@@ -591,6 +592,24 @@ false**.
 
 [reconnect]: #reconnect
 [strategy]: #strategy
+
+##### transport
+
+The transport object allows you to add transport specific configuration in to
+Primus. We only recommend using this if understand and accept the following
+consequences:
+
+- Primus will attempt to override properties that it needs in order to function
+  properly inside this configuration.
+- We might start using options without any announcements or major version bumps.
+- Expect your client and it's connection to malfunction once you switch between
+  different transports as these are configuration changes that are specific to
+  the bundled transformer library/client.
+- Bugs and bug reports that caused by using this functionality is closed
+  immediately.
+
+Having that said, this does give you ultimate freedom while still getting the
+benefits of Primus.
 
 #### primus.write(message)
 
