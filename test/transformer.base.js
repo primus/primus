@@ -120,6 +120,17 @@ module.exports = function base(transformer) {
         expect(socket.options.strategy).to.equal('');
       });
 
+      it('sets reconnection strategies by default', function () {
+        var socket = new Socket('http://localhost:'+ server.portnumber, {
+          manual: true
+        });
+
+        expect(socket.options.strategy).to.contain('disconnect');
+        expect(socket.options.strategy).to.contain('timeout');
+        expect(socket.options.strategy).to.contain('online');
+        expect(socket.options.strategy).to.contain(',');
+      });
+
       it('emits errors for incorrect context when theres a listener', function () {
         var socket = new Socket('http://localhost:'+ server.portnumber, {
           manual: true
@@ -281,8 +292,9 @@ module.exports = function base(transformer) {
           }
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber,
-                                { strategy: 'none' });
+        var socket = new Socket('http://localhost:'+ server.portnumber, {
+          strategy: 'none'
+        });
 
         socket.on('close', function () {
           expect(Object.keys(socket.timers).length).to.equal(0);
@@ -312,8 +324,9 @@ module.exports = function base(transformer) {
           }
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber,
-                                { strategy: 'none' });
+        var socket = new Socket('http://localhost:'+ server.portnumber, {
+          strategy: 'none'
+        });
 
         socket.on('reconnect', function (message) {
           throw new Error('bad');
