@@ -72,7 +72,10 @@ module.exports = function client() {
   // We need to write a new message to the socket.
   //
   primus.on('outgoing::data', function write(message) {
-    if (socket) socket.send(message);
+    if (!socket || socket.readyState !== Factory.OPEN) return;
+
+    try { socket.send(message); }
+    catch (e) { primus.emit('incoming::error', e); }
   });
 
   //
