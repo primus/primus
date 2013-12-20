@@ -273,7 +273,8 @@ primus.on('connection', function (spark) {
     console.log('received data from the client', data);
 
     //
-    // Always close the connection if we didn't receive our secret imaginary handshake.
+    // Always close the connection if we didn't receive our secret imaginary
+    // handshake.
     //
     if ('foo' !== data.secrethandshake) spark.end();
     spark.write({ foo: 'bar' });
@@ -347,8 +348,11 @@ The error you pass can either be a string or an object. If an object, it can
 have the following properties which affect the response sent to the client:
 
 - `statusCode`: The HTTP status code returned to the client. Defaults to 401.
-- `authenticate`: If set and `statusCode` is 401 then a `WWW-Authenticate` header is added to the response, with a value equal to the `authenticate` property's value.
-- `message`: The error message returned to the client. The response body will be `{error: message}`, JSON-encoded.
+- `authenticate`: If set and `statusCode` is 401 then a `WWW-Authenticate`
+  header is added to the response, with a value equal to the `authenticate`
+  property's value.
+- `message`: The error message returned to the client. The response body will be
+  `{error: message}`, JSON-encoded.
 
 If the error you pass is a string then a 401 response is sent to the client
 with no `WWW-Authenticate` header and the string as the error message.
