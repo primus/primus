@@ -111,6 +111,15 @@ module.exports = function base(transformer) {
         }, 100);
       });
 
+      it('allows disabling of the reconnect functionality', function () {
+        var socket = new Socket('http://localhost:'+ server.portnumber, {
+          strategy: false,
+          manual: true
+        });
+
+        expect(socket.options.strategy).to.equal('');
+      });
+
       it('emits errors for incorrect context when theres a listener', function () {
         var socket = new Socket('http://localhost:'+ server.portnumber, {
           manual: true

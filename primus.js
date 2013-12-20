@@ -219,7 +219,9 @@ function Primus(url, options) {
   options.reconnect = options.reconnect || {};  // Stores the back off configuration.
   options.ping = +options.ping || 25e3;         // Heartbeat ping interval.
   options.pong = +options.pong || 10e3;         // Heartbeat pong response timeout.
-  options.strategy = options.strategy || [];    // Reconnect strategies.
+  options.strategy = 'strategy' in options      // Reconnect strategies, supplying
+    ? options.strategy
+    : [];
 
   primus.buffer = [];                           // Stores premature send data.
   primus.writable = true;                       // Silly stream compatibility.
@@ -247,7 +249,13 @@ function Primus(url, options) {
     options.strategy = options.strategy.split(/\s?\,\s?/g);
   }
 
-  if (!options.strategy.length) {
+  if (false === options.strategy) {
+    //
+    // Strategies are disabled, but we still need an empty array to join it in
+    // to nothing.
+    //
+    options.strategy = [];
+  } else if (!options.strategy.length) {
     options.strategy.push('disconnect', 'online');
 
     //
