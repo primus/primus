@@ -827,11 +827,11 @@ Primus.prototype.backoff = function backoff(callback, opts) {
   //
   if (opts.backoff) return primus;
 
-  opts.maxDelay = opts.maxDelay || Infinity;  // Maximum delay.
-  opts.minDelay = opts.minDelay || 500;       // Minimum delay.
-  opts.retries = opts.retries || 10;          // Amount of allowed retries.
-  opts.attempt = (+opts.attempt || 0) + 1;    // Current attempt.
-  opts.factor = opts.factor || 2;             // Back off factor.
+  opts.maxDelay = 'maxDelay' in opts ? opts.maxDelay : Infinity;  // Maximum delay.
+  opts.minDelay = 'minDelay' in opts ? opts.minDelay : 500;       // Minimum delay.
+  opts.retries = 'retries' in opts ? opts.retries : 10;           // Allowed retries.
+  opts.attempt = (+opts.attempt || 0) + 1;                        // Current attempt.
+  opts.factor = 'factor' in opts ? opts.factor : 2;               // Back off factor.
 
   //
   // Bailout if we are about to make to much attempts. Please note that we use
