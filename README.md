@@ -576,6 +576,19 @@ access will try to reconect again**.
 We automatically disable this for you when you've set the authorization before
 you save the library.
 
+But there are always use cases where reconnection is not advice for your
+application. In these cases we've provided a way to completely disable the
+reconnection, this is done by setting the `strategy` to `false`:
+
+```js
+var primus = new Primus(url, { strategy: false });
+```
+
+If you want manually control the reconnecting you can should just call
+`primus.end()` to close the connection and `primus.open()` to start a
+connection. **Don't do manual reconnection if you haven't set the strategy to
+false**.
+
 [reconnect]: #reconnect
 [strategy]: #strategy
 
