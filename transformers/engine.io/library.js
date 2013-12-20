@@ -1096,8 +1096,7 @@ var global = require('global');
 
 function polling (opts) {
   var xhr
-    , xd = false
-    , isXProtocol = false;
+    , xd = false;
 
   if (global.location) {
     var isSSL = 'https:' == location.protocol;
@@ -1109,14 +1108,9 @@ function polling (opts) {
     }
 
     xd = opts.hostname != location.hostname || port != opts.port;
-    isXProtocol = opts.secure != isSSL;
   }
 
   xhr = util.request(xd, opts);
-  /* See #7 at http://blogs.msdn.com/b/ieinternals/archive/2010/05/13/xdomainrequest-restrictions-limitations-and-workarounds.aspx */
-  if (isXProtocol && global.XDomainRequest && xhr instanceof global.XDomainRequest) {
-    return new JSONP(opts);
-  }
 
   if (xhr && !opts.forceJSONP) {
     return new XHR(opts);
@@ -1526,49 +1520,33 @@ Request.prototype.create = function(){
 
   if ('POST' == this.method) {
     try {
-      if (xhr.setRequestHeader) {
-        // xmlhttprequest
-        xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
-      } else {
-        // xdomainrequest
-        xhr.contentType = 'text/plain';
-      }
+      xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
     } catch (e) {}
   }
 
-  if (this.xd && global.XDomainRequest && xhr instanceof XDomainRequest) {
-    xhr.onerror = function(e){
+  // ie6 check
+  if ('withCredentials' in xhr) {
+    xhr.withCredentials = true;
+  }
+
+  xhr.onreadystatechange = function(){
+    var data;
+
+    try {
+      if (4 != xhr.readyState) return;
+      if (200 == xhr.status || 1223 == xhr.status) {
+        data = xhr.responseText;
+      } else {
+        self.onError(xhr.status);
+      }
+    } catch (e) {
       self.onError(e);
-    };
-    xhr.onload = function(){
-      self.onData(xhr.responseText);
-    };
-    xhr.onprogress = empty;
-  } else {
-    // ie6 check
-    if ('withCredentials' in xhr) {
-      xhr.withCredentials = true;
     }
 
-    xhr.onreadystatechange = function(){
-      var data;
-
-      try {
-        if (4 != xhr.readyState) return;
-        if (200 == xhr.status || 1223 == xhr.status) {
-          data = xhr.responseText;
-        } else {
-          self.onError(xhr.status);
-        }
-      } catch (e) {
-        self.onError(e);
-      }
-
-      if (undefined !== data) {
-        self.onData(data);
-      }
-    };
-  }
+    if (null != data) {
+      self.onData(data);
+    }
+  };
 
   debug('sending xhr with url %s | data %s', this.uri, this.data);
   try {
@@ -1634,9 +1612,6 @@ Request.prototype.cleanup = function(){
   }
   // xmlhttprequest
   this.xhr.onreadystatechange = empty;
-
-  // xdomainrequest
-  this.xhr.onload = this.xhr.onerror = empty;
 
   try {
     this.xhr.abort();
@@ -2300,10 +2275,6 @@ exports.request = function request (xdomain, opts) {
     return new _XMLHttpRequest(opts);
   } catch (e) {}
 
-  if (xdomain && 'undefined' != typeof XDomainRequest && !exports.ua.hasCORS) {
-    return new XDomainRequest();
-  }
-
   // XMLHttpRequest can be disabled on IE
   try {
     if ('undefined' != typeof XMLHttpRequest && (!xdomain || exports.ua.hasCORS)) {
@@ -2387,9 +2358,6 @@ var hasCORS = require('has-cors');
 
 module.exports = function(opts) {
   var xdomain = opts.xdomain;
-  if (xdomain && 'undefined' != typeof XDomainRequest && !hasCORS) {
-    return new XDomainRequest();
-  }
 
   // XMLHttpRequest can be disabled on IE
   try {
