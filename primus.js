@@ -2,19 +2,20 @@
 'use strict';
 
 //
-// Sets the default connection URL.
+// Sets the default connection URL, it uses the default origin of the browser
+// when supported but degrades for older browsers. In Node.js, we cannot guess
+// where the user wants to connect to, so we just default to localhost.
 //
 var defaultUrl;
+
 try {
-  if (window.location.origin) {
-    // Most web browsers.
-    defaultUrl = window.location.origin;
+  if (location.origin) {
+    defaultUrl = location.origin;
   } else {
-    // Internet Explorer fix.
-    defaultUrl = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port : '');
+    defaultUrl = location.protocol +'//'+ location.hostname + (location.port ? ':'+ location.port : '');
   }
-} catch (e) { // Should throw a ReferenceError if using Node.
-  defaultUrl  = "http://127.0.0.1";
+} catch (e) {
+  defaultUrl = 'http://127.0.0.1';
 }
 
 /**
