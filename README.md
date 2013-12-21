@@ -103,6 +103,16 @@ var server = http.createServer(/* request handler */)
   , primus = new Primus(server, {/* options */});
 ```
 
+The following options can be provided:
+
+Name                | Description                             | Default       
+--------------------|-----------------------------------------|---------------
+authorization       | Authorization handler                   | `null`
+pathname            | The URL namespace that Primus can own   | `/primus`
+parser              | Message encoder for all communication   | `JSON`
+transformer         | The tranformer we should use internally | `websockets`
+plugin              | The plugins that should be applied      | `{}`
+
 In addition to support different frameworks we've also made it possible to use
 custom encoding and decoding libraries. We're using `JSON` by default but you
 could also use `msgpack` or `JSONH` for example (but these parsers need to be
@@ -152,9 +162,13 @@ page add:
 <script src="/primus/primus.js"></script>
 ```
 
-If you've configured a different `pathname` in the options you would of course
-need to update the `src` attribute to the correct location.
-It's always available at:
+As you can see, it will use the `/primus` pathname by default. Primus needs to
+own the whole path/namespace in order to function properly as it will forward
+all other requests directly in to the transformers so they can work their magic.
+If you already have a static folder with the name `primus` you can change the
+pathname to something different and still make this work. But you would of
+course need to update the `src` attribute of the script tag to set the correct
+location. It's always available at:
 
 ```
 <protocol>://<server location>/<pathname>/primus.js
