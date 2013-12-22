@@ -350,18 +350,18 @@ Primus.prototype.client = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It asumes that the `close` event is
+  // Attempt to reconnect the socket. It asumes that the `outgoing::end` event is
   // called if it failed to disconnect.
   //
   primus.on('outgoing::reconnect', function reconnect(url) {
-    if (socket) primus.emit('outgoing::close');
+    if (socket) primus.emit('outgoing::end');
     primus.emit('outgoing::connect', url);
   });
 
   //
   // We need to close the socket.
   //
-  primus.on('outgoing::close', function close() {
+  primus.on('outgoing::end', function close() {
     if (socket) {
       socket.close();
       socket = null;
