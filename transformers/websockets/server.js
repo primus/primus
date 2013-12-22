@@ -44,6 +44,7 @@ module.exports = function server() {
       spark.on('outgoing::end', function end() {
         socket.close();
       }).on('outgoing::data', function write(data) {
+        if (socket.readyState !== socket.OPEN) return;
         if ('string' === typeof data) return socket.send(data, noop);
 
         socket.send(data, { binary: true }, noop);
