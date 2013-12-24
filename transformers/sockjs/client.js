@@ -37,7 +37,8 @@ module.exports = function client() {
       null,
       primus.merge(primus.transport, {
       info: {
-        websocket: !primus.AVOID_WEBSOCKETS
+        websocket: !primus.AVOID_WEBSOCKETS,  // Prevent WebSocket crashes
+        cookie_needed: true                   // Disables xdomainrequest bugs
       }
     }));
 
