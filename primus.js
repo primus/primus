@@ -185,7 +185,10 @@ function context(self, method) {
 
   var failure = new Error('Primus#'+ method + '\'s context should called with a Primus instance');
 
-  if (!self.listeners('error').length) throw failure;
+  if ('function' !== typeof self.listeners || !self.listeners('error').length) {
+    throw failure;
+  }
+
   self.emit('error', failure);
 }
 
@@ -1087,7 +1090,9 @@ Primus.prototype.emits = function emits(event, parser) {
 Primus.prototype.transform = function transform(type, fn) {
   context(this, 'transform');
 
-  if (!(type in this.transformers)) throw new Error('Invalid transformer type');
+  if (!(type in this.transformers)) {
+    return this.critical(new Error('Invalid transformer type'));
+  }
 
   this.transformers[type].push(fn);
   return this;
@@ -1101,7 +1106,10 @@ Primus.prototype.transform = function transform(type, fn) {
  * @api private
  */
 Primus.prototype.critical = function critical(err) {
-  if (this.listeners('error').length) return this.emit('error', err);
+  if (this.listeners('error').length) {
+    this.emit('error', err);
+    return this;
+  }
 
   throw err;
 };
