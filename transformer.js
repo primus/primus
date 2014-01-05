@@ -220,7 +220,7 @@ Transformer.prototype.test = function test(req) {
 //
 // Make the transporter extendable.
 //
-Transformer.extend = require('extendable');
+Transformer.extend = require('predefine').extend;
 
 //
 // Expose the transformer's skeleton.

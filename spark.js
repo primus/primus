@@ -3,6 +3,7 @@
 var ParserError = require('./errors').ParserError
   , parse = require('querystring').parse
   , forwarded = require('./forwarded')
+  , predefine = require('predefine')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
 
@@ -20,25 +21,33 @@ var ParserError = require('./errors').ParserError
  * @api public
  */
 function Spark(primus, headers, address, query, id) {
-  this.primus = primus;         // References to the primus.
-  this.headers = headers || {}; // The request headers.
-  this.remote = address || {};  // The remote address location.
-  this.query = query || {};     // The query string.
-  this.id = id || this.uuid();  // Unique id for socket.
-  this.readyState = Spark.OPEN; // The readyState of the connection.
+  var readable = predefine(this, predefine.READABLE)
+    , writable = predefine(this, predefine.WRITABLE);
 
-  this.writable = true;         // Silly stream compatibility.
-  this.readable = true;         // Silly stream compatibility.
+  readable('primus', primus);         // References to Primus.
+  readable('headers', headers || {}); // The request headers.
+  readable('remote', address || {});  // The remote address location.
+  readable('id', id || this.uuid());  // Unique id for socket.
+  readable('writable', true);         // Silly stream compatibility.
+  readable('readable', true);         // Silly stream compatibility.
+
+  writable('readyState', Spark.OPEN); // The readyState of the connection.
+  writable('query', query || {});     // The query string.
+
 
   //
   // Parse our query string.
   //
-  if ('string' === typeof this.query) this.query = parse(this.query);
+  if ('string' === typeof this.query) {
+    this.query = parse(this.query);
+  }
 
   this.initialise();
 }
 
 Spark.prototype.__proto__ = require('stream').prototype;
+Spark.readable = predefine(Spark.prototype, predefine.READABLE);
+Spark.writable = predefine(Spark.prototype, predefine.WRITABLE);
 
 //
 // Internal readyState's to prevent writes against close sockets.
@@ -50,18 +59,16 @@ Spark.CLOSED = 2;
 // Lazy parse interface for IP address information. As nobody is always
 // interested in this, we're going to defer parsing until it's actually needed.
 //
-Object.defineProperty(Spark.prototype, 'address', {
-  get: function address() {
-    return forwarded(this.remote, this.headers, this.primus.whitelist);
-  }
-});
+Spark.readable('address', { get: function address() {
+  return forwarded(this.remote, this.headers, this.primus.whitelist);
+}}, true);
 
 /**
  * Attach hooks and automatically announce a new connection.
  *
  * @api private
  */
-Spark.prototype.initialise = function initialise() {
+Spark.readable('initialise', function initialise() {
   var primus = this.primus
     , spark = this;
 
@@ -139,17 +146,17 @@ Spark.prototype.initialise = function initialise() {
   process.nextTick(function tick() {
     primus.emit('connection', spark);
   });
-};
+});
 
 /**
- * Generate a unique uuid.
+ * Generate a unique UUID.
  *
- * @returns {String} uuid.
+ * @returns {String} UUID.
  * @api private
  */
-Spark.prototype.uuid = function uuid() {
+Spark.readable('uuid', function uuid() {
   return Date.now() +'$'+ this.primus.sparks++;
-};
+});
 
 /**
  * Simple emit wrapper that returns a function that emits an event once it's
@@ -160,7 +167,7 @@ Spark.prototype.uuid = function uuid() {
  * @param {Function} parser Argument parser.
  * @api public
  */
-Spark.prototype.emits = function emits(event, parser) {
+Spark.readable('emits', function emits(event, parser) {
   var spark = this;
 
   return function emit(arg) {
@@ -168,7 +175,7 @@ Spark.prototype.emits = function emits(event, parser) {
 
     spark.emit('incoming::'+ event, data);
   };
-};
+});
 
 /**
  * Send a new message to a given spark.
@@ -177,7 +184,7 @@ Spark.prototype.emits = function emits(event, parser) {
  * @returns {Boolean} Always returns true.
  * @api public
  */
-Spark.prototype.write = function write(data) {
+Spark.readable('write', function write(data) {
   var primus = this.primus
     , packet;
 
@@ -203,7 +210,7 @@ Spark.prototype.write = function write(data) {
 
   this._write(data);
   return true;
-};
+});
 
 /**
  * The actual message writer.
@@ -211,7 +218,7 @@ Spark.prototype.write = function write(data) {
  * @param {Mixed} data The message that needs to be written.
  * @api private
  */
-Spark.prototype._write = function _write(data) {
+Spark.readable('_write', function _write(data) {
   var primus = this.primus
     , spark = this;
 
@@ -245,7 +252,7 @@ Spark.prototype._write = function _write(data) {
 
     spark.emit('outgoing::data', packet);
   });
-};
+});
 
 /**
  * End the connection.
@@ -253,7 +260,7 @@ Spark.prototype._write = function _write(data) {
  * @param {Mixed} data Optional closing data.
  * @api public
  */
-Spark.prototype.end = function end(data) {
+Spark.readable('end', function end(data) {
   var spark = this;
 
   if (data) spark.write(data);
@@ -268,7 +275,7 @@ Spark.prototype.end = function end(data) {
     spark.emit('outgoing::end');
     spark.emit('end');
   });
-};
+});
 
 //
 // Expose the module.
