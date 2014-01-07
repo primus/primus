@@ -345,7 +345,7 @@ Primus.prototype.library = function compile(nodejs) {
   // client.
   //
   var client = '(function (name, context, definition) {'
-    + '  context[name] = definition();'
+    + '  context[name] = definition.call(context);'
     + '  if (typeof module !== "undefined" && module.exports) {'
     + '    module.exports = context[name];'
     + '  } else if (typeof define == "function" && define.amd) {'
@@ -402,7 +402,7 @@ Primus.prototype.library = function compile(nodejs) {
       // this is the use of the `require` function which requirejs, browserify
       // and others are using.
       //
-      return '(function library(Primus) {'+ lib +'}(this.Primus));';
+      return '(function library(Primus, global) {'+ lib +'}(this.Primus, this));';
     }).join('\n');
 };
 
