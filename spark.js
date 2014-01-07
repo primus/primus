@@ -22,7 +22,9 @@ var ParserError = require('./errors').ParserError
  */
 function Spark(primus, headers, address, query, id) {
   var readable = predefine(this, predefine.READABLE)
-    , writable = predefine(this, predefine.WRITABLE);
+    , writable = predefine(this, predefine.WRITABLE)
+    , readyState = Spark.OPEN
+    , spark = this;
 
   readable('primus', primus);         // References to Primus.
   readable('headers', headers || {}); // The request headers.
@@ -30,8 +32,6 @@ function Spark(primus, headers, address, query, id) {
   readable('id', id || this.uuid());  // Unique id for socket.
   readable('writable', true);         // Silly stream compatibility.
   readable('readable', true);         // Silly stream compatibility.
-
-  writable('readyState', Spark.OPEN); // The readyState of the connection.
   writable('query', query || {});     // The query string.
   writable('timeout', null);          // Heartbeat timeout.
 
@@ -42,7 +42,21 @@ function Spark(primus, headers, address, query, id) {
     this.query = parse(this.query);
   }
 
-  this.heartbeat().initialise();
+  readable('readyState', {
+    get: function get() {
+      return readyState;
+    },
+    set: function set(state) {
+      if (readyState === state) return state;
+      readyState = state;
+
+      spark.emit('readyStateChange');
+    }
+  });
+
+  this.initialise.forEach(function execute(initialise) {
+    initialise.call(spark);
+  }, true);
 }
 
 Spark.prototype.__proto__ = require('stream').prototype;
@@ -52,8 +66,9 @@ Spark.writable = predefine(Spark.prototype, predefine.WRITABLE);
 //
 // Internal readyState's to prevent writes against close sockets.
 //
-Spark.OPEN   = 1;
-Spark.CLOSED = 2;
+Spark.OPENING = 1;    // Only here for primus.js readyState number compatibility.
+Spark.CLOSED  = 2;    // The connection is closed.
+Spark.OPEN    = 3;    // The connection is open.
 
 //
 // Lazy parse interface for IP address information. As nobody is always
@@ -89,9 +104,10 @@ Spark.readable('heartbeat', function heartbeat() {
 /**
  * Attach hooks and automatically announce a new connection.
  *
+ * @type {Array}
  * @api private
  */
-Spark.readable('initialise', function initialise() {
+Spark.readable('initialise', [function initialise() {
   var primus = this.primus
     , spark = this;
 
@@ -178,7 +194,7 @@ Spark.readable('initialise', function initialise() {
   process.nextTick(function tick() {
     primus.emit('connection', spark);
   });
-});
+}]);
 
 /**
  * Generate a unique UUID.
