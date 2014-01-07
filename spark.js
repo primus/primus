@@ -52,11 +52,11 @@ function Spark(primus, headers, address, query, id) {
 
       spark.emit('readyStateChange');
     }
-  });
+  }, true);
 
   this.initialise.forEach(function execute(initialise) {
     initialise.call(spark);
-  }, true);
+  });
 }
 
 Spark.prototype.__proto__ = require('stream').prototype;
