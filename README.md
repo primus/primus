@@ -815,6 +815,7 @@ Event                 | Usage       | Location      | Description
 `online`              | **public**  | client        | We've regained a network connection
 `offline`             | **public**  | client        | We've lost our internet connection
 `log`                 | **public**  | server        | Log messages.
+`readyStateChange`    | **public**  | client/spark  | The readyState has changed.
 
 As a rule of thumb assume that every event that is prefixed with `incoming::` or
 `outgoing::` is reserved for internal use only and that emitting such events your

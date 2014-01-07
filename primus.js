@@ -459,13 +459,24 @@ Primus.prototype.initialise = function initalise(options) {
   var primus = this;
 
   primus.on('outgoing::open', function opening() {
+    var readyState = primus.readyState;
+
     primus.readyState = Primus.OPENING;
+    if (readyState !== Primus.OPENING) {
+      primus.emit('readyStateChange');
+    }
   });
 
   primus.on('incoming::open', function opened() {
     if (primus.attempt) primus.attempt = null;
 
+    var readyState = primus.readyState;
+
     primus.readyState = Primus.OPEN;
+    if (readyState !== Primus.OPEN) {
+      primus.emit('readyStateChange');
+    }
+
     primus.emit('open');
     primus.clearTimeout('ping', 'pong').heartbeat();
 
@@ -561,6 +572,10 @@ Primus.prototype.initialise = function initalise(options) {
     // is only executed because our readyState is set to `open`.
     //
     primus.readyState = Primus.CLOSED;
+    if (readyState !== Primus.CLOSED) {
+      primus.emit('readyStateChange');
+    }
+
     if (primus.timers.connect) primus.end();
     if (readyState !== Primus.OPEN) return;
 
@@ -921,7 +936,12 @@ Primus.prototype.end = function end(data) {
   if (data) this.write(data);
 
   this.writable = false;
+
+  var readyState = this.readyState;
   this.readyState = Primus.CLOSED;
+  if (readyState !== Primus.CLOSED) {
+    this.emit('readyStateChange');
+  }
 
   for (var timeout in this.timers) {
     this.clearTimeout(timeout);

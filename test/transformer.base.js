@@ -166,6 +166,27 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('emits a readyStateChange event', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber)
+          , state = socket.readyState
+          , calls = 0;
+
+        socket.on('readyStateChange', function () {
+          expect(state).to.not.equal(socket.readyState);
+          state = socket.readyState;
+
+          calls++;
+        });
+
+        socket.on('open', function () {
+          expect(!!socket.socket).to.equal(true);
+          socket.end();
+        }).on('end', function () {
+          expect(calls).to.equal(3);
+          done();
+        });
+      });
+
       it('emits an `end` event when its closed', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
