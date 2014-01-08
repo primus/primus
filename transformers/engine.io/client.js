@@ -42,6 +42,14 @@ module.exports = function client() {
     }));
 
     //
+    // Nuke a growing memory leak as engine.io pushes instances in to an exposed
+    // `sockets` array.
+    //
+    if (factory.sockets && factory.sockets.length) {
+      factory.sockets.length = 0;
+    }
+
+    //
     // Setup the Event handlers.
     //
     socket.onopen = primus.emits('open');
