@@ -1,5 +1,7 @@
 'use strict';
 
+var http = require('http');
+
 /**
  * Minimum viable Browserchannel server for Node.js that works through the primus
  * interface.
@@ -44,10 +46,13 @@ module.exports = function server() {
   //
   // Listen to upgrade requests.
   //
-  this.on('request', function request(req, res, next) {
+  this.on('request', function request(req, res) {
     //
     // The browser.channel returns a middleware layer.
     //
-    this.service(req, res, next);
+    this.service(req, res, function next() {
+      res.writeHead(404, {'content-type': 'text/plain'});
+      res.end(http.STATUS_CODES[404]);
+    });
   });
 };

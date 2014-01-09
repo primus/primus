@@ -909,6 +909,18 @@ module.exports = function base(transformer) {
         );
       });
 
+      it('should handle requests to non existing routes captured by primus', function(done) {
+        this.timeout(100);
+        request(
+          'http://localhost:'+ server.portnumber + '/primus.js',
+          function (err, res, body) {
+            if (err) return done(err);
+
+            done();
+          }
+        );
+      });
+
       it('correctly parses the ip address', function (done) {
         primus.on('connection', function (spark) {
           var address = spark.address;

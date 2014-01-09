@@ -10,7 +10,10 @@
 module.exports = function server() {
   var sockjs = require('sockjs')
     , Spark = this.Spark
-    , primus = this.primus;
+    , primus = this.primus
+    , prefix = primus.pathname;
+
+  if (prefix.charAt(prefix.length - 1) !== '/') prefix += '(?:[^/]+)?';
 
   this.service = sockjs.createServer();
 
@@ -46,7 +49,7 @@ module.exports = function server() {
   // Listen to upgrade requests.
   //
   var handle = this.service.listener({
-    prefix: primus.pathname,
+    prefix: prefix,
     log: this.logger.plain
   }).getHandler();
 
