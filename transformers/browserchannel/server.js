@@ -44,10 +44,13 @@ module.exports = function server() {
   //
   // Listen to upgrade requests.
   //
-  this.on('request', function request(req, res, next) {
+  this.on('request', function request(req, res) {
+    var transformer = this;
     //
     // The browser.channel returns a middleware layer.
     //
-    this.service(req, res, next);
+    this.service(req, res, function next() {
+      transformer.emit('previous::request', req, res);
+    });
   });
 };

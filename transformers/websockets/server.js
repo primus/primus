@@ -1,6 +1,7 @@
 'use strict';
 
-var parse = require('url').parse;
+var http = require('http')
+  , parse = require('url').parse;
 
 /**
  * Minimum viable WebSocket server for Node.js that works through the Primus
@@ -12,7 +13,6 @@ var parse = require('url').parse;
 module.exports = function server() {
   var WebSocketServer = require('ws').Server
     , logger = this.logger
-    , primus = this.primus
     , Spark = this.Spark;
 
   var service = this.service = new WebSocketServer({
@@ -54,6 +54,9 @@ module.exports = function server() {
       socket.on('error', spark.emits('error'));
       socket.on('message', spark.emits('data'));
     });
+  }).on('request', function request(req, res) {
+    res.writeHead(400, {'content-type': 'text/plain'});
+    res.end(http.STATUS_CODES[400]);
   });
 
   this.on('close', function close() {
