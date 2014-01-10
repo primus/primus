@@ -166,6 +166,18 @@ describe('Primus', function () {
     throw new Error('Should have thrown');
   });
 
+  it('throws an error if initialised with an invalid server instance', function () {
+    var app = function () {};
+    try {
+      new Primus(app);
+    } catch (e) {
+      expect(e).to.be.instanceOf(Error);
+      return expect(e.message).to.include('server instance');
+    }
+
+    throw new Error('Should have thrown');
+  });
+
   describe('.use', function () {
     it('throws an error if no valid name is provided', function () {
       try { primus.use({}); }

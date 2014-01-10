@@ -17,6 +17,11 @@ var EventEmitter = require('events').EventEmitter
  */
 function Primus(server, options) {
   if (!(this instanceof Primus)) return new Primus(server, options);
+  if ('object' !== typeof server) {
+    var message = 'The first argument of the constructor must be ' +
+      'an HTTP or HTTPS server instance';
+    throw new PrimusError(message, this);
+  }
 
   options = options || {};
   var primus = this;
