@@ -151,8 +151,10 @@ describe('Primus', function () {
       new Primus(server, { transformer: 'cowsack' });
     } catch (e) {
       expect(e).to.be.instanceOf(Error);
-      expect(e.message).to.include('cowsack');
+      return expect(e.message).to.include('cowsack');
     }
+
+    throw new Error('Should have thrown');
   });
 
   it('throws a human readable error for an unsupported parser', function () {
