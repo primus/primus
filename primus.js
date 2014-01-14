@@ -377,7 +377,7 @@ try {
     // a port number etc (as browsers remove port 443 and 80 from the urls).
     //
     for (key in a) {
-      if (a[key] && ('string' === typeof a[key] || +a[key])) {
+      if ('string' === typeof a[key] || 'number' === typeof a[key]) {
         data[key] = a[key];
       }
     }
