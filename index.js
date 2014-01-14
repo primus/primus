@@ -1,7 +1,7 @@
 'use strict';
 
-var EventEmitter = require('events').EventEmitter
-  , PrimusError = require('./errors').PrimusError
+var PrimusError = require('./errors').PrimusError
+  , EventEmitter = require('eventemitter3')
   , Transformer = require('./transformer')
   , Spark = require('./spark')
   , fs = require('fs');

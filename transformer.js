@@ -26,7 +26,7 @@ function Transformer(primus) {
   this.initialise();
 }
 
-Transformer.prototype.__proto__ = require('events').EventEmitter.prototype;
+Transformer.prototype.__proto__ = require('eventemitter3').prototype;
 
 //
 // Simple logger shortcut.
