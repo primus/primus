@@ -1,6 +1,7 @@
 'use strict';
 
 var querystring = require('querystring').parse
+  , EventEmitter = require('eventemitter3')
   , url = require('url').parse;
 
 //
@@ -23,10 +24,11 @@ function Transformer(primus) {
   this.service = null;          // Stores the real-time service.
   this.buffer = null;           // Buffer of the library.
 
+  EventEmitter.call(this);
   this.initialise();
 }
 
-Transformer.prototype.__proto__ = require('eventemitter3').prototype;
+Transformer.prototype.__proto__ = EventEmitter.prototype;
 
 //
 // Simple logger shortcut.
