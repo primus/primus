@@ -65,8 +65,13 @@ Transformer.prototype.initialise = function initialise() {
   var server = this.primus.server
     , transformer = this;
 
-  server.listeners('request').map(this.on.bind(this, 'previous::request'));
-  server.listeners('upgrade').map(this.on.bind(this, 'previous::upgrade'));
+  server.listeners('request').forEach(function each(fn) {
+    transformer.on('previous::request', fn);
+  });
+
+  server.listeners('upgrade').forEach(function each(fn) {
+    transformer.on('previous::upgrade', fn);
+  });
 
   //
   // Remove the old listeners as we want to be the first request handler for all
