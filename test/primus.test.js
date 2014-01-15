@@ -110,6 +110,20 @@ describe('Primus', function () {
     });
   });
 
+  it('serves the primus client on /primus/primus.js', function (done) {
+    common.request({
+      uri: 'http://localhost:'+ server.portnumber +'/primus/primus.js',
+      method: 'GET'
+    }, function (err, res, body) {
+      if (err) return done(err);
+
+      expect(res.statusCode).to.equal(200);
+      expect(body).to.include('Primus.prototype');
+
+      done();
+    });
+  });
+
   it('accepts a third-party transformer', function () {
     var Optimus = Primus.Transformer.extend({
       server: function () {},
