@@ -383,6 +383,19 @@ try {
     }
 
     //
+    // If we don't obtain a port number (e.g. when using zombie) then try
+    // and guess at a value from the 'href' value
+    //
+    if (!data.port) {
+        if (!data.href) data.href = '';
+        if ((data.href.match(/\:/g) || []).length > 1) {
+            data.port = data.href.split(':')[2].split('/')[0];
+        } else {
+            data.port = ('https' === data.href.substr(0, 5)) ? 443 : 80;
+        }
+    }
+
+    //
     // Browsers do not parse authorization information, so we need to extract
     // that from the URL.
     //
