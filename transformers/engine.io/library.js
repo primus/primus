@@ -58,12 +58,12 @@ module.exports.parser = require('engine.io-parser');
  * Module dependencies.
  */
 
-var util = require('./util')
-  , transports = require('./transports')
-  , Emitter = require('./emitter')
-  , debug = require('debug')('engine.io-client:socket')
-  , index = require('indexof')
-  , parser = require('engine.io-parser');
+var util = require('./util');
+var transports = require('./transports');
+var Emitter = require('./emitter');
+var debug = require('debug')('engine.io-client:socket');
+var index = require('indexof');
+var parser = require('engine.io-parser');
 
 /**
  * Module exports.
@@ -83,7 +83,7 @@ var global = require('global');
  * @api private
  */
 
-function noop () {};
+function noop(){}
 
 /**
  * Socket constructor.
@@ -98,7 +98,7 @@ function Socket(uri, opts){
 
   opts = opts || {};
 
-  if ('object' == typeof uri) {
+  if (uri && 'object' == typeof uri) {
     opts = uri;
     uri = null;
   }
@@ -132,7 +132,7 @@ function Socket(uri, opts){
   this.path = (opts.path || '/engine.io').replace(/\/$/, '') + '/';
   this.forceJSONP = !!opts.forceJSONP;
   this.timestampParam = opts.timestampParam || 't';
-  this.timestampRequests = !!opts.timestampRequests;
+  this.timestampRequests = opts.timestampRequests;
   this.flashPath = opts.flashPath || '';
   this.transports = opts.transports || ['polling', 'websocket', 'flashsocket'];
   this.readyState = '';
@@ -140,10 +140,7 @@ function Socket(uri, opts){
   this.callbackBuffer = [];
   this.policyPort = opts.policyPort || 843;
   this.open();
-
-  Socket.sockets.push(this);
-  Socket.sockets.evs.emit('add', this);
-};
+}
 
 /**
  * Mix in `Emitter`.
@@ -158,13 +155,6 @@ Emitter(Socket.prototype);
  */
 
 Socket.protocol = parser.protocol; // this is an int
-
-/**
- * Static EventEmitter.
- */
-
-Socket.sockets = [];
-Socket.sockets.evs = new Emitter;
 
 /**
  * Expose deps for legacy compatibility
@@ -233,8 +223,9 @@ function clone (obj) {
  */
 
 Socket.prototype.open = function () {
+  var transport = this.transports[0];
   this.readyState = 'opening';
-  var transport = this.createTransport(this.transports[0]);
+  var transport = this.createTransport(transport);
   transport.open();
   this.setTransport(transport);
 };
@@ -245,11 +236,12 @@ Socket.prototype.open = function () {
  * @api private
  */
 
-Socket.prototype.setTransport = function (transport) {
+Socket.prototype.setTransport = function(transport){
+  debug('setting transport %s', transport.name);
   var self = this;
 
   if (this.transport) {
-    debug('clearing existing transport');
+    debug('clearing existing transport %s', this.transport.name);
     this.transport.removeAllListeners();
   }
 
@@ -258,18 +250,18 @@ Socket.prototype.setTransport = function (transport) {
 
   // set up transport listeners
   transport
-    .on('drain', function () {
-      self.onDrain();
-    })
-    .on('packet', function (packet) {
-      self.onPacket(packet);
-    })
-    .on('error', function (e) {
-      self.onError(e);
-    })
-    .on('close', function () {
-      self.onClose('transport close');
-    });
+  .on('drain', function(){
+    self.onDrain();
+  })
+  .on('packet', function(packet){
+    self.onPacket(packet);
+  })
+  .on('error', function(e){
+    self.onError(e);
+  })
+  .on('close', function(){
+    self.onClose('transport close');
+  });
 };
 
 /**
@@ -316,7 +308,7 @@ Socket.prototype.probe = function (name) {
         debug('probe transport "%s" failed', name);
         var err = new Error('probe error');
         err.transport = transport.name;
-        self.emit('error', err);
+        self.emit('upgradeError', err);
       }
     });
   });
@@ -336,8 +328,8 @@ Socket.prototype.probe = function (name) {
 
     debug('probe transport "%s" failed because of error: %s', name, err);
 
-    self.emit('error', error);
-  };
+    self.emit('upgradeError', error);
+  }
 
   transport.open();
 
@@ -661,9 +653,9 @@ Socket.prototype.filterUpgrades = function (upgrades) {
  * Module dependencies.
  */
 
-var util = require('./util')
-  , parser = require('engine.io-parser')
-  , Emitter = require('./emitter');
+var util = require('./util');
+var parser = require('engine.io-parser');
+var Emitter = require('./emitter');
 
 /**
  * Module exports.
@@ -688,7 +680,7 @@ function Transport (opts) {
   this.timestampRequests = opts.timestampRequests;
   this.readyState = '';
   this.agent = opts.agent || false;
-};
+}
 
 /**
  * Mix in `Emitter`.
@@ -800,13 +792,14 @@ Transport.prototype.onClose = function () {
 };
 
 },{"./emitter":2,"./util":12,"engine.io-parser":16}],6:[function(require,module,exports){
+
 /**
  * Module dependencies.
  */
 
-var WS = require('./websocket')
-  , util = require('../util')
-  , debug = require('debug')('engine.io-client:flashsocket');
+var WS = require('./websocket');
+var util = require('../util');
+var debug = require('debug')('engine.io-client:flashsocket');
 
 /**
  * Module exports.
@@ -832,11 +825,11 @@ var xobject = global[['Active'].concat('Object').join('X')];
  * @api public
  */
 
-function FlashWS (options) {
+function FlashWS(options){
   WS.call(this, options);
   this.flashPath = options.flashPath;
   this.policyPort = options.policyPort;
-};
+}
 
 /**
  * Inherits from WebSocket.
@@ -858,39 +851,39 @@ FlashWS.prototype.name = 'flashsocket';
  * @api public
  */
 
-FlashWS.prototype.doOpen = function () {
+FlashWS.prototype.doOpen = function(){
   if (!this.check()) {
     // let the probe timeout
     return;
   }
 
   // instrument websocketjs logging
-  function log (type) {
+  function log(type){
     return function(){
       var str = Array.prototype.join.call(arguments, ' ');
       debug('[websocketjs %s] %s', type, str);
     };
-  };
+  }
 
-  WEB_SOCKET_LOGGER = { log: log('debug'), error: log('error') };
-  WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
-  WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
+  global.WEB_SOCKET_LOGGER = { log: log('debug'), error: log('error') };
+  global.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
+  global.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
 
-  if ('undefined' == typeof WEB_SOCKET_SWF_LOCATION) {
-    WEB_SOCKET_SWF_LOCATION = this.flashPath + 'WebSocketMainInsecure.swf';
+  if (!global.WEB_SOCKET_SWF_LOCATION) {
+    global.WEB_SOCKET_SWF_LOCATION = this.flashPath + 'WebSocketMainInsecure.swf';
   }
 
   // dependencies
   var deps = [this.flashPath + 'web_socket.js'];
 
-  if ('undefined' == typeof swfobject) {
+  if (!global.swfobject) {
     deps.unshift(this.flashPath + 'swfobject.js');
   }
 
   var self = this;
 
-  load(deps, function () {
-    self.ready(function () {
+  load(deps, function(){
+    self.ready(function(){
       WebSocket.__addTask(function () {
         self.socket = new WebSocket(self.uri());
         self.addEventListeners();
@@ -905,10 +898,10 @@ FlashWS.prototype.doOpen = function () {
  * @api private
  */
 
-FlashWS.prototype.doClose = function () {
+FlashWS.prototype.doClose = function(){
   if (!this.socket) return;
   var self = this;
-  WebSocket.__addTask(function() {
+  WebSocket.__addTask(function(){
     WS.prototype.doClose.call(self);
   });
 };
@@ -919,9 +912,9 @@ FlashWS.prototype.doClose = function () {
  * @api private
  */
 
-FlashWS.prototype.write = function() {
+FlashWS.prototype.write = function(){
   var self = this, args = arguments;
-  WebSocket.__addTask(function () {
+  WebSocket.__addTask(function(){
     WS.prototype.write.apply(self, args);
   });
 };
@@ -932,22 +925,23 @@ FlashWS.prototype.write = function() {
  * @api private
  */
 
-FlashWS.prototype.ready = function (fn) {
+FlashWS.prototype.ready = function(fn){
   if (typeof WebSocket == 'undefined' ||
-    !('__initialize' in WebSocket) || !swfobject) {
+    !('__initialize' in WebSocket) || !global.swfobject) {
     return;
   }
 
-  if (swfobject.getFlashPlayerVersion().major < 10) {
+  if (global.swfobject.getFlashPlayerVersion().major < 10) {
     return;
   }
 
   function init () {
-    // Only start downloading the swf file when the checked that this browser
-    // actually supports it
+    // only start downloading the swf file when
+    // we checked that this browser actually supports it
     if (!FlashWS.loaded) {
       if (843 != self.policyPort) {
-        WebSocket.loadFlashPolicyFile('xmlsocket://' + self.hostname + ':' + self.policyPort);
+        var policy = 'xmlsocket://' + self.hostname + ':' + self.policyPort;
+        WebSocket.loadFlashPolicyFile(policy);
       }
 
       WebSocket.__initialize();
@@ -972,7 +966,7 @@ FlashWS.prototype.ready = function (fn) {
  * @api public
  */
 
-FlashWS.prototype.check = function () {
+FlashWS.prototype.check = function(){
   if ('undefined' == typeof window) {
     return false;
   }
@@ -1017,14 +1011,14 @@ var scripts = {};
  * @api private
  */
 
-function create (path, fn) {
+function create(path, fn){
   if (scripts[path]) return fn();
 
   var el = document.createElement('script');
   var loaded = false;
 
   debug('loading "%s"', path);
-  el.onload = el.onreadystatechange = function () {
+  el.onload = el.onreadystatechange = function(){
     if (loaded || scripts[path]) return;
     var rs = el.readyState;
     if (!rs || 'loaded' == rs || 'complete' == rs) {
@@ -1041,7 +1035,7 @@ function create (path, fn) {
 
   var head = document.getElementsByTagName('head')[0];
   head.insertBefore(el, head.firstChild);
-};
+}
 
 /**
  * Loads scripts and fires a callback.
@@ -1050,16 +1044,16 @@ function create (path, fn) {
  * @param {Function} callback
  */
 
-function load (arr, fn) {
-  function process (i) {
+function load(arr, fn){
+  function process(i){
     if (!arr[i]) return fn();
     create(arr[i], function () {
       process(++i);
     });
-  };
+  }
 
   process(0);
-};
+}
 
 },{"../util":12,"./websocket":11,"debug":14,"global":19}],7:[function(require,module,exports){
 
@@ -1067,11 +1061,11 @@ function load (arr, fn) {
  * Module dependencies
  */
 
-var XHR = require('./polling-xhr')
+var XMLHttpRequest = require('xmlhttprequest')
+  , XHR = require('./polling-xhr')
   , JSONP = require('./polling-jsonp')
   , websocket = require('./websocket')
   , flashsocket = require('./flashsocket')
-  , util = require('../util');
 
 /**
  * Export transports.
@@ -1110,7 +1104,8 @@ function polling (opts) {
     xd = opts.hostname != location.hostname || port != opts.port;
   }
 
-  xhr = util.request(xd, opts);
+  opts.xdomain = xd;
+  xhr = new XMLHttpRequest(opts);
 
   if (xhr && !opts.forceJSONP) {
     return new XHR(opts);
@@ -1119,14 +1114,14 @@ function polling (opts) {
   }
 };
 
-},{"../util":12,"./flashsocket":6,"./polling-jsonp":8,"./polling-xhr":9,"./websocket":11,"global":19}],8:[function(require,module,exports){
+},{"./flashsocket":6,"./polling-jsonp":8,"./polling-xhr":9,"./websocket":11,"global":19,"xmlhttprequest":13}],8:[function(require,module,exports){
 
 /**
  * Module requirements.
  */
 
-var Polling = require('./polling')
-  , util = require('../util');
+var Polling = require('./polling');
+var util = require('../util');
 
 /**
  * Module exports.
@@ -1193,26 +1188,13 @@ function JSONPPolling (opts) {
 
   // append to query string
   this.query.j = this.index;
-};
+}
 
 /**
  * Inherits from Polling.
  */
 
 util.inherits(JSONPPolling, Polling);
-
-/**
- * Opens the socket.
- *
- * @api private
- */
-
-JSONPPolling.prototype.doOpen = function () {
-  var self = this;
-  util.defer(function () {
-    Polling.prototype.doOpen.call(self);
-  });
-};
 
 /**
  * Closes the socket
@@ -1251,9 +1233,9 @@ JSONPPolling.prototype.doPoll = function () {
 
   script.async = true;
   script.src = this.uri();
-	script.onerror = function(e){
-		self.onError('jsonp poll error',e);
-	}
+  script.onerror = function(e){
+    self.onError('jsonp poll error',e);
+  };
 
   var insertAt = document.getElementsByTagName('script')[0];
   insertAt.parentNode.insertBefore(script, insertAt);
@@ -1306,7 +1288,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
   function complete () {
     initIframe();
     fn();
-  };
+  }
 
   function initIframe () {
     if (self.iframe) {
@@ -1331,7 +1313,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 
     self.form.appendChild(iframe);
     self.iframe = iframe;
-  };
+  }
 
   initIframe();
 
@@ -1358,10 +1340,11 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
  * Module requirements.
  */
 
-var Polling = require('./polling')
-  , util = require('../util')
-  , Emitter = require('../emitter')
-  , debug = require('debug')('engine.io-client:polling-xhr');
+var XMLHttpRequest = require('xmlhttprequest');
+var Polling = require('./polling');
+var util = require('../util');
+var Emitter = require('../emitter');
+var debug = require('debug')('engine.io-client:polling-xhr');
 
 /**
  * Module exports.
@@ -1380,7 +1363,7 @@ var global = require('global');
  * Obfuscated key for Blue Coat.
  */
 
-var xobject = global[['Active'].concat('Object').join('X')];
+var hasAttachEvent = global.document && global.document.attachEvent;
 
 /**
  * Empty function
@@ -1410,26 +1393,13 @@ function XHR(opts){
     this.xd = opts.hostname != global.location.hostname ||
       port != opts.port;
   }
-};
+}
 
 /**
  * Inherits from Polling.
  */
 
 util.inherits(XHR, Polling);
-
-/**
- * Opens the socket
- *
- * @api private
- */
-
-XHR.prototype.doOpen = function(){
-  var self = this;
-  util.defer(function(){
-    Polling.prototype.doOpen.call(self);
-  });
-};
 
 /**
  * Creates a request.
@@ -1513,43 +1483,48 @@ Emitter(Request.prototype);
  */
 
 Request.prototype.create = function(){
-  var xhr = this.xhr = util.request(this.xd, { agent: this.agent });
+  var xhr = this.xhr = new XMLHttpRequest({ agent: this.agent, xdomain: this.xd });
   var self = this;
 
-  xhr.open(this.method, this.uri, this.async);
-
-  if ('POST' == this.method) {
-    try {
-      xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
-    } catch (e) {}
-  }
-
-  // ie6 check
-  if ('withCredentials' in xhr) {
-    xhr.withCredentials = true;
-  }
-
-  xhr.onreadystatechange = function(){
-    var data;
-
-    try {
-      if (4 != xhr.readyState) return;
-      if (200 == xhr.status || 1223 == xhr.status) {
-        data = xhr.responseText;
-      } else {
-        self.onError(xhr.status);
-      }
-    } catch (e) {
-      self.onError(e);
-    }
-
-    if (null != data) {
-      self.onData(data);
-    }
-  };
-
-  debug('sending xhr with url %s | data %s', this.uri, this.data);
   try {
+    debug('xhr open %s: %s', this.method, this.uri);
+    xhr.open(this.method, this.uri, this.async);
+
+    if ('POST' == this.method) {
+      try {
+        xhr.setRequestHeader('Content-type', 'text/plain;charset=UTF-8');
+      } catch (e) {}
+    }
+
+    // ie6 check
+    if ('withCredentials' in xhr) {
+      xhr.withCredentials = true;
+    }
+
+    xhr.onreadystatechange = function(){
+      var data;
+
+      try {
+        if (4 != xhr.readyState) return;
+        if (200 == xhr.status || 1223 == xhr.status) {
+          data = xhr.responseText;
+        } else {
+          // make sure the `error` event handler that's user-set
+          // does not throw in the same tick and gets caught here
+          setTimeout(function(){
+            self.onError(xhr.status);
+          }, 0);
+        }
+      } catch (e) {
+        self.onError(e);
+      }
+
+      if (null != data) {
+        self.onData(data);
+      }
+    };
+
+    debug('xhr data %s', this.data);
     xhr.send(this.data);
   } catch (e) {
     // Need to defer since .create() is called directly from the constructor
@@ -1561,7 +1536,7 @@ Request.prototype.create = function(){
     return;
   }
 
-  if (xobject) {
+  if (hasAttachEvent) {
     this.index = Request.requestsCount++;
     Request.requests[this.index] = this;
   }
@@ -1617,7 +1592,7 @@ Request.prototype.cleanup = function(){
     this.xhr.abort();
   } catch(e) {}
 
-  if (xobject) {
+  if (hasAttachEvent) {
     delete Request.requests[this.index];
   }
 
@@ -1634,7 +1609,12 @@ Request.prototype.abort = function(){
   this.cleanup();
 };
 
-if (xobject) {
+/**
+ * Cleanup is needed for old versions of IE
+ * that leak memory unless we abort request before unload.
+ */
+
+if (hasAttachEvent) {
   Request.requestsCount = 0;
   Request.requests = {};
 
@@ -1647,15 +1627,15 @@ if (xobject) {
   });
 }
 
-},{"../emitter":2,"../util":12,"./polling":10,"debug":14,"global":19}],10:[function(require,module,exports){
+},{"../emitter":2,"../util":12,"./polling":10,"debug":14,"global":19,"xmlhttprequest":13}],10:[function(require,module,exports){
 /**
  * Module dependencies.
  */
 
-var Transport = require('../transport')
-  , util = require('../util')
-  , parser = require('engine.io-parser')
-  , debug = require('debug')('engine.io-client:polling');
+var Transport = require('../transport');
+var util = require('../util');
+var parser = require('engine.io-parser');
+var debug = require('debug')('engine.io-client:polling');
 
 /**
  * Module exports.
@@ -1855,9 +1835,14 @@ Polling.prototype.uri = function(){
   var port = '';
 
   // cache busting is forced for IE / android / iOS6 ಠ_ಠ
-  if (global.ActiveXObject || util.ua.chromeframe || util.ua.android || util.ua.ios6 ||
-      this.timestampRequests) {
-    query[this.timestampParam] = +new Date;
+  if ('ActiveXObject' in global
+    || util.ua.chromeframe
+    || util.ua.android
+    || util.ua.ios6
+    || this.timestampRequests) {
+    if (false !== this.timestampRequests) {
+      query[this.timestampParam] = +new Date;
+    }
   }
 
   query = util.qs(query);
@@ -1881,11 +1866,18 @@ Polling.prototype.uri = function(){
  * Module dependencies.
  */
 
-var Transport = require('../transport')
-  , WebSocket = require('ws')
-  , parser = require('engine.io-parser')
-  , util = require('../util')
-  , debug = require('debug')('engine.io-client:websocket');
+var Transport = require('../transport');
+var parser = require('engine.io-parser');
+var util = require('../util');
+var debug = require('debug')('engine.io-client:websocket');
+
+/**
+ * `ws` exposes a WebSocket-compatible interface in
+ * Node, or the `WebSocket` or `MozWebSocket` globals
+ * in the browser.
+ */
+
+var WebSocket = require('ws');
 
 /**
  * Module exports.
@@ -1908,7 +1900,7 @@ var global = require('global');
 
 function WS(opts){
   Transport.call(this, opts);
-};
+}
 
 /**
  * Inherits from Transport.
@@ -1951,7 +1943,7 @@ WS.prototype.doOpen = function(){
  * @api private
  */
 
-WS.prototype.addEventListeners = function() {
+WS.prototype.addEventListeners = function(){
   var self = this;
 
   this.socket.onopen = function(){
@@ -2154,23 +2146,6 @@ if ('undefined' != typeof window) {
 }
 
 /**
- * Defers a function to ensure a spinner is not displayed by the browser.
- *
- * @param {Function} fn
- * @api private
- */
-
-exports.defer = function (fn) {
-  if (!exports.ua.webkit || 'undefined' != typeof importScripts) {
-    return fn();
-  }
-
-  exports.load(function () {
-    setTimeout(fn, 100);
-  });
-};
-
-/**
  * JSON parse.
  *
  * @see Based on jQuery#parseJSON (MIT) and JSON2
@@ -2212,14 +2187,6 @@ exports.parseJSON = function (data) {
 exports.ua = {};
 
 /**
- * Whether the UA supports CORS for XHR.
- *
- * @api private
- */
-
-exports.ua.hasCORS = require('has-cors');
-
-/**
  * Detect webkit.
  *
  * @api private
@@ -2257,37 +2224,6 @@ exports.ua.ios6 = exports.ua.ios && /OS 6_/.test(navigator.userAgent);
  */
 
 exports.ua.chromeframe = Boolean(global.externalHost);
-
-/**
- * XHR request helper.
- *
- * @param {Boolean} whether we need xdomain
- * @param {Object} opts Optional "options" object
- * @api private
- */
-
-exports.request = function request (xdomain, opts) {
-  opts = opts || {};
-  opts.xdomain = xdomain;
-
-  try {
-    var _XMLHttpRequest = require('xmlhttprequest');
-    return new _XMLHttpRequest(opts);
-  } catch (e) {}
-
-  // XMLHttpRequest can be disabled on IE
-  try {
-    if ('undefined' != typeof XMLHttpRequest && (!xdomain || exports.ua.hasCORS)) {
-      return new XMLHttpRequest();
-    }
-  } catch (e) { }
-
-  if (!xdomain) {
-    try {
-      return new ActiveXObject('Microsoft.XMLHTTP');
-    } catch(e) { }
-  }
-};
 
 /**
  * Parses an URI
@@ -2352,7 +2288,7 @@ exports.qsParse = function(qs){
   return qry;
 };
 
-},{"global":19,"has-cors":20,"xmlhttprequest":13}],13:[function(require,module,exports){
+},{"global":19}],13:[function(require,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = require('has-cors');
 
@@ -2393,6 +2329,8 @@ function debug(name) {
   if (!debug.enabled(name)) return function(){};
 
   return function(fmt){
+    fmt = coerce(fmt);
+
     var curr = new Date;
     var ms = curr - (debug[name] || curr);
     debug[name] = curr;
@@ -2495,9 +2433,20 @@ debug.enabled = function(name) {
   return false;
 };
 
+/**
+ * Coerce `val`.
+ */
+
+function coerce(val) {
+  if (val instanceof Error) return val.stack || val.message;
+  return val;
+}
+
 // persist
 
-if (window.localStorage) debug.enable(localStorage.debug);
+try {
+  if (window.localStorage) debug.enable(localStorage.debug);
+} catch(e){}
 
 },{}],15:[function(require,module,exports){
 
