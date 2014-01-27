@@ -15,7 +15,7 @@ various of real-time frameworks.
    of code. No more API rewrites needed when your project requirements change,
    the framework get abandoned or simply breaks down.
 2. Built-in reconnect, it just works. The reconnect is controlled by a
-   randomized exponential backoff algorithm to reduce server stress.
+   randomised exponential back-off algorithm to reduce server stress.
 3. Offline detection, Primus is smart enough to detect when users drop their
    internet connection (switching WIFI points/cell towers for example) and
    reconnects when they are back online.
@@ -154,7 +154,7 @@ primus.save(__dirname +'/primus.js', function save(err) {
 
 But to make it easier for you during development we've automatically added an
 extra route to the supplied HTTP server, this will serve the library for you so
-you don't have to save it. Please note, that this route isn't optimized for
+you don't have to save it. Please note, that this route isn't optimised for
 serving static assets and should only be used during development. In your HTML
 page add:
 
@@ -517,7 +517,7 @@ There are 2 important options that we're going to look a bit closer at.
 ##### Reconnect
 
 When the connection goes down unexpectedly a automatic reconnect process is
-started. It's using a randomized exponential backoff algorithm to prevent
+started. It's using a randomised exponential back-off algorithm to prevent
 clients from DDoSing your server when you reboot as they will all be re-connecting at
 different times. The reconnection can be configured using the `options` argument
 in `Primus` and you should add these options to the `reconnect` property:
@@ -1027,13 +1027,13 @@ var primus = new Primus(server, { plugin: {
 The server function is only executed on the server side and receives 2
 arguments:
 
-1. A reference to the initialized Primus server.
+1. A reference to the initialised Primus server.
 2. The options that were passed in the `new Primus(server, { options })`
    constructor. So the plugin can be configured through the same interface.
 
 The client receives the same arguments:
 
-1. A reference to the initialized Primus client.
+1. A reference to the initialised Primus client.
 2. The options that were passed in the `new Primus(url, { options })`
    constructor. So the plugin can be configured through the same interface.
 
@@ -1392,7 +1392,7 @@ semver as closely as possible but this is how we use our version numbering:
 
 #### Release cycle
 
-There isn't a steady or monthly release cycle. I usually release a new 
+There isn't a steady or monthly release cycle. We usually release a new 
 version when:
 
 1. A critical bug is discovered.
