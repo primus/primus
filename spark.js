@@ -70,7 +70,8 @@ Spark.readable('address', { get: function address() {
  * @api private
  */
 Spark.readable('heartbeat', function heartbeat() {
-  if (this.timeout) clearTimeout(this.timeout);
+  clearTimeout(this.timeout);
+
   if ('number' !== typeof this.primus.timeout) return this;
 
   var spark = this;
