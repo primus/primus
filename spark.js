@@ -75,7 +75,11 @@ Spark.readable('heartbeat', function heartbeat() {
 
   var spark = this;
   this.timeout = setTimeout(function timeout() {
+    if (spark.readyState === Spark.CLOSED) return;
+
+    spark.readyState = Spark.CLOSED;
     spark.emit('outgoing::end');
+    spark.emit('end');
   }, this.primus.timeout);
 
   return this;
