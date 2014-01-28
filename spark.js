@@ -33,14 +33,7 @@ function Spark(primus, headers, address, query, id) {
 
   writable('readyState', Spark.OPEN); // The readyState of the connection.
   writable('query', query || {});     // The query string.
-
-  //
-  // Set a timer to forcibly disconnect the spark if no data
-  // is received from the client within the given timeout.
-  //
-  if ('number' === typeof primus.timeout) {
-    writable('timeout', setTimeout(this.disconnect.bind(this), primus.timeout));
-  }
+  writable('timeout', null);          // Heartbeat timeout.
 
   //
   // Parse our query string.
@@ -49,7 +42,7 @@ function Spark(primus, headers, address, query, id) {
     this.query = parse(this.query);
   }
 
-  this.initialise();
+  this.heartbeat().initialise();
 }
 
 Spark.prototype.__proto__ = require('stream').prototype;
@@ -71,6 +64,24 @@ Spark.readable('address', { get: function address() {
 }}, true);
 
 /**
+ * Set a timer to forcibly disconnect the spark if no data is received from the
+ * client within the given timeout.
+ *
+ * @api private
+ */
+Spark.readable('heartbeat', function heartbeat() {
+  if (this.timeout) clearTimeout(this.timeout);
+  if ('number' !== typeof this.primus.timeout) return this;
+
+  var spark = this;
+  this.timeout = setTimeout(function timeout() {
+    spark.emit('outgoing::end');
+  }, this.primus.timeout);
+
+  return this;
+});
+
+/**
  * Attach hooks and automatically announce a new connection.
  *
  * @api private
@@ -83,10 +94,12 @@ Spark.readable('initialise', function initialise() {
   // We've received new data from our client, decode and emit it.
   //
   spark.on('incoming::data', function message(raw) {
-    if (spark.timeout) {
-      clearTimeout(spark.timeout);
-      spark.timeout = setTimeout(spark.disconnect.bind(spark), primus.timeout);
-    }
+    //
+    // New data has arrived so we're certain that the connection is still alive,
+    // so it's save to restart the heartbeat sequence.
+    //
+    spark.heartbeat();
+
     primus.decoder(raw, function decoding(err, data) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
@@ -123,7 +136,12 @@ Spark.readable('initialise', function initialise() {
   //
   // The client has disconnected.
   //
-  spark.on('incoming::end', spark.disconnect);
+  spark.on('incoming::end', function end() {
+    if (spark.readyState === Spark.CLOSED) return;
+
+    spark.readyState = Spark.CLOSED;
+    spark.emit('end');
+  });
 
   spark.on('incoming::error', function error(err) {
     //
@@ -144,7 +162,8 @@ Spark.readable('initialise', function initialise() {
   // End is triggered by both incoming and outgoing events.
   //
   spark.on('end', function () {
-    clearTimeout(spark.timeout);
+    if (spark.timeout) clearTimeout(spark.timeout);
+
     spark.removeAllListeners();
     primus.emit('disconnection', spark);
   });
@@ -264,22 +283,14 @@ Spark.readable('_write', function _write(data) {
 });
 
 /**
- * The client has disconnected.
- *
- * @api private
- */
-Spark.readable('disconnect', function disconnect() {
-  this.readyState = Spark.CLOSED;
-  this.emit('end');
-});
-
-/**
  * End the connection.
  *
  * @param {Mixed} data Optional closing data.
  * @api public
  */
 Spark.readable('end', function end(data) {
+  if (Spark.CLOSED === this.readyState) return this;
+
   var spark = this;
 
   if (data) spark.write(data);
@@ -294,6 +305,8 @@ Spark.readable('end', function end(data) {
     spark.emit('outgoing::end');
     spark.emit('end');
   });
+
+  return this;
 });
 
 //
