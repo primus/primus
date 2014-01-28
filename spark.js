@@ -2,7 +2,7 @@
 
 var ParserError = require('./errors').ParserError
   , parse = require('querystring').parse
-  , forwarded = require('./forwarded')
+  , forwarded = require('forwarded-for')
   , predefine = require('predefine')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
