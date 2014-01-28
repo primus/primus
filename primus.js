@@ -662,9 +662,9 @@ Primus.prototype.initialise = function initalise(options) {
    * @api private
    */
   function offline() {
-      primus.online = false;
-      primus.emit('offline');
-      primus.end();
+    primus.online = false;
+    primus.emit('offline');
+    primus.end();
   }
 
   /**
