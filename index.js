@@ -31,9 +31,12 @@ function Primus(server, options) {
   this.decoder = null;                        // Shorthand to the parser's decoder.
   this.auth = options.authorization || null;  // Do we have an authorization handler.
   this.sparks = 0;                            // Increment id for connection ids.
-  this.connected = 0;                         // Connection counter .
+  this.connected = 0;                         // Connection counter.
   this.connections = Object.create(null);     // Connection storage.
   this.ark = Object.create(null);             // Plugin storage.
+  this.timeout = 'timeout' in options         // The timeout used to detect zombie sparks.
+    ? options.timeout
+    : 35000;
   this.whitelist = [];                        // Forwarded-for whitelisting.
   this.options = options;                     // The configuration.
   this.transformers = {                       // Message transformers.
@@ -369,6 +372,11 @@ Primus.prototype.library = function compile(nodejs) {
     .replace('null; // @import {primus::auth}', (!!this.auth).toString())
     .replace('null; // @import {primus::encoder}', encoder.toString())
     .replace('null; // @import {primus::decoder}', decoder.toString());
+
+  if ('number' === typeof this.timeout) {
+    var timeout = this.timeout - 10000;
+    client = client.replace('+options.ping || 25e3;', '+options.ping || ' + timeout + ';');
+  }
 
   //
   // Add the parser inside the closure, to prevent global leaking.
