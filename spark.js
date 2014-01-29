@@ -141,7 +141,7 @@ Spark.readable('initialise', function initialise() {
   //
   // The client has disconnected.
   //
-  spark.on('incoming::end', function end() {
+  spark.on('incoming::end', function disconnect() {
     if (spark.readyState === Spark.CLOSED) return;
 
     spark.readyState = Spark.CLOSED;
@@ -166,9 +166,8 @@ Spark.readable('initialise', function initialise() {
   //
   // End is triggered by both incoming and outgoing events.
   //
-  spark.on('end', function () {
-    if (spark.timeout) clearTimeout(spark.timeout);
-
+  spark.on('end', function end() {
+    clearTimeout(spark.timeout);
     spark.removeAllListeners();
     primus.emit('disconnection', spark);
   });
