@@ -151,20 +151,25 @@ describe('Spark', function () {
     it('disconnects if the timeout expires', function (done) {
       this.timeout(50);
       var primus = new Primus(server, { timeout: 25 });
+
       primus.on('disconnection', function (socket) {
         expect(socket).to.equal(spark);
         done();
       });
+
       var spark = new primus.Spark();
     });
+
     it('can disable the disconnect timeout', function (done) {
-      var primus = new Primus(server, { timeout: false});
-      var spark = new primus.Spark();
+      var primus = new Primus(server, { timeout: false})
+        , spark = new primus.Spark();
+
       spark.on('data', function (msg) {
         expect(msg).to.equal('foo');
         expect(spark.timeout).to.equal(null);
         done();
       });
+
       expect(spark.timeout).to.equal(null);
       spark.emit('data', 'foo');
     });

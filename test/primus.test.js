@@ -402,6 +402,28 @@ describe('Primus', function () {
       expect(library).to.be.a('string');
       expect(library).to.include('i am a client plugin');
     });
+
+    it('updates the default timeout', function (done) {
+      var primus = new Primus(server, { timeout: 60000 })
+        , Socket = primus.Socket;
+
+      var socket = new Socket('http://localhost:'+ server.portnumber);
+
+      expect(socket.options.ping).to.equal(50000);
+      socket.on('open', socket.end).on('end', done);
+    });
+
+    it('still allows overridng the default timeout', function (done) {
+      var primus = new Primus(server, { timeout: 60000 })
+        , Socket = primus.Socket;
+
+      var socket = new Socket('http://localhost:'+ server.portnumber, {
+        ping: 100
+      });
+
+      expect(socket.options.ping).to.equal(100);
+      socket.on('open', socket.end).on('end', done);
+    });
   });
 
   describe('#save', function () {
