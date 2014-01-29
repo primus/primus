@@ -161,7 +161,7 @@ describe('Spark', function () {
     });
 
     it('can disable the disconnect timeout', function (done) {
-      var primus = new Primus(server, { timeout: false})
+      var primus = new Primus(server, { timeout: false })
         , spark = new primus.Spark();
 
       spark.on('data', function (msg) {

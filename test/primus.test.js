@@ -413,7 +413,7 @@ describe('Primus', function () {
       socket.on('open', socket.end).on('end', done);
     });
 
-    it('still allows overridng the default timeout', function (done) {
+    it('still allows overriding the default timeout', function (done) {
       var primus = new Primus(server, { timeout: 60000 })
         , Socket = primus.Socket;
 
