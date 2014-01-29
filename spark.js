@@ -116,7 +116,7 @@ Spark.readable('initialise', function initialise() {
       // Handle client-side heartbeats by answering them as fast as possible.
       //
       if ('string' === typeof data && data.indexOf('primus::ping::') === 0) {
-        return spark.write('primus::pong::'+ data.slice(14));
+        return spark._write('primus::pong::'+ data.slice(14));
       }
 
       for (var i = 0, length = primus.transformers.incoming.length; i < length; i++) {
