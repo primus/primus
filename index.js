@@ -373,6 +373,11 @@ Primus.prototype.library = function compile(nodejs) {
     .replace('null; // @import {primus::encoder}', encoder.toString())
     .replace('null; // @import {primus::decoder}', decoder.toString());
 
+  //
+  // As we're given an timeout value on the server side, we need to update the
+  // `ping` interval of the client to ensure that we've send the server
+  // a message before the timeout gets triggered and we get disconnected.
+  //
   if ('number' === typeof this.timeout) {
     var timeout = this.timeout - 10000;
     client = client.replace('+options.ping || 25e3;', '+options.ping || ' + timeout + ';');
