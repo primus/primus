@@ -486,7 +486,8 @@ Primus.prototype.plugin = function plugin(name) {
  * @api private
  */
 Primus.prototype.initialise = function initalise(options) {
-  var primus = this;
+  var primus = this
+    , start;
 
   primus.on('outgoing::open', function opening() {
     var readyState = primus.readyState;
@@ -495,6 +496,8 @@ Primus.prototype.initialise = function initalise(options) {
     if (readyState !== Primus.OPENING) {
       primus.emit('readyStateChange');
     }
+
+    start = +new Date();
   });
 
   primus.on('incoming::open', function opened() {
@@ -517,6 +520,8 @@ Primus.prototype.initialise = function initalise(options) {
 
       primus.buffer.length = 0;
     }
+
+    primus.latency = +new Date() - start;
   });
 
   primus.on('incoming::pong', function pong(time) {
