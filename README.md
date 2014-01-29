@@ -105,13 +105,19 @@ var server = http.createServer(/* request handler */)
 
 The following options can be provided:
 
-Name                | Description                             | Default       
---------------------|-----------------------------------------|---------------
-authorization       | Authorization handler                   | `null`
-pathname            | The URL namespace that Primus can own   | `/primus`
-parser              | Message encoder for all communication   | `JSON`
-transformer         | The tranformer we should use internally | `websockets`
-plugin              | The plugins that should be applied      | `{}`
+Name                | Description                               | Default       
+--------------------|-------------------------------------------|---------------
+authorization       | Authorization handler                     | `null`
+pathname            | The URL namespace that Primus can own     | `/primus`
+parser              | Message encoder for all communication     | `JSON`
+transformer         | The tranformer we should use internally   | `websockets`
+plugin              | The plugins that should be applied        | `{}`
+timeout             | The heartbeat timeout                     | `35000`
+
+The heartbeat timeout is used to forcefully disconnect a spark if no data is
+received from the client within the specified amount of time. It is possible
+to completly disable the heartbeat timeout by setting the value of the `timeout`
+option to `false`.
 
 In addition to support different frameworks we've also made it possible to use
 custom encoding and decoding libraries. We're using `JSON` by default but you
