@@ -251,6 +251,7 @@ function Primus(url, options) {
   primus.timers = {};                           // Contains all our timers.
   primus.attempt = null;                        // Current back off attempt.
   primus.socket = null;                         // Reference to the internal connection.
+  primus.latency = 0;                           // Latency between messages.
   primus.transport = options.transport || {};   // Transport options.
   primus.transformers = {                       // Message transformers.
     outgoing: [],
@@ -521,6 +522,8 @@ Primus.prototype.initialise = function initalise(options) {
   primus.on('incoming::pong', function pong(time) {
     primus.online = true;
     primus.clearTimeout('pong').heartbeat();
+
+    primus.latency = (+new Date()) - time;
   });
 
   primus.on('incoming::error', function error(e) {
