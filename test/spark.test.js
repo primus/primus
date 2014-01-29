@@ -107,7 +107,7 @@ describe('Spark', function () {
   });
 
   describe('#end', function () {
-    it('emits a `disconnection` event on the primus instance when destoryed', function (done) {
+    it('emits a `disconnection` event on the primus instance when destroyed', function (done) {
       primus.on('disconnection', function (socket) {
         expect(socket).to.equal(spark);
         done();
@@ -144,6 +144,29 @@ describe('Spark', function () {
       var spark = new primus.Spark();
       spark.on('outgoing::end', done);
       spark.end();
+    });
+  });
+
+  describe('#timeout', function () {
+    it('disconnects if the timeout expires', function (done) {
+      this.timeout(50);
+      var primus = new Primus(server, { timeout: 25 });
+      primus.on('disconnection', function (socket) {
+        expect(socket).to.equal(spark);
+        done();
+      });
+      var spark = new primus.Spark();
+    });
+    it('can disable the disconnect timeout', function (done) {
+      var primus = new Primus(server, { timeout: false});
+      var spark = new primus.Spark();
+      spark.on('data', function (msg) {
+        expect(msg).to.equal('foo');
+        expect(spark.timeout).to.equal(null);
+        done();
+      });
+      expect(spark.timeout).to.equal(null);
+      spark.emit('data', 'foo');
     });
   });
 
