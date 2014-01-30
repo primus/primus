@@ -1,6 +1,6 @@
 # Primus
 
-[![Build Status](https://travis-ci.org/primus/primus.png)](https://travis-ci.org/primus/primus)
+[![Build Status](https://travis-ci.org/primus/primus.png?branch=master)](https://travis-ci.org/primus/primus)
 [![NPM version](https://badge.fury.io/js/primus.png)](http://badge.fury.io/js/primus)
 
 Primus, the creator god of transformers but now also known as universal wrapper
