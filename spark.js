@@ -159,11 +159,9 @@ Spark.readable('__initialise', [function initialise() {
       if (err) return new ParserError('Failed to decode incoming data: '+ err.message, spark, err);
 
       //
-      // Handle client-side heartbeats by answering them as fast as possible.
+      // Handle "primus::" prefixed protocol messages.
       //
-      if ('string' === typeof data && data.indexOf('primus::ping::') === 0) {
-        return spark._write('primus::pong::'+ data.slice(14));
-      }
+      if (spark.protocol(data)) return;
 
       for (var i = 0, length = primus.transformers.incoming.length; i < length; i++) {
         var packet = { data: data };
@@ -234,6 +232,44 @@ Spark.readable('__initialise', [function initialise() {
  */
 Spark.readable('uuid', function uuid() {
   return Date.now() +'$'+ this.primus.sparks++;
+});
+
+/**
+ * Really dead simple protocol parser. We simply assume that every message that
+ * is prefixed with `primus::` could be used as some sort of protocol definition
+ * for primus.
+ *
+ * @param {String} msg The data.
+ * @returns {Boolean} Is a protocol message.
+ * @api private
+ */
+Spark.readable('protocol', function protocol(msg) {
+  if (
+       'string' !== typeof msg
+    || msg.indexOf('primus::') !== 0
+  ) return false;
+
+  var last = msg.indexOf(':', 8)
+    , value = msg.slice(last + 2);
+
+  switch (msg.slice(8,  last)) {
+    case 'ping':
+      this._write('primus::pong::'+ value);
+    break;
+
+    case 'id':
+      this._write('primus::id::'+ this.id);
+    break;
+
+    //
+    // Unknown protocol, somebody is probably sending primus:: prefixed
+    // messages.
+    //
+    default:
+      return false;
+  }
+
+  return true;
 });
 
 /**
