@@ -1333,7 +1333,7 @@ https://github.com/primus/primus/wiki/Production
 
 ### FAQ
 
-#### Scaling
+#### What is the best way to scale Primus
 
 Scaling Primus is as simple as sticking it behind a load balancer that supports
 sticky sessions and run multiple versions of your application. This is a vital
@@ -1344,7 +1344,7 @@ support sticky sessions, get another one. I highly recommend
 and best proxy available that supports WebSockets. See
 https://github.com/observing/balancerbattle for more detailed information.
 
-#### Express
+#### How do I use Primus with Express 3
 
 Express 3's `express()` instance isn't a valid HTTP server. In order to make it
 work with `Primus` and other real-time transformers you need to feed the instance
@@ -1367,7 +1367,7 @@ var server = require('http').createServer(app)
 server.listen(port);
 ```
 
-#### Require.js
+#### Is require.js supported
 
 Require.js is supported to a certain degree. The `primus.js` core file should be
 compatible with require.js but it could be that the transformer of your choosing

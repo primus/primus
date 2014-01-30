@@ -22,7 +22,8 @@ var ParserError = require('./errors').ParserError
  */
 function Spark(primus, headers, address, query, id) {
   var readable = predefine(this, predefine.READABLE)
-    , writable = predefine(this, predefine.WRITABLE);
+    , writable = predefine(this, predefine.WRITABLE)
+    , spark = this;
 
   readable('primus', primus);         // References to Primus.
   readable('headers', headers || {}); // The request headers.
@@ -30,8 +31,6 @@ function Spark(primus, headers, address, query, id) {
   readable('id', id || this.uuid());  // Unique id for socket.
   readable('writable', true);         // Silly stream compatibility.
   readable('readable', true);         // Silly stream compatibility.
-
-  writable('readyState', Spark.OPEN); // The readyState of the connection.
   writable('query', query || {});     // The query string.
   writable('timeout', null);          // Heartbeat timeout.
 
@@ -42,7 +41,9 @@ function Spark(primus, headers, address, query, id) {
     this.query = parse(this.query);
   }
 
-  this.heartbeat().initialise();
+  this.heartbeat().__initialise.forEach(function execute(initialise) {
+    initialise.call(spark);
+  });
 }
 
 Spark.prototype.__proto__ = require('stream').prototype;
@@ -52,8 +53,29 @@ Spark.writable = predefine(Spark.prototype, predefine.WRITABLE);
 //
 // Internal readyState's to prevent writes against close sockets.
 //
-Spark.OPEN   = 1;
-Spark.CLOSED = 2;
+Spark.OPENING = 1;    // Only here for primus.js readyState number compatibility.
+Spark.CLOSED  = 2;    // The connection is closed.
+Spark.OPEN    = 3;    // The connection is open.
+
+//
+// Make sure that we emit `readyState` change events when a new readyState is
+// checked. This way plugins can correctly act according to this.
+//
+Spark.readable('readyState', {
+  get: function get() {
+    return this.__readyState;
+  },
+  set: function set(readyState) {
+    if (this.__readyState === readyState) return readyState;
+
+    this.__readyState = readyState;
+    this.emit('readyStateChange');
+
+    return readyState;
+  }
+}, true);
+
+Spark.writable('__readyState', Spark.OPEN);
 
 //
 // Lazy parse interface for IP address information. As nobody is always
@@ -87,13 +109,37 @@ Spark.readable('heartbeat', function heartbeat() {
 });
 
 /**
- * Attach hooks and automatically announce a new connection.
+ * Allows for adding initialise listeners without people overriding our default
+ * initializer. If they are feeling adventures and really want want to hack it
+ * up, they can remove it from the __initialise array.
  *
+ * @returns {Function} The last added initialise hook.
  * @api private
  */
-Spark.readable('initialise', function initialise() {
+Spark.readable('initialise', {
+  get: function get() {
+    return this.__initialise[this.__initialise.length - 1];
+  },
+  set: function set(initialise) {
+    if ('function' === typeof initialise) this.__initialise.push(initialise);
+  }
+}, true);
+
+/**
+ * Attach hooks and automatically announce a new connection.
+ *
+ * @type {Array}
+ * @api private
+ */
+Spark.readable('__initialise', [function initialise() {
   var primus = this.primus
     , spark = this;
+
+  //
+  // Prevent double initialization of the spark. If we already have an
+  // `incoming::data` handler we assume that all other cases are handled as well.
+  //
+  if (this.listeners('incoming::data').length) return;
 
   //
   // We've received new data from our client, decode and emit it.
@@ -178,7 +224,7 @@ Spark.readable('initialise', function initialise() {
   process.nextTick(function tick() {
     primus.emit('connection', spark);
   });
-});
+}]);
 
 /**
  * Generate a unique UUID.
