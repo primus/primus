@@ -41,7 +41,7 @@ function Spark(primus, headers, address, query, id) {
     this.query = parse(this.query);
   }
 
-  this.initialise.forEach(function execute(initialise) {
+  this.__initialise.forEach(function execute(initialise) {
     initialise.call(spark);
   });
 }
@@ -109,12 +109,29 @@ Spark.readable('heartbeat', function heartbeat() {
 });
 
 /**
+ * Allows for adding initialise listeners without people overriding our default
+ * initializer. If they are feeling adventures and really want want to hack it
+ * up, they can remove it from the __initialise array.
+ *
+ * @returns {Function} The last added initialise hook.
+ * @api private
+ */
+Spark.readable('initialise', {
+  get: function get() {
+    return this.__initialise[this.__initialise.length - 1];
+  },
+  set: function set(initialise) {
+    if ('function' === typeof initialise) this.__initialise.push(initialise);
+  }
+}, true);
+
+/**
  * Attach hooks and automatically announce a new connection.
  *
  * @type {Array}
  * @api private
  */
-Spark.readable('initialise', [function initialise() {
+Spark.readable('__initialise', [function initialise() {
   var primus = this.primus
     , spark = this;
 
