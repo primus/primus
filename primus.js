@@ -562,17 +562,9 @@ Primus.prototype.initialise = function initalise(options) {
       if (err) return primus.listeners('error').length && primus.emit('error', err);
 
       //
-      // The server is closing the connection, forcefully disconnect so we don't
-      // reconnect again.
+      // Handle all "primus::" prefixed protocol messages.
       //
-      if ('primus::server::close' === data) return primus.end();
-
-      //
-      // We received a pong message from the server, return the id.
-      //
-      if ('string' === typeof data && data.indexOf('primus::pong::') === 0) {
-        return primus.emit('incoming::pong', data.slice(14));
-      }
+      if (primus.protocol(data)) return;
 
       for (var i = 0, length = primus.transformers.incoming.length; i < length; i++) {
         var packet = { data: data };
@@ -696,6 +688,63 @@ Primus.prototype.initialise = function initalise(options) {
   }
 
   return primus;
+};
+
+/**
+ * Really dead simple protocol parser. We simply assume that every message that
+ * is prefixed with `primus::` could be used as some sort of protocol definition
+ * for primus.
+ *
+ * @param {String} msg The data.
+ * @returns {Boolean} Is a protocol message.
+ * @api private
+ */
+Primus.prototype.protocol = function protocol(msg) {
+  if (
+       'string' !== typeof msg
+    || msg.indexOf('primus::') !== 0
+  ) return false;
+
+  var last = msg.indexOf(':', 8)
+    , value = msg.slice(last + 2);
+
+  switch (msg.slice(8,  last)) {
+    case 'pong':
+      this.emit('incoming::pong', value);
+    break;
+
+    case 'server':
+      //
+      // The server is closing the connection, forcefully disconnect so we don't
+      // reconnect again.
+      //
+      if ('close' === value) this.end();
+    break;
+
+    case 'id':
+      this.emit('incoming::id', value);
+    break;
+
+    //
+    // Unknown protocol, somebody is probably sending primus:: prefixed
+    // messages.
+    //
+    default:
+      return false;
+  }
+
+  return true;
+};
+
+/**
+ * Retrieve the current id from the server.
+ *
+ * @param {Function} fn Callback function.
+ * @api public
+ */
+Primus.prototype.id = function id(fn) {
+  this.write('primus::id::');
+  return this.once('incoming::id');
 };
 
 /**
