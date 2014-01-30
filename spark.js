@@ -41,7 +41,7 @@ function Spark(primus, headers, address, query, id) {
     this.query = parse(this.query);
   }
 
-  this.__initialise.forEach(function execute(initialise) {
+  this.heartbeat().__initialise.forEach(function execute(initialise) {
     initialise.call(spark);
   });
 }

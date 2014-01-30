@@ -157,6 +157,10 @@ describe('Spark', function () {
         done();
       });
 
+      primus.on('connection', function (socket) {
+        expect(socket).to.equal(spark);
+      });
+
       var spark = new primus.Spark();
     });
 
