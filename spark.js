@@ -23,7 +23,6 @@ var ParserError = require('./errors').ParserError
 function Spark(primus, headers, address, query, id) {
   var readable = predefine(this, predefine.READABLE)
     , writable = predefine(this, predefine.WRITABLE)
-    , readyState = Spark.OPEN
     , spark = this;
 
   readable('primus', primus);         // References to Primus.
@@ -42,18 +41,6 @@ function Spark(primus, headers, address, query, id) {
     this.query = parse(this.query);
   }
 
-  readable('readyState', {
-    get: function get() {
-      return readyState;
-    },
-    set: function set(state) {
-      if (readyState === state) return state;
-      readyState = state;
-
-      spark.emit('readyStateChange');
-    }
-  }, true);
-
   this.initialise.forEach(function execute(initialise) {
     initialise.call(spark);
   });
@@ -69,6 +56,26 @@ Spark.writable = predefine(Spark.prototype, predefine.WRITABLE);
 Spark.OPENING = 1;    // Only here for primus.js readyState number compatibility.
 Spark.CLOSED  = 2;    // The connection is closed.
 Spark.OPEN    = 3;    // The connection is open.
+
+//
+// Make sure that we emit `readyState` change events when a new readyState is
+// checked. This way plugins can correctly act according to this.
+//
+Spark.readable('readyState', {
+  get: function get() {
+    return this.__readyState;
+  },
+  set: function set(readyState) {
+    if (this.__readyState === readyState) return readyState;
+
+    this.__readyState = readyState;
+    this.emit('readyStateChange');
+
+    return readyState;
+  }
+}, true);
+
+Spark.writable('__readyState', Spark.OPEN);
 
 //
 // Lazy parse interface for IP address information. As nobody is always
@@ -110,6 +117,12 @@ Spark.readable('heartbeat', function heartbeat() {
 Spark.readable('initialise', [function initialise() {
   var primus = this.primus
     , spark = this;
+
+  //
+  // Prevent double initialization of the spark. If we already have an
+  // `incoming::data` handler we assume that all other cases are handled as well.
+  //
+  if (this.listeners('incoming::data').length) return;
 
   //
   // We've received new data from our client, decode and emit it.
