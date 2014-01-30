@@ -5,6 +5,7 @@ describe('Spark', function () {
     , Primus = common.Primus
     , http = require('http')
     , expect = common.expect
+    , Spark = Primus.Spark
     , server
     , primus;
 
@@ -225,6 +226,29 @@ describe('Spark', function () {
       });
 
       expect(spark.write(data)).to.equal(true);
+    });
+  });
+
+  describe('.initialise', function () {
+    it('allows overriding the initialise function', function (done) {
+      Spark.prototype.initialise = function init() {
+        Spark.prototype.__initialise.length = 1;
+        done();
+      };
+
+      var spark = new Spark(primus);
+    });
+
+    it('get initialise returns the last added function', function () {
+      expect(Spark.prototype.initialise).to.equal(Spark.prototype.__initialise[0]);
+
+      function foo() {}
+
+      Spark.prototype.initialise = foo;
+      expect(Spark.prototype.initialise).to.equal(Spark.prototype.__initialise[1]);
+      expect(Spark.prototype.initialise).to.equal(foo);
+
+      Spark.prototype.__initialise.length = 1;
     });
   });
 });
