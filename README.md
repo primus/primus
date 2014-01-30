@@ -1273,6 +1273,21 @@ see it be merged automatically.
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="https://github.com/zeMirco/primus-express-session">primus-express-session</a></dt>
+  <dd>
+    Share a user session between Express and Primus.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/zeMirco/primus-express-session">
+      <img src="https://travis-ci.org/zeMirco/primus-express-session.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-express-session">
+      <img src="https://badge.fury.io/js/primus-express-session.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
 
 In addition to these community provided plugins, the Primus project also
 provides the following plugins:
