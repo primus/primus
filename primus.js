@@ -1,23 +1,6 @@
 /*globals require, define */
 'use strict';
 
-//
-// Sets the default connection URL, it uses the default origin of the browser
-// when supported but degrades for older browsers. In Node.js, we cannot guess
-// where the user wants to connect to, so we just default to localhost.
-//
-var defaultUrl;
-
-try {
-  if (location.origin) {
-    defaultUrl = location.origin;
-  } else {
-    defaultUrl = location.protocol +'//'+ location.hostname + (location.port ? ':'+ location.port : '');
-  }
-} catch (e) {
-  defaultUrl = 'http://127.0.0.1';
-}
-
 /**
  * Minimal EventEmitter interface that is molded against the Node.js
  * EventEmitter interface.
@@ -208,6 +191,23 @@ function context(self, method) {
   self.emit('error', failure);
 }
 
+//
+// Sets the default connection URL, it uses the default origin of the browser
+// when supported but degrades for older browsers. In Node.js, we cannot guess
+// where the user wants to connect to, so we just default to localhost.
+//
+var defaultUrl;
+
+try {
+  if (location.origin) {
+    defaultUrl = location.origin;
+  } else {
+    defaultUrl = location.protocol +'//'+ location.hostname + (location.port ? ':'+ location.port : '');
+  }
+} catch (e) {
+  defaultUrl = 'http://127.0.0.1';
+}
+
 /**
  * Primus in a real-time library agnostic framework for establishing real-time
  * connections with servers.
@@ -226,7 +226,7 @@ function context(self, method) {
  * @constructor
  * @param {String} url The URL of your server.
  * @param {Object} options The configuration.
- * @api private
+ * @api public
  */
 function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url, options);
@@ -668,6 +668,8 @@ Primus.prototype.initialise = function initalise(options) {
    * @api private
    */
   function offline() {
+    if (!primus.online) return; // Already or still offline, bailout.
+
     primus.online = false;
     primus.emit('offline');
     primus.end();
@@ -679,6 +681,8 @@ Primus.prototype.initialise = function initalise(options) {
    * @api private
    */
   function online() {
+    if (primus.online) return; // Already or still online, bailout
+
     primus.online = true;
     primus.emit('online');
 
@@ -843,7 +847,7 @@ Primus.prototype.heartbeat = function heartbeat() {
     //
     // The network events already captured the offline event.
     //
-    if (primus.online) return;
+    if (!primus.online) return;
 
     primus.online = false;
     primus.emit('offline');
