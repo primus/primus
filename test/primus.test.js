@@ -424,6 +424,20 @@ describe('Primus', function () {
       expect(socket.options.ping).to.equal(100);
       socket.on('open', socket.end).on('end', done);
     });
+
+    it('allows the use of options when using the default connection URL', function (done) {
+      var Socket = primus.Socket;
+
+      var socket = new Socket({
+        ping: 100,
+        strategy: false
+      });
+
+      expect(socket.url).to.eql(socket.parse('http://127.0.0.1'));
+      expect(socket.options.ping).to.equal(100);
+      expect(socket.options.strategy).to.have.length(0);
+      socket.on('open', socket.end).on('end', done);
+    });
   });
 
   describe('#save', function () {
