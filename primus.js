@@ -743,6 +743,8 @@ Primus.prototype.protocol = function protocol(msg) {
  * @api public
  */
 Primus.prototype.id = function id(fn) {
+  if (this.socket && this.socket.id) return fn(this.socket.id);
+
   this.write('primus::id::');
   return this.once('incoming::id', fn);
 };
