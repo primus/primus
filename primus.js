@@ -233,7 +233,13 @@ function Primus(url, options) {
 
   var primus = this;
 
-  options = options || {};
+  if ('object' === typeof url) {
+    options = url;
+    url = defaultUrl;
+  } else {
+    options = options || {};
+  }
+
   options.timeout = +options.timeout || 10e3;   // Connection timeout duration.
   options.reconnect = options.reconnect || {};  // Stores the back off configuration.
   options.ping = +options.ping || 25e3;         // Heartbeat ping interval.
