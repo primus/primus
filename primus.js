@@ -744,7 +744,7 @@ Primus.prototype.protocol = function protocol(msg) {
  */
 Primus.prototype.id = function id(fn) {
   this.write('primus::id::');
-  return this.once('incoming::id');
+  return this.once('incoming::id', fn);
 };
 
 /**

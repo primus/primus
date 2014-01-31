@@ -1093,6 +1093,20 @@ module.exports = function base(transformer) {
           });
         });
       });
+
+      describe('#id', function () {
+        it('should receive the id', function (done) {
+          primus.on('connection', function (spark) {
+            socket.id(function (id) {
+              expect(id).to.equal(spark.id);
+              spark.end();
+              done();
+            });
+          });
+
+          var socket = new Socket('http://localhost:'+ server.portnumber);
+        });
+      });
     });
   });
 };
