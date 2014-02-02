@@ -476,4 +476,24 @@ describe('Primus', function () {
       });
     });
   });
+
+  describe('#reserved', function () {
+    it('sees all incoming:: and outgoing:: as reserved', function () {
+      expect(primus.reserved('incoming::error')).to.equal(true);
+      expect(primus.reserved('outgoing::error')).to.equal(true);
+      expect(primus.reserved('incoming::')).to.equal(true);
+      expect(primus.reserved('outgoing::')).to.equal(true);
+      expect(primus.reserved('somwhatincoming::error')).to.equal(false);
+      expect(primus.reserved('somwhatoutgoing::error')).to.equal(false);
+      expect(primus.reserved('INCOMING::ERROR')).to.equal(false);
+      expect(primus.reserved('OUTGOING::ERROR')).to.equal(false);
+      expect(primus.reserved('INCOMING::')).to.equal(false);
+      expect(primus.reserved('OUTGOING::')).to.equal(false);
+    });
+
+    it('sees specific events as reserved', function () {
+      expect(primus.reserved('log')).to.equal(true);
+      expect(primus.reserved('ERROR')).to.equal(false);
+    });
+  });
 });

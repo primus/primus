@@ -121,6 +121,30 @@ describe('Spark', function () {
     });
   });
 
+  describe('#reserved', function () {
+    it('sees all incoming:: and outgoing:: as reserved', function () {
+      var spark = new primus.Spark();
+
+      expect(spark.reserved('incoming::error')).to.equal(true);
+      expect(spark.reserved('outgoing::error')).to.equal(true);
+      expect(spark.reserved('incoming::')).to.equal(true);
+      expect(spark.reserved('outgoing::')).to.equal(true);
+      expect(spark.reserved('somwhatincoming::error')).to.equal(false);
+      expect(spark.reserved('somwhatoutgoing::error')).to.equal(false);
+      expect(spark.reserved('INCOMING::ERROR')).to.equal(false);
+      expect(spark.reserved('OUTGOING::ERROR')).to.equal(false);
+      expect(spark.reserved('INCOMING::')).to.equal(false);
+      expect(spark.reserved('OUTGOING::')).to.equal(false);
+    });
+
+    it('sees specific events as reserved', function () {
+      var spark = new primus.Spark();
+
+      expect(spark.reserved('error')).to.equal(true);
+      expect(spark.reserved('ERROR')).to.equal(false);
+    });
+  });
+
   describe('#end', function () {
     it('emits a `disconnection` event on the primus instance when destroyed', function (done) {
       primus.on('disconnection', function (socket) {
