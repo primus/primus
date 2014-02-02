@@ -222,6 +222,7 @@ try {
  * - network, Use network events as leading method for network connection drops.
  * - strategy, Reconnection strategies.
  * - transport, Transport options.
+ * - url, uri, The URL to use connect with the server.
  *
  * @constructor
  * @param {String} url The URL of your server.
@@ -483,6 +484,30 @@ Primus.prototype.plugin = function plugin(name) {
   }
 
   return plugins;
+};
+
+/**
+ * Checks if the given event is an emitted event by Primus.
+ *
+ * @param {String} evt The event name.
+ * @returns {Boolean}
+ * @api public
+ */
+Primus.prototype.reserved = function reserved(evt) {
+  return (/^(incoming|outgoing)::/).test(evt)
+  || evt in {
+    readyStateChange: 1,
+    reconnecting: 1,
+    reconnect: 1,
+    offline: 1,
+    timeout: 1,
+    online: 1,
+    error: 1,
+    close: 1,
+    open: 1,
+    data: 1,
+    end: 1
+  };
 };
 
 /**

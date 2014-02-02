@@ -601,6 +601,24 @@ Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) 
 };
 
 /**
+ * Checks if the given event is an emitted event by Primus.
+ *
+ * @param {String} evt The event name.
+ * @returns {Boolean}
+ * @api public
+ */
+Primus.prototype.reserved = function reserved(evt) {
+  return (/^(incoming|outgoing)::/).test(evt)
+  || evt in {
+    disconnection: 1,
+    initialised: 1,
+    connection: 1,
+    close: 1,
+    log: 1
+  };
+};
+
+/**
  * Add a createSocket interface so we can create a Server client with the
  * specified `transformer` and `parser`.
  *

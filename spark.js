@@ -109,6 +109,23 @@ Spark.readable('heartbeat', function heartbeat() {
 });
 
 /**
+ * Checks if the given event is an emitted event by Primus.
+ *
+ * @param {String} evt The event name.
+ * @returns {Boolean}
+ * @api public
+ */
+Spark.readable('reserved', function reserved(evt) {
+  return (/^(incoming|outgoing)::/).test(evt)
+  || evt in {
+    readyStateChange: 1,
+    error: 1,
+    data: 1,
+    end: 1
+  };
+});
+
+/**
  * Allows for adding initialise listeners without people overriding our default
  * initializer. If they are feeling adventures and really want want to hack it
  * up, they can remove it from the __initialise array.
