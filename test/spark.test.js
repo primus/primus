@@ -64,6 +64,7 @@ describe('Spark', function () {
       done();
     });
 
+    spark.readyState = Spark.OPEN;
     spark.readyState = Spark.CLOSED;
   });
 
