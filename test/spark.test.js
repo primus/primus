@@ -54,6 +54,19 @@ describe('Spark', function () {
     var spark = new primus.Spark();
   });
 
+  it('emits a `readyStateChange` event when the readyState changes', function (done) {
+    var spark = new primus.Spark();
+
+    expect(spark.readyState).to.equal(Spark.OPEN);
+
+    spark.on('readyStateChange', function () {
+      expect(spark.readyState).to.equal(Spark.CLOSED);
+      done();
+    });
+
+    spark.readyState = Spark.CLOSED;
+  });
+
   it('transforms querystrings', function()  {
     var spark = new primus.Spark({}, {}, 'string=foo');
 
