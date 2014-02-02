@@ -235,7 +235,7 @@ function Primus(url, options) {
 
   if ('object' === typeof url) {
     options = url;
-    url = defaultUrl;
+    url = options.url || options.uri || defaultUrl;
   } else {
     options = options || {};
   }

@@ -425,18 +425,38 @@ describe('Primus', function () {
       socket.on('open', socket.end).on('end', done);
     });
 
-    it('allows the use of options when using the default connection URL', function (done) {
+    it('allows the use of options when using the default connection URL', function () {
       var Socket = primus.Socket;
 
       var socket = new Socket({
         ping: 100,
-        strategy: false
+        strategy: false,
+        manual: true
       });
 
       expect(socket.url).to.eql(socket.parse('http://127.0.0.1'));
       expect(socket.options.ping).to.equal(100);
       expect(socket.options.strategy).to.have.length(0);
-      socket.on('open', socket.end).on('end', done);
+    });
+
+    it('allows option.(url|uri) as url', function () {
+      var socket = new primus.Socket({
+        url: 'http://google.com',
+        ping: 100,
+        strategy: false,
+        manual: true
+      });
+
+      expect(socket.url).to.eql(socket.parse('http://google.com'));
+
+      socket = new primus.Socket({
+        uri: 'http://google.com',
+        ping: 100,
+        strategy: false,
+        manual: true
+      });
+
+      expect(socket.url).to.eql(socket.parse('http://google.com'));
     });
   });
 
