@@ -495,19 +495,27 @@ Primus.prototype.plugin = function plugin(name) {
  */
 Primus.prototype.reserved = function reserved(evt) {
   return (/^(incoming|outgoing)::/).test(evt)
-  || evt in {
-    readyStateChange: 1,
-    reconnecting: 1,
-    reconnect: 1,
-    offline: 1,
-    timeout: 1,
-    online: 1,
-    error: 1,
-    close: 1,
-    open: 1,
-    data: 1,
-    end: 1
-  };
+  || evt in reserved.events;
+};
+
+/**
+ * The actual events that are used by the client.
+ *
+ * @type {Object}
+ * @api private
+ */
+Primus.prototype.reserved.events = {
+  readyStateChange: 1,
+  reconnecting: 1,
+  reconnect: 1,
+  offline: 1,
+  timeout: 1,
+  online: 1,
+  error: 1,
+  close: 1,
+  open: 1,
+  data: 1,
+  end: 1
 };
 
 /**

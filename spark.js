@@ -117,13 +117,21 @@ Spark.readable('heartbeat', function heartbeat() {
  */
 Spark.readable('reserved', function reserved(evt) {
   return (/^(incoming|outgoing)::/).test(evt)
-  || evt in {
-    readyStateChange: 1,
-    error: 1,
-    data: 1,
-    end: 1
-  };
+  || evt in reserved.events;
 });
+
+/**
+ * The actual events that are used by the Spark.
+ *
+ * @type {Object}
+ * @api private
+ */
+Spark.prototype.reserved.events = {
+  readyStateChange: 1,
+  error: 1,
+  data: 1,
+  end: 1
+};
 
 /**
  * Allows for adding initialise listeners without people overriding our default

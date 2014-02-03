@@ -609,13 +609,21 @@ Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) 
  */
 Primus.prototype.reserved = function reserved(evt) {
   return (/^(incoming|outgoing)::/).test(evt)
-  || evt in {
-    disconnection: 1,
-    initialised: 1,
-    connection: 1,
-    close: 1,
-    log: 1
-  };
+  || evt in reserved.events;
+};
+
+/**
+ * The actual events that are used by Primus.
+ *
+ * @type {Object}
+ * @api private
+ */
+Primus.prototype.reserved.events = {
+  disconnection: 1,
+  initialised: 1,
+  connection: 1,
+  close: 1,
+  log: 1
 };
 
 /**
