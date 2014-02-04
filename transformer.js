@@ -13,7 +13,7 @@ function noop() {}
  * Transformer skeletons
  *
  * @constructor
- * @param {Primus} primus Reference to the Primus.
+ * @param {Primus} primus Reference to the Primus instance.
  * @api public
  */
 function Transformer(primus) {

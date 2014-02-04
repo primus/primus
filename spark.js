@@ -124,7 +124,7 @@ Spark.readable('reserved', function reserved(evt) {
  * The actual events that are used by the Spark.
  *
  * @type {Object}
- * @api private
+ * @api public
  */
 Spark.prototype.reserved.events = {
   readyStateChange: 1,
@@ -139,7 +139,7 @@ Spark.prototype.reserved.events = {
  * up, they can remove it from the __initialise array.
  *
  * @returns {Function} The last added initialise hook.
- * @api private
+ * @api public
  */
 Spark.readable('initialise', {
   get: function get() {
@@ -262,7 +262,7 @@ Spark.readable('uuid', function uuid() {
 /**
  * Really dead simple protocol parser. We simply assume that every message that
  * is prefixed with `primus::` could be used as some sort of protocol definition
- * for primus.
+ * for Primus.
  *
  * @param {String} msg The data.
  * @returns {Boolean} Is a protocol message.
@@ -287,7 +287,7 @@ Spark.readable('protocol', function protocol(msg) {
     break;
 
     //
-    // Unknown protocol, somebody is probably sending primus:: prefixed
+    // Unknown protocol, somebody is probably sending `primus::` prefixed
     // messages.
     //
     default:

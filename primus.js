@@ -502,7 +502,7 @@ Primus.prototype.reserved = function reserved(evt) {
  * The actual events that are used by the client.
  *
  * @type {Object}
- * @api private
+ * @api public
  */
 Primus.prototype.reserved.events = {
   readyStateChange: 1,
@@ -736,7 +736,7 @@ Primus.prototype.initialise = function initalise(options) {
 /**
  * Really dead simple protocol parser. We simply assume that every message that
  * is prefixed with `primus::` could be used as some sort of protocol definition
- * for primus.
+ * for Primus.
  *
  * @param {String} msg The data.
  * @returns {Boolean} Is a protocol message.
@@ -769,7 +769,7 @@ Primus.prototype.protocol = function protocol(msg) {
     break;
 
     //
-    // Unknown protocol, somebody is probably sending primus:: prefixed
+    // Unknown protocol, somebody is probably sending `primus::` prefixed
     // messages.
     //
     default:
@@ -1122,7 +1122,7 @@ Primus.prototype.merge = function merge(target) {
  *
  * @param {String} url Connection URL.
  * @returns {Object} Parsed connection.
- * @api public
+ * @api private
  */
 Primus.prototype.parse = parse;
 
@@ -1131,7 +1131,7 @@ Primus.prototype.parse = parse;
  *
  * @param {String} query The query string that needs to be parsed.
  * @returns {Object} Parsed query string.
- * @api public
+ * @api private
  */
 Primus.prototype.querystring = function querystring(query) {
   var parser = /([^=?&]+)=([^&]*)/g

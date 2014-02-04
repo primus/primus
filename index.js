@@ -616,7 +616,7 @@ Primus.prototype.reserved = function reserved(evt) {
  * The actual events that are used by Primus.
  *
  * @type {Object}
- * @api private
+ * @api public
  */
 Primus.prototype.reserved.events = {
   disconnection: 1,
