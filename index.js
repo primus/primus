@@ -380,7 +380,7 @@ Primus.prototype.library = function compile(nodejs) {
   //
   if ('number' === typeof this.timeout) {
     var timeout = this.timeout - 10000;
-    client = client.replace('+options.ping || 25e3;', '+options.ping || ' + timeout + ';');
+    client = client.replace('options.ping : 25e3;', 'options.ping : '+ timeout +';');
   }
 
   //

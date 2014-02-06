@@ -232,8 +232,6 @@ try {
 function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url, options);
 
-  var primus = this;
-
   if ('object' === typeof url) {
     options = url;
     url = options.url || options.uri || defaultUrl;
@@ -241,13 +239,25 @@ function Primus(url, options) {
     options = options || {};
   }
 
-  options.timeout = +options.timeout || 10e3;   // Connection timeout duration.
-  options.reconnect = options.reconnect || {};  // Stores the back off configuration.
-  options.ping = +options.ping || 25e3;         // Heartbeat ping interval.
-  options.pong = +options.pong || 10e3;         // Heartbeat pong response timeout.
-  options.strategy = 'strategy' in options      // Reconnect strategies, supplying
-    ? options.strategy
-    : [];
+  var primus = this;
+
+  // Connection timeout duration.
+  options.timeout = 'timeout' in options ? options.timeout : 10e3;
+
+  // Stores the back off configuration.
+  options.reconnect = 'reconnect' in options ? options.reconnect : {};
+
+  // Heartbeat ping interval.
+  options.ping = 'ping' in options ? options.ping : 25e3;
+
+  // Heartbeat pong response timeout.
+  options.pong = 'pong' in options ? options.pong : 10e3;
+
+  // Reconnect strategies.
+  options.strategy = 'strategy' in options ? options.strategy : [];
+
+  // Custom transport options.
+  options.transport = 'transport' in options ? options.transport : {};
 
   primus.buffer = [];                           // Stores premature send data.
   primus.writable = true;                       // Silly stream compatibility.
@@ -382,7 +392,7 @@ try {
     //
     // Transform it from a readOnly object to a read/writable object so we can
     // change some parsed values. This is required if we ever want to override
-    // a port number etc (as browsers remove port 443 and 80 from the urls).
+    // a port number etc. (as browsers remove port 443 and 80 from the URL's).
     //
     for (key in a) {
       if ('string' === typeof a[key] || 'number' === typeof a[key]) {
@@ -449,7 +459,10 @@ Primus.prototype.NETWORK_EVENTS = false;
 Primus.prototype.online = true;
 
 try {
-  if (Primus.prototype.NETWORK_EVENTS = 'onLine' in navigator && (window.addEventListener || document.body.attachEvent)) {
+  if (
+       Primus.prototype.NETWORK_EVENTS = 'onLine' in navigator
+    && (window.addEventListener || document.body.attachEvent)
+  ) {
     if (!navigator.onLine) {
       Primus.prototype.online = false;
     }
