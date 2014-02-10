@@ -76,7 +76,8 @@ function Primus(server, options) {
   });
 
   //
-  // copy over the static methods so readable and writable can also be exposed.
+  // Copy over the original Spark static properties and methods so readable and 
+  // writable can also be used.
   //
   for (var key in Spark) this.Spark[key] = Spark[key];
 
