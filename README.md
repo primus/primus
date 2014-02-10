@@ -118,8 +118,8 @@ timeout             | The heartbeat timeout                     | `35000`
 
 The heartbeat timeout is used to forcefully disconnect a spark if no data is
 received from the client within the specified amount of time. It is possible
-to completly disable the heartbeat timeout by setting the value of the `timeout`
-option to `false`.
+to completely disable the heartbeat timeout by setting the value of the
+`timeout` option to `false`.
 
 In addition to support different frameworks we've also made it possible to use
 custom encoding and decoding libraries. We're using `JSON` by default but you
@@ -619,21 +619,21 @@ do manual reconnection if you haven't set the strategy to false**.
 
 ##### transport
 
-The transport object allows you to add transport specific configuration in to
-Primus. We only recommend using this if understand and accept the following
+The transport object allows you to add a transport specific configuration.
+We only recommend using this if you understand and accept the following
 consequences:
 
-- Primus will attempt to override properties that it needs in order to function
-  properly inside this configuration.
-- We might start using options without any announcements or major version bumps.
+- Primus will try to override configuration properties that are needed to
+  ensure a correct functioning.
+- We might start using options without any announcement or major version bump.
 - Expect your client and it's connection to malfunction once you switch between
-  different transports as these are configuration changes that are specific to
-  the bundled transformer library/client.
-- Bugs and bug reports that caused by using this functionality is closed
+  different transports, as these configurations are specific to the bundled
+  transformer library/client.
+- Bugs and bug reports caused by using this functionality are closed
   immediately.
 
-Having that said, this does give you ultimate freedom while still getting the
-benefits of Primus.
+Having that said, this gives you total freedom while still getting the benefits
+of Primus.
 
 #### primus.write(message)
 
