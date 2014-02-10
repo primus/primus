@@ -537,7 +537,7 @@ Primus.prototype.reserved.events = {
  * @param {Object} options The original options object.
  * @api private
  */
-Primus.prototype.initialise = function initalise(options) {
+Primus.prototype.initialise = function initialise(options) {
   var primus = this
     , start;
 
