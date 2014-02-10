@@ -1393,12 +1393,12 @@ https://github.com/primus/primus/wiki/Production
 #### What is the best way to scale Primus
 
 Scaling Primus is as simple as sticking it behind a load balancer that supports
-sticky sessions and run multiple versions of your application. This is a vital
-feature that your load balancer needs to support. This ensures that the incoming
-requests always go back to the same server. If your load balancer does not
-support sticky sessions, get another one. I highly recommend
-[HAProxy](http://haproxy.1wt.eu/). According to my own testing it the fastest
-and best proxy available that supports WebSockets. See
+[sticky sessions](https://github.com/primus/primus/issues/147) and run multiple
+versions of your application. This is a vital feature that your load balancer
+needs to support. This ensures that the incoming requests always go back to the
+same server. If your load balancer does not support sticky sessions, get another
+one. I highly recommend [HAProxy](http://haproxy.1wt.eu/). According to my own
+testing it the fastest and best proxy available that supports WebSockets. See
 https://github.com/observing/balancerbattle for more detailed information.
 
 #### How do I use Primus with Express 3
