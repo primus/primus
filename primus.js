@@ -269,7 +269,7 @@ function Primus(url, options) {
   primus.attempt = null;                        // Current back off attempt.
   primus.socket = null;                         // Reference to the internal connection.
   primus.latency = 0;                           // Latency between messages.
-  primus.transport = options.transport || {};   // Transport options.
+  primus.transport = options.transport;         // Transport options.
   primus.transformers = {                       // Message transformers.
     outgoing: [],
     incoming: []
