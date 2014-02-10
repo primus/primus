@@ -76,6 +76,7 @@ npm install primus --save
   - [Scaling](#what-is-the-best-way-to-scale-primus)
   - [Express](#how-do-i-use-primus-with-express-3)
   - [RequireJS](#is-requirejs-supported)
+  - [Custom headers](#can-i-send-custom-headers-to-the-server)
 - [Versioning](#versioning)
   - [History](#history)
   - [Convention](#convention)
@@ -214,6 +215,11 @@ interface. So this will include all methods that are available on the
 The `spark.headers` property contains contains the headers of either the request
 that started a handshake with the server or the headers of the actual real-time
 connection. This depends on the module you are using.
+
+*Please note that sending custom headers from the client to the server is
+impossible as not all transports that these transformers support can add custom
+headers to a request (JSONP for example). If you need to send custom data, use a
+query string when connecting*
 
 #### spark.address
 
@@ -1429,6 +1435,20 @@ general advice for this is to drop require.js in favour of plain script loading
 or use of browserify where possible. If you feel strong about require.js we accept
 pull requests that improve this behaviour or helps us save guard against these
 issues.
+
+#### Can I send custom headers to the server
+
+It's impossible to send custom headers from the client to the server. This is
+because these headers need to be set by the actual transports that the
+transformers are using. The only transport that would support this would be AJAX
+polling. The only to send custom data to the server would be by using a query
+string in your connection URL as this is something that all transports supports.
+The only noticeable exception for this case is SockJS as it doesn't allow
+query strings in the connect URL.
+
+```js
+var primus = new Primus('http://localhost:8080/?token=1&name=foo');
+```
 
 ### Versioning
 
