@@ -43,6 +43,12 @@ describe('Primus', function () {
     expect(primus.Spark).to.be.a('function');
   });
 
+  it('expooses static methods on wrapped Spark constructor', function () {
+    for (var key in Primus.Spark) {
+      expect(primus.Spark[key]).to.be.eql(Primus.Spark[key]);
+    }
+  });
+
   it('pre-binds the primus server in to the spark', function () {
     var spark = new primus.Spark();
     expect(spark.primus).to.equal(primus);
