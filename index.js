@@ -412,16 +412,7 @@ Primus.prototype.library = function compile(nodejs) {
   // patch to much code.
   //
   return client +' return Primus; });' + library
-    .filter(Boolean)
-    .map(function wrap(lib) {
-      //
-      // Wrap the libraries in a closure, they could expose variables or
-      // override variables that are used by the application. A good example of
-      // this is the use of the `require` function which requirejs, browserify
-      // and others are using.
-      //
-      return '(function library(Primus, global) {'+ lib +'}(this.Primus, this));';
-    }).join('\n');
+    .filter(Boolean).join('\n');
 };
 
 /**
