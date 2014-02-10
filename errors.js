@@ -28,7 +28,7 @@ util.inherits(PrimusError, Error);
  * There was an error while parsing incoming or outgoing data.
  *
  * @param {String} message The reason for the error.
- * @param {EventEmitter} spark The spark that caused the error.
+ * @param {Spark} spark The spark that caused the error.
  * @api public
  */
 function ParserError(message, spark) {
