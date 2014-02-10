@@ -75,6 +75,11 @@ function Primus(server, options) {
     }
   });
 
+  //
+  // copy over the static methods so readable and writable can also be exposed.
+  //
+  for (var key in Spark) this.Spark[key] = Spark[key];
+
   this.parsers(options.parser);
   this.initialise(options.transformer || options.transport, options);
 
