@@ -144,9 +144,13 @@ primus.library();
 
 Which returns the client-side library. It's not minified as that is out of the
 scope of this project. You can store this on a CDN or on your static server. Do
-whatever you want with it, but I would advice you to regenerate that file every
-time you redeploy so it always contains a client side library that is compatible
-with your back-end. To save the file you can use:
+whatever you want with it, but remember to regenerate it every time you change
+Primus server options. This is important because some properties of the client
+are set using the server configuration. For example if you change the
+`pathname`, the client should be regenerated to reflect that change and work
+correctly. We advice you to regenerate the library every time you redeploy so
+you always have a client compatible with your back-end. To save the file you
+can use:
 
 ```js
 primus.save(__dirname +'/primus.js');
@@ -237,7 +241,7 @@ active at the time you access this property.*
 The `spark.query` contains the query string you used to connect to server. It's
 parsed to an object. Please note that this is not available for all supported
 transformers, but it's proven to be to useful to not implement it because one
-silly transformer refuses to support it. Yes.. I'm looking at you SockJS.
+silly transformer refuses to support it. Yes, I'm looking at you SockJS.
 
 #### spark.id
 
@@ -1438,13 +1442,13 @@ issues.
 
 #### Can I send custom headers to the server
 
-It's impossible to send custom headers from the client to the server. This is
+It is not possible to send custom headers from the client to the server. This is
 because these headers need to be set by the actual transports that the
 transformers are using. The only transport that would support this would be AJAX
-polling. The only to send custom data to the server would be by using a query
-string in your connection URL as this is something that all transports supports.
-The only noticeable exception for this case is SockJS as it doesn't allow
-query strings in the connect URL.
+polling. To send custom data to the server use a query string in your connection
+URL, as this is something that all transports support. The only noticeable
+exception for this case is SockJS as it doesn't allow query strings in the
+connection URL.
 
 ```js
 var primus = new Primus('http://localhost:8080/?token=1&name=foo');
