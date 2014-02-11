@@ -34,13 +34,19 @@ var http = require('http')
 //
 server = http.createServer(function server(req, res) {
   res.setHeader('Content-Type', 'text/html');
-  fs.createReadStream(__dirname + '/index.html').pipe(res);
+  fs.createReadStream(
+    __dirname + (~req.url.indexOf('primus.js') ? '/primus.js' : '/index.html')
+  ).pipe(res);
 });
 
 //
 // Now that we've setup our basic server, we can setup our Primus server.
 //
-primus = new Primus(server, { transformer: argh.transformer, parser: argh.parser });
+primus = new Primus(server, {
+  transformer: argh.transformer,
+  parser: argh.parser,
+  pathname: argh.pathname || '/primusexample'
+});
 
 //
 // Listen for new connections and send data
