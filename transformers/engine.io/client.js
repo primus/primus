@@ -75,6 +75,8 @@ module.exports = function client() {
     if (socket) {
       socket.close();
       socket.open();
+    } else {
+      primus.emit('outgoing::open');
     }
   });
 

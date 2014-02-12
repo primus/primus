@@ -26,7 +26,7 @@ has been forgotten many times before. So in order to compile engine.io correctly
 run:
 
 1. Clone the repository: `https://github.com/LearnBoost/engine.io-client.git`
-2. Save and run `make build`
+2. cd in the directory and run `make build`
 3. Override the `library.js` with the newly created `engine.io.js`
 4. Commit changes to the Primus main repository.
 5. Profit
