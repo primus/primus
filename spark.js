@@ -396,20 +396,28 @@ Spark.readable('_write', function _write(data) {
 /**
  * End the connection.
  *
+ * Options:
+ * - reconnect (boolean) Trigger client-side reconnect.
+ *
  * @param {Mixed} data Optional closing data.
+ * @param {Object} options End instructions.
  * @api public
  */
-Spark.readable('end', function end(data) {
+Spark.readable('end', function end(data, options) {
   if (Spark.CLOSED === this.readyState) return this;
 
+  options = options || {};
   var spark = this;
 
   if (data) spark.write(data);
 
   //
-  // Bypass the .write method as this message should not be transformed.
+  // If we want to trigger a reconnect do not send
+  // `primus::server::close`, otherwise bypass the .write method
+  // as this message should not be transformed.
   //
-  spark._write('primus::server::close');
+  if (!options.reconnect) spark._write('primus::server::close');
+
   spark.readyState = Spark.CLOSED;
 
   process.nextTick(function tick() {

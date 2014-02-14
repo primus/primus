@@ -62,9 +62,7 @@ module.exports = function client() {
     socket.on('connect_failed', primus.emits('error'));
     socket.on('error', primus.emits('error'));
     socket.on('message', primus.emits('data'));
-    socket.on('disconnect', primus.emits('end', function parser(kind) {
-      return kind === 'booted' ? 'primus::server::close' : false;
-    }));
+    socket.on('disconnect', primus.emits('end'));
   });
 
   //

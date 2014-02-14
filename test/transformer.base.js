@@ -361,7 +361,7 @@ module.exports = function base(transformer) {
         });
       });
 
-      it('should reconnect when the connection closes unexcpectingly', function (done) {
+      it('should reconnect when the connection closes unexpectedly', function (done) {
         primus.on('connection', function (spark) {
           if (!reconnected) {
             reconnected = true;
@@ -377,6 +377,36 @@ module.exports = function base(transformer) {
               default:
                 spark.emit('outgoing::end');
             }
+          }
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber)
+          , reconnected = false
+          , reconnect = false
+          , opened = 0;
+
+        socket.on('reconnect', function (message) {
+          reconnect = true;
+        });
+
+        socket.on('open', function () {
+          if (++opened !== 2) return;
+
+          expect(reconnect).to.equal(true);
+
+          primus.forEach(function (socket) {
+            socket.end();
+          });
+
+          done();
+        });
+      });
+
+      it('should allow to trigger a client-side reconnect from server', function (done) {
+        primus.on('connection', function (spark) {
+          if (!reconnected) {
+            reconnected = true;
+            spark.end(null, { reconnect: true });
           }
         });
 
