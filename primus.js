@@ -644,7 +644,7 @@ Primus.prototype.initialise = function initialise(options) {
     });
   });
 
-  primus.on('incoming::end', function end(intentional) {
+  primus.on('incoming::end', function end() {
     var readyState = primus.readyState;
 
     //
@@ -668,18 +668,8 @@ Primus.prototype.initialise = function initialise(options) {
     }
 
     //
-    // Some transformers emit garbage when they close the connection. Like the
-    // reason why it closed etc. we should explicitly check if WE send an
-    // intentional message.
-    //
-    if ('primus::server::close' === intentional) {
-      return primus.emit('end');
-    }
-
-    //
-    // Always, call the `close` event as an indication of connection disruption.
-    // This also emitted by `primus#end` so for all cases above, it's still
-    // emitted.
+    // Fire the `close` event as an indication of connection disruption.
+    // This is also fired by `primus#end` so it is emitted in all cases.
     //
     primus.emit('close');
 
