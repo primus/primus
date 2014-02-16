@@ -261,9 +261,25 @@ handled.
 spark.write({ foo: 'bar' });
 ```
 
-#### spark.end()
+#### spark.end(data, options)
 
-The `spark.end()` closes the connection.
+You can use `spark.end` to close the connection. This method takes two optional
+arguments. The first if provided is the `data` to send to the client before
+closing the connection. The second is an options object used to customize the
+behavior of the method. By default the `spark.end` method closes the connection
+in a such way that the client knows it was intentional and it doesn't attempt a
+reconnection.
+
+```js
+spark.end(); // the client doesn't reconnect automatically
+```
+
+You can change this behavior and trigger a client-side reconnection using the
+`reconnect` option.
+
+```js
+spark.end(null, { reconnect: true }); // trigger a client-side reconnection
+```
 
 #### spark.emits(event, parser)
 
