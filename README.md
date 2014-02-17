@@ -53,10 +53,12 @@ npm install primus --save
   - [Advantages](#advantages)
 - [Installation](#installation)
 - [Getting Started](#getting-started)
-- [Connecting from the server](#connecting-from-the-server)
-  - [Broadcasting](#broadcasting)
-  - [Destruction](#destruction)
+  - [Client library](#client-library)
 - [Connecting from the browser](#connecting-from-the-browser)
+- [Connecting from the server](#connecting-from-the-server)
+- [Authorization](#authorization)
+- [Broadcasting](#broadcasting)
+- [Destruction](#destruction)
 - [Events](#events)
 - [Heartbeats and latency](#heartbeats-and-latency)
 - [Supported real-time frameworks](#supported-real-time-frameworks)
@@ -67,7 +69,7 @@ npm install primus --save
   - [Socket.IO](#socketio)
 - [Transformer Inconsistencies](#transformer-inconsistencies)
 - [Plugins](#plugins)
-  - [Extending the Spark/socket](#extending-the-spark--socket)
+  - [Extending the Spark / Socket](#extending-the-spark--socket)
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
   - [Community Plugins](#community-plugins)
 - [Example](#example)
@@ -133,6 +135,8 @@ var primus = new Primus(server, { parser: 'JSON' });
 ```
 
 All parsers have an `async` interface for error handling.
+
+#### Client library
 
 As most libraries come with their own client-side framework for making the
 connection we've also created a small wrapper for this. The library can be
@@ -333,191 +337,7 @@ primus.on('connection', function (spark) {
 })
 ```
 
-### Broadcasting
-
-Broadcasting allows you to write a message to every connected `Spark` on your server.
-There are 2 different ways of doing broadcasting in Primus. The easiest way is to
-use the `Primus#write` method which will write a message to every connected user:
-
-```js
-primus.write(message);
-```
-
-There are cases where you only want to broadcast a message to a smaller group of
-users. To make it easier to do this, we've added a `Primus#forEach` method which
-allows you to iterate over all active connections.
-
-```js
-primus.forEach(function (spark, id, connections) {
-  if (spark.query.foo !== 'bar') return;
-
-  spark.write('message');
-});
-```
-
-### Authorization
-
-#### Server
-
-Primus has a built in auth hook that allows you to leverage the basic auth
-header to validate the connection. To setup the optional auth hook, use the
-`Primus#authorize` method:
-
-```js
-var authParser = require('basic-auth-parser');
-
-//
-// Add hook on server
-//
-primus.authorize(function (req, done) {
-  var auth;
-
-  try { auth = authParser(req.headers['authorization']) }
-  catch (ex) { return done(ex) }
-
-  //
-  // Do some async auth check
-  //
-  authCheck(auth, done);
-});
-
-primus.on('connection', function (spark) {
-  //
-  // You only get here if you make it through the auth hook!
-  //
-});
-```
-
-In this particular case, if an error is passed to `done` by `authCheck` or
-the exception handler then the connection attempt will never make it to the
-`primus.on('connection')` handler.
-
-The error you pass can either be a string or an object. If an object, it can
-have the following properties which affect the response sent to the client:
-
-- `statusCode`: The HTTP status code returned to the client. Defaults to 401.
-- `authenticate`: If set and `statusCode` is 401 then a `WWW-Authenticate`
-  header is added to the response, with a value equal to the `authenticate`
-  property's value.
-- `message`: The error message returned to the client. The response body will be
-  `{error: message}`, JSON-encoded.
-
-If the error you pass is a string then a 401 response is sent to the client
-with no `WWW-Authenticate` header and the string as the error message.
-
-For example to send 500 when an exception is caught, 403 for forbidden users
-and details of the basic auth scheme being used when authentication fails:
-
-```js
-primus.authorize(function (req, done) {
-  var auth;
-
-  if (req.headers.authorization) {
-    try { auth = authParser(req.headers.authorization) }
-    catch (ex) { 
-      ex.statusCode = 500;
-      return done(ex);
-    }
-
-    if ((auth.scheme === 'myscheme') &&
-        checkCredentials(auth.username, auth.password)) {
-      if (userAllowed(auth.username)) {
-        return done();
-      } else {
-        return done({ statusCode: 403, message: 'Go away!' });
-      }
-    }
-  }
-
-  done({
-    message: 'Authentication required',
-    authenticate: 'Basic realm="myscheme"'
-  });
-});
-```
-
-#### Client
-
-Unfortunately, the amount of detail you get in your client when authorization
-fails depends on the transformer in use. Most real-time frameworks supported
-by Primus don't expose the status code, headers or response body.
-
-The WebSocket transformer's underlying transport socket will fire an
-`unexpected-response` event with the HTTP request and response:
-
-```js
-client.on('outgoing::open', function ()
-{
-  client.socket.on('unexpected-response', function (req, res)
-  {
-    console.error(res.statusCode);
-    console.error(res.headers['www-authenticate']);
-
-    // it's up to us to close the request (although it will time out)
-    req.abort();
-
-    // it's also up to us to emit an error so primus can clean up
-    socket.socket.emit('error', 'authorization failed: ' + res.statusCode);
-  });
-});
-```
-
-If you want to read the response body then you can do something like this:
-
-```js
-client.on('outgoing::open', function ()
-{
-  client.socket.on('unexpected-response', function (req, res)
-  {
-    console.error(res.statusCode);
-    console.error(res.headers['www-authenticate']);
-
-    var data = '';
-
-    res.on('data', function (v) {
-      data += v;
-    });
-
-    res.on('end', function () {
-      // remember error message is in the 'error' property
-      socket.socket.emit('error', new Error(obj.error));
-    });
-  });
-});
-```
-
-If `unexpected-response` isn't caught (because the WebSocket transformer isn't
-being used or you don't listen for it) then you'll get an `error` event:
-
-```js
-primus.on('error', function error(err) {
-  console.error('Something horrible has happened', err, err.message);
-});
-```
-
-As noted above, `err` won't contain any details about the authorization failure
-so you won't be able to distinguish it from other errors.
-
-### Destruction
-
-In rare cases you might need to destroy the Primus instance you've created. You
-can use the `primus.destroy()` or `primus.end()` method for this. This method
-accepts an Object which allows you to configure how you want the connections to
-be destroyed:
-
-- `close` Close the HTTP server that Primus received. Defaults to `true`.
-- `end` End all active connections. Defaults to `true`.
-- `timeout` Clean up the server and optionally, it's active connections after
-  the specified amount of timeout. Defaults to `0`.
-
-The timeout is especially useful if you want gracefully shutdown your server but
-really don't want to wait an infinite amount of time.
-
-```js
-primus.destroy({ timeout: 10000 });
-```
-
-### Connecting from the Browser.
+### Connecting from the Browser
 
 Primus comes with its client framework which can be compiled using
 `primus.library()` as mentioned above. To create a connection you can simply
@@ -814,6 +634,190 @@ a server side client.
     "transformer":"websockets"
   }
   ```
+
+### Authorization
+
+#### Server
+
+Primus has a built in auth hook that allows you to leverage the basic auth
+header to validate the connection. To setup the optional auth hook, use the
+`Primus#authorize` method:
+
+```js
+var authParser = require('basic-auth-parser');
+
+//
+// Add hook on server
+//
+primus.authorize(function (req, done) {
+  var auth;
+
+  try { auth = authParser(req.headers['authorization']) }
+  catch (ex) { return done(ex) }
+
+  //
+  // Do some async auth check
+  //
+  authCheck(auth, done);
+});
+
+primus.on('connection', function (spark) {
+  //
+  // You only get here if you make it through the auth hook!
+  //
+});
+```
+
+In this particular case, if an error is passed to `done` by `authCheck` or
+the exception handler then the connection attempt will never make it to the
+`primus.on('connection')` handler.
+
+The error you pass can either be a string or an object. If an object, it can
+have the following properties which affect the response sent to the client:
+
+- `statusCode`: The HTTP status code returned to the client. Defaults to 401.
+- `authenticate`: If set and `statusCode` is 401 then a `WWW-Authenticate`
+  header is added to the response, with a value equal to the `authenticate`
+  property's value.
+- `message`: The error message returned to the client. The response body will be
+  `{error: message}`, JSON-encoded.
+
+If the error you pass is a string then a 401 response is sent to the client
+with no `WWW-Authenticate` header and the string as the error message.
+
+For example to send 500 when an exception is caught, 403 for forbidden users
+and details of the basic auth scheme being used when authentication fails:
+
+```js
+primus.authorize(function (req, done) {
+  var auth;
+
+  if (req.headers.authorization) {
+    try { auth = authParser(req.headers.authorization) }
+    catch (ex) { 
+      ex.statusCode = 500;
+      return done(ex);
+    }
+
+    if ((auth.scheme === 'myscheme') &&
+        checkCredentials(auth.username, auth.password)) {
+      if (userAllowed(auth.username)) {
+        return done();
+      } else {
+        return done({ statusCode: 403, message: 'Go away!' });
+      }
+    }
+  }
+
+  done({
+    message: 'Authentication required',
+    authenticate: 'Basic realm="myscheme"'
+  });
+});
+```
+
+#### Client
+
+Unfortunately, the amount of detail you get in your client when authorization
+fails depends on the transformer in use. Most real-time frameworks supported
+by Primus don't expose the status code, headers or response body.
+
+The WebSocket transformer's underlying transport socket will fire an
+`unexpected-response` event with the HTTP request and response:
+
+```js
+client.on('outgoing::open', function ()
+{
+  client.socket.on('unexpected-response', function (req, res)
+  {
+    console.error(res.statusCode);
+    console.error(res.headers['www-authenticate']);
+
+    // it's up to us to close the request (although it will time out)
+    req.abort();
+
+    // it's also up to us to emit an error so primus can clean up
+    socket.socket.emit('error', 'authorization failed: ' + res.statusCode);
+  });
+});
+```
+
+If you want to read the response body then you can do something like this:
+
+```js
+client.on('outgoing::open', function ()
+{
+  client.socket.on('unexpected-response', function (req, res)
+  {
+    console.error(res.statusCode);
+    console.error(res.headers['www-authenticate']);
+
+    var data = '';
+
+    res.on('data', function (v) {
+      data += v;
+    });
+
+    res.on('end', function () {
+      // remember error message is in the 'error' property
+      socket.socket.emit('error', new Error(obj.error));
+    });
+  });
+});
+```
+
+If `unexpected-response` isn't caught (because the WebSocket transformer isn't
+being used or you don't listen for it) then you'll get an `error` event:
+
+```js
+primus.on('error', function error(err) {
+  console.error('Something horrible has happened', err, err.message);
+});
+```
+
+As noted above, `err` won't contain any details about the authorization failure
+so you won't be able to distinguish it from other errors.
+
+### Broadcasting
+
+Broadcasting allows you to write a message to every connected `Spark` on your server.
+There are 2 different ways of doing broadcasting in Primus. The easiest way is to
+use the `Primus#write` method which will write a message to every connected user:
+
+```js
+primus.write(message);
+```
+
+There are cases where you only want to broadcast a message to a smaller group of
+users. To make it easier to do this, we've added a `Primus#forEach` method which
+allows you to iterate over all active connections.
+
+```js
+primus.forEach(function (spark, id, connections) {
+  if (spark.query.foo !== 'bar') return;
+
+  spark.write('message');
+});
+```
+
+### Destruction
+
+In rare cases you might need to destroy the Primus instance you've created. You
+can use the `primus.destroy()` or `primus.end()` method for this. This method
+accepts an Object which allows you to configure how you want the connections to
+be destroyed:
+
+- `close` Close the HTTP server that Primus received. Defaults to `true`.
+- `end` End all active connections. Defaults to `true`.
+- `timeout` Clean up the server and optionally, it's active connections after
+  the specified amount of timeout. Defaults to `0`.
+
+The timeout is especially useful if you want gracefully shutdown your server but
+really don't want to wait an infinite amount of time.
+
+```js
+primus.destroy({ timeout: 10000 });
+```
 
 ### Events
 
