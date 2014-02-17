@@ -231,6 +231,11 @@ try {
  */
 function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url, options);
+  if ('function' !== typeof this.client) {
+    var message = 'The client library has not been compiled correctly, ' +
+      'see https://github.com/primus/primus#client-library for more details';
+    return this.critical(new Error(message));
+  }
 
   if ('object' === typeof url) {
     options = url;
@@ -405,12 +410,12 @@ try {
     // and guess at a value from the 'href' value
     //
     if (!data.port) {
-        if (!data.href) data.href = '';
-        if ((data.href.match(/\:/g) || []).length > 1) {
-            data.port = data.href.split(':')[2].split('/')[0];
-        } else {
-            data.port = ('https' === data.href.substr(0, 5)) ? 443 : 80;
-        }
+      if (!data.href) data.href = '';
+      if ((data.href.match(/\:/g) || []).length > 1) {
+        data.port = data.href.split(':')[2].split('/')[0];
+      } else {
+        data.port = ('https' === data.href.substr(0, 5)) ? 443 : 80;
+      }
     }
 
     //
