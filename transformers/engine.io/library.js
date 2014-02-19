@@ -139,8 +139,11 @@ function Socket(uri, opts){
   this.writeBuffer = [];
   this.callbackBuffer = [];
   this.policyPort = opts.policyPort || 843;
+  this.rememberUpgrade = opts.rememberUpgrade || false;
   this.open();
 }
+
+Socket.priorWebsocketSuccess = false;
 
 /**
  * Mix in `Emitter`.
@@ -221,9 +224,13 @@ function clone (obj) {
  *
  * @api private
  */
-
 Socket.prototype.open = function () {
-  var transport = this.transports[0];
+  var transport;
+  if (this.rememberUpgrade && Socket.priorWebsocketSuccess && this.transports.indexOf('websocket') != -1) {
+    transport = 'websocket';
+  } else {
+    transport = this.transports[0];
+  }
   this.readyState = 'opening';
   var transport = this.createTransport(transport);
   transport.open();
@@ -277,6 +284,8 @@ Socket.prototype.probe = function (name) {
     , failed = false
     , self = this;
 
+  Socket.priorWebsocketSuccess = false;
+
   transport.once('open', function () {
     if (failed) return;
 
@@ -288,6 +297,7 @@ Socket.prototype.probe = function (name) {
         debug('probe transport "%s" pong', name);
         self.upgrading = true;
         self.emit('upgrading', transport);
+        Socket.priorWebsocketSuccess = 'websocket' == transport.name;
 
         debug('pausing current transport "%s"', self.transport.name);
         self.transport.pause(function () {
@@ -297,9 +307,9 @@ Socket.prototype.probe = function (name) {
           }
           debug('changing transport and sending upgrade packet');
           transport.removeListener('error', onerror);
-          self.emit('upgrade', transport);
           self.setTransport(transport);
           transport.send([{ type: 'upgrade' }]);
+          self.emit('upgrade', transport);
           transport = null;
           self.upgrading = false;
           self.flush();
@@ -360,12 +370,13 @@ Socket.prototype.probe = function (name) {
 Socket.prototype.onOpen = function () {
   debug('socket open');
   this.readyState = 'open';
+  Socket.priorWebsocketSuccess = 'websocket' == this.transport.name;
   this.emit('open');
   this.onopen && this.onopen.call(this);
   this.flush();
 
   // we check for `readyState` in case an `open`
-  // listener alreay closed the socket
+  // listener already closed the socket
   if ('open' == this.readyState && this.upgrade && this.transport.pause) {
     debug('starting upgrade probes');
     for (var i = 0, l = this.upgrades.length; i < l; i++) {
@@ -585,6 +596,7 @@ Socket.prototype.close = function () {
 
 Socket.prototype.onError = function (err) {
   debug('socket error %j', err);
+  Socket.priorWebsocketSuccess = false;
   this.emit('error', err);
   this.onerror && this.onerror.call(this, err);
   this.onClose('transport error', err);
@@ -617,17 +629,14 @@ Socket.prototype.onClose = function (reason, desc) {
     this.transport.removeAllListeners();
 
     // set ready state
-    var prev = this.readyState;
     this.readyState = 'closed';
 
     // clear session id
     this.id = null;
 
-    // emit events
-    if (prev == 'open') {
-      this.emit('close', reason, desc);
-      this.onclose && this.onclose.call(this);
-    }
+    // emit close event
+    this.emit('close', reason, desc);
+    this.onclose && this.onclose.call(this);
   }
 };
 
@@ -2232,7 +2241,7 @@ exports.ua.chromeframe = Boolean(global.externalHost);
  * @api private
  */
 
-var re = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
+var re = /^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
 
 var parts = [
     'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host'
@@ -2832,8 +2841,14 @@ var global = require('global');
  *   - https://github.com/Modernizr/Modernizr/blob/master/feature-detects/cors.js
  */
 
-module.exports = 'XMLHttpRequest' in global &&
-  'withCredentials' in new global.XMLHttpRequest();
+try {
+  module.exports = 'XMLHttpRequest' in global &&
+    'withCredentials' in new global.XMLHttpRequest();
+} catch (err) {
+  // if XMLHttp support is disabled in IE then it will throw
+  // when trying to create
+  module.exports = false;
+}
 
 },{"global":19}],21:[function(require,module,exports){
 
