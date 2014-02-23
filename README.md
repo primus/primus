@@ -1354,6 +1354,18 @@ see it be merged automatically.
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="https://github.com/Shopetti/backbone.primus/">backbone.primus</a></dt>
+  <dd>
+    Bind primus.io events to backbone models and collections.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/Shopetti/backbone.primus">
+      <img src="https://travis-ci.org/Shopetti/backbone.primus.png?branch=master" alt="Build Status" />
+    </a>
+  </dd>
+</dl>
+
 
 In addition to these community provided plugins, the Primus project also
 provides the following plugins:
