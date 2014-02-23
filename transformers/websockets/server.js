@@ -40,7 +40,7 @@ module.exports = function server() {
         , socket.upgradeReq                       // IP address location.
         , parse(socket.upgradeReq.url).query      // Optional query string.
       );
-
+      spark.user = req.user; // store the user details (if exists on the spark)
       spark.on('outgoing::end', function end() {
         socket.close();
       }).on('outgoing::data', function write(data) {
