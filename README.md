@@ -942,7 +942,7 @@ npm install engine.io-client --save
 And then you can access it from your server instance:
 
 ```js
-var Socket = primus.Socket;
+var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
@@ -968,7 +968,7 @@ The `WebSockets` transformer comes with built-in client support and can be
 accessed using:
 
 ```js
-var Socket = primus.Socket;
+var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
@@ -993,7 +993,7 @@ The `browserchannel` transformer comes with built-in node client support and can
 accessed using:
 
 ```js
-var Socket = primus.Socket;
+var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
@@ -1057,7 +1057,7 @@ npm install socket.io-client --save
 And then you can access it from your server instance:
 
 ```js
-var Socket = primus.Socket;
+var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
