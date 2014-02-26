@@ -31,20 +31,21 @@
     "forwarded-for": "0.0.x"
   },
   "devDependencies": {
+    "binary-pack": "0.0.x",
     "browserchannel": "1.0.x",
     "chai": "1.7.x",
-    "engine.io": "git://github.com/3rd-Eden/engine.io.git#issue/178",
-    "engine.io-client": "0.6.x",
+    "e-json": "0.0.x",
+    "engine.io": "0.9.x",
+    "engine.io-client": "0.9.0",
+    "global-wrap": "1.4.x",
     "jsonh": "0.0.x",
     "mocha": "1.11.x",
     "pre-commit": "0.0.x",
+    "request": "2.21.x",
     "socket.io": "0.9.x",
     "socket.io-client": "0.9.x",
     "sockjs": "0.3.x",
-    "ws": "0.4.x",
     "sockjs-client-node": "0.0.x",
-    "request": "2.21.x",
-    "binary-pack": "0.0.x",
-    "e-json": "0.0.x"
+    "ws": "0.4.x"
   }
 }
