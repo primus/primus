@@ -1026,7 +1026,7 @@ npm install sockjs-client-node --save
 And then you can access it from your server instance:
 
 ```js
-var Socket = primus.Socket;
+var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
