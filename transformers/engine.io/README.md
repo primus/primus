@@ -21,12 +21,15 @@ primus.on('connection', function connection(spark) {
 
 # Compiling the Engine.IO library
 
-We cannot depend on the `engine.io.js` file to be up to date as it's compilation
-has been forgotten many times before. So in order to compile engine.io correctly
-run:
+We cannot depend on the `engine.io.js` file since it is compiled as a UMD
+bundle that doesn't works with Primus when using RequireJS. To compile
+engine.io correctly use the `update.sh` utility which builds the library using
+the [`global-wrap`](https://github.com/domenic/global-wrap) module.
+The steps required are the following:
 
-1. Clone the repository: `https://github.com/LearnBoost/engine.io-client.git`
-2. cd in the directory and run `make build`
-3. Override the `library.js` with the newly created `engine.io.js`
-4. Commit changes to the Primus main repository.
+1. Fork or clone Primus
+2. cd in the directory, make sure that the `engine.io-client` dependency is up
+  to date in the `package.json` and run `npm install`
+3. cd in the directory `transformers/engine.io/` and run `./update.sh`
+4. Commit the changes to the Primus main repository
 5. Profit
