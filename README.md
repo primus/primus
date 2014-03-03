@@ -83,6 +83,7 @@ npm install primus --save
   - [History](#history)
   - [Convention](#convention)
   - [Release cycle](#release-cycle)
+- [Other languages](#other-languages)
 - [License](#license)
 
 ### Getting Started
@@ -1532,6 +1533,23 @@ version when:
 3. A framework did an incompatible update.
 4. A new framework is added.
 5. People ask for it.
+
+### Other languages
+
+These projects are maintained by our valuable community and allow you to use
+primus in a different language than JavaScript:
+
+<dl>
+  <dt><a href="https://github.com/seegno/primus-objc">primus-objc</a></dt>
+  <dd>
+    A client written in Objective-C for the Primus real-time framework with
+    initial support for web sockets (via SocketRocket) and socket.io (via
+    socket.IO-objc). Easily switch between different real-time Objective-C
+    frameworks without any code changes.
+  </dd>
+</dl>
+
+Want to have your project listed here? Add it using a pull-request!
 
 ### License
 
