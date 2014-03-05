@@ -13,8 +13,9 @@ cleanup () {
 
 trap cleanup INT TERM EXIT
 
-git clone https://github.com/LearnBoost/engine.io-client.git $TEMPDIR
+git clone https://github.com/sockjs/sockjs-client.git $TEMPDIR
 cd $TEMPDIR
 git checkout $(git describe --tags --abbrev=0)
-NODE_ENV=production npm install
-$DESTDIR/globalify.sh $TEMPDIR
+NODE_ENV=development npm install
+make sockjs.js
+mv sockjs.js $DESTDIR/library.js

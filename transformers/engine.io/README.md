@@ -28,8 +28,7 @@ the [`global-wrap`](https://github.com/domenic/global-wrap) module.
 The steps required are the following:
 
 1. Fork or clone Primus
-2. cd in the directory, make sure that the `engine.io-client` dependency is up
-  to date in the `package.json` and run `npm install`
+2. cd in the directory and run `npm install`
 3. cd in the directory `transformers/engine.io/` and run `./update.sh`
 4. Commit the changes to the Primus main repository
 5. Profit
