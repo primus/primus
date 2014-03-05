@@ -1542,15 +1542,15 @@ primus in a different language than JavaScript:
 <dl>
   <dt><a href="https://github.com/seegno/primus-objc">primus-objc</a></dt>
   <dd>
+    <a href="https://travis-ci.org/seegno/primus-objc">
+      <img src="https://travis-ci.org/seegno/primus-objc.png" alt="Build Status" />
+    </a>
+  </dd>
+  <dd>
     A client written in Objective-C for the Primus real-time framework with
     initial support for web sockets (via SocketRocket) and socket.io (via
     socket.IO-objc). Easily switch between different real-time Objective-C
     frameworks without any code changes.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/seegno/primus-objc">
-      <img src="https://travis-ci.org/seegno/primus-objc.png" alt="Build Status" />
-    </a>
   </dd>
 </dl>
 
