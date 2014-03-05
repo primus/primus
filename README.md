@@ -1547,6 +1547,11 @@ primus in a different language than JavaScript:
     socket.IO-objc). Easily switch between different real-time Objective-C
     frameworks without any code changes.
   </dd>
+  <dd>
+    <a href="https://travis-ci.org/seegno/primus-objc">
+      <img src="https://travis-ci.org/seegno/primus-objc.png" alt="Build Status" />
+    </a>
+  </dd>
 </dl>
 
 Want to have your project listed here? Add it using a pull-request!
