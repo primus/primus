@@ -668,7 +668,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
   return filteredUpgrades;
 };
 
-},{"./emitter":3,"./transport":6,"./transports":8,"./util":13,"debug":15,"engine.io-parser":17,"global":22,"indexof":24}],6:[function(require,module,exports){
+},{"./emitter":3,"./transport":6,"./transports":8,"./util":13,"debug":15,"engine.io-parser":17,"global":23,"indexof":25}],6:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -1082,7 +1082,7 @@ function load(arr, fn){
   process(0);
 }
 
-},{"../util":13,"./websocket":12,"debug":15,"global":22}],8:[function(require,module,exports){
+},{"../util":13,"./websocket":12,"debug":15,"global":23}],8:[function(require,module,exports){
 
 /**
  * Module dependencies
@@ -1141,7 +1141,7 @@ function polling (opts) {
   }
 };
 
-},{"./flashsocket":7,"./polling-jsonp":9,"./polling-xhr":10,"./websocket":12,"global":22,"xmlhttprequest":14}],9:[function(require,module,exports){
+},{"./flashsocket":7,"./polling-jsonp":9,"./polling-xhr":10,"./websocket":12,"global":23,"xmlhttprequest":14}],9:[function(require,module,exports){
 
 /**
  * Module requirements.
@@ -1368,7 +1368,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
   }
 };
 
-},{"../util":13,"./polling":11,"global":22}],10:[function(require,module,exports){
+},{"../util":13,"./polling":11,"global":23}],10:[function(require,module,exports){
 /**
  * Module requirements.
  */
@@ -1688,7 +1688,7 @@ if (hasAttachEvent) {
   global.attachEvent('onunload', unloadHandler);
 }
 
-},{"../emitter":3,"../util":13,"./polling":11,"debug":15,"global":22,"xmlhttprequest":14}],11:[function(require,module,exports){
+},{"../emitter":3,"../util":13,"./polling":11,"debug":15,"global":23,"xmlhttprequest":14}],11:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -1946,7 +1946,7 @@ Polling.prototype.uri = function(){
   return schema + '://' + this.hostname + port + this.path + query;
 };
 
-},{"../transport":6,"../util":13,"debug":15,"engine.io-parser":17,"global":22,"xmlhttprequest":14}],12:[function(require,module,exports){
+},{"../transport":6,"../util":13,"debug":15,"engine.io-parser":17,"global":23,"xmlhttprequest":14}],12:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2175,7 +2175,7 @@ WS.prototype.check = function(){
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":6,"../util":13,"debug":15,"engine.io-parser":17,"global":22,"ws":25}],13:[function(require,module,exports){
+},{"../transport":6,"../util":13,"debug":15,"engine.io-parser":17,"global":23,"ws":26}],13:[function(require,module,exports){
 
 var global = require('global');
 
@@ -2397,7 +2397,7 @@ exports.qsParse = function(qs){
   return qry;
 };
 
-},{"global":22}],14:[function(require,module,exports){
+},{"global":23}],14:[function(require,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = require('has-cors');
 
@@ -2418,7 +2418,7 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":23}],15:[function(require,module,exports){
+},{"has-cors":24}],15:[function(require,module,exports){
 
 /**
  * Expose `debug()` as the module.
@@ -2721,7 +2721,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{"indexof":24}],17:[function(require,module,exports){
+},{"indexof":25}],17:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -2731,13 +2731,6 @@ var keys = require('./keys');
 var sliceBuffer = require('arraybuffer.slice');
 var base64encoder = require('base64-arraybuffer');
 var after = require('after');
-
-/**
- * A utility for doing slicing, even when ArrayBuffer.prototype.slice doesn't
- * exist
- *
- * @api private
- */
 
 /**
  * Current protocol version.
@@ -2768,34 +2761,10 @@ var packetslist = keys(packets);
 var err = { type: 'error', data: 'parser error' };
 
 /**
- * Create a blob builder even when vendor prefixes exist
+ * Create a blob api even for blob builder when vendor prefixes exist
  */
 
-var BlobBuilder = global.BlobBuilder
-  || global.WebKitBlobBuilder
-  || global.MSBlobBuilder
-  || global.MozBlobBuilder;
-
-/**
- * Check if Blob constructor is supported
- */
-
-var blobSupported = (function() {
-  try {
-    var b = new Blob(['hi']);
-    return b.size == 2;
-  } catch(e) {
-    return false;
-  }
-})();
-
-/**
- * Check if BlobBuilder is supported
- */
-
-var blobBuilderSupported = !!BlobBuilder
-  && !!BlobBuilder.prototype.append
-  && !!BlobBuilder.prototype.getBlob;
+var Blob = require('blob');
 
 /**
  * Encodes a packet.
@@ -2821,11 +2790,11 @@ exports.encodePacket = function (packet, supportsBinary, callback) {
 
   var data = (packet.data === undefined)
     ? undefined
-    : packet.data.buffer || packet.data;
+    : packet.data.buffer || packet.data;
 
   if (global.ArrayBuffer && data instanceof ArrayBuffer) {
     return encodeArrayBuffer(packet, supportsBinary, callback);
-  } else if (blobSupported && data instanceof Blob) {
+  } else if (Blob && data instanceof Blob) {
     return encodeBlob(packet, supportsBinary, callback);
   }
 
@@ -2860,7 +2829,7 @@ function encodeArrayBuffer(packet, supportsBinary, callback) {
   }
 
   return callback(resultBuffer.buffer);
-};
+}
 
 function encodeBlobAsArrayBuffer(packet, supportsBinary, callback) {
   if (!supportsBinary) {
@@ -2873,7 +2842,7 @@ function encodeBlobAsArrayBuffer(packet, supportsBinary, callback) {
     exports.encodePacket(packet, supportsBinary, callback);
   };
   return fr.readAsArrayBuffer(packet.data);
-};
+}
 
 function encodeBlob(packet, supportsBinary, callback) {
   if (!supportsBinary) {
@@ -2882,18 +2851,10 @@ function encodeBlob(packet, supportsBinary, callback) {
 
   var length = new Uint8Array(1);
   length[0] = packets[packet.type];
-  var blob;
-  if (blobSupported) {
-    blob = new Blob([length.buffer, packet.data]);
-  } else {
-    var bb = new BlobBuilder();
-    bb.append(length);
-    bb.append(packet.data);
-    blob = bb.getBlob();
-  }
+  var blob = new Blob([length.buffer, packet.data]);
 
   return callback(blob);
-};
+}
 
 /**
  * Encodes a packet with binary data in a base64 string
@@ -2904,7 +2865,7 @@ function encodeBlob(packet, supportsBinary, callback) {
 
 exports.encodeBase64Packet = function(packet, callback) {
   var message = 'b' + exports.packets[packet.type];
-  if (blobSupported && packet.data instanceof Blob) {
+  if (Blob && packet.data instanceof Blob) {
     var fr = new FileReader();
     fr.onload = function() {
       var b64 = fr.result.split(',')[1];
@@ -2938,7 +2899,7 @@ exports.encodeBase64Packet = function(packet, callback) {
 
 exports.decodePacket = function (data, binaryType) {
   // String data
-  if (typeof data == 'string' || data === undefined) {
+  if (typeof data == 'string' || data === undefined) {
     if (data.charAt(0) == 'b') {
       return exports.decodeBase64Packet(data.substr(1), binaryType);
     }
@@ -2955,22 +2916,18 @@ exports.decodePacket = function (data, binaryType) {
       return { type: packetslist[type] };
     }
   }
- 
+
   var asArray = new Uint8Array(data);
   var type = asArray[0];
   var rest = sliceBuffer(data, 1);
-  if (blobSupported && binaryType === 'blob') {
+  if (Blob && binaryType === 'blob') {
     rest = new Blob([rest]);
-  } else if (blobBuilderSupported && binaryType === 'blob') {
-    var bb = new BlobBuilder();
-    bb.append(rest);
-    rest = bb.getBlob();
   }
-  return { type: packetslist[type], data: rest };
+  return { type: packetslist[type], data: rest };
 };
 
 /**
- * Decodes a packet encoded in a base64 string 
+ * Decodes a packet encoded in a base64 string
  *
  * @param {String} base64 encoded message
  * @return {Object} with `type` and `data` (if any)
@@ -2979,17 +2936,13 @@ exports.decodePacket = function (data, binaryType) {
 exports.decodeBase64Packet = function(msg, binaryType) {
   var type = packetslist[msg.charAt(0)];
   if (!global.ArrayBuffer) {
-    return { type: type, data: { base64: true, data: msg.substr(1) } };
+    return { type: type, data: { base64: true, data: msg.substr(1) } };
   }
 
   var data = base64encoder.decode(msg.substr(1));
 
-  if (binaryType === 'blob' && blobSupported) {
+  if (binaryType === 'blob' && Blob) {
     data = new Blob([data]);
-  } else if (binaryType === 'blob' && blobBuilderSupported) {
-    var bb = new BlobBuilder();
-    bb.append(data);
-    data = bb.getBlob();
   }
 
   return { type: type, data: data };
@@ -3018,7 +2971,7 @@ exports.encodePayload = function (packets, supportsBinary, callback) {
   }
 
   if (supportsBinary) {
-    if (blobSupported || blobBuilderSupported) {
+    if (Blob) {
       return exports.encodePayloadAsBlob(packets, callback);
     }
     return exports.encodePayloadAsArrayBuffer(packets, callback);
@@ -3028,15 +2981,15 @@ exports.encodePayload = function (packets, supportsBinary, callback) {
     return callback('0:');
   }
 
-  function setLengthHeader(message) {
+  function setLengthHeader(message) {
     return message.length + ':' + message;
-  };
+  }
 
   function encodeOne(packet, doneCallback) {
     exports.encodePacket(packet, supportsBinary, function(message) {
       doneCallback(null, setLengthHeader(message));
     });
-  };
+  }
 
   map(packets, encodeOne, function(err, results) {
     return callback(results.join(''));
@@ -3060,8 +3013,8 @@ function map(ary, each, done) {
 
   for (var i = 0; i < ary.length; i++) {
     eachWithIndex(i, ary[i], next);
-  };
-};
+  }
+}
 
 /*
  * Decodes data when a payload is maybe expected. Possible binary contents are
@@ -3072,7 +3025,7 @@ function map(ary, each, done) {
  */
 
 exports.decodePayload = function (data, binaryType, callback) {
-  if (!(typeof data == 'string')) {
+  if (typeof data != 'string') {
     return exports.decodePayloadAsBinary(data, binaryType, callback);
   }
 
@@ -3092,7 +3045,7 @@ exports.decodePayload = function (data, binaryType, callback) {
 
   for (var i = 0, l = data.length; i < l; i++) {
     var chr = data.charAt(i);
-   
+
     if (':' != chr) {
       length += chr;
     } else {
@@ -3156,7 +3109,7 @@ exports.encodePayloadAsArrayBuffer = function(packets, callback) {
     exports.encodePacket(packet, true, function(data) {
       return doneCallback(null, data);
     });
-  };
+  }
 
   map(packets, encodeOne, function(err, encodedPackets) {
     var totalLength = encodedPackets.reduce(function(acc, p) {
@@ -3166,7 +3119,7 @@ exports.encodePayloadAsArrayBuffer = function(packets, callback) {
       } else {
         len = p.byteLength;
       }
-      return acc + (new String(len)).length + len + 2; // string/binary identifier + separator = 2
+      return acc + len.toString().length + len + 2; // string/binary identifier + separator = 2
     }, 0);
 
     var resultArray = new Uint8Array(totalLength);
@@ -3189,7 +3142,7 @@ exports.encodePayloadAsArrayBuffer = function(packets, callback) {
         resultArray[bufferIndex++] = 1;
       }
 
-      var lenStr = new String(ab.byteLength);
+      var lenStr = ab.byteLength.toString();
       for (var i = 0; i < lenStr.length; i++) {
         resultArray[bufferIndex++] = parseInt(lenStr[i]);
       }
@@ -3227,37 +3180,22 @@ exports.encodePayloadAsBlob = function(packets, callback) {
         ? encoded.byteLength
         : encoded.size;
 
-      var lenStr = new String(len);
+      var lenStr = len.toString();
       var lengthAry = new Uint8Array(lenStr.length + 1);
       for (var i = 0; i < lenStr.length; i++) {
         lengthAry[i] = parseInt(lenStr[i]);
       }
       lengthAry[lenStr.length] = 255;
 
-      if (blobSupported) {
+      if (Blob) {
         var blob = new Blob([binaryIdentifier.buffer, lengthAry.buffer, encoded]);
-        doneCallback(null, blob);
-      } else {
-        var bb = new BlobBuilder();
-        bb.append(binaryIdentifier);
-        bb.append(lengthAry.buffer);
-        bb.append(encoded);
-        var blob = bb.getBlob();
         doneCallback(null, blob);
       }
     });
-  };
+  }
 
   map(packets, encodeOne, function(err, results) {
-    if (blobSupported) {
-      return callback(new Blob(results));
-    }
-
-    var bb = new BlobBuilder();
-    results.forEach(function(encoding) {
-      bb.append(encoding);
-    });
-    return callback(bb.getBlob());
+    return callback(new Blob(results));
   });
 };
 
@@ -3281,7 +3219,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 
   while (bufferTail.byteLength > 0) {
     var tailArray = new Uint8Array(bufferTail);
-    var isString = tailArray[0] == 0;
+    var isString = tailArray[0] === 0;
     var msgLength = '';
     for (var i = 1; ; i++) {
       if (tailArray[i] == 255) break;
@@ -3315,7 +3253,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":18,"after":19,"arraybuffer.slice":20,"base64-arraybuffer":21}],18:[function(require,module,exports){
+},{"./keys":18,"after":19,"arraybuffer.slice":20,"base64-arraybuffer":21,"blob":22}],18:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -3371,7 +3309,7 @@ function noop() {}
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
  *
- * @api private
+ * @api public
  */
 
 module.exports = function(arraybuffer, start, end) {
@@ -3381,11 +3319,11 @@ module.exports = function(arraybuffer, start, end) {
 
   if (arraybuffer.slice) { return arraybuffer.slice(start, end); }
 
-  if (start < 0) { start += bytes; }
+  if (start < 0) { start += bytes; }
   if (end < 0) { end += bytes; }
   if (end > bytes) { end = bytes; }
 
-  if (start >= bytes || start >= end || bytes == 0) { 
+  if (start >= bytes || start >= end || bytes === 0) {
     return new ArrayBuffer(0);
   }
 
@@ -3458,6 +3396,59 @@ module.exports = function(arraybuffer, start, end) {
   };
 })("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 },{}],22:[function(require,module,exports){
+(function (global){
+/**
+ * Create a blob builder even when vendor prefixes exist
+ */
+
+var BlobBuilder = global.BlobBuilder
+  || global.WebKitBlobBuilder
+  || global.MSBlobBuilder
+  || global.MozBlobBuilder;
+
+/**
+ * Check if Blob constructor is supported
+ */
+
+var blobSupported = (function() {
+  try {
+    var b = new Blob(['hi']);
+    return b.size == 2;
+  } catch(e) {
+    return false;
+  }
+})();
+
+/**
+ * Check if BlobBuilder is supported
+ */
+
+var blobBuilderSupported = BlobBuilder
+  && BlobBuilder.prototype.append
+  && BlobBuilder.prototype.getBlob;
+
+function BlobBuilderConstructor(ary, options) {
+  options = options || {};
+
+  var bb = new BlobBuilder();
+  for (var i = 0; i < ary.length; i++) {
+    bb.append(ary[i]);
+  }
+  return (options.type) ? bb.getBlob(options.type) : bb.getBlob();
+};
+
+module.exports = (function() {
+  if (blobSupported) {
+    return global.Blob;
+  } else if (blobBuilderSupported) {
+    return BlobBuilderConstructor;
+  } else {
+    return undefined;
+  }
+})();
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],23:[function(require,module,exports){
 
 /**
  * Returns `this`. Execute this without a "context" (i.e. without it being
@@ -3467,7 +3458,7 @@ module.exports = function(arraybuffer, start, end) {
 
 module.exports = (function () { return this; })();
 
-},{}],23:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -3492,7 +3483,7 @@ try {
   module.exports = false;
 }
 
-},{"global":22}],24:[function(require,module,exports){
+},{"global":23}],25:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -3503,7 +3494,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],25:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 
 /**
  * Module dependencies.
