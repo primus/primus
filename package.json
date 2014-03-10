@@ -29,7 +29,8 @@
     "load": "1.0.x",
     "predefine": "0.0.x",
     "eventemitter3": "0.1.x",
-    "forwarded-for": "0.0.x"
+    "forwarded-for": "0.0.x",
+    "access-control": "0.0.x"
   },
   "devDependencies": {
     "binary-pack": "0.0.x",
