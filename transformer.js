@@ -146,9 +146,15 @@ Transformer.prototype.initialise = function initialise() {
  */
 Transformer.prototype.request = function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
-  if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
 
+  //
+  // HTTP Access Control (CORS) should only be applied to primus routes. As the
+  // `access-control` will only add headers when a `Origin` header is send to
+  // the server, these will not be any overhead for normal requests.
+  //
   if (this.cors(req, res)) return; // Cors request handled.
+
+  if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
   if (req.uri.pathname === this.specfile) return this.emit('spec', req, res);
   if (!this.primus.auth) return this.emit('request', req, res, noop);
 
