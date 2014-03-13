@@ -1263,6 +1263,21 @@ see it be merged automatically.
 </dl>
 
 <dl>
+  <dt><a href="http://github.com/neoziro/primus-cluster">primus-cluster</a></dt>
+  <dd>
+    Scale Primus across multiple servers or with node cluster.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/neoziro/primus-cluster">
+      <img src="https://travis-ci.org/neoziro/primus-cluster.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-cluster">
+      <img src="https://badge.fury.io/js/primus-cluster.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
   <dt><a href="http://github.com/swissmanu/primus-responder">primus-responder</a></dt>
   <dd>
     Client and server plugin that adds a request/response cycle to Primus.
