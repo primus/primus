@@ -15,6 +15,11 @@ var fs = require('fs')
   , globalWrap = require('global-wrap')
   , path = require('path');
 
+var glob = function() {
+  return 'typeof self !== "undefined" ? self : ' +
+    'typeof window !== "undefined" ? window : {}';
+};
+
 //
 // Build Engine.IO client using the `global-wrap` module.
 // This generates a bundle and exposes it as a property of the global object.
@@ -24,6 +29,9 @@ var fs = require('fs')
 // RequireJS is used. See issue #157.
 //
 globalWrap({
+  bundleOptions: {
+    insertGlobalVars: { global: glob }
+  },
   constructorOptions: { builtins: false },
   global: 'eio',
   main: path.resolve(dir, 'index.js'),
