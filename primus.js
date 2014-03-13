@@ -513,7 +513,7 @@ Primus.prototype.plugin = function plugin(name) {
  */
 Primus.prototype.reserved = function reserved(evt) {
   return (/^(incoming|outgoing)::/).test(evt)
-  || evt in reserved.events;
+  || evt in this.reserved.events;
 };
 
 /**
