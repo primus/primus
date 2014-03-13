@@ -56,6 +56,7 @@ module.exports = require('./socket');
 module.exports.parser = require('engine.io-parser');
 
 },{"./socket":5,"engine.io-parser":17}],5:[function(require,module,exports){
+(function (global){
 /**
  * Module dependencies.
  */
@@ -66,18 +67,14 @@ var Emitter = require('./emitter');
 var debug = require('debug')('engine.io-client:socket');
 var index = require('indexof');
 var parser = require('engine.io-parser');
+var parseuri = require('parseuri');
+var parsejson = require('parsejson');
 
 /**
  * Module exports.
  */
 
 module.exports = Socket;
-
-/**
- * Global reference.
- */
-
-var global = require('global');
 
 /**
  * Noop function.
@@ -106,7 +103,7 @@ function Socket(uri, opts){
   }
 
   if (uri) {
-    uri = util.parseUri(uri);
+    uri = parseuri(uri);
     opts.host = uri.host;
     opts.secure = uri.protocol == 'https' || uri.protocol == 'wss';
     opts.port = uri.port;
@@ -413,7 +410,7 @@ Socket.prototype.onPacket = function (packet) {
 
     switch (packet.type) {
       case 'open':
-        this.onHandshake(util.parseJSON(packet.data));
+        this.onHandshake(parsejson(packet.data));
         break;
 
       case 'pong':
@@ -668,7 +665,8 @@ Socket.prototype.filterUpgrades = function (upgrades) {
   return filteredUpgrades;
 };
 
-},{"./emitter":3,"./transport":6,"./transports":8,"./util":13,"debug":15,"engine.io-parser":17,"global":23,"indexof":25}],6:[function(require,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./emitter":3,"./transport":6,"./transports":8,"./util":13,"debug":15,"engine.io-parser":17,"indexof":25,"parsejson":26,"parseuri":27}],6:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -813,6 +811,7 @@ Transport.prototype.onClose = function () {
 };
 
 },{"./emitter":3,"./util":13,"engine.io-parser":17}],7:[function(require,module,exports){
+(function (global){
 
 /**
  * Module dependencies.
@@ -827,12 +826,6 @@ var debug = require('debug')('engine.io-client:flashsocket');
  */
 
 module.exports = FlashWS;
-
-/**
- * Global reference.
- */
-
-var global = require('global');
 
 /**
  * Obfuscated key for Blue Coat.
@@ -1082,7 +1075,9 @@ function load(arr, fn){
   process(0);
 }
 
-},{"../util":13,"./websocket":12,"debug":15,"global":23}],8:[function(require,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../util":13,"./websocket":12,"debug":15}],8:[function(require,module,exports){
+(function (global){
 
 /**
  * Module dependencies
@@ -1101,12 +1096,6 @@ var XMLHttpRequest = require('xmlhttprequest')
 exports.polling = polling;
 exports.websocket = websocket;
 exports.flashsocket = flashsocket;
-
-/**
- * Global reference.
- */
-
-var global = require('global');
 
 /**
  * Polling transport polymorphic constructor.
@@ -1141,7 +1130,9 @@ function polling (opts) {
   }
 };
 
-},{"./flashsocket":7,"./polling-jsonp":9,"./polling-xhr":10,"./websocket":12,"global":23,"xmlhttprequest":14}],9:[function(require,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./flashsocket":7,"./polling-jsonp":9,"./polling-xhr":10,"./websocket":12,"xmlhttprequest":14}],9:[function(require,module,exports){
+(function (global){
 
 /**
  * Module requirements.
@@ -1155,12 +1146,6 @@ var util = require('../util');
  */
 
 module.exports = JSONPPolling;
-
-/**
- * Global reference.
- */
-
-var global = require('global');
 
 /**
  * Cached regular expressions.
@@ -1368,7 +1353,9 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
   }
 };
 
-},{"../util":13,"./polling":11,"global":23}],10:[function(require,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../util":13,"./polling":11}],10:[function(require,module,exports){
+(function (global){
 /**
  * Module requirements.
  */
@@ -1385,12 +1372,6 @@ var debug = require('debug')('engine.io-client:polling-xhr');
 
 module.exports = XHR;
 module.exports.Request = Request;
-
-/**
- * Global reference.
- */
-
-var global = require('global');
 
 /**
  * Obfuscated key for Blue Coat.
@@ -1688,7 +1669,9 @@ if (hasAttachEvent) {
   global.attachEvent('onunload', unloadHandler);
 }
 
-},{"../emitter":3,"../util":13,"./polling":11,"debug":15,"global":23,"xmlhttprequest":14}],11:[function(require,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../emitter":3,"../util":13,"./polling":11,"debug":15,"xmlhttprequest":14}],11:[function(require,module,exports){
+(function (global){
 /**
  * Module dependencies.
  */
@@ -1703,12 +1686,6 @@ var debug = require('debug')('engine.io-client:polling');
  */
 
 module.exports = Polling;
-
-/**
- * Global reference.
- */
-
-var global = require('global');
 
 /**
  * Is XHR2 supported?
@@ -1946,7 +1923,8 @@ Polling.prototype.uri = function(){
   return schema + '://' + this.hostname + port + this.path + query;
 };
 
-},{"../transport":6,"../util":13,"debug":15,"engine.io-parser":17,"global":23,"xmlhttprequest":14}],12:[function(require,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"../transport":6,"../util":13,"debug":15,"engine.io-parser":17,"xmlhttprequest":14}],12:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -1969,12 +1947,6 @@ var WebSocket = require('ws');
  */
 
 module.exports = WS;
-
-/**
- * Global reference.
- */
-
-var global = require('global');
 
 /**
  * WebSocket transport constructor.
@@ -2175,9 +2147,8 @@ WS.prototype.check = function(){
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":6,"../util":13,"debug":15,"engine.io-parser":17,"global":23,"ws":26}],13:[function(require,module,exports){
-
-var global = require('global');
+},{"../transport":6,"../util":13,"debug":15,"engine.io-parser":17,"ws":28}],13:[function(require,module,exports){
+(function (global){
 
 /**
  * Status of page load.
@@ -2255,39 +2226,6 @@ if ('undefined' != typeof window) {
 }
 
 /**
- * JSON parse.
- *
- * @see Based on jQuery#parseJSON (MIT) and JSON2
- * @api private
- */
-
-var rvalidchars = /^[\],:{}\s]*$/;
-var rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
-var rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
-var rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g;
-var rtrimLeft = /^\s+/;
-var rtrimRight = /\s+$/;
-
-exports.parseJSON = function (data) {
-  if ('string' != typeof data || !data) {
-    return null;
-  }
-
-  data = data.replace(rtrimLeft, '').replace(rtrimRight, '');
-
-  // Attempt to parse using the native JSON parser first
-  if (global.JSON && JSON.parse) {
-    return JSON.parse(data);
-  }
-
-  if (rvalidchars.test(data.replace(rvalidescape, '@')
-      .replace(rvalidtokens, ']')
-      .replace(rvalidbraces, ''))) {
-    return (new Function('return ' + data))();
-  }
-};
-
-/**
  * UA / engines detection namespace.
  *
  * @namespace
@@ -2335,32 +2273,6 @@ exports.ua.ios6 = exports.ua.ios && /OS 6_/.test(navigator.userAgent);
 exports.ua.chromeframe = Boolean(global.externalHost);
 
 /**
- * Parses an URI
- *
- * @author Steven Levithan <stevenlevithan.com> (MIT license)
- * @api private
- */
-
-var re = /^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
-
-var parts = [
-    'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host'
-  , 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'
-];
-
-exports.parseUri = function (str) {
-  var m = re.exec(str || '')
-    , uri = {}
-    , i = 14;
-
-  while (i--) {
-    uri[parts[i]] = m[i] || '';
-  }
-
-  return uri;
-};
-
-/**
  * Compiles a querystring
  *
  * @param {Object}
@@ -2397,7 +2309,8 @@ exports.qsParse = function(qs){
   return qry;
 };
 
-},{"global":23}],14:[function(require,module,exports){
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],14:[function(require,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = require('has-cors');
 
@@ -2418,7 +2331,7 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":24}],15:[function(require,module,exports){
+},{"has-cors":23}],15:[function(require,module,exports){
 
 /**
  * Expose `debug()` as the module.
@@ -3451,16 +3364,6 @@ module.exports = (function() {
 },{}],23:[function(require,module,exports){
 
 /**
- * Returns `this`. Execute this without a "context" (i.e. without it being
- * attached to an object of the left-hand side), and `this` points to the
- * "global" scope of the current JS execution.
- */
-
-module.exports = (function () { return this; })();
-
-},{}],24:[function(require,module,exports){
-
-/**
  * Module dependencies.
  */
 
@@ -3483,7 +3386,17 @@ try {
   module.exports = false;
 }
 
-},{"global":23}],25:[function(require,module,exports){
+},{"global":24}],24:[function(require,module,exports){
+
+/**
+ * Returns `this`. Execute this without a "context" (i.e. without it being
+ * attached to an object of the left-hand side), and `this` points to the
+ * "global" scope of the current JS execution.
+ */
+
+module.exports = (function () { return this; })();
+
+},{}],25:[function(require,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -3495,6 +3408,68 @@ module.exports = function(arr, obj){
   return -1;
 };
 },{}],26:[function(require,module,exports){
+(function (global){
+/**
+ * JSON parse.
+ *
+ * @see Based on jQuery#parseJSON (MIT) and JSON2
+ * @api private
+ */
+
+var rvalidchars = /^[\],:{}\s]*$/;
+var rvalidescape = /\\(?:["\\\/bfnrt]|u[0-9a-fA-F]{4})/g;
+var rvalidtokens = /"[^"\\\n\r]*"|true|false|null|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?/g;
+var rvalidbraces = /(?:^|:|,)(?:\s*\[)+/g;
+var rtrimLeft = /^\s+/;
+var rtrimRight = /\s+$/;
+
+module.exports = function parsejson(data) {
+  if ('string' != typeof data || !data) {
+    return null;
+  }
+
+  data = data.replace(rtrimLeft, '').replace(rtrimRight, '');
+
+  // Attempt to parse using the native JSON parser first
+  if (global.JSON && JSON.parse) {
+    return JSON.parse(data);
+  }
+
+  if (rvalidchars.test(data.replace(rvalidescape, '@')
+      .replace(rvalidtokens, ']')
+      .replace(rvalidbraces, ''))) {
+    return (new Function('return ' + data))();
+  }
+};
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],27:[function(require,module,exports){
+/**
+ * Parses an URI
+ *
+ * @author Steven Levithan <stevenlevithan.com> (MIT license)
+ * @api private
+ */
+
+var re = /^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
+
+var parts = [
+    'source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host'
+  , 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'
+];
+
+module.exports = function parseuri(str) {
+  var m = re.exec(str || '')
+    , uri = {}
+    , i = 14;
+
+  while (i--) {
+    uri[parts[i]] = m[i] || '';
+  }
+
+  return uri;
+};
+
+},{}],28:[function(require,module,exports){
 
 /**
  * Module dependencies.
