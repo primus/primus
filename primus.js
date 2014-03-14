@@ -1187,6 +1187,11 @@ Primus.prototype.uri = function uri(options, querystring) {
   options.host = 'host' in options ? options.host : url.hostname || url.host.replace(':'+ url.port, '');
 
   //
+  // Allow transformation of the options before we construct a full URL from it.
+  //
+  this.emit('outgoing::url', options);
+
+  //
   // Automatically suffix the protocol so we can supply `ws` and `http` and it gets
   // transformed correctly.
   //

@@ -49,6 +49,31 @@ describe('Plugin', function () {
     });
   });
 
+  it('can transform the connection url', function (done) {
+    var server = http.createServer()
+      , primus = new Primus(server)
+      , port = common.port;
+
+    primus.use('qs', {
+      client: function (primus) {
+        primus.on('outgoing::url', function (options) {
+          options.query = 'foo=bar';
+        });
+      }
+    });
+
+    primus.on('connection', function (spark) {
+      expect(spark.query.foo).to.equal('bar');
+      spark.end();
+      server.close(done);
+    });
+
+    server.listen(port, function () {
+      var Socket = primus.Socket
+        , socket = new Socket('http://localhost:'+ port);
+    });
+  });
+
   it('extends the Spark with overriding the global spark', function (done) {
     var server = http.createServer()
       , primus = new Primus(server)
