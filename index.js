@@ -26,14 +26,14 @@ function Primus(server, options) {
   options = options || {};
   var primus = this;
 
+  this.auth = options.authorization || null;  // Do we have an authorization handler.
+  this.connections = Object.create(null);     // Connection storage.
+  this.ark = Object.create(null);             // Plugin storage.
   this.transformer = null;                    // Reference to the real-time engine instance.
   this.encoder = null;                        // Shorthand to the parser's encoder.
   this.decoder = null;                        // Shorthand to the parser's decoder.
-  this.auth = options.authorization || null;  // Do we have an authorization handler.
-  this.sparks = 0;                            // Increment id for connection ids.
   this.connected = 0;                         // Connection counter.
-  this.connections = Object.create(null);     // Connection storage.
-  this.ark = Object.create(null);             // Plugin storage.
+  this.sparks = 0;                            // Increment id for connection ids.
   this.timeout = 'timeout' in options         // The timeout used to detect zombie sparks.
     ? options.timeout
     : 35000;
@@ -76,7 +76,7 @@ function Primus(server, options) {
   });
 
   //
-  // Copy over the original Spark static properties and methods so readable and 
+  // Copy over the original Spark static properties and methods so readable and
   // writable can also be used.
   //
   for (var key in Spark) this.Spark[key] = Spark[key];
