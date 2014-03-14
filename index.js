@@ -404,8 +404,8 @@ Primus.prototype.library = function compile(nodejs) {
     plugin = this.ark[name];
     name = JSON.stringify(name);
 
-    if (!plugin.client) continue;
     if (plugin.library) library.push(plugin.library);
+    if (!plugin.client) continue;
 
     client += 'Primus.prototype.ark['+ name +'] = '+ plugin.client.toString() + '\n';
   }
