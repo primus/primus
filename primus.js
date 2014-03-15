@@ -930,10 +930,10 @@ Primus.prototype.timeout = function timeout() {
           .clearTimeout('connect');
   }
 
-  primus.timers.connect = setTimeout(function setTimeout() {
+  primus.timers.connect = setTimeout(function expired() {
     remove(); // Clean up old references.
 
-    if (Primus.readyState === Primus.OPEN || primus.attempt) return;
+    if (primus.readyState === Primus.OPEN || primus.attempt) return;
 
     primus.emit('timeout');
 
