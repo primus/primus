@@ -29,6 +29,7 @@ function Primus(server, options) {
   this.auth = options.authorization || null;  // Do we have an authorization handler.
   this.connections = Object.create(null);     // Connection storage.
   this.ark = Object.create(null);             // Plugin storage.
+  this.layers = [];                           // Middleware layers.
   this.transformer = null;                    // Reference to the real-time engine instance.
   this.encoder = null;                        // Shorthand to the parser's encoder.
   this.decoder = null;                        // Shorthand to the parser's decoder.
@@ -37,7 +38,7 @@ function Primus(server, options) {
   this.timeout = 'timeout' in options         // The timeout used to detect zombie sparks.
     ? options.timeout
     : 35000;
-  this.whitelist = [];                        // Forwarded-for whitelisting.
+  this.whitelist = [];                        // Forwarded-for white listing.
   this.options = options;                     // The configuration.
   this.transformers = {                       // Message transformers.
     outgoing: [],
@@ -523,6 +524,85 @@ Primus.prototype.plugin = function plugin(name) {
   }
 
   return plugins;
+};
+
+/**
+ * Add a new middleware layer.
+ *
+ * @param {String} name The name of the middleware.
+ * @param {Function} fn The middleware that's called each time.
+ * @api public
+ */
+Primus.prototype.before = function before(name, fn) {
+  var layer = {
+    length: fn.length,
+    enabled: true,
+    name: name,
+    fn: fn
+  }, index = this.indexOfLayer(name);
+
+  //
+  // Override middleware layers if we already have a middleware layer with
+  // exactly the same name.
+  //
+  if (!~index) this.layers.push(layer);
+  else this.layers[index] = layer;
+
+  return this;
+};
+
+/**
+ * Remove a middleware layer from the stack.
+ *
+ * @param {String} name The name of the middleware.
+ * @api public
+ */
+Primus.prototype.remove = function remove(name) {
+  var index = this.indexOfLayer(name);
+
+  if (~index) this.layers.slice(index, 1);
+  return this;
+};
+
+/**
+ * Enable a given middleware layer.
+ *
+ * @param {String} name The name of the middleware.
+ * @api public
+ */
+Primus.prototype.enable = function enable(name) {
+  var index = this.indexOfLayer(name);
+
+  if (~index) this.layers[index].enabled = true;
+  return this;
+};
+
+/**
+ * Disable a given middleware layer.
+ *
+ * @param {String} name The name of the middleware.
+ * @api public
+ */
+Primus.prototype.disable = function disable(name) {
+  var index = this.indexOfLayer(name);
+
+  if (~index) this.layers[index].enabled = false;
+  return this;
+};
+
+/**
+ * Find the index of a given middleware layer by name.
+ *
+ * @param {String} name The name of the layer.
+ * @returns {Number}
+ * @api public
+ */
+Primus.prototype.indexOfLayer = function indexOfLayer(name) {
+  for (var i = 0, length = this.layers.length; i < length; i++) {
+    if (this.layers[i] === name) return i;
+  }
+
+  return -1;
 };
 
 /**
