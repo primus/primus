@@ -123,6 +123,37 @@ Transformer.readable('initialise', function initialise() {
 });
 
 /**
+ * Iterate all the middleware layers that we're set on our Primus instance.
+ *
+ * @param {Request} req HTTP request.
+ * @param {Response} res HTTP response.
+ * @param {Function} next Continuation callback.
+ * @api private
+ */
+Transformer.readable('forEach', function (req, res, next) {
+  var layers = this.primus.layers;
+
+  if (!layers.length) return next();
+
+  (function iterate(index) {
+    var layer = layers[index++];
+    if (!layer) return next();
+    if (!layer.enabled) iterate(index);
+
+    if (layer.length === 2) {
+      layer.fn(req, res);
+      return iterate(index);
+    }
+
+    layer.fn(req, res, function done(err) {
+      if (err) return next(err);
+
+      iterate(index);
+    });
+  }(0));
+});
+
+/**
  * Start listening for incoming requests and check if we need to forward them to
  * the transformers.
  *
