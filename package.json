@@ -27,7 +27,7 @@
   "license": "MIT",
   "dependencies": {
     "load": "1.0.x",
-    "predefine": "0.0.x",
+    "fusing": "0.0.x",
     "eventemitter3": "0.1.x",
     "forwarded-for": "0.0.x"
   },

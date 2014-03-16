@@ -2,7 +2,8 @@
 
 var querystring = require('querystring').parse
   , EventEmitter = require('eventemitter3')
-  , url = require('url').parse;
+  , url = require('url').parse
+  , fuse = require('fusing');
 
 //
 // Used to fake middleware's as we don't have a next callback.
@@ -28,7 +29,7 @@ function Transformer(primus) {
   this.initialise();
 }
 
-Transformer.prototype.__proto__ = EventEmitter.prototype;
+fuse(Transformer, EventEmitter);
 
 //
 // Simple logger shortcut.
@@ -36,30 +37,21 @@ Transformer.prototype.__proto__ = EventEmitter.prototype;
 Object.defineProperty(Transformer.prototype, 'logger', {
   get: function logger() {
     return {
-      error: this.log.bind(this.primus, 'log', 'error'),  // Log error <line>.
-      warn:  this.log.bind(this.primus, 'log', 'warn'),   // Log warn <line>.
-      info:  this.log.bind(this.primus, 'log', 'info'),   // Log info <line>.
-      debug: this.log.bind(this.primus, 'log', 'debug'),  // Log debug <line>.
-      plain: this.log.bind(this.primus, 'log')            // Log x <line>.
+      error: this.primus.emits('log', 'error'),  // Log error <line>.
+      warn:  this.primus.emits('log', 'warn'),   // Log warn <line>.
+      info:  this.primus.emits('log', 'info'),   // Log info <line>.
+      debug: this.primus.emits('log', 'debug'),  // Log debug <line>.
+      plain: this.primus.emits('log')            // Log x <line>.
     };
   }
 });
-
-/**
- * Simple log handler that will emit log messages under the given `type`.
- *
- * @api private
- */
-Transformer.prototype.log = function log(type) {
-  this.emit.apply(this, arguments);
-};
 
 /**
  * Create the server and attach the appropriate event listeners.
  *
  * @api private
  */
-Transformer.prototype.initialise = function initialise() {
+Transformer.readable('initialise', function initialise() {
   if (this.server) this.server();
 
   var server = this.primus.server
@@ -128,7 +120,7 @@ Transformer.prototype.initialise = function initialise() {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(this.primus.spec));
   });
-};
+});
 
 /**
  * Start listening for incoming requests and check if we need to forward them to
@@ -138,7 +130,7 @@ Transformer.prototype.initialise = function initialise() {
  * @param {Response} res HTTP response.
  * @api private
  */
-Transformer.prototype.request = function request(req, res) {
+Transformer.readable('request', function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
   if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
   if (req.uri.pathname === this.specfile) return this.emit('spec', req, res);
@@ -157,7 +149,7 @@ Transformer.prototype.request = function request(req, res) {
 
     res.end(JSON.stringify({ error: err.message || err }));
   });
-};
+});
 
 /**
  * Starting listening for incoming upgrade requests and check if we need to
@@ -168,7 +160,7 @@ Transformer.prototype.request = function request(req, res) {
  * @param {Buffer} head Buffered data.
  * @api private
  */
-Transformer.prototype.upgrade = function upgrade(req, socket, head) {
+Transformer.readable('upgrade', function upgrade(req, socket, head) {
   //
   // Copy buffer to prevent large buffer retention in Node core.
   // @see jmatthewsr-ms/node-slab-memory-issues
@@ -200,7 +192,7 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
     socket.write(message);
     socket.destroy();
   });
-};
+});
 
 /**
  * Check if we should accept this request.
@@ -209,7 +201,7 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
  * @returns {Boolean} Do we need to accept this request.
  * @api private
  */
-Transformer.prototype.test = function test(req) {
+Transformer.readable('test', function test(req) {
   req.uri = url(req.url);
 
   var pathname = req.uri.pathname || '/'
@@ -222,12 +214,7 @@ Transformer.prototype.test = function test(req) {
   // Make sure that the first part of the path matches.
   //
   return accepted;
-};
-
-//
-// Make the transporter extendable.
-//
-Transformer.extend = require('predefine').extend;
+});
 
 //
 // Expose the transformer's skeleton.

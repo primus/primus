@@ -3,7 +3,7 @@
 var ParserError = require('./errors').ParserError
   , parse = require('querystring').parse
   , forwarded = require('forwarded-for')
-  , predefine = require('predefine')
+  , fuse = require('fusing')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
 
@@ -21,8 +21,8 @@ var ParserError = require('./errors').ParserError
  * @api public
  */
 function Spark(primus, headers, address, query, id) {
-  var readable = predefine(this, predefine.READABLE)
-    , writable = predefine(this, predefine.WRITABLE)
+  var readable = Spark.predefine(this, Spark.predefine.READABLE)
+    , writable = Spark.predefine(this, Spark.predefine.WRITABLE)
     , spark = this;
 
   readable('primus', primus);         // References to Primus.
@@ -46,9 +46,7 @@ function Spark(primus, headers, address, query, id) {
   });
 }
 
-Spark.prototype.__proto__ = require('stream').prototype;
-Spark.readable = predefine(Spark.prototype, predefine.READABLE);
-Spark.writable = predefine(Spark.prototype, predefine.WRITABLE);
+fuse(Spark, require('stream'), { defaults: false });
 
 //
 // Internal readyState's to prevent writes against close sockets.
