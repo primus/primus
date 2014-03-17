@@ -134,9 +134,7 @@ Transformer.readable('forEach', function (req, res, next) {
  */
 Transformer.readable('request', function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
-  if (!this.primus.auth) return this.emit('request', req, res, noop);
-
-  var transformer = this;
+  this.forEach(req, res, this.emits('request', req, res));
 });
 
 /**
@@ -157,7 +155,8 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
   head.copy(buffy);
 
   if (!this.test(req)) return this.emit('previous::upgrade', req, socket, buffy);
-  if (!this.primus.auth) return this.emit('upgrade', req, socket, buffy, noop);
+
+  this.forEach(req, socket, this.emits('upgrade', req, socket, buffy));
 });
 
 /**
@@ -171,15 +170,9 @@ Transformer.readable('test', function test(req) {
   req.uri = url(req.url);
 
   var pathname = req.uri.pathname || '/'
-    , route = this.primus.pathname
-    , accepted = pathname.slice(0, route.length) === route;
+    , route = this.primus.pathname;
 
-  if (!accepted) this.emit('unknown', req);
-
-  //
-  // Make sure that the first part of the path matches.
-  //
-  return accepted;
+  return pathname.slice(0, route.length) === route;
 });
 
 //
