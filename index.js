@@ -565,7 +565,7 @@ Primus.readable('before', function before(name, fn) {
 Primus.readable('remove', function remove(name) {
   var index = this.indexOfLayer(name);
 
-  if (~index) this.layers.slice(index, 1);
+  if (~index) this.layers.splice(index, 1);
   return this;
 });
 
@@ -604,7 +604,7 @@ Primus.readable('disable', function disable(name) {
  */
 Primus.readable('indexOfLayer', function indexOfLayer(name) {
   for (var i = 0, length = this.layers.length; i < length; i++) {
-    if (this.layers[i] === name) return i;
+    if (this.layers[i].name === name) return i;
   }
 
   return -1;
