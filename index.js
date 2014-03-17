@@ -228,6 +228,13 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   });
 
   //
+  // Add our default middleware layers.
+  //
+  this.before('primus.js', require('./middleware/primus'));
+  this.before('spec', require('./middleware/spec'));
+  this.before('authorization', require('./middleware/authorization'));
+
+  //
   // Emit the initialised event after the next tick so we have some time to
   // attach listeners.
   //
@@ -536,9 +543,17 @@ Primus.readable('plugin', function plugin(name) {
  *
  * @param {String} name The name of the middleware.
  * @param {Function} fn The middleware that's called each time.
+ * @param {Object} options Middleware configuration.
  * @api public
  */
-Primus.readable('before', function before(name, fn) {
+Primus.readable('before', function before(name, fn, options) {
+  //
+  // No or only 1 argument means that we need to initialise the middleware, this
+  // is a special initialisation process where we pass in a reference to the
+  // initialised Primus instance so a pre-compiling process can be done.
+  //
+  if (fn.length < 2) fn = fn.call(this, options);
+
   var layer = {
     length: fn.length,
     enabled: true,

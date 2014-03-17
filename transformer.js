@@ -20,10 +20,7 @@ function noop() {}
 function Transformer(primus) {
   this.Spark = primus.Spark;    // Used by the Server to create a new connection.
   this.primus = primus;         // Reference to the Primus instance.
-  this.primusjs = null;         // Path to the client library.
-  this.specfile = null;         // Path to the Primus specification.
   this.service = null;          // Stores the real-time service.
-  this.buffer = null;           // Buffer of the library.
 
   EventEmitter.call(this);
   this.initialise();
@@ -89,37 +86,6 @@ Transformer.readable('initialise', function initialise() {
   if (this.listeners('upgrade').length || this.listeners('previous::upgrade').length) {
     server.on('upgrade', this.upgrade.bind(this));
   }
-
-  //
-  // Create a client URL, this where we respond with our library. The path to
-  // the server specification which can be used to retrieve the transformer that
-  // was used.
-  //
-  var pathname = this.primus.pathname.split('/').filter(Boolean)
-    , client = pathname.slice(0)
-    , spec = pathname.slice(0);
-
-  client.push('primus.js');
-  spec.push('spec');
-
-  this.primusjs = '/'+ client.join('/');
-  this.specfile = '/'+ spec.join('/');
-
-  //
-  // Listen for static requests.
-  //
-  this.on('static', function serve(req, res) {
-    this.buffer = this.buffer || new Buffer(this.primus.library());
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-    res.end(this.buffer);
-  });
-
-  this.on('spec', function spec(req, res) {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(this.primus.spec));
-  });
 });
 
 /**
@@ -131,25 +97,30 @@ Transformer.readable('initialise', function initialise() {
  * @api private
  */
 Transformer.readable('forEach', function (req, res, next) {
-  var layers = this.primus.layers;
+  var layers = this.primus.layers
+    , primus = this.primus;
 
   if (!layers.length) return next();
 
+  //
+  // Async or sync call the middleware layer.
+  //
   (function iterate(index) {
     var layer = layers[index++];
     if (!layer) return next();
     if (!layer.enabled) iterate(index);
 
     if (layer.length === 2) {
-      layer.fn(req, res);
-      return iterate(index);
+      if (layer.fn.call(primus, req, res) === undefined) {
+        return iterate(index);
+      }
+    } else {
+      layer.fn.call(primus, req, res, function done(err) {
+        if (err) return next(err);
+
+        iterate(index);
+      });
     }
-
-    layer.fn(req, res, function done(err) {
-      if (err) return next(err);
-
-      iterate(index);
-    });
   }(0));
 });
 
@@ -163,23 +134,9 @@ Transformer.readable('forEach', function (req, res, next) {
  */
 Transformer.readable('request', function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
-  if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
-  if (req.uri.pathname === this.specfile) return this.emit('spec', req, res);
   if (!this.primus.auth) return this.emit('request', req, res, noop);
 
   var transformer = this;
-  this.primus.auth(req, function authorized(err) {
-    if (!err) return transformer.emit('request', req, res, noop);
-
-    res.statusCode = err.statusCode || 401;
-    res.setHeader('Content-Type', 'application/json');
-
-    if ((res.statusCode === 401) && err.authenticate) {
-      res.setHeader('WWW-Authenticate', err.authenticate);
-    }
-
-    res.end(JSON.stringify({ error: err.message || err }));
-  });
 });
 
 /**
@@ -201,28 +158,6 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
 
   if (!this.test(req)) return this.emit('previous::upgrade', req, socket, buffy);
   if (!this.primus.auth) return this.emit('upgrade', req, socket, buffy, noop);
-
-  var transformer = this;
-  this.primus.auth(req, function authorized(err) {
-    if (!err) return transformer.emit('upgrade', req, socket, buffy, noop);
-
-    var message = JSON.stringify({ error: err.message || err });
-    var code = err.statusCode || 401;
-
-    socket.write('HTTP/' + req.httpVersion + ' ');
-    socket.write(code + ' ' + require('http').STATUS_CODES[code] + '\r\n');
-    socket.write('Connection: close\r\n');
-    socket.write('Content-Type: application/json\r\n');
-    socket.write('Content-Length: ' + message.length + '\r\n');
-
-    if ((code === 401) && err.authenticate) {
-      socket.write('WWW-Authenticate: ' + err.authenticate + '\r\n');
-    }
-
-    socket.write('\r\n');
-    socket.write(message);
-    socket.destroy();
-  });
 });
 
 /**
