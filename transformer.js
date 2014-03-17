@@ -107,8 +107,9 @@ Transformer.readable('forEach', function (req, res, next) {
   //
   (function iterate(index) {
     var layer = layers[index++];
+
     if (!layer) return next();
-    if (!layer.enabled) iterate(index);
+    if (!layer.enabled) return iterate(index);
 
     if (layer.length === 2) {
       if (layer.fn.call(primus, req, res) === undefined) {

@@ -16,7 +16,7 @@ module.exports = function configure() {
    * @param {Response} res HTTP response.
    * @api private
    */
-  return function spec(req, res, next) {
+  return function spec(req, res) {
     if (req.uri.pathname !== specification) return;
 
     res.statusCode = 200;
