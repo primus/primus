@@ -213,7 +213,7 @@ primus.on('disconnection', function (spark) {
 });
 ```
 
-The `spark` the actual real-time socket/connection. Sparks have a really low
+The `spark` argument is the actual real-time socket/connection. Sparks have a really low
 level interface and only expose a couple properties that are cross engine
 supported. The interface is modeled towards a Node.js stream compatible
 interface. So this will include all methods that are available on the 
@@ -221,7 +221,7 @@ interface. So this will include all methods that are available on the
 
 #### spark.headers
 
-The `spark.headers` property contains contains the headers of either the request
+The `spark.headers` property contains the headers of either the request
 that started a handshake with the server or the headers of the actual real-time
 connection. This depends on the module you are using.
 
