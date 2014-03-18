@@ -555,10 +555,10 @@ Primus.readable('before', function before(name, fn, options) {
   if (fn.length < 2) fn = fn.call(this, options);
 
   var layer = {
-    length: fn.length,
-    enabled: true,
-    name: name,
-    fn: fn
+    length: fn.length,                // Amount of arguments indicates if it's a sync
+    enabled: true,                    // Middleware is enabled by default.
+    name: name,                       // Used for lookups.
+    fn: fn                            // The actual middleware.
   }, index = this.indexOfLayer(name);
 
   //

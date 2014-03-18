@@ -91,12 +91,13 @@ Transformer.readable('initialise', function initialise() {
 /**
  * Iterate all the middleware layers that we're set on our Primus instance.
  *
+ * @param {String} type Either `http` or `upgrade`
  * @param {Request} req HTTP request.
  * @param {Response} res HTTP response.
  * @param {Function} next Continuation callback.
  * @api private
  */
-Transformer.readable('forEach', function (req, res, next) {
+Transformer.readable('forEach', function (type, req, res, next) {
   var layers = this.primus.layers
     , primus = this.primus;
 
@@ -109,7 +110,7 @@ Transformer.readable('forEach', function (req, res, next) {
     var layer = layers[index++];
 
     if (!layer) return next();
-    if (!layer.enabled) return iterate(index);
+    if (!layer.enabled || layer[type] === false) return iterate(index);
 
     if (layer.length === 2) {
       if (layer.fn.call(primus, req, res) === undefined) {
@@ -135,7 +136,8 @@ Transformer.readable('forEach', function (req, res, next) {
  */
 Transformer.readable('request', function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
-  this.forEach(req, res, this.emits('request', req, res));
+
+  this.forEach('http', req, res, this.emits('request', req, res));
 });
 
 /**
@@ -157,7 +159,7 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
 
   if (!this.test(req)) return this.emit('previous::upgrade', req, socket, buffy);
 
-  this.forEach(req, socket, this.emits('upgrade', req, socket, buffy));
+  this.forEach('upgrade', req, socket, this.emits('upgrade', req, socket, buffy));
 });
 
 /**
