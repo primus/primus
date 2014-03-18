@@ -7,7 +7,8 @@
  * @api public
  */
 module.exports = function configure() {
-  var specification = this.pathname +'/spec';
+  var specification = this.pathname +'/spec'
+    , primus = this;
 
   /**
    * The actual HTTP middleware.
@@ -16,13 +17,20 @@ module.exports = function configure() {
    * @param {Response} res HTTP response.
    * @api private
    */
-  return function spec(req, res) {
+  function spec(req, res) {
     if (req.uri.pathname !== specification) return;
 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(this.spec));
+    res.end(JSON.stringify(primus.spec));
 
     return false;
-  };
+  }
+
+  //
+  // Don't run a specification test for HTTP upgrades.
+  //
+  spec.upgrade = false;
+
+  return spec;
 };

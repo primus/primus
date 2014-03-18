@@ -18,7 +18,7 @@ module.exports = function configure() {
    * @param {Response} res HTTP response.
    * @api private
    */
-  return function client(req, res) {
+  function client(req, res) {
     if (req.uri.pathname !== primusjs) return;
 
     res.statusCode = 200;
@@ -27,5 +27,12 @@ module.exports = function configure() {
     res.end(library);
 
     return false;
-  };
+  }
+
+  //
+  // We don't serve our client-side library over HTTP upgrades.
+  //
+  client.upgrade = false;
+
+  return client;
 };
