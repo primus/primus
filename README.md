@@ -116,9 +116,20 @@ Name                | Description                               | Default
 authorization       | Authorization handler                     | `null`
 pathname            | The URL namespace that Primus can own     | `/primus`
 parser              | Message encoder for all communication     | `JSON`
-transformer         | The tranformer we should use internally   | `websockets`
+transformer         | The transformer we should use internally  | `websockets`
 plugin              | The plugins that should be applied        | `{}`
 timeout             | The heartbeat timeout                     | `35000`
+origins             | **cors** List of origins                  | `*`
+methods             | **cors** List of accepted HTTP methods    | `GET,HEAD,PUT,POST,DELETE,OPTIONS`
+credentials         | **cors** Allow sending of credentials     | `true`
+maxAge              | **cors** Cache duration of cors preflight | `30 days`
+headers             | **cors** Allowed headers                  | `false`
+exposed             | **cors** Headers exposed to the client    | `false`
+
+The options that are prefixed with **cors** are supplied to our
+[access-control](http://github.com/primus/access-control) module which handles
+HTTP Access Control (CORS), so for a more detailed explanation of these options
+check it out.
 
 The heartbeat timeout is used to forcefully disconnect a spark if no data is
 received from the client within the specified amount of time. It is possible
@@ -213,7 +224,7 @@ primus.on('disconnection', function (spark) {
 });
 ```
 
-The `spark` the actual real-time socket/connection. Sparks have a really low
+The `spark` argument is the actual real-time socket/connection. Sparks have a really low
 level interface and only expose a couple properties that are cross engine
 supported. The interface is modeled towards a Node.js stream compatible
 interface. So this will include all methods that are available on the 
@@ -221,7 +232,7 @@ interface. So this will include all methods that are available on the
 
 #### spark.headers
 
-The `spark.headers` property contains contains the headers of either the request
+The `spark.headers` property contains the headers of either the request
 that started a handshake with the server or the headers of the actual real-time
 connection. This depends on the module you are using.
 

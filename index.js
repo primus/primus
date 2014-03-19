@@ -230,6 +230,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   //
   // Add our default middleware layers.
   //
+  this.before('cors', require('./middleware/access-control'));
   this.before('primus.js', require('./middleware/primus'));
   this.before('spec', require('./middleware/spec'));
   this.before('authorization', require('./middleware/authorization'));
@@ -644,7 +645,8 @@ Primus.readable('destroy', function destroy(options, fn) {
   }
 
   options = options || {};
-  var primus = this;
+  var primus = this
+    , clean = false;
 
   /**
    * Clean up connections that are left open.
@@ -652,6 +654,9 @@ Primus.readable('destroy', function destroy(options, fn) {
    * @api private
    */
   function cleanup() {
+    if (clean) return;
+    clean = true;
+
     if (options.end !== false) {
       primus.forEach(function shutdown(spark) {
         spark.end();
@@ -668,24 +673,39 @@ Primus.readable('destroy', function destroy(options, fn) {
     if (fn && options.close === false) fn();
   }
 
+  /**
+   * Clean up the server after it has been closed.
+   *
+   * @api private
+   */
+  function closed() {
+    if (primus.transformer) primus.transformer.removeAllListeners();
+    if (primus.server) primus.server.removeAllListeners();
+    primus.removeAllListeners();
+
+    //
+    // The server has closed, but we didn't run any cleanups. Run them now
+    // before we kill the `primus.connections` object which will render the
+    // clean up process useless as there wouldn't be anything to iterate over.
+    //
+    if (!clean) cleanup();
+
+    //
+    // Null some potentially heavy objects to free some more memory instantly
+    //
+    primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
+    primus.transformer = primus.encoder = primus.decoder = primus.server = null;
+    primus.sparks = primus.connected = 0;
+
+    primus.connections = Object.create(null);
+    primus.ark = Object.create(null);
+
+    if (fn) fn();
+  }
+
   if (options.close !== false) {
-    primus.server.close(function closed() {
-      primus.transformer.removeAllListeners();
-      primus.server.removeAllListeners();
-      primus.removeAllListeners();
-
-      //
-      // Null some potentially heavy objects to free some more memory instantly
-      //
-      primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
-      primus.transformer = primus.encoder = primus.decoder = primus.server = null;
-      primus.sparks = primus.connected = 0;
-
-      primus.connections = Object.create(null);
-      primus.ark = Object.create(null);
-
-      if (fn) fn();
-    });
+    if (primus.server) primus.server.close(closed);
+    else setTimeout(closed, 0);
   }
 
   if (+options.timeout) {
