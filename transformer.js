@@ -2,6 +2,7 @@
 
 var querystring = require('querystring').parse
   , EventEmitter = require('eventemitter3')
+  , access = require('access-control')
   , url = require('url').parse;
 
 //
@@ -23,6 +24,11 @@ function Transformer(primus) {
   this.specfile = null;         // Path to the Primus specification.
   this.service = null;          // Stores the real-time service.
   this.buffer = null;           // Buffer of the library.
+
+  //
+  // Configure the HTTP Access Control (CORS) handling.
+  //
+  this.cors = access(primus.options);
 
   EventEmitter.call(this);
   this.initialise();
@@ -140,6 +146,14 @@ Transformer.prototype.initialise = function initialise() {
  */
 Transformer.prototype.request = function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
+
+  //
+  // HTTP Access Control (CORS) should only be applied to primus routes. As the
+  // `access-control` will only add headers when a `Origin` header is send to
+  // the server, these will not be any overhead for normal requests.
+  //
+  if (this.cors(req, res)) return; // Cors request handled.
+
   if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
   if (req.uri.pathname === this.specfile) return this.emit('spec', req, res);
   if (!this.primus.auth) return this.emit('request', req, res, noop);
