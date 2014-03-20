@@ -248,6 +248,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
  * Add a new authorization handler.
  *
  * @param {Function} auth The authorization handler.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('authorize', function authorize(auth) {
@@ -267,6 +268,7 @@ Primus.readable('authorize', function authorize(auth) {
  * Iterate over the connections.
  *
  * @param {Function} fn The function that is called every iteration.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('forEach', function forEach(fn) {
@@ -281,6 +283,7 @@ Primus.readable('forEach', function forEach(fn) {
  * Broadcast the message to all connections.
  *
  * @param {Mixed} data The data you want to send.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('write', function write(data) {
@@ -295,6 +298,7 @@ Primus.readable('write', function write(data) {
  * Install message parsers.
  *
  * @param {Mixed} parser Parse name or parser Object.
+ * @returns {Primus}
  * @api private
  */
 Primus.readable('parsers', function parsers(parser) {
@@ -341,6 +345,7 @@ Primus.readable('parsers', function parsers(parser) {
  *
  * @param {String} type Incoming or outgoing
  * @param {Function} fn A new message transformer.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('transform', function transform(type, fn) {
@@ -440,6 +445,7 @@ Primus.readable('library', function compile(nodejs) {
  *
  * @param {String} dir The location that we need to save the library.
  * @param {function} fn Optional callback, if you want an async save.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('save', function save(path, fn) {
@@ -477,6 +483,7 @@ Primus.readable('save', function save(path, fn) {
  *
  * @param {String} name The name of the plugin.
  * @param {Object} energon The plugin that contains client and server extensions.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('use', function use(name, energon) {
@@ -545,6 +552,7 @@ Primus.readable('plugin', function plugin(name) {
  * @param {String} name The name of the middleware.
  * @param {Function} fn The middleware that's called each time.
  * @param {Object} options Middleware configuration.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('before', function before(name, fn, options) {
@@ -576,6 +584,7 @@ Primus.readable('before', function before(name, fn, options) {
  * Remove a middleware layer from the stack.
  *
  * @param {String} name The name of the middleware.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('remove', function remove(name) {
@@ -589,6 +598,7 @@ Primus.readable('remove', function remove(name) {
  * Enable a given middleware layer.
  *
  * @param {String} name The name of the middleware.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('enable', function enable(name) {
@@ -602,6 +612,7 @@ Primus.readable('enable', function enable(name) {
  * Disable a given middleware layer.
  *
  * @param {String} name The name of the middleware.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('disable', function disable(name) {
@@ -616,7 +627,7 @@ Primus.readable('disable', function disable(name) {
  *
  * @param {String} name The name of the layer.
  * @returns {Number}
- * @api public
+ * @api private
  */
 Primus.readable('indexOfLayer', function indexOfLayer(name) {
   for (var i = 0, length = this.layers.length; i < length; i++) {
@@ -636,6 +647,7 @@ Primus.readable('indexOfLayer', function indexOfLayer(name) {
  *
  * @param {Object} options Destruction instructions.
  * @param {Function} fn Callback.
+ * @returns {Primus}
  * @api public
  */
 Primus.readable('destroy', function destroy(options, fn) {
