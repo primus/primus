@@ -246,6 +246,9 @@ function Primus(url, options) {
 
   var primus = this;
 
+  // The maximum number of messages that can be placed in queue.
+  options.queueSize = 'queueSize' in options ? options.queueSize : Infinity;
+
   // Connection timeout duration.
   options.timeout = 'timeout' in options ? options.timeout : 10e3;
 
@@ -575,7 +578,7 @@ Primus.prototype.initialise = function initialise(options) {
         primus.write(primus.buffer[i]);
       }
 
-      primus.buffer.length = 0;
+      primus.buffer = [];
     }
 
     primus.latency = +new Date() - start;
@@ -859,7 +862,14 @@ Primus.prototype.write = function write(data) {
       primus.emit('outgoing::data', packet);
     });
   } else {
-    primus.buffer.push(data);
+    var buffer = primus.buffer;
+
+    //
+    // If the buffer is at capacity, remove the first item.
+    //
+    if (buffer.length === primus.options.queueSize) buffer.splice(0, 1);
+
+    buffer.push(data);
   }
 
   return true;
