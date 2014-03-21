@@ -347,7 +347,7 @@ Primus.prototype.transform = function transform(type, fn) {
  * @returns {Spark}
  * @api private
  */
-Primus.prototype.spark = function is(id) {
+Primus.prototype.spark = function spark(id) {
   return this.connections[id];
 };
 
