@@ -54,6 +54,20 @@ describe('Spark', function () {
     var spark = new primus.Spark();
   });
 
+  it('can be retreived using primus.spark()', function (done) {
+    primus.on('connection', function (socket) {
+      expect(socket).to.equal(spark);
+
+      var ref = primus.spark(socket.id);
+      expect(socket).to.equal(ref);
+      expect(spark).to.equal(ref);
+
+      done();
+    });
+
+    var spark = new primus.Spark();
+  });
+
   it('emits a `readyStateChange` event when the readyState changes', function (done) {
     var spark = new primus.Spark();
 
