@@ -432,6 +432,25 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should allow access to the original HTTP request', function (done) {
+        primus.on('connection', function (spark) {
+          expect(spark.request).to.not.equal(undefined);
+          expect(spark.request.headers).to.be.a('object');
+
+          //
+          // Timeout is added to ensure that a request had time to get closed.
+          // As closed requests could add a bunch of issues.
+          //
+          setTimeout(function () {
+            expect(spark.request).to.not.equal(undefined);
+            spark.end();
+            done();
+          }, 100);
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+      });
+
       it('should not increment the attempt if a backoff is running', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber);
 
