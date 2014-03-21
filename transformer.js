@@ -97,7 +97,7 @@ Transformer.readable('initialise', function initialise() {
  * @param {Function} next Continuation callback.
  * @api private
  */
-Transformer.readable('forEach', function (type, req, res, next) {
+Transformer.readable('forEach', function forEach(type, req, res, next) {
   var layers = this.primus.layers
     , primus = this.primus;
 
@@ -137,6 +137,26 @@ Transformer.readable('forEach', function (type, req, res, next) {
 Transformer.readable('request', function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
 
+  req.headers['primus::req::backup'] = req;
+  res.once('end', function gc() {
+    delete req.headers['primus::req::backup'];
+  });
+
+  //
+  // I want to see you're face when you're looking at the lines of code above
+  // while you think, WTF what is this shit, you mad bro!? Let me take a moment
+  // to explain this mad and sadness.
+  //
+  // There are some real-time transformers that do not give us access to the
+  // HTTP request that initiated their `socket` connection. They only give us
+  // access to the information that they think is useful, we're greedy, we want
+  // everything and let developers decide what they want to use instead and
+  // therefor want to expose this HTTP request on our `spark` object.
+  //
+  // The reason it's added to the headers is because it's currently the only
+  // field that is accessible through all transformers.
+  //
+
   this.forEach('http', req, res, this.emits('request', req, res));
 });
 
@@ -150,6 +170,8 @@ Transformer.readable('request', function request(req, res) {
  * @api private
  */
 Transformer.readable('upgrade', function upgrade(req, socket, head) {
+  if (!this.test(req)) return this.emit('previous::upgrade', req, socket, head);
+
   //
   // Copy buffer to prevent large buffer retention in Node core.
   // @see jmatthewsr-ms/node-slab-memory-issues
@@ -157,7 +179,13 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
   var buffy = new Buffer(head.length);
   head.copy(buffy);
 
-  if (!this.test(req)) return this.emit('previous::upgrade', req, socket, buffy);
+  //
+  // See Transformer#request for an explanation of this madness.
+  //
+  req.headers['primus::req::backup'] = req;
+  socket.once('end', function gc() {
+    delete req.headers['primus::req::backup'];
+  });
 
   this.forEach('upgrade', req, socket, this.emits('upgrade', req, socket, buffy));
 });

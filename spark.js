@@ -20,7 +20,7 @@ var ParserError = require('./errors').ParserError
  * @param {String} id An optional id of the socket, or we will generate one.
  * @api public
  */
-function Spark(primus, headers, address, query, id) {
+function Spark(primus, headers, address, query, id, request) {
   var readable = Spark.predefine(this, Spark.predefine.READABLE)
     , writable = Spark.predefine(this, Spark.predefine.WRITABLE)
     , spark = this;
@@ -33,6 +33,7 @@ function Spark(primus, headers, address, query, id) {
   readable('readable', true);         // Silly stream compatibility.
   writable('query', query || {});     // The query string.
   writable('timeout', null);          // Heartbeat timeout.
+  writable('http', request);          // Reference to an HTTP request.
 
   //
   // Parse our query string.
@@ -46,7 +47,9 @@ function Spark(primus, headers, address, query, id) {
   });
 }
 
-fuse(Spark, require('stream'), { defaults: false });
+fuse(Spark, require('stream'), {
+  defaults: false
+});
 
 //
 // Internal readyState's to prevent writes against close sockets.
@@ -81,6 +84,14 @@ Spark.writable('__readyState', Spark.OPEN);
 //
 Spark.readable('address', { get: function address() {
   return forwarded(this.remote, this.headers, this.primus.whitelist);
+}}, true);
+
+//
+// This gives access to the original HTTP request that was used to initialise
+// the connection.
+//
+Spark.readable('request', { get: function request() {
+  return this.http || this.headers['primus::req::backup'];
 }}, true);
 
 /**

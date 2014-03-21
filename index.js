@@ -547,7 +547,9 @@ Primus.readable('plugin', function plugin(name) {
 });
 
 /**
- * Add a new middleware layer.
+ * Add a new middleware layer. If no middleware name has been provided we will
+ * attempt to take the name of the supplied function. If that fails, well fuck,
+ * just random id it.
  *
  * @param {String} name The name of the middleware.
  * @param {Function} fn The middleware that's called each time.
@@ -556,6 +558,14 @@ Primus.readable('plugin', function plugin(name) {
  * @api public
  */
 Primus.readable('before', function before(name, fn, options) {
+  if ('function' === typeof name) {
+    options = fn;
+    fn = name;
+    name = fn.name || 'pid_'+ Date.now();
+  }
+
+  options = options || {};
+
   //
   // No or only 1 argument means that we need to initialise the middleware, this
   // is a special initialisation process where we pass in a reference to the
