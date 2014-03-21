@@ -341,6 +341,17 @@ Primus.prototype.transform = function transform(type, fn) {
 };
 
 /**
+ * Gets a spark by its id.
+ *
+ * @param {String} id The spark's id.
+ * @returns {Spark}
+ * @api private
+ */
+Primus.prototype.spark = function is(id) {
+  return this.connections[id];
+};
+
+/**
  * Generate a client library.
  *
  * @param {Boolean} nodejs Don't include the library, as we're running on Node.js.
