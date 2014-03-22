@@ -176,7 +176,7 @@ Spark.readable('__initialise', [function initialise() {
     //
     spark.heartbeat();
 
-    primus.decoder(raw, function decoding(err, data) {
+    primus.decoder.call(spark, raw, function decoding(err, data) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
@@ -369,7 +369,7 @@ Spark.readable('_write', function _write(data) {
   //
   if (Spark.CLOSED === spark.readyState) return false;
 
-  primus.encoder(data, function encoded(err, packet) {
+  primus.encoder.call(spark, data, function encoded(err, packet) {
     //
     // Do a "save" emit('error') when we fail to parse a message. We don't
     // want to throw here as listening to errors should be optional.
