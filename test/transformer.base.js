@@ -166,6 +166,31 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should set the correct read/writable states', function (done) {
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        expect(socket.readable).to.equal(true);
+        expect(socket.writable).to.equal(true);
+
+        socket.once('open', function () {
+          expect(socket.readable).to.equal(true);
+          expect(socket.writable).to.equal(true);
+
+          socket.once('end', function () {
+
+            expect(socket.readable).to.equal(false);
+            expect(socket.writable).to.equal(false);
+
+            socket.once('open', function () {
+              expect(socket.readable).to.equal(true);
+              expect(socket.writable).to.equal(true);
+
+              socket.once('end', done).end();
+            }).open();
+          }).end();
+        });
+      });
+
       it('emits a readyStateChange event', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber)
           , state = socket.readyState
@@ -453,7 +478,7 @@ module.exports = function base(transformer) {
         socket.on('end', done);
       });
 
-      it('shoud reset the reconnect details after a succesful reconnect', function (done) {
+      it('should reset the reconnect details after a succesful reconnect', function (done) {
         var socket = new Socket('http://localhost:'+ server.portnumber, {
           reconnect: {
             minDelay: 100,

@@ -268,8 +268,8 @@ function Primus(url, options) {
   options.transport = 'transport' in options ? options.transport : {};
 
   primus.buffer = [];                           // Stores premature send data.
-  primus.writable = false;                      // Silly stream compatibility.
-  primus.readable = false;                      // Silly stream compatibility.
+  primus.writable = true;                       // Silly stream compatibility.
+  primus.readable = true;                       // Silly stream compatibility.
   primus.url = primus.parse(url || defaultUrl); // Parse the URL to a readable format.
   primus.readyState = Primus.CLOSED;            // The readyState of the connection.
   primus.options = options;                     // Reference to the supplied options.
