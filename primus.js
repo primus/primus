@@ -668,6 +668,8 @@ Primus.prototype.initialise = function initialise(options) {
     if (primus.timers.connect) primus.end();
     if (readyState !== Primus.OPEN) return;
 
+    this.writable = false;
+
     //
     // Clear all timers in case we're not going to reconnect.
     //
@@ -682,10 +684,15 @@ Primus.prototype.initialise = function initialise(options) {
     primus.emit('close');
 
     //
-    // The disconnect was unintentional, probably because the server shut down.
-    // So we should just start a reconnect procedure.
+    // The disconnect was unintentional, probably because the server has
+    // shutdown, so if the reconnection is enabled start a reconnect procedure.
     //
-    if (~primus.options.strategy.indexOf('disconnect')) primus.reconnect();
+    if (~primus.options.strategy.indexOf('disconnect')) {
+      return primus.reconnect();
+    }
+
+    primus.emit('outgoing::end');
+    primus.emit('end');
   });
 
   //
