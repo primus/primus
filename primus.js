@@ -268,8 +268,8 @@ function Primus(url, options) {
   options.transport = 'transport' in options ? options.transport : {};
 
   primus.buffer = [];                           // Stores premature send data.
-  primus.writable = true;                       // Silly stream compatibility.
-  primus.readable = true;                       // Silly stream compatibility.
+  primus.writable = false;                      // Silly stream compatibility.
+  primus.readable = false;                      // Silly stream compatibility.
   primus.url = primus.parse(url || defaultUrl); // Parse the URL to a readable format.
   primus.readyState = Primus.CLOSED;            // The readyState of the connection.
   primus.options = options;                     // Reference to the supplied options.
@@ -563,6 +563,13 @@ Primus.prototype.initialise = function initialise(options) {
   primus.on('incoming::open', function opened() {
     if (primus.attempt) primus.attempt = null;
 
+    //
+    // The connection has been openend so we should set our state to
+    // (writ|read)able so our stream compatibility works as intended.
+    //
+    primus.writable = true;
+    primus.readable = true;
+
     var readyState = primus.readyState;
 
     primus.readyState = Primus.OPEN;
@@ -669,6 +676,7 @@ Primus.prototype.initialise = function initialise(options) {
     if (readyState !== Primus.OPEN) return;
 
     this.writable = false;
+    this.readable = false;
 
     //
     // Clear all timers in case we're not going to reconnect.
@@ -1092,6 +1100,7 @@ Primus.prototype.end = function end(data) {
   if (data) this.write(data);
 
   this.writable = false;
+  this.readable = false;
 
   var readyState = this.readyState;
   this.readyState = Primus.CLOSED;
