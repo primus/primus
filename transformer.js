@@ -123,7 +123,7 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
     if (layer.length === 2) {
       if (layer.fn.call(primus, req, res) === undefined) {
         return iterate(index);
-      }
+      } else next();
     } else {
       layer.fn.call(primus, req, res, function done(err) {
         if (err) return next(err);
