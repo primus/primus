@@ -101,6 +101,14 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
   var layers = this.primus.layers
     , primus = this.primus;
 
+  req.uri = req.uri || url(req.url, true);
+  req.query = req.query || req.uri.query || {};
+
+  //
+  // Add some silly HTTP properties for connect.js compatibility.
+  //
+  req.originalUrl = req.url;
+
   if (!layers.length) return next();
 
   //
@@ -198,7 +206,7 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
  * @api private
  */
 Transformer.readable('test', function test(req) {
-  req.uri = url(req.url);
+  req.uri = url(req.url, true);
 
   var pathname = req.uri.pathname || '/'
     , route = this.primus.pathname;
