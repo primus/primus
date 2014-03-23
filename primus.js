@@ -665,11 +665,6 @@ Primus.prototype.initialise = function initialise(options) {
   primus.on('close', function end() {
     var readyState = primus.readyState;
 
-    //
-    // Always set the readyState to closed, and if we're still connecting, close
-    // the connection so we're sure that everything after this if statement block
-    // is only executed because our readyState is set to `open`.
-    //
     primus.readyState = Primus.CLOSED;
     if (readyState !== Primus.CLOSED) {
       primus.emit('readyStateChange');
@@ -689,6 +684,11 @@ Primus.prototype.initialise = function initialise(options) {
   primus.on('incoming::end', function end() {
     var readyState = primus.readyState;
 
+    //
+    // If we're still connecting, close the connection.
+    // Everything after the following if statements is only executed when
+    // the readyState is set to `open`.
+    //
     if (primus.timers.connect) primus.end();
     if (readyState !== Primus.OPEN) return;
 
