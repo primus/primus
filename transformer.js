@@ -121,16 +121,16 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
     if (!layer.enabled || layer.fn[type] === false) return iterate(index);
 
     if (layer.length === 2) {
-      if (layer.fn.call(primus, req, res) === undefined) {
-        return iterate(index);
-      } else next();
-    } else {
-      layer.fn.call(primus, req, res, function done(err) {
-        if (err) return next(err);
+      if (layer.fn.call(primus, req, res) !== undefined) return next();
 
-        iterate(index);
-      });
+      return iterate(index);
     }
+
+    layer.fn.call(primus, req, res, function done(err) {
+      if (err) return next(err);
+
+      iterate(index);
+    });
   }(0));
 });
 
