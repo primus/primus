@@ -964,7 +964,7 @@ var Socket = primus.Socket
 
 If you are targeting a high end audience or maybe just something for internal
 uses you can use a pure WebSocket server. This uses the `ws` WebSocket module
-which is known to be one if not the fastest WebSocket server available in
+which is known to be one of, if not the fastest, WebSocket servers available in
 Node.js and supports all protocol specifications. To use pure WebSockets you
 need to install the `ws` module:
 
