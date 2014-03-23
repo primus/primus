@@ -1014,6 +1014,40 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should make the spark available to the parser', function (done) {
+        var rnd = Math.random(),
+            parser = primus.parser;
+
+        primus.parsers({
+          decoder: function (data, fn) {
+            expect(this.foobar).to.equal(rnd);
+            parser.decoder.call(this, data, function (err, decoded) {
+              expect(err).not.to.exist;
+              expect(decoded).to.eql({ echo: 'pong' });
+              fn(null, decoded);
+            });
+          },
+
+          encoder: function (data, fn) {
+            expect(this.foobar).to.equal(rnd);
+            parser.encoder.call(this, data, fn);
+            if (data === 'pong') {
+              done();
+            }
+          }
+        });
+
+        primus.on('connection', function (spark) {
+          spark.foobar = rnd;
+        });
+
+        var socket = new Socket('http://localhost:'+ server.portnumber);
+
+        socket.on('open', function () {
+          socket.write({ echo: 'pong' });
+        });
+      });
+
       describe('#transform', function () {
         it('thrown an error if an invalid type is given', function (done) {
           try { primus.transform('cowsack', function () {}); }
