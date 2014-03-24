@@ -169,7 +169,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
       });
 
       it('should set the correct read/writable states', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         expect(socket.readable).to.equal(true);
         expect(socket.writable).to.equal(true);
@@ -1089,7 +1089,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
           spark.foobar = rnd;
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function () {
           socket.write({ echo: 'pong' });
