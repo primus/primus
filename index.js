@@ -573,6 +573,13 @@ Primus.readable('before', function before(name, fn, options) {
   //
   if (fn.length < 2) fn = fn.call(this, options);
 
+  //
+  // Make sure that the given or returned function can
+  //
+  if ('function' !== typeof fn || fn.length < 2) {
+    throw new PrimusError('Middleware should be a function that accepts at least 2 args');
+  }
+
   var layer = {
     length: fn.length,                // Amount of arguments indicates if it's a sync
     enabled: true,                    // Middleware is enabled by default.
