@@ -1,9 +1,9 @@
 'use strict';
 
 var PrimusError = require('./errors').PrimusError
-  , EventEmitter = require('eventemitter3')
   , Transformer = require('./transformer')
   , Spark = require('./spark')
+  , fuse = require('fusing')
   , fs = require('fs');
 
 /**
@@ -24,11 +24,14 @@ function Primus(server, options) {
   }
 
   options = options || {};
+  this.fuse();
+
   var primus = this;
 
   this.auth = options.authorization || null;  // Do we have an authorization handler.
   this.connections = Object.create(null);     // Connection storage.
   this.ark = Object.create(null);             // Plugin storage.
+  this.layers = [];                           // Middleware layers.
   this.transformer = null;                    // Reference to the real-time engine instance.
   this.encoder = null;                        // Shorthand to the parser's encoder.
   this.decoder = null;                        // Shorthand to the parser's decoder.
@@ -37,7 +40,7 @@ function Primus(server, options) {
   this.timeout = 'timeout' in options         // The timeout used to detect zombie sparks.
     ? options.timeout
     : 35000;
-  this.whitelist = [];                        // Forwarded-for whitelisting.
+  this.whitelist = [];                        // Forwarded-for white listing.
   this.options = options;                     // The configuration.
   this.transformers = {                       // Message transformers.
     outgoing: [],
@@ -93,7 +96,11 @@ function Primus(server, options) {
   }
 }
 
-Primus.prototype.__proto__ = EventEmitter.prototype;
+//
+// Fuse and spice-up the Primus prototype with EventEmitter and predefine
+// awesomeness.
+//
+fuse(Primus, require('eventemitter3'));
 
 //
 // Lazy read the primus.js JavaScript client.
@@ -136,7 +143,7 @@ Primus.parsers = require('./parsers.json');
  * @returns {Object}
  * @api private
  */
-Primus.prototype.is = function is(what, where) {
+Primus.readable('is', function is(what, where) {
   var missing = Primus.parsers !== where
       ? 'transformer'
       : 'parser'
@@ -165,7 +172,7 @@ Primus.prototype.is = function is(what, where) {
       return 'Unsupported '+ missing +': "'+ what +'"';
     }
   };
-};
+});
 
 /**
  * Initialise the real-time transport that was chosen.
@@ -174,7 +181,7 @@ Primus.prototype.is = function is(what, where) {
  * @param {Object} options Options.
  * @api private
  */
-Primus.prototype.initialise = function initialise(Transformer, options) {
+Primus.readable('initialise', function initialise(Transformer, options) {
   Transformer = Transformer || 'websockets';
 
   var primus = this
@@ -222,21 +229,30 @@ Primus.prototype.initialise = function initialise(Transformer, options) {
   });
 
   //
+  // Add our default middleware layers.
+  //
+  this.before('cors', require('./middleware/access-control'));
+  this.before('primus.js', require('./middleware/primus'));
+  this.before('spec', require('./middleware/spec'));
+  this.before('authorization', require('./middleware/authorization'));
+
+  //
   // Emit the initialised event after the next tick so we have some time to
   // attach listeners.
   //
   process.nextTick(function tock() {
     primus.emit('initialised', primus.transformer, primus.parser, options);
   });
-};
+});
 
 /**
  * Add a new authorization handler.
  *
  * @param {Function} auth The authorization handler.
+ * @returns {Primus}
  * @api public
  */
-Primus.prototype.authorize = function authorize(auth) {
+Primus.readable('authorize', function authorize(auth) {
   if ('function' !== typeof auth) {
     throw new PrimusError('Authorize only accepts functions', this);
   }
@@ -247,43 +263,46 @@ Primus.prototype.authorize = function authorize(auth) {
 
   this.auth = auth;
   return this;
-};
+});
 
 /**
  * Iterate over the connections.
  *
  * @param {Function} fn The function that is called every iteration.
+ * @returns {Primus}
  * @api public
  */
-Primus.prototype.forEach = function forEach(fn) {
+Primus.readable('forEach', function forEach(fn) {
   for (var stream in this.connections) {
     fn(this.connections[stream], stream, this.connections);
   }
 
   return this;
-};
+});
 
 /**
  * Broadcast the message to all connections.
  *
  * @param {Mixed} data The data you want to send.
+ * @returns {Primus}
  * @api public
  */
-Primus.prototype.write = function write(data) {
+Primus.readable('write', function write(data) {
   this.forEach(function forEach(spark) {
     spark.write(data);
   });
 
   return this;
-};
+});
 
 /**
  * Install message parsers.
  *
  * @param {Mixed} parser Parse name or parser Object.
+ * @returns {Primus}
  * @api private
  */
-Primus.prototype.parsers = function parsers(parser) {
+Primus.readable('parsers', function parsers(parser) {
   parser = parser || 'json';
 
   if ('string' === typeof parser) {
@@ -318,7 +337,7 @@ Primus.prototype.parsers = function parsers(parser) {
   this.parser = parser;
 
   return this;
-};
+});
 
 /**
  * Register a new message transformer. This allows you to easily manipulate incoming
@@ -327,9 +346,10 @@ Primus.prototype.parsers = function parsers(parser) {
  *
  * @param {String} type Incoming or outgoing
  * @param {Function} fn A new message transformer.
+ * @returns {Primus}
  * @api public
  */
-Primus.prototype.transform = function transform(type, fn) {
+Primus.readable('transform', function transform(type, fn) {
   if (!(type in this.transformers)) {
     throw new PrimusError('Invalid transformer type', this);
   }
@@ -338,7 +358,7 @@ Primus.prototype.transform = function transform(type, fn) {
 
   this.transformers[type].push(fn);
   return this;
-};
+});
 
 /**
  * Gets a spark by its id.
@@ -358,7 +378,7 @@ Primus.prototype.spark = function spark(id) {
  * @returns {String} The client library.
  * @api public
  */
-Primus.prototype.library = function compile(nodejs) {
+Primus.readable('library', function compile(nodejs) {
   var encoder = this.encoder.client || this.encoder
     , decoder = this.decoder.client || this.decoder
     , library = [ !nodejs ? this.transformer.library : null ]
@@ -430,21 +450,22 @@ Primus.prototype.library = function compile(nodejs) {
   //
   return client +' return Primus; });' + library
     .filter(Boolean).join('\n');
-};
+});
 
 /**
  * Save the library to disk.
  *
  * @param {String} dir The location that we need to save the library.
  * @param {function} fn Optional callback, if you want an async save.
+ * @returns {Primus}
  * @api public
  */
-Primus.prototype.save = function save(path, fn) {
+Primus.readable('save', function save(path, fn) {
   if (!fn) fs.writeFileSync(path, this.library(), 'utf-8');
   else fs.writeFile(path, this.library(), 'utf-8', fn);
 
   return this;
-};
+});
 
 /**
  * Register a new Primus plugin.
@@ -474,9 +495,10 @@ Primus.prototype.save = function save(path, fn) {
  *
  * @param {String} name The name of the plugin.
  * @param {Object} energon The plugin that contains client and server extensions.
+ * @returns {Primus}
  * @api public
  */
-Primus.prototype.use = function use(name, energon) {
+Primus.readable('use', function use(name, energon) {
   if ('object' === typeof name && !energon) {
     energon = name;
     name = energon.name;
@@ -515,7 +537,7 @@ Primus.prototype.use = function use(name, energon) {
 
   energon.server.call(this, this, this.options);
   return this;
-};
+});
 
 /**
  * Return the given plugin.
@@ -524,7 +546,7 @@ Primus.prototype.use = function use(name, energon) {
  * @returns {Mixed}
  * @api public
  */
-Primus.prototype.plugin = function plugin(name) {
+Primus.readable('plugin', function plugin(name) {
   if (name) return this.ark[name];
 
   var plugins = {};
@@ -534,7 +556,115 @@ Primus.prototype.plugin = function plugin(name) {
   }
 
   return plugins;
-};
+});
+
+/**
+ * Add a new middleware layer. If no middleware name has been provided we will
+ * attempt to take the name of the supplied function. If that fails, well fuck,
+ * just random id it.
+ *
+ * @param {String} name The name of the middleware.
+ * @param {Function} fn The middleware that's called each time.
+ * @param {Object} options Middleware configuration.
+ * @returns {Primus}
+ * @api public
+ */
+Primus.readable('before', function before(name, fn, options) {
+  if ('function' === typeof name) {
+    options = fn;
+    fn = name;
+    name = fn.name || 'pid_'+ Date.now();
+  }
+
+  options = options || {};
+
+  //
+  // No or only 1 argument means that we need to initialise the middleware, this
+  // is a special initialisation process where we pass in a reference to the
+  // initialised Primus instance so a pre-compiling process can be done.
+  //
+  if (fn.length < 2) fn = fn.call(this, options);
+
+  //
+  // Make sure that the given or returned function can
+  //
+  if ('function' !== typeof fn || fn.length < 2) {
+    throw new PrimusError('Middleware should be a function that accepts at least 2 args');
+  }
+
+  var layer = {
+    length: fn.length,                // Amount of arguments indicates if it's a sync
+    enabled: true,                    // Middleware is enabled by default.
+    name: name,                       // Used for lookups.
+    fn: fn                            // The actual middleware.
+  }, index = this.indexOfLayer(name);
+
+  //
+  // Override middleware layers if we already have a middleware layer with
+  // exactly the same name.
+  //
+  if (!~index) this.layers.push(layer);
+  else this.layers[index] = layer;
+
+  return this;
+});
+
+/**
+ * Remove a middleware layer from the stack.
+ *
+ * @param {String} name The name of the middleware.
+ * @returns {Primus}
+ * @api public
+ */
+Primus.readable('remove', function remove(name) {
+  var index = this.indexOfLayer(name);
+
+  if (~index) this.layers.splice(index, 1);
+  return this;
+});
+
+/**
+ * Enable a given middleware layer.
+ *
+ * @param {String} name The name of the middleware.
+ * @returns {Primus}
+ * @api public
+ */
+Primus.readable('enable', function enable(name) {
+  var index = this.indexOfLayer(name);
+
+  if (~index) this.layers[index].enabled = true;
+  return this;
+});
+
+/**
+ * Disable a given middleware layer.
+ *
+ * @param {String} name The name of the middleware.
+ * @returns {Primus}
+ * @api public
+ */
+Primus.readable('disable', function disable(name) {
+  var index = this.indexOfLayer(name);
+
+  if (~index) this.layers[index].enabled = false;
+  return this;
+});
+
+/**
+ * Find the index of a given middleware layer by name.
+ *
+ * @param {String} name The name of the layer.
+ * @returns {Number}
+ * @api private
+ */
+Primus.readable('indexOfLayer', function indexOfLayer(name) {
+  for (var i = 0, length = this.layers.length; i < length; i++) {
+    if (this.layers[i].name === name) return i;
+  }
+
+  return -1;
+});
 
 /**
  * Destroy the created Primus instance.
@@ -546,9 +676,10 @@ Primus.prototype.plugin = function plugin(name) {
  *
  * @param {Object} options Destruction instructions.
  * @param {Function} fn Callback.
+ * @returns {Primus}
  * @api public
  */
-Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) {
+Primus.readable('destroy', function destroy(options, fn) {
   if ('function' === typeof options) {
     fn = options;
     options = null;
@@ -625,7 +756,12 @@ Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) 
   }
 
   return this;
-};
+});
+
+//
+// Alias for destroy.
+//
+Primus.readable('end', Primus.prototype.destroy);
 
 /**
  * Checks if the given event is an emitted event by Primus.
@@ -634,10 +770,10 @@ Primus.prototype.destroy = Primus.prototype.end = function destroy(options, fn) 
  * @returns {Boolean}
  * @api public
  */
-Primus.prototype.reserved = function reserved(evt) {
+Primus.readable('reserved', function reserved(evt) {
   return (/^(incoming|outgoing)::/).test(evt)
   || evt in reserved.events;
-};
+});
 
 /**
  * The actual events that are used by Primus.

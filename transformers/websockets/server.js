@@ -39,6 +39,8 @@ module.exports = function server() {
           socket.upgradeReq.headers               // HTTP request headers.
         , socket.upgradeReq                       // IP address location.
         , parse(socket.upgradeReq.url).query      // Optional query string.
+        , null                                    // We don't have an unique id.
+        , socket.upgradeReq                       // Reference to the HTTP req.
       );
 
       spark.on('outgoing::end', function end() {

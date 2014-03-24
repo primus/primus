@@ -3,7 +3,7 @@
 var ParserError = require('./errors').ParserError
   , parse = require('querystring').parse
   , forwarded = require('forwarded-for')
-  , predefine = require('predefine')
+  , fuse = require('fusing')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
 
@@ -20,9 +20,11 @@ var ParserError = require('./errors').ParserError
  * @param {String} id An optional id of the socket, or we will generate one.
  * @api public
  */
-function Spark(primus, headers, address, query, id) {
-  var readable = predefine(this, predefine.READABLE)
-    , writable = predefine(this, predefine.WRITABLE)
+function Spark(primus, headers, address, query, id, request) {
+  this.fuse();
+
+  var readable = this.readable
+    , writable = this.writable
     , spark = this;
 
   readable('primus', primus);         // References to Primus.
@@ -33,6 +35,7 @@ function Spark(primus, headers, address, query, id) {
   readable('readable', true);         // Silly stream compatibility.
   writable('query', query || {});     // The query string.
   writable('timeout', null);          // Heartbeat timeout.
+  writable('http', request);          // Reference to an HTTP request.
 
   //
   // Parse our query string.
@@ -46,9 +49,9 @@ function Spark(primus, headers, address, query, id) {
   });
 }
 
-Spark.prototype.__proto__ = require('stream').prototype;
-Spark.readable = predefine(Spark.prototype, predefine.READABLE);
-Spark.writable = predefine(Spark.prototype, predefine.WRITABLE);
+fuse(Spark, require('stream'), {
+  defaults: false
+});
 
 //
 // Internal readyState's to prevent writes against close sockets.
@@ -83,6 +86,14 @@ Spark.writable('__readyState', Spark.OPEN);
 //
 Spark.readable('address', { get: function address() {
   return forwarded(this.remote, this.headers, this.primus.whitelist);
+}}, true);
+
+//
+// This gives access to the original HTTP request that was used to initialise
+// the connection.
+//
+Spark.readable('request', { get: function request() {
+  return this.http || this.headers['primus::req::backup'];
 }}, true);
 
 /**

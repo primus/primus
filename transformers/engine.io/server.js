@@ -21,10 +21,11 @@ module.exports = function server() {
   //
   this.service.on('connection', function connection(socket) {
     var spark = new Spark(
-        socket.request.headers              // HTTP request headers.
-      , socket.request.primus               // IP Address location.
-      , socket.request.query                // Optional query string.
-      , socket.id                           // Unique connection id.
+        socket.request.headers                      // HTTP request headers.
+      , socket.request.primus                       // IP Address location.
+      , socket.request.query                        // Optional query string.
+      , socket.id                                   // Unique connection id.
+      , socket.request                              // Reference to the HTTP req.
     );
 
     spark.on('outgoing::end', function end() {

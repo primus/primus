@@ -220,7 +220,7 @@ Disconnects are announced using a `disconnection` event:
 
 ```js
 primus.on('disconnection', function (spark) {
-  // the spark that disconnected
+// the spark that disconnected
 });
 ```
 
@@ -265,6 +265,14 @@ This is an unique id that we use to identify this single connection with. Normal
 the frameworks refer to this as an `sessionid` which is confusing as it's only
 used for the duration of one single connection. You should not see this as an
 "session id" and expect it change to between disconnects and reconnects.
+
+#### spark.request
+
+The `spark.request` gives you access to the HTTP request that was used to
+initiate the real-time connection with the server. Please note that this request
+is already answered and closed (in most cases) so do not attempt to write or
+answer it in anyway. But it might be useful access methods that get added by
+middleware layers etc.
 
 #### spark.write(data)
 

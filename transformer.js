@@ -1,9 +1,8 @@
 'use strict';
 
 var querystring = require('querystring').parse
-  , EventEmitter = require('eventemitter3')
-  , access = require('access-control')
-  , url = require('url').parse;
+  , url = require('url').parse
+  , fuse = require('fusing');
 
 //
 // Used to fake middleware's as we don't have a next callback.
@@ -18,23 +17,16 @@ function noop() {}
  * @api public
  */
 function Transformer(primus) {
+  this.fuse();
+
   this.Spark = primus.Spark;    // Used by the Server to create a new connection.
   this.primus = primus;         // Reference to the Primus instance.
-  this.primusjs = null;         // Path to the client library.
-  this.specfile = null;         // Path to the Primus specification.
   this.service = null;          // Stores the real-time service.
-  this.buffer = null;           // Buffer of the library.
 
-  //
-  // Configure the HTTP Access Control (CORS) handling.
-  //
-  this.cors = access(primus.options);
-
-  EventEmitter.call(this);
   this.initialise();
 }
 
-Transformer.prototype.__proto__ = EventEmitter.prototype;
+fuse(Transformer, require('eventemitter3'));
 
 //
 // Simple logger shortcut.
@@ -42,30 +34,22 @@ Transformer.prototype.__proto__ = EventEmitter.prototype;
 Object.defineProperty(Transformer.prototype, 'logger', {
   get: function logger() {
     return {
-      error: this.log.bind(this.primus, 'log', 'error'),  // Log error <line>.
-      warn:  this.log.bind(this.primus, 'log', 'warn'),   // Log warn <line>.
-      info:  this.log.bind(this.primus, 'log', 'info'),   // Log info <line>.
-      debug: this.log.bind(this.primus, 'log', 'debug'),  // Log debug <line>.
-      plain: this.log.bind(this.primus, 'log')            // Log x <line>.
+      error: this.primus.emits('log', 'error'), // Log error <line>.
+      warn:  this.primus.emits('log', 'warn'),  // Log warn <line>.
+      info:  this.primus.emits('log', 'info'),  // Log info <line>.
+      debug: this.primus.emits('log', 'debug'), // Log debug <line>.
+      log:   this.primus.emits('log', 'log'),   // Log log <line>.
+      plain: this.primus.emits('log', 'log')    // Log log <line>.
     };
   }
 });
-
-/**
- * Simple log handler that will emit log messages under the given `type`.
- *
- * @api private
- */
-Transformer.prototype.log = function log(type) {
-  this.emit.apply(this, arguments);
-};
 
 /**
  * Create the server and attach the appropriate event listeners.
  *
  * @api private
  */
-Transformer.prototype.initialise = function initialise() {
+Transformer.readable('initialise', function initialise() {
   if (this.server) this.server();
 
   var server = this.primus.server
@@ -103,38 +87,57 @@ Transformer.prototype.initialise = function initialise() {
   if (this.listeners('upgrade').length || this.listeners('previous::upgrade').length) {
     server.on('upgrade', this.upgrade.bind(this));
   }
+});
+
+/**
+ * Iterate all the middleware layers that we're set on our Primus instance.
+ *
+ * @param {String} type Either `http` or `upgrade`
+ * @param {Request} req HTTP request.
+ * @param {Response} res HTTP response.
+ * @param {Function} next Continuation callback.
+ * @api private
+ */
+Transformer.readable('forEach', function forEach(type, req, res, next) {
+  var layers = this.primus.layers
+    , primus = this.primus;
+
+  req.uri = req.uri || url(req.url, true);
+  req.query = req.query || req.uri.query || {};
 
   //
-  // Create a client URL, this where we respond with our library. The path to
-  // the server specification which can be used to retrieve the transformer that
-  // was used.
+  // Add some silly HTTP properties for connect.js compatibility.
   //
-  var pathname = this.primus.pathname.split('/').filter(Boolean)
-    , client = pathname.slice(0)
-    , spec = pathname.slice(0);
+  req.originalUrl = req.url;
 
-  client.push('primus.js');
-  spec.push('spec');
-
-  this.primusjs = '/'+ client.join('/');
-  this.specfile = '/'+ spec.join('/');
+  if (!layers.length) {
+    next();
+    return this;
+  }
 
   //
-  // Listen for static requests.
+  // Async or sync call the middleware layer.
   //
-  this.on('static', function serve(req, res) {
-    this.buffer = this.buffer || new Buffer(this.primus.library());
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
-    res.end(this.buffer);
-  });
+  (function iterate(index) {
+    var layer = layers[index++];
 
-  this.on('spec', function spec(req, res) {
-    res.statusCode = 200;
-    res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(this.primus.spec));
-  });
-};
+    if (!layer) return next();
+    if (!layer.enabled || layer.fn[type] === false) return iterate(index);
+
+    if (layer.length === 2) {
+      if (layer.fn.call(primus, req, res) === false) return;
+      return iterate(index);
+    }
+
+    layer.fn.call(primus, req, res, function done(err) {
+      if (err) return next(err);
+
+      iterate(index);
+    });
+  }(0));
+
+  return this;
+});
 
 /**
  * Start listening for incoming requests and check if we need to forward them to
@@ -144,34 +147,31 @@ Transformer.prototype.initialise = function initialise() {
  * @param {Response} res HTTP response.
  * @api private
  */
-Transformer.prototype.request = function request(req, res) {
+Transformer.readable('request', function request(req, res) {
   if (!this.test(req)) return this.emit('previous::request', req, res);
 
-  //
-  // HTTP Access Control (CORS) should only be applied to primus routes. As the
-  // `access-control` will only add headers when a `Origin` header is send to
-  // the server, these will not be any overhead for normal requests.
-  //
-  if (this.cors(req, res)) return; // Cors request handled.
-
-  if (req.uri.pathname === this.primusjs) return this.emit('static', req, res);
-  if (req.uri.pathname === this.specfile) return this.emit('spec', req, res);
-  if (!this.primus.auth) return this.emit('request', req, res, noop);
-
-  var transformer = this;
-  this.primus.auth(req, function authorized(err) {
-    if (!err) return transformer.emit('request', req, res, noop);
-
-    res.statusCode = err.statusCode || 401;
-    res.setHeader('Content-Type', 'application/json');
-
-    if ((res.statusCode === 401) && err.authenticate) {
-      res.setHeader('WWW-Authenticate', err.authenticate);
-    }
-
-    res.end(JSON.stringify({ error: err.message || err }));
+  req.headers['primus::req::backup'] = req;
+  res.once('end', function gc() {
+    delete req.headers['primus::req::backup'];
   });
-};
+
+  //
+  // I want to see you're face when you're looking at the lines of code above
+  // while you think, WTF what is this shit, you mad bro!? Let me take a moment
+  // to explain this mad and sadness.
+  //
+  // There are some real-time transformers that do not give us access to the
+  // HTTP request that initiated their `socket` connection. They only give us
+  // access to the information that they think is useful, we're greedy, we want
+  // everything and let developers decide what they want to use instead and
+  // therefor want to expose this HTTP request on our `spark` object.
+  //
+  // The reason it's added to the headers is because it's currently the only
+  // field that is accessible through all transformers.
+  //
+
+  this.forEach('http', req, res, this.emits('request', req, res));
+});
 
 /**
  * Starting listening for incoming upgrade requests and check if we need to
@@ -182,7 +182,9 @@ Transformer.prototype.request = function request(req, res) {
  * @param {Buffer} head Buffered data.
  * @api private
  */
-Transformer.prototype.upgrade = function upgrade(req, socket, head) {
+Transformer.readable('upgrade', function upgrade(req, socket, head) {
+  if (!this.test(req)) return this.emit('previous::upgrade', req, socket, head);
+
   //
   // Copy buffer to prevent large buffer retention in Node core.
   // @see jmatthewsr-ms/node-slab-memory-issues
@@ -190,31 +192,16 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
   var buffy = new Buffer(head.length);
   head.copy(buffy);
 
-  if (!this.test(req)) return this.emit('previous::upgrade', req, socket, buffy);
-  if (!this.primus.auth) return this.emit('upgrade', req, socket, buffy, noop);
-
-  var transformer = this;
-  this.primus.auth(req, function authorized(err) {
-    if (!err) return transformer.emit('upgrade', req, socket, buffy, noop);
-
-    var message = JSON.stringify({ error: err.message || err });
-    var code = err.statusCode || 401;
-
-    socket.write('HTTP/' + req.httpVersion + ' ');
-    socket.write(code + ' ' + require('http').STATUS_CODES[code] + '\r\n');
-    socket.write('Connection: close\r\n');
-    socket.write('Content-Type: application/json\r\n');
-    socket.write('Content-Length: ' + message.length + '\r\n');
-
-    if ((code === 401) && err.authenticate) {
-      socket.write('WWW-Authenticate: ' + err.authenticate + '\r\n');
-    }
-
-    socket.write('\r\n');
-    socket.write(message);
-    socket.destroy();
+  //
+  // See Transformer#request for an explanation of this madness.
+  //
+  req.headers['primus::req::backup'] = req;
+  socket.once('end', function gc() {
+    delete req.headers['primus::req::backup'];
   });
-};
+
+  this.forEach('upgrade', req, socket, this.emits('upgrade', req, socket, buffy));
+});
 
 /**
  * Check if we should accept this request.
@@ -223,25 +210,14 @@ Transformer.prototype.upgrade = function upgrade(req, socket, head) {
  * @returns {Boolean} Do we need to accept this request.
  * @api private
  */
-Transformer.prototype.test = function test(req) {
-  req.uri = url(req.url);
+Transformer.readable('test', function test(req) {
+  req.uri = url(req.url, true);
 
   var pathname = req.uri.pathname || '/'
-    , route = this.primus.pathname
-    , accepted = pathname.slice(0, route.length) === route;
+    , route = this.primus.pathname;
 
-  if (!accepted) this.emit('unknown', req);
-
-  //
-  // Make sure that the first part of the path matches.
-  //
-  return accepted;
-};
-
-//
-// Make the transporter extendable.
-//
-Transformer.extend = require('predefine').extend;
+  return pathname.slice(0, route.length) === route;
+});
 
 //
 // Expose the transformer's skeleton.
