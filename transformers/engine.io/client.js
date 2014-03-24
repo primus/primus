@@ -42,6 +42,11 @@ module.exports = function client() {
       // caching requests.
       //
       rememberUpgrade: false,
+
+      //
+      // Binary support in Engine.IO breaks a shit things. Turn it off for now.
+      //
+      forceBase64: true,
       path: this.pathname,
       transports: !primus.AVOID_WEBSOCKETS
         ? ['polling', 'websocket']
