@@ -475,7 +475,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
           }, 100);
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
       });
 
       it('should not increment the attempt if a backoff is running', function (done) {
