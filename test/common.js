@@ -1,7 +1,10 @@
 'use strict';
 
 var chai = require('chai');
-chai.Assertion.includeStack = true;
+chai.config.includeStack = true;
+
+var path = require('path');
+var fs = require('fs');
 
 //
 // Expose primus
@@ -32,7 +35,22 @@ Object.defineProperty(exports, 'port', {
 // Expose a server creation utility.
 //
 exports.create = function create(transformer, fn, port) {
-  port = port || exports.port;
+  var pathname;
+
+  if (typeof port === 'string') {
+    if (port.indexOf('/', port.length - 1) < 0) {
+      pathname = port;
+    } else {
+      pathname = port;
+      port = exports.port;
+      pathname = String(path.join(pathname, String(port)));
+    }
+    if (fs.existsSync(pathname)) {
+      fs.unlinkSync(pathname);
+    }
+  } else {
+    port = port || exports.port;
+  }
 
   var server = require('http').createServer(function handle(req, res) {
     console.error('');
@@ -43,12 +61,15 @@ exports.create = function create(transformer, fn, port) {
     res.end('original listener');
   });
 
-  var primus = new exports.Primus(server, { transformer: transformer });
+  var primus = new exports.Primus(server, {
+    transformer: transformer,
+    pathname: pathname
+  });
 
   primus.on('connection', function connection(spark) {
     spark.on('data', function data(packet) {
       if (packet.echo) spark.write(packet.echo);
-      if (packet.pipe) require('fs').createReadStream(__filename).pipe(spark, {
+      if (packet.pipe) fs.createReadStream(__filename).pipe(spark, {
         autoClose: false
       });
     });
@@ -79,8 +100,22 @@ exports.create = function create(transformer, fn, port) {
     upgrades.length = requests.length = 0;
   }
 
-  server.portnumber = port;
-  server.listen(port, fn);
+  server.portnumber = pathname || port;
+  server.pathname = pathname;
+
+  server.listen(pathname || port, fn);
+
+  if (pathname) {
+    server.make_addr = function (auth, query) {
+      return 'ws+unix://' + (auth ? auth + '@' : '') + pathname;
+    }
+  } else {
+    server.make_addr = function (auth, query) {
+      return 'http://' + (auth ? auth + '@' : '') + 'localhost:' + port + (query ? '/' + query : '');
+    }
+  }
+
+  server.addr = server.make_addr();
 
   return {
     Socket: primus.Socket,

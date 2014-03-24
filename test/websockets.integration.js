@@ -1,5 +1,3 @@
 'use strict';
 
-[
-  'WebSockets'
-].forEach(require('./transformer.base'));
+require('./transformer.base')('WebSockets');

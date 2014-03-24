@@ -382,9 +382,10 @@ ping                | Ping interval to test connection        | `25000` ms
 pong                | Time the server has to respond to ping  | `10000` ms
 [strategy]          | Our reconnect strategies                | `"disconnect,online,timeout"`
 manual              | Manually open the connection            | `false`
-websockets          | Should we AVOID the usage of WebSockets | Boolean, is detected.
-network             | Use native `online`/`offline` detection | Boolean, is feature detected.
+websockets          | Should we AVOID the usage of WebSockets | Boolean, is detected
+network             | Use native `online`/`offline` detection | Boolean, is feature detected
 transport           | Transport specific configuration        | `{}`
+queueSize           | Number of messages that can be queued   | `Infinity`
 
 There are 2 important options that we're going to look a bit closer at.
 
@@ -572,7 +573,7 @@ primus.on('reconnect', function () {
 });
 ```
 
-### primus.on('reconnecting')
+#### primus.on('reconnecting')
 
 Looks a lot like the `reconnect` event mentioned above, but it's emitted when
 we've detected that connection went/is down and we're going to start a reconnect
@@ -971,7 +972,7 @@ var Socket = primus.Socket
 
 If you are targeting a high end audience or maybe just something for internal
 uses you can use a pure WebSocket server. This uses the `ws` WebSocket module
-which is known to be one if not the fastest WebSocket server available in
+which is known to be one of, if not the fastest, WebSocket servers available in
 Node.js and supports all protocol specifications. To use pure WebSockets you
 need to install the `ws` module:
 

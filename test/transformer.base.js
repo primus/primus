@@ -1,6 +1,8 @@
 'use strict';
 
-module.exports = function base(transformer) {
+module.exports = function base(transformer, pathname, transformer_name) {
+  transformer_name = transformer_name || '';
+
   var EventEmitter = require('events').EventEmitter;
 
   var emitter = {
@@ -24,7 +26,7 @@ module.exports = function base(transformer) {
     }
   };
 
-  describe('Transformer: '+ transformer, function () {
+  describe('Transformer: '+ (transformer_name || transformer), function () {
     var common = require('./common')
       , request = common.request
       , Primus = common.Primus
@@ -36,7 +38,7 @@ module.exports = function base(transformer) {
       , primus;
 
     beforeEach(function beforeEach(done) {
-      var services = create(transformer, done);
+      var services = create(transformer, done, pathname);
 
       destroy = services.destroy;
       Socket = services.Socket;
@@ -52,12 +54,12 @@ module.exports = function base(transformer) {
     });
 
     describe('.Socket', function () {
-      it('exposes a complatible socket', function () {
+      it('exposes a compatible socket', function () {
         expect(Socket).to.be.a('function');
       });
 
       it('emits an `open` event when its connected', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function () {
           socket.end();
@@ -66,7 +68,7 @@ module.exports = function base(transformer) {
       });
 
       it('exposes a .socket property', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function () {
           expect(!!socket.socket).to.equal(true);
@@ -76,7 +78,7 @@ module.exports = function base(transformer) {
       });
 
       it('initialises without `new`', function (done) {
-        var socket = Socket('http://localhost:'+ server.portnumber, {
+        var socket = Socket(server.addr, {
           timeout: 50000
         });
 
@@ -97,7 +99,7 @@ module.exports = function base(transformer) {
       });
 
       it('should not open the socket if we set out state to manual', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber, {
+        var socket = new Socket(server.addr, {
           manual: true
         });
 
@@ -112,7 +114,7 @@ module.exports = function base(transformer) {
       });
 
       it('allows disabling of the reconnect functionality', function () {
-        var socket = new Socket('http://localhost:'+ server.portnumber, {
+        var socket = new Socket(server.addr, {
           strategy: false,
           manual: true
         });
@@ -121,7 +123,7 @@ module.exports = function base(transformer) {
       });
 
       it('sets reconnection strategies by default', function () {
-        var socket = new Socket('http://localhost:'+ server.portnumber, {
+        var socket = new Socket(server.addr, {
           manual: true
         });
 
@@ -132,7 +134,7 @@ module.exports = function base(transformer) {
       });
 
       it('emits errors for incorrect context when theres a listener', function () {
-        var socket = new Socket('http://localhost:'+ server.portnumber, {
+        var socket = new Socket(server.addr, {
           manual: true
         }), calls = 0;
 
@@ -149,7 +151,7 @@ module.exports = function base(transformer) {
       });
 
       it('should change readyStates', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         expect(socket.readyState).to.equal(Socket.CLOSED);
 
@@ -166,8 +168,33 @@ module.exports = function base(transformer) {
         });
       });
 
+      it('should set the correct read/writable states', function (done) {
+        var socket = new Socket(server.addr);
+
+        expect(socket.readable).to.equal(true);
+        expect(socket.writable).to.equal(true);
+
+        socket.once('open', function () {
+          expect(socket.readable).to.equal(true);
+          expect(socket.writable).to.equal(true);
+
+          socket.once('end', function () {
+
+            expect(socket.readable).to.equal(false);
+            expect(socket.writable).to.equal(false);
+
+            socket.once('open', function () {
+              expect(socket.readable).to.equal(true);
+              expect(socket.writable).to.equal(true);
+
+              socket.once('end', done).end();
+            }).open();
+          }).end();
+        });
+      });
+
       it('emits a readyStateChange event', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber)
+        var socket = new Socket(server.addr)
           , state = socket.readyState
           , calls = 0;
 
@@ -188,7 +215,7 @@ module.exports = function base(transformer) {
       });
 
       it('emits an `end` event when its closed', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function () {
           socket.end();
@@ -196,7 +223,7 @@ module.exports = function base(transformer) {
       });
 
       it('emits an `close` event when its closed', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function () {
           socket.end();
@@ -204,7 +231,7 @@ module.exports = function base(transformer) {
       });
 
       it('only emits `end` once', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function () {
           socket.end();
@@ -217,7 +244,7 @@ module.exports = function base(transformer) {
       });
 
       it('sends & receives messages', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('data', function (message) {
           expect(message).to.equal('pong');
@@ -231,7 +258,7 @@ module.exports = function base(transformer) {
       });
 
       it('receives the raw packet data', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('data', function (message, raw) {
           var data = JSON.stringify(message);
@@ -250,7 +277,7 @@ module.exports = function base(transformer) {
       });
 
       it('emits an `error` event when it cannot encode the data', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function () {
           var data = { foo: 'bar' };
@@ -267,7 +294,7 @@ module.exports = function base(transformer) {
       });
 
       it('buffers messages before it connected', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber)
+        var socket = new Socket(server.addr)
           , messages = 10
           , received = 0;
 
@@ -286,7 +313,7 @@ module.exports = function base(transformer) {
       });
 
       it('should not reconnect when we close the connection', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function (message) {
           socket.end();
@@ -313,7 +340,7 @@ module.exports = function base(transformer) {
           }
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber, {
+        var socket = new Socket(server.addr, {
           strategy: 'none'
         });
 
@@ -345,7 +372,7 @@ module.exports = function base(transformer) {
           }
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber, {
+        var socket = new Socket(server.addr, {
           strategy: 'none'
         });
 
@@ -380,7 +407,7 @@ module.exports = function base(transformer) {
           }
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber)
+        var socket = new Socket(server.addr)
           , reconnected = false
           , reconnect = false
           , opened = 0;
@@ -410,7 +437,7 @@ module.exports = function base(transformer) {
           }
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber)
+        var socket = new Socket(server.addr)
           , reconnected = false
           , reconnect = false
           , opened = 0;
@@ -452,7 +479,7 @@ module.exports = function base(transformer) {
       });
 
       it('should not increment the attempt if a backoff is running', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         var backoff = {}
           , result = socket.backoff(function () {
@@ -472,8 +499,8 @@ module.exports = function base(transformer) {
         socket.on('end', done);
       });
 
-      it('shoud reset the reconnect details after a succesful reconnect', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber, {
+      it('should reset the reconnect details after a succesful reconnect', function (done) {
+        var socket = new Socket(server.addr, {
           reconnect: {
             minDelay: 100,
             maxDelay: 2000
@@ -525,7 +552,7 @@ module.exports = function base(transformer) {
       });
 
       it('can force websocket avoidance', function (done) {
-        var socket = new Socket('http://localhost:'+ server.portnumber, {
+        var socket = new Socket(server.addr, {
           websockets: false
         });
 
@@ -542,7 +569,7 @@ module.exports = function base(transformer) {
 
       describe('#transform', function () {
         it('thrown an error if an invalid type is given', function (done) {
-          var socket = new Socket('http://localhost:'+ server.portnumber);
+          var socket = new Socket(server.addr);
 
           primus.on('connection', function (spark) {
             spark.end();
@@ -557,7 +584,7 @@ module.exports = function base(transformer) {
 
         describe('outgoing', function () {
           it('rewrites the outgoing message', function (done) {
-            var socket = new Socket('http://localhost:'+ server.portnumber);
+            var socket = new Socket(server.addr);
 
             primus.on('connection', function (spark) {
               spark.on('data', function (data) {
@@ -584,7 +611,7 @@ module.exports = function base(transformer) {
           });
 
           it('prevents the message from being written', function (done) {
-            var socket = new Socket('http://localhost:'+ server.portnumber);
+            var socket = new Socket(server.addr);
 
             socket.transform('outgoing', function (data) {
               setTimeout(function () {
@@ -603,7 +630,7 @@ module.exports = function base(transformer) {
 
         describe('incoming', function () {
           it('rewrites the incoming message', function (done) {
-            var socket = new Socket('http://localhost:'+ server.portnumber);
+            var socket = new Socket(server.addr);
 
             primus.on('connection', function (spark) {
               spark.write('foo');
@@ -630,7 +657,7 @@ module.exports = function base(transformer) {
           });
 
           it('prevents the message from being emitted', function (done) {
-            var socket = new Socket('http://localhost:'+ server.portnumber);
+            var socket = new Socket(server.addr);
 
             primus.on('connection', function (spark) {
               spark.write('foo');
@@ -655,8 +682,11 @@ module.exports = function base(transformer) {
 
     describe('.createSocket', function () {
       it('can connect to the server', function (done) {
-        var PSocket = Primus.createSocket({ transformer: transformer })
-          , socket = new PSocket('http://localhost:'+ server.portnumber);
+        var PSocket = Primus.createSocket({
+              transformer: transformer,
+              pathname: server.pathname
+            })
+          , socket = new PSocket(server.addr);
 
         socket.on('open', function () {
           socket.end();
@@ -667,11 +697,12 @@ module.exports = function base(transformer) {
       it('should accept plugins', function (done) {
         var PSocket = Primus.createSocket({
               transformer: transformer,
+              pathname: server.pathname,
               plugin: {
                 emit: emitter
               }
             })
-          , socket = new PSocket('http://localhost:'+ server.portnumber);
+          , socket = new PSocket(server.addr);
 
         expect(socket.$emit).to.be.a('function');
         socket.on('open', function () {
@@ -693,8 +724,12 @@ module.exports = function base(transformer) {
           throw new Error('Auth should be called');
         });
 
-        var Socket = Primus.createSocket({ transformer: transformer, authorization: true })
-          , socket = new Socket('http://localhost:'+ server.portnumber);
+        var Socket = Primus.createSocket({
+              transformer: transformer,
+              pathname: server.pathname,
+              authorization: true
+            })
+          , socket = new Socket(server.addr);
 
         socket.on('end', done);
         socket.on('reconnect', function () {
@@ -716,8 +751,12 @@ module.exports = function base(transformer) {
           throw new Error('Auth should be called');
         });
 
-        var Socket = Primus.createSocket({ transformer: transformer, authorization: true })
-          , socket = new Socket('http://localhost:'+ server.portnumber);
+        var Socket = Primus.createSocket({
+              transformer: transformer,
+              pathname: server.pathname,
+              authorization: true
+            })
+          , socket = new Socket(server.addr);
 
         socket.on('end', done);
         socket.on('reconnect', function () {
@@ -739,8 +778,12 @@ module.exports = function base(transformer) {
           throw new Error('Auth should be called');
         });
 
-        var Socket = Primus.createSocket({ transformer: transformer, authorization: true })
-          , socket = new Socket('http://localhost:'+ server.portnumber);
+        var Socket = Primus.createSocket({
+              transformer: transformer,
+              pathname: server.pathname,
+              authorization: true
+            })
+          , socket = new Socket(server.addr);
 
         socket.on('outgoing::open', function () {
           if (socket.socket.on) {
@@ -780,7 +823,7 @@ module.exports = function base(transformer) {
           spark.end();
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('end', done);
         socket.on('reconnect', function () {
@@ -803,7 +846,7 @@ module.exports = function base(transformer) {
           });
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
         socket.write('balls');
       });
 
@@ -814,7 +857,7 @@ module.exports = function base(transformer) {
           socket.end();
         });
 
-        var socket = new Socket('http://usr:pass@localhost:'+ server.portnumber +'/?foo=bar');
+        var socket = new Socket(server.make_addr('usr:pass', '?foo=bar'));
         socket.on('end', done);
       });
 
@@ -823,7 +866,7 @@ module.exports = function base(transformer) {
           setTimeout(next, 1000);
         });
 
-        var socket = new Socket('http://usr:pass@localhost:'+ server.portnumber +'/?foo=bar', {
+        var socket = new Socket(server.make_addr('usr:pass', '?foo=bar'), {
           timeout: 500
         });
 
@@ -835,7 +878,7 @@ module.exports = function base(transformer) {
           setTimeout(next, 1000);
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber, { timeout: 10 })
+        var socket = new Socket(server.addr, { timeout: 10 })
           , pattern = [];
 
         socket.on('timeout', function () {
@@ -864,7 +907,7 @@ module.exports = function base(transformer) {
           spark.on('end', done);
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('open', function () {
           socket.end();
@@ -887,7 +930,7 @@ module.exports = function base(transformer) {
           spark.write(data);
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
       });
 
       it('should receive querystrings', function (done) {
@@ -895,7 +938,8 @@ module.exports = function base(transformer) {
           expect(spark.query).to.be.a('object');
 
           if (
-            transformer.toLowerCase() !== 'sockjs'
+            (transformer.toLowerCase() !== 'sockjs') &&
+            (transformer_name.toLowerCase() !== 'unixdomainwebsockets')
           ) {
             expect(spark.query.foo).to.equal('bar');
           }
@@ -903,7 +947,7 @@ module.exports = function base(transformer) {
           socket.end();
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber +'/?foo=bar');
+        var socket = new Socket(server.make_addr(null, '?foo=bar'));
         socket.on('end', done);
       });
 
@@ -915,7 +959,7 @@ module.exports = function base(transformer) {
           socket.end();
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber +'/?foo=bar');
+        var socket = new Socket(server.make_addr(null, '?foo=bar'));
         socket.on('end', done);
       });
 
@@ -924,7 +968,7 @@ module.exports = function base(transformer) {
           spark.end();
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
 
         socket.on('end', done);
         socket.on('reconnect', function () {
@@ -932,9 +976,10 @@ module.exports = function base(transformer) {
         });
       });
 
+      if (transformer_name.toLowerCase() !== 'unixdomainwebsockets') {
       it('should still allow requests to the original listener', function (done) {
         request(
-          'http://localhost:'+ server.portnumber +'/nothrow',
+          server.addr +'/nothrow',
           function (err, res, body) {
             if (err) return done(err);
 
@@ -946,7 +991,7 @@ module.exports = function base(transformer) {
 
       it('responds to library requests', function (done) {
         request(
-          'http://localhost:'+ server.portnumber + '/primus/primus.js',
+          server.addr + '/primus/primus.js',
           function (err, res, body) {
             if (err) return done(err);
 
@@ -961,7 +1006,7 @@ module.exports = function base(transformer) {
       it('should handle requests to non existing routes captured by primus', function(done) {
         this.timeout(100);
         request(
-          'http://localhost:'+ server.portnumber + '/primus.js',
+          server.addr + '/primus.js',
           function (err, res, body) {
             if (err) return done(err);
 
@@ -980,8 +1025,9 @@ module.exports = function base(transformer) {
           done();
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
       });
+      } // !unixdomainwebsockets
 
       it('uses x-forwarded headers over the connection ip address', function (done) {
         primus.on('connection', function (spark) {
@@ -995,12 +1041,13 @@ module.exports = function base(transformer) {
           done();
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
       });
 
+      if (transformer_name.toLowerCase() !== 'unixdomainwebsockets') {
       it('exposes a spec file with the correct transformer', function (done) {
         request(
-          'http://localhost:'+ server.portnumber +'/primus/spec',
+          server.addr +'/primus/spec',
           function (err, res, body) {
             if (err) return done(err);
             body = JSON.parse(body);
@@ -1013,6 +1060,7 @@ module.exports = function base(transformer) {
           }
         );
       });
+      } // !unixdomainwebsockets
 
       it('doesnt crash when we write to a closed connection', function (done) {
         primus.on('connection', function (spark) {
@@ -1027,9 +1075,43 @@ module.exports = function base(transformer) {
           });
         });
 
-        var socket = new Socket('http://localhost:'+ server.portnumber);
+        var socket = new Socket(server.addr);
         socket.on('open', function () {
           socket.end();
+        });
+      });
+
+      it('should make the spark available to the parser', function (done) {
+        var rnd = Math.random(),
+            parser = primus.parser;
+
+        primus.parsers({
+          decoder: function (data, fn) {
+            expect(this.foobar).to.equal(rnd);
+            parser.decoder.call(this, data, function (err, decoded) {
+              expect(err).not.to.exist;
+              expect(decoded).to.eql({ echo: 'pong' });
+              fn(null, decoded);
+            });
+          },
+
+          encoder: function (data, fn) {
+            expect(this.foobar).to.equal(rnd);
+            parser.encoder.call(this, data, fn);
+            if (data === 'pong') {
+              done();
+            }
+          }
+        });
+
+        primus.on('connection', function (spark) {
+          spark.foobar = rnd;
+        });
+
+        var socket = new Socket(server.addr);
+
+        socket.on('open', function () {
+          socket.write({ echo: 'pong' });
         });
       });
 
@@ -1060,7 +1142,7 @@ module.exports = function base(transformer) {
               }, 10);
             });
 
-            var socket = new Socket('http://localhost:'+ server.portnumber);
+            var socket = new Socket(server.addr);
 
             socket.on('data', function (data) {
               expect(data).to.be.a('object');
@@ -1090,7 +1172,7 @@ module.exports = function base(transformer) {
               spark.write('foo');
             });
 
-            var socket = new Socket('http://localhost:'+ server.portnumber);
+            var socket = new Socket(server.addr);
           });
         });
 
@@ -1117,7 +1199,7 @@ module.exports = function base(transformer) {
               });
             });
 
-            var socket = new Socket('http://localhost:'+ server.portnumber);
+            var socket = new Socket(server.addr);
             socket.write('foo');
           });
 
@@ -1137,7 +1219,7 @@ module.exports = function base(transformer) {
               });
             });
 
-            var socket = new Socket('http://localhost:'+ server.portnumber);
+            var socket = new Socket(server.addr);
             socket.write('foo');
           });
         });
@@ -1153,7 +1235,7 @@ module.exports = function base(transformer) {
             });
           });
 
-          var socket = new Socket('http://localhost:'+ server.portnumber);
+          var socket = new Socket(server.addr);
         });
       });
     });

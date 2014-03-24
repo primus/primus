@@ -246,6 +246,9 @@ function Primus(url, options) {
 
   var primus = this;
 
+  // The maximum number of messages that can be placed in queue.
+  options.queueSize = 'queueSize' in options ? options.queueSize : Infinity;
+
   // Connection timeout duration.
   options.timeout = 'timeout' in options ? options.timeout : 10e3;
 
@@ -560,6 +563,13 @@ Primus.prototype.initialise = function initialise(options) {
   primus.on('incoming::open', function opened() {
     if (primus.attempt) primus.attempt = null;
 
+    //
+    // The connection has been openend so we should set our state to
+    // (writ|read)able so our stream compatibility works as intended.
+    //
+    primus.writable = true;
+    primus.readable = true;
+
     var readyState = primus.readyState;
 
     primus.readyState = Primus.OPEN;
@@ -575,7 +585,7 @@ Primus.prototype.initialise = function initialise(options) {
         primus.write(primus.buffer[i]);
       }
 
-      primus.buffer.length = 0;
+      primus.buffer = [];
     }
 
     primus.latency = +new Date() - start;
@@ -665,6 +675,9 @@ Primus.prototype.initialise = function initialise(options) {
     if (primus.timers.connect) primus.end();
     if (readyState !== Primus.OPEN) return;
 
+    this.writable = false;
+    this.readable = false;
+
     //
     // Clear all timers in case we're not going to reconnect.
     //
@@ -679,10 +692,15 @@ Primus.prototype.initialise = function initialise(options) {
     primus.emit('close');
 
     //
-    // The disconnect was unintentional, probably because the server shut down.
-    // So we should just start a reconnect procedure.
+    // The disconnect was unintentional, probably because the server has
+    // shutdown, so if the reconnection is enabled start a reconnect procedure.
     //
-    if (~primus.options.strategy.indexOf('disconnect')) primus.reconnect();
+    if (~primus.options.strategy.indexOf('disconnect')) {
+      return primus.reconnect();
+    }
+
+    primus.emit('outgoing::end');
+    primus.emit('end');
   });
 
   //
@@ -859,7 +877,14 @@ Primus.prototype.write = function write(data) {
       primus.emit('outgoing::data', packet);
     });
   } else {
-    primus.buffer.push(data);
+    var buffer = primus.buffer;
+
+    //
+    // If the buffer is at capacity, remove the first item.
+    //
+    if (buffer.length === primus.options.queueSize) buffer.splice(0, 1);
+
+    buffer.push(data);
   }
 
   return true;
@@ -1075,6 +1100,7 @@ Primus.prototype.end = function end(data) {
   if (data) this.write(data);
 
   this.writable = false;
+  this.readable = false;
 
   var readyState = this.readyState;
   this.readyState = Primus.CLOSED;
