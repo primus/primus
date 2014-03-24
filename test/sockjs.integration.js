@@ -1,5 +1,3 @@
 'use strict';
 
-[
-  'SockJS'
-].forEach(require('./transformer.base'));
+require('./transformer.base')('SockJS');
