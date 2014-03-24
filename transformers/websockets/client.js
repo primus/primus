@@ -45,14 +45,15 @@ module.exports = function client() {
       // Only allow primus.transport object in Node.js, it will throw in
       // browsers with a TypeError if we supply to much arguments.
       //
+      var prot = primus.url.protocol === 'ws+unix:' ? 'ws+unix' : 'ws';
       if (Factory.length === 3) {
         primus.socket = socket = new Factory(
-          primus.uri({ protocol: 'ws', query: true }),  // URL
+          primus.uri({ protocol: prot, query: true }),  // URL
           [],                                           // Sub protocols
           primus.transport                              // options.
         );
       } else {
-        primus.socket = socket = new Factory(primus.uri({ protocol: 'ws', query: true }));
+        primus.socket = socket = new Factory(primus.uri({ protocol: prot, query: true }));
       }
     } catch (e) { return primus.emit('error', e); }
 

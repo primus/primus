@@ -1,5 +1,3 @@
 'use strict';
 
-[
-  'Engine.IO'
-].forEach(require('./transformer.base'));
+require('./transformer.base')('Engine.IO');

@@ -1,5 +1,3 @@
 'use strict';
 
-[
-  'BrowserChannel'
-].forEach(require('./transformer.base'));
+require('./transformer.base')('BrowserChannel');

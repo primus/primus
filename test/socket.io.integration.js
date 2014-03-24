@@ -1,5 +1,3 @@
 'use strict';
 
-[
-  'Socket.IO'
-].forEach(require('./transformer.base'));
+require('./transformer.base')('Socket.IO');
