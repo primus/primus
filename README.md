@@ -1107,6 +1107,78 @@ of the transformer, we just `toLowerCase()` everything.
   The bug causes closed connections to say open. If you're experiencing this you
   can apply this [patch](http://github.com/3rd-Eden/engine.io/commit/0cf81270e9d5700).
 
+### Middleware
+
+Primus has two ways of extending the functionality. We have [plugins](#plugins)
+but also support middleware. And there is an important difference between these.
+The middleware layers allows you to modify the incoming requests **before** they
+are passed in to the transformers. The middleware layer is only ran for the
+requests that are handled by Primus. 
+
+We support 2 kind of middleware, **async** and **sync** middleware. The main
+difference between these kinds is that sync middleware doesn't require a
+callback, it is completely optional. In Primus, we eat our own dog food. Various
+of components in Primus are implemented through middleware layers:
+
+- `cors`: Adds the Access Control headers.
+- `primus.js`: It serves our `primus.js` client file.
+- `spec`: It outputs the server specification.
+- `authorization` Our authorization handler.
+
+#### Primus.before(name, fn, options)
+
+The `primus.before` method is how you add middleware layers to your system. All
+middleware layers need to be named. This allows you to also enable, disable and
+remove middleware layers. The supplied function can either a pre-configured
+function that is ready to answer request/responses or an unconfigured
+middleware. An unconfigured middleware is function with less then 2 arguments.
+We execute this function automatically with `Primus` as context of the function
+and optionally, the options that got provided:
+
+```js
+primus.before('name', function () {
+  var primus = this;
+
+  return function (req, res) {
+    res.end('foo');
+  }
+}, { foo: 'bar' });
+```
+
+As you can see in the example above, we assume that you return the actual
+middleware layer. If you don't need any pre-configuration you can just supply
+the function directly:
+
+```js
+// sync middleware
+primus.before('name', function (req, res) {
+
+});
+
+// async middleware
+primus.before('name', function (req, res, next) {
+  doStuff();
+});
+```
+
+You need to be aware that these middleware layers are running for HTTP requests
+but also upgrade requests. So it could be that certain middleware layers should
+only run for HTTP or Upgrade requests. In order to figure that out you can add a
+`http` or `upgrade` property to the middleware function and set it to `false` if
+you don't want it to be triggered.
+
+```js
+primus.before('name', function () {
+  function middleware(req, res, next) {
+  
+  }
+
+  middleware.upgrade = false; // Don't run this middleware for upgrades
+
+  return middleware
+});
+```
+
 ### Plugins
 
 Primus was built as a low level interface where you can build your applications
