@@ -122,8 +122,8 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
     if (!layer.enabled || layer.fn[type] === false) return iterate(index);
 
     if (layer.length === 2) {
-      if (layer.fn.call(primus, req, res) === undefined) return iterate(index);
-      return; // It returned something, assume the function handled it.
+      if (layer.fn.call(primus, req, res) === false) return;
+      return iterate(index);
     }
 
     layer.fn.call(primus, req, res, function done(err) {
