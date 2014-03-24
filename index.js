@@ -59,6 +59,11 @@ function Primus(server, options) {
   };
 
   //
+  // Inherit all properties of the EventEmitter.
+  //
+  EventEmitter.call(this);
+
+  //
   // Create a pre-bound Spark constructor. Doing a Spark.bind(Spark, this) doesn't
   // work as we cannot extend the constructor of it anymore. The added benefit of
   // approach listed below is that the prototype extensions are only applied to

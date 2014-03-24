@@ -34,11 +34,12 @@ fuse(Transformer, EventEmitter);
 Object.defineProperty(Transformer.prototype, 'logger', {
   get: function logger() {
     return {
-      error: this.primus.emits('log', 'error'),  // Log error <line>.
-      warn:  this.primus.emits('log', 'warn'),   // Log warn <line>.
-      info:  this.primus.emits('log', 'info'),   // Log info <line>.
-      debug: this.primus.emits('log', 'debug'),  // Log debug <line>.
-      plain: this.primus.emits('log')            // Log x <line>.
+      error: this.primus.emits('log', 'error'), // Log error <line>.
+      warn:  this.primus.emits('log', 'warn'),  // Log warn <line>.
+      info:  this.primus.emits('log', 'info'),  // Log info <line>.
+      debug: this.primus.emits('log', 'debug'), // Log debug <line>.
+      log:   this.primus.emits('log', 'log'),   // Log log <line>.
+      plain: this.primus.emits('log', 'log')    // Log log <line>.
     };
   }
 });
