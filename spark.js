@@ -21,8 +21,10 @@ var ParserError = require('./errors').ParserError
  * @api public
  */
 function Spark(primus, headers, address, query, id, request) {
-  var readable = Spark.predefine(this, Spark.predefine.READABLE)
-    , writable = Spark.predefine(this, Spark.predefine.WRITABLE)
+  this.fuse();
+
+  var readable = this.readable
+    , writable = this.writable
     , spark = this;
 
   readable('primus', primus);         // References to Primus.

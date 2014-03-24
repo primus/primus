@@ -1,7 +1,6 @@
 'use strict';
 
 var querystring = require('querystring').parse
-  , EventEmitter = require('eventemitter3')
   , url = require('url').parse
   , fuse = require('fusing');
 
@@ -18,15 +17,16 @@ function noop() {}
  * @api public
  */
 function Transformer(primus) {
+  this.fuse();
+
   this.Spark = primus.Spark;    // Used by the Server to create a new connection.
   this.primus = primus;         // Reference to the Primus instance.
   this.service = null;          // Stores the real-time service.
 
-  EventEmitter.call(this);
   this.initialise();
 }
 
-fuse(Transformer, EventEmitter);
+fuse(Transformer, require('eventemitter3'));
 
 //
 // Simple logger shortcut.
@@ -110,7 +110,10 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
   //
   req.originalUrl = req.url;
 
-  if (!layers.length) return next();
+  if (!layers.length) {
+    next();
+    return this;
+  }
 
   //
   // Async or sync call the middleware layer.
@@ -132,6 +135,8 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
       iterate(index);
     });
   }(0));
+
+  return this;
 });
 
 /**

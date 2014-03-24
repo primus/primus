@@ -1,7 +1,6 @@
 'use strict';
 
 var PrimusError = require('./errors').PrimusError
-  , EventEmitter = require('eventemitter3')
   , Transformer = require('./transformer')
   , Spark = require('./spark')
   , fuse = require('fusing')
@@ -25,6 +24,8 @@ function Primus(server, options) {
   }
 
   options = options || {};
+  this.fuse();
+
   var primus = this;
 
   this.auth = options.authorization || null;  // Do we have an authorization handler.
@@ -57,11 +58,6 @@ function Primus(server, options) {
     version: this.version,
     pathname: this.pathname
   };
-
-  //
-  // Inherit all properties of the EventEmitter.
-  //
-  EventEmitter.call(this);
 
   //
   // Create a pre-bound Spark constructor. Doing a Spark.bind(Spark, this) doesn't
@@ -104,7 +100,7 @@ function Primus(server, options) {
 // Fuse and spice-up the Primus prototype with EventEmitter and predefine
 // awesomeness.
 //
-fuse(Primus, EventEmitter);
+fuse(Primus, require('eventemitter3'));
 
 //
 // Lazy read the primus.js JavaScript client.
