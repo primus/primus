@@ -1,6 +1,7 @@
 'use strict';
 
 var PrimusError = require('./errors').PrimusError
+  , EventEmitter = require('eventemitter3')
   , Transformer = require('./transformer')
   , Spark = require('./spark')
   , fuse = require('fusing')
@@ -100,7 +101,7 @@ function Primus(server, options) {
 // Fuse and spice-up the Primus prototype with EventEmitter and predefine
 // awesomeness.
 //
-fuse(Primus, require('eventemitter3'));
+fuse(Primus, EventEmitter);
 
 //
 // Lazy read the primus.js JavaScript client.
