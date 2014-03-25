@@ -1175,8 +1175,41 @@ primus.before('name', function () {
 
   middleware.upgrade = false; // Don't run this middleware for upgrades
 
-  return middleware
+  return middleware;
 });
+```
+
+#### Primus.remove(name)
+
+This method allows you to remove middleware's that are configured. This works
+for the middleware layers that you added but also the middleware layers that we
+add by default. If you want to a different way of serving `primus.js` files you
+can simply:
+
+```js
+primus.remove('primus.js');
+```
+
+And add your own middleware instead.
+
+#### Primus.disable(name)
+
+In addition to removing middleware layers, it's also possible to disable them so
+they are skipped when we iterate over the middleware layers. This might be
+useful to just disable certain middleware layers in production.
+
+```js
+primus.disable('name');
+```
+
+#### Primus.enable(name)
+
+Of course, when you can disable middleware there also needs to be way to enable
+them again. This is exactly what this method does. Re-enable a disabled
+middleware layer.
+
+```js
+primus.enable('name');
 ```
 
 ### Plugins
