@@ -164,7 +164,7 @@ whatever you want with it, but remember to regenerate it every time you change
 Primus server options. This is important because some properties of the client
 are set using the server configuration. For example if you change the
 `pathname`, the client should be regenerated to reflect that change and work
-correctly. We advice you to regenerate the library every time you redeploy so
+correctly. We advise you to regenerate the library every time you redeploy so
 you always have a client compatible with your back-end. To save the file you
 can use:
 
