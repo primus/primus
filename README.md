@@ -52,8 +52,9 @@ npm install primus --save
 If you deploy your application behind a reverse proxy (Nginx, HAProxy, etc.) you
 might need to add WebSocket specific settings to it's configuration files. If
 you intent to use WebSockets please ensure that these settings have been added.
-There are some example configuration files available in
-[observer/balancerbattle](https://github.com/observing/balancerbattle).
+There are some example configuration files available in the
+[observing/balancerbattle](https://github.com/observing/balancerbattle)
+repository.
 
 ### Table of Contents
 
