@@ -165,7 +165,7 @@ primus.library();
 ```
 
 Which returns the client-side library as a string (which can then be minified or
-even have more code added to it). It's does not come pre-minified as that is out
+even have more code added to it). It does not come pre-minified as that is out
 of the scope of this project. You can store this on a CDN or on your static server.
 Do whatever you want with it, but remember to regenerate it every time you change
 Primus server options. This is important because some properties of the client
