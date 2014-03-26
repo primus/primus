@@ -39,6 +39,12 @@ If you have questions or need help with primus, come chat in our IRC room:
    room: #primus
 ```
 
+### Before Starting
+
+Please note that your HTTP server (Apache, Nginx, etc.) may need websocket
+specific settings in its configuration files. If intending to use websockets,
+please ensure these settings have been added before proceeding.
+
 ### Installation
 
 Primus is released in `npm` and can be installed using:
@@ -158,9 +164,10 @@ retrieved using:
 primus.library();
 ```
 
-Which returns the client-side library. It's not minified as that is out of the
-scope of this project. You can store this on a CDN or on your static server. Do
-whatever you want with it, but remember to regenerate it every time you change
+Which returns the client-side library as a string (which can then be minified or
+even have more code added to it). It's does not come pre-minified as that is out
+of the scope of this project. You can store this on a CDN or on your static server.
+Do whatever you want with it, but remember to regenerate it every time you change
 Primus server options. This is important because some properties of the client
 are set using the server configuration. For example if you change the
 `pathname`, the client should be regenerated to reflect that change and work
@@ -203,7 +210,8 @@ location. It's always available at:
 <protocol>://<server location>/<pathname>/primus.js
 ```
 
-The client is cross domain compatible so you don't have to serve it from the
+Here `<pathname>` is the `pathname` set in server options above. The client
+is cross domain compatible so you don't have to serve it from the
 same domain you're running Primus on. But please note, that the real-time
 framework you're using might be tied to same domain restrictions.
 
