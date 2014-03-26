@@ -77,6 +77,7 @@ repository.
   - [SockJS](#sockjs)
   - [Socket.IO](#socketio)
 - [Transformer Inconsistencies](#transformer-inconsistencies)
+- [Middleware](#middleware)
 - [Plugins](#plugins)
   - [Extending the Spark / Socket](#extending-the-spark--socket)
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
