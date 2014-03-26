@@ -39,12 +39,6 @@ If you have questions or need help with primus, come chat in our IRC room:
    room: #primus
 ```
 
-### Before Starting
-
-Please note that your HTTP server (Apache, Nginx, etc.) may need websocket
-specific settings in its configuration files. If intending to use websockets,
-please ensure these settings have been added before proceeding.
-
 ### Installation
 
 Primus is released in `npm` and can be installed using:
@@ -52,6 +46,14 @@ Primus is released in `npm` and can be installed using:
 ```
 npm install primus --save
 ```
+
+### Before Starting
+
+If you deploy your application behind a reverse proxy (Nginx, HAProxy, etc.) you
+might need to add WebSocket specific settings to it's configuration files. If
+you intent to use WebSockets please ensure that these settings have been added.
+There are some example configuration files available in
+[observer/balancerbattle](https://github.com/observing/balancerbattle).
 
 ### Table of Contents
 
