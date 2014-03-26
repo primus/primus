@@ -18,6 +18,7 @@ var ParserError = require('./errors').ParserError
  * @param {Object} address The object that holds the remoteAddress and port.
  * @param {Object} query The query string of request.
  * @param {String} id An optional id of the socket, or we will generate one.
+ * @param {Request} request The HTTP Request instance that initialised the spark.
  * @api public
  */
 function Spark(primus, headers, address, query, id, request) {
