@@ -8,8 +8,9 @@
  */
 module.exports = function configure() {
   var primusjs = this.pathname +'/primus.js'
-    , library = new Buffer(this.library())
-    , length = library.length;
+    , primus = this
+    , library
+    , length;
 
   /**
    * The actual HTTP middleware.
@@ -20,6 +21,14 @@ module.exports = function configure() {
    */
   function client(req, res) {
     if (req.uri.pathname !== primusjs) return;
+
+    //
+    // Lazy include and compile the library so we give our server some time to
+    // add plugins or we will compile the client library without plugins, which
+    // is sad :(
+    //
+    library = library || new Buffer(primus.library());
+    length = length || library.length;
 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/javascript; charset=utf-8');
