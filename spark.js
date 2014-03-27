@@ -24,19 +24,24 @@ var ParserError = require('./errors').ParserError
 function Spark(primus, headers, address, query, id, request) {
   this.fuse();
 
-  var readable = this.readable
-    , writable = this.writable
+  var writable = this.writable
     , spark = this;
 
-  readable('primus', primus);         // References to Primus.
-  readable('headers', headers || {}); // The request headers.
-  readable('remote', address || {});  // The remote address location.
-  readable('id', id || this.uuid());  // Unique id for socket.
-  readable('writable', true);         // Silly stream compatibility.
-  readable('readable', true);         // Silly stream compatibility.
-  writable('query', query || {});     // The query string.
+  query = query || {};
+  id = id || this.uuid(primus);
+  headers = headers || {};
+  address = address || {};
+  request = request || headers['primus::req::backups'];
+
+  writable('id', id);                 // Unique id for socket.
+  writable('primus', primus);         // References to Primus.
+  writable('remote', address);        // The remote address location.
+  writable('headers', headers);       // The request headers.
+  writable('request', request);       // Reference to an HTTP request.
+  writable('writable', true);         // Silly stream compatibility.
+  writable('readable', true);         // Silly stream compatibility.
+  writable('query', query);           // The query string.
   writable('timeout', null);          // Heartbeat timeout.
-  writable('http', request);          // Reference to an HTTP request.
 
   //
   // Parse our query string.
@@ -87,14 +92,6 @@ Spark.writable('__readyState', Spark.OPEN);
 //
 Spark.readable('address', { get: function address() {
   return forwarded(this.remote, this.headers, this.primus.whitelist);
-}}, true);
-
-//
-// This gives access to the original HTTP request that was used to initialise
-// the connection.
-//
-Spark.readable('request', { get: function request() {
-  return this.http || this.headers['primus::req::backup'];
 }}, true);
 
 /**
@@ -251,6 +248,27 @@ Spark.readable('__initialise', [function initialise() {
     clearTimeout(spark.timeout);
     spark.removeAllListeners();
     primus.emit('disconnection', spark);
+
+    //
+    // We are most likely the first `end` event in the EventEmitter stack which
+    // will make our callback the first to be execute. If we instantly delete
+    // properties it will cause that our users can't access them anymore in
+    // their `end` listener. So if they need to un-register something based on
+    // the spark.id, that would be impossible. Therefor we delay our deletion
+    // with a non scientific amount of milliseconds to give people some time to
+    // use these references for the last time.
+    //
+    setTimeout(function timeout() {
+      //
+      // Release references.
+      // @TODO also remove the references that we're set by users.
+      //
+      [
+        'id', 'primus', 'remote', 'headers', 'request', 'query'
+      ].forEach(function each(key) {
+        delete spark[key];
+      });
+    }, 10);
   });
 
   //
@@ -264,11 +282,12 @@ Spark.readable('__initialise', [function initialise() {
 /**
  * Generate a unique UUID.
  *
+ * @param {Primus} primus Reference to the primus instance.
  * @returns {String} UUID.
  * @api private
  */
-Spark.readable('uuid', function uuid() {
-  return Date.now() +'$'+ this.primus.sparks++;
+Spark.readable('uuid', function uuid(primus) {
+  return Date.now() +'$'+ primus.sparks++;
 });
 
 /**
