@@ -835,18 +835,18 @@ module.exports = function base(transformer, pathname, transformer_name) {
         primus.authorize(function auth(req, next) {
           expect(req.headers).to.be.a('object');
 
-          next();
+          setTimeout(next, 20);
         });
 
         primus.on('connection', function (spark) {
           spark.on('data', function (data) {
             expect(data).to.equal('balls');
             spark.end();
-            done();
           });
         });
 
         var socket = new Socket(server.addr);
+        socket.on('end', done);
         socket.write('balls');
       });
 
