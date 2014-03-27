@@ -300,7 +300,7 @@ spark.write({ foo: 'bar' });
 #### spark.end(data, options)
 
 You can use `spark.end` to close the connection. This method takes two optional
-arguments. The first if provided is the `data` to send to the client before
+arguments. The first, if provided, is the `data` to send to the client before
 closing the connection. The second is an options object used to customize the
 behavior of the method. By default the `spark.end` method closes the connection
 in a such way that the client knows it was intentional and it doesn't attempt a
