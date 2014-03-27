@@ -19,3 +19,5 @@ git checkout $(git describe --tags --abbrev=0)
 NODE_ENV=development npm install
 make sockjs.js
 mv sockjs.js $DESTDIR/library.js
+cd $DESTDIR
+find patches -name *.patch -exec patch -i {} \;

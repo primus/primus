@@ -1,0 +1,26 @@
+diff --git a/transformers/sockjs/library.js b/transformers/sockjs/library.js
+index 585215c..26cccb0 100644
+--- a/transformers/sockjs/library.js
++++ b/transformers/sockjs/library.js
+@@ -268,13 +268,14 @@ utils.userSetCode = function (code) {
+ // See: http://www.erg.abdn.ac.uk/~gerrit/dccp/notes/ccid2/rto_estimator/
+ // and RFC 2988.
+ utils.countRTO = function (rtt) {
+-    var rto;
+-    if (rtt > 100) {
+-        rto = 3 * rtt; // rto > 300msec
+-    } else {
+-        rto = rtt + 200; // 200msec < rto <= 300msec
+-    }
+-    return rto;
++    // In a local environment, when using IE8/9 and the `jsonp-polling`
++    // transport the time needed to establish a connection (the time that pass
++    // from the opening of the transport to the call of `_dispatchOpen`) is
++    // around 200ms (the lower bound used in the official client) and this
++    // causes spurious timeouts. For this reason we calculate a value slightly
++    // larger than that used in official client.
++    if (rtt > 100) return 4 * rtt; // rto > 400ms
++    return 300 + rtt;              // 300ms < rto <= 400ms
+ }
+ 
+ utils.log = function() {
