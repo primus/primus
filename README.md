@@ -273,25 +273,25 @@ silly transformer refuses to support it. Yes, I'm looking at you SockJS.
 
 #### spark.id
 
-This is an unique id that we use to identify this single connection with. Normally
-the frameworks refer to this as an `sessionid` which is confusing as it's only
-used for the duration of one single connection. You should not see this as an
-"session id" and expect it change to between disconnects and reconnects.
+This is a unique id that we use to identify this single connection with. Normally
+the frameworks refer to this as a `sessionid`, which is confusing as it's only
+used for the duration of one single connection. You should not see this as a
+"session id", and rather expect it to change between disconnects and reconnects.
 
 #### spark.request
 
 The `spark.request` gives you access to the HTTP request that was used to
 initiate the real-time connection with the server. Please note that this request
 is already answered and closed (in most cases) so do not attempt to write or
-answer it in anyway. But it might be useful access methods that get added by
-middleware layers etc.
+answer it in anyway. But it might be useful to access methods that get added by
+middleware layers, etc.
 
 #### spark.write(data)
 
 You can use the `spark.write` method to send data over the socket. The data is
 automatically encoded for you using the `parser` that you've set while creating
-the Primus instance. This method always returns `true` so back pressure isn't
-handled.
+the Primus server instance. This method always returns `true` so back pressure
+isn't handled.
 
 ```js
 spark.write({ foo: 'bar' });
@@ -300,7 +300,7 @@ spark.write({ foo: 'bar' });
 #### spark.end(data, options)
 
 You can use `spark.end` to close the connection. This method takes two optional
-arguments. The first if provided is the `data` to send to the client before
+arguments. The first, if provided, is the `data` to send to the client before
 closing the connection. The second is an options object used to customize the
 behavior of the method. By default the `spark.end` method closes the connection
 in a such way that the client knows it was intentional and it doesn't attempt a
@@ -385,7 +385,7 @@ var primus = Primus.connect(url, { options });
 ```
 
 The `url` argument should be the base url to connect to, not including the
-`pathname` option of the `Primus` server (See: [getting-started]: #getting-started.)
+`pathname` option of the `Primus` server (See: [getting-started](#getting-started).)
 If no `url` argument is passed, it will default to the current url.
 
 The following options can be provided:
