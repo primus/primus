@@ -31,7 +31,7 @@ function Spark(primus, headers, address, query, id, request) {
   id = id || this.uuid(primus);
   headers = headers || {};
   address = address || {};
-  request = request || headers['primus::req::backups'];
+  request = request || headers['primus::req::backup'];
 
   writable('id', id);                 // Unique id for socket.
   writable('primus', primus);         // References to Primus.
