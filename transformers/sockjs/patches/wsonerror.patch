@@ -1,0 +1,32 @@
+diff --git a/transformers/sockjs/library.js b/transformers/sockjs/library.js
+index 26cccb0..30f8792 100644
+--- a/transformers/sockjs/library.js
++++ b/transformers/sockjs/library.js
+@@ -939,7 +939,7 @@ var SockJS = function(url, dep_protocols_whitelist, options) {
+         // makes `new` optional
+         return new SockJS(url, dep_protocols_whitelist, options);
+     }
+-    
++
+     var that = this, protocols_whitelist;
+     that._options = {devel: false, debug: false, protocols_whitelist: [],
+                      info: undefined, rtt: undefined};
+@@ -1215,6 +1215,9 @@ var WebSocketTransport = SockJS.websocket = function(ri, trans_url) {
+     that.ws.onmessage = function(e) {
+         that.ri._didMessage(e.data);
+     };
++    that.ws.onerror = function() {
++      ri._didMessage(utils.closeFrame(1006, "WebSocket connection broken"));
++    };
+     // Firefox has an interesting bug. If a websocket connection is
+     // created after onunload, it stays alive even when user
+     // navigates away from the page. In such situation let's lie -
+@@ -1235,7 +1238,7 @@ WebSocketTransport.prototype.doCleanup = function() {
+     var that = this;
+     var ws = that.ws;
+     if (ws) {
+-        ws.onmessage = ws.onclose = null;
++        ws.onmessage = ws.onclose = ws.onerror = null;
+         ws.close();
+         utils.unload_del(that.unload_ref);
+         that.unload_ref = that.ri = that.ws = null;
