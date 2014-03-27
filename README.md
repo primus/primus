@@ -283,15 +283,15 @@ used for the duration of one single connection. You should not see this as a
 The `spark.request` gives you access to the HTTP request that was used to
 initiate the real-time connection with the server. Please note that this request
 is already answered and closed (in most cases) so do not attempt to write or
-answer it in anyway. But it might be useful access methods that get added by
-middleware layers etc.
+answer it in anyway. But it might be useful to access methods that get added by
+middleware layers, etc.
 
 #### spark.write(data)
 
 You can use the `spark.write` method to send data over the socket. The data is
 automatically encoded for you using the `parser` that you've set while creating
-the Primus instance. This method always returns `true` so back pressure isn't
-handled.
+the Primus server instance. This method always returns `true` so back pressure
+isn't handled.
 
 ```js
 spark.write({ foo: 'bar' });
