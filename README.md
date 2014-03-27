@@ -385,7 +385,7 @@ var primus = Primus.connect(url, { options });
 ```
 
 The `url` argument should be the base url to connect to, not including the
-`pathname` option of the `Primus` server (See: [getting-started]: #getting-started.)
+`pathname` option of the `Primus` server (See: [getting-started](#getting-started).)
 If no `url` argument is passed, it will default to the current url.
 
 The following options can be provided:
