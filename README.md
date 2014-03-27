@@ -1524,6 +1524,21 @@ see it be merged automatically.
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="https://github.com/fishrock123/primus-spark-latency/">primus-spark-latency</a></dt>
+  <dd>
+    Adds a latency property to primus sparks server-side.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/Fishrock123/primus-spark-latency">
+      <img src="https://travis-ci.org/Fishrock123/primus-spark-latency.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-spark-latency">
+      <img src="https://badge.fury.io/js/primus-spark-latency.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
 
 In addition to these community provided plugins, the Primus project also
 provides the following plugins:
