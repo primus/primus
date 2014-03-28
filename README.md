@@ -1141,13 +1141,13 @@ of components in Primus are implemented through middleware layers:
 - `spec`: It outputs the server specification.
 - `authorization` Our authorization handler.
 
-#### Primus.before(name, fn, options)
+#### Primus.before(name, fn, options, index)
 
 The `primus.before` method is how you add middleware layers to your system. All
 middleware layers need to be named. This allows you to also enable, disable and
-remove middleware layers. The supplied function can either a pre-configured
-function that is ready to answer request/responses or an unconfigured
-middleware. An unconfigured middleware is function with less then 2 arguments.
+remove middleware layers. The supplied function can either be a pre-configured
+function that is ready to answer request/response or an unconfigured
+middleware. An unconfigured middleware is a function with less then 2 arguments.
 We execute this function automatically with `Primus` as context of the function
 and optionally, the options that got provided:
 
@@ -1178,10 +1178,10 @@ primus.before('name', function (req, res, next) {
 ```
 
 You need to be aware that these middleware layers are running for HTTP requests
-but also upgrade requests. So it could be that certain middleware layers should
-only run for HTTP or Upgrade requests. In order to figure that out you can add a
-`http` or `upgrade` property to the middleware function and set it to `false` if
-you don't want it to be triggered.
+but also for upgrade requests. Certain middleware layers should only run for
+HTTP or Upgrade requests. To make it possible you can add a `http` or `upgrade`
+property to the middleware function and set it to `false` if you don't want it
+to be triggered.
 
 ```js
 primus.before('name', function () {
@@ -1195,12 +1195,24 @@ primus.before('name', function () {
 });
 ```
 
+By default a new middleware layer is added after the previous one, but there
+are cases where you need to add a middleware at a specified index in
+the stack. To accomplish this you can use the optional 0 based `index`
+argument.
+
+```js
+// add a middleware after the first two in the stack
+primus.before('name', function (req, res) {
+
+}, 2);
+```
+
 #### Primus.remove(name)
 
 This method allows you to remove middleware's that are configured. This works
 for the middleware layers that you added but also the middleware layers that we
-add by default. If you want to a different way of serving `primus.js` files you
-can simply:
+add by default. If you want to use a different way to serve the `primus.js`
+file you can simply:
 
 ```js
 primus.remove('primus.js');
@@ -1211,8 +1223,8 @@ And add your own middleware instead.
 #### Primus.disable(name)
 
 In addition to removing middleware layers, it's also possible to disable them so
-they are skipped when we iterate over the middleware layers. This might be
-useful to just disable certain middleware layers in production.
+they are skipped when we iterate over the middleware layers. It might be useful
+to just disable certain middleware layers in production.
 
 ```js
 primus.disable('name');

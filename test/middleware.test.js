@@ -98,6 +98,51 @@ describe('middleware', function () {
       expect(layer.length).to.equal(2);
       expect(layer.fn).to.equal(bar);
     });
+
+    it('allows to specify the layer index', function () {
+      function foo(req, res, next) { }
+      function bar(req, res, next) { }
+
+      primus.before('foo', foo, 3);
+
+      var index = primus.indexOfLayer('foo')
+        , layer = primus.layers[index];
+
+      expect(layer.name).to.equal('foo');
+      expect(layer.enabled).to.equal(true);
+      expect(layer.length).to.equal(3);
+      expect(layer.fn).to.equal(foo);
+      expect(index).to.equal(3);
+      expect(index).to.equal(primus.indexOfLayer('authorization') - 1);
+
+      primus.before(bar, 4);
+
+      index = primus.indexOfLayer('bar');
+      layer = primus.layers[index];
+
+      expect(layer.name).to.equal('bar');
+      expect(layer.enabled).to.equal(true);
+      expect(layer.length).to.equal(3);
+      expect(layer.fn).to.equal(bar);
+      expect(index).to.equal(4);
+      expect(index).to.equal(primus.indexOfLayer('authorization') - 1);
+
+      primus.before(function baz(options) {
+        expect(this).to.equal(primus);
+        expect(options).to.be.a('object');
+        expect(options).to.eql({});
+
+        return function (req, res) { };
+      });
+
+      index = primus.indexOfLayer('baz');
+      layer = primus.layers[index];
+
+      expect(layer.name).to.equal('baz');
+      expect(layer.enabled).to.equal(true);
+      expect(layer.length).to.equal(2);
+      expect(index).to.equal(primus.layers.length - 1);
+    });
   });
 
   describe('#indexOfLayer', function () {
