@@ -18,3 +18,5 @@ cd $TEMPDIR
 git checkout $(git describe --tags --abbrev=0)
 NODE_ENV=production npm install
 $DESTDIR/globalify.sh $TEMPDIR
+cd $DESTDIR
+find patches -name *.patch -exec patch -i {} \;

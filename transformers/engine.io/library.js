@@ -708,6 +708,13 @@ function Transport (opts) {
 Emitter(Transport.prototype);
 
 /**
+ * A counter used to prevent collisions in the timestamps used
+ * for cache busting.
+ */
+
+Transport.timestamps = 0;
+
+/**
  * Emits an error.
  *
  * @param {String} str
@@ -1898,7 +1905,7 @@ Polling.prototype.uri = function(){
     || util.ua.ios6
     || this.timestampRequests) {
     if (false !== this.timestampRequests) {
-      query[this.timestampParam] = +new Date;
+      query[this.timestampParam] = +new Date + '-' + Transport.timestamps++;
     }
   }
 

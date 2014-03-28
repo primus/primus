@@ -1,0 +1,34 @@
+diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
+index 7886c11..151e3e1 100644
+--- a/transformers/engine.io/library.js
++++ b/transformers/engine.io/library.js
+@@ -708,6 +708,13 @@ function Transport (opts) {
+ Emitter(Transport.prototype);
+ 
+ /**
++ * A counter used to prevent collisions in the timestamps used
++ * for cache busting.
++ */
++
++Transport.timestamps = 0;
++
++/**
+  * Emits an error.
+  *
+  * @param {String} str
+@@ -1898,7 +1905,7 @@ Polling.prototype.uri = function(){
+     || util.ua.ios6
+     || this.timestampRequests) {
+     if (false !== this.timestampRequests) {
+-      query[this.timestampParam] = +new Date;
++      query[this.timestampParam] = +new Date + '-' + Transport.timestamps++;
+     }
+   }
+ 
+@@ -3527,4 +3534,4 @@ function ws(uri, protocols, opts) {
+ 
+ if (WebSocket) ws.prototype = WebSocket.prototype;
+ 
+-},{}]},{},[1])
+\ No newline at end of file
++},{}]},{},[1])
