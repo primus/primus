@@ -665,7 +665,7 @@ a server side client.
 
   ```json
   {
-    "version":"1.0.1",
+    "version":"2.1.2",
     "pathname":"/primus",
     "parser":"json",
     "transformer":"websockets"
