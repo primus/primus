@@ -1,6 +1,7 @@
 'use strict';
 
-var querystring = require('querystring').parse
+var middlewareError = require('./middleware/error')
+  , querystring = require('querystring').parse
   , url = require('url').parse
   , fuse = require('fusing');
 
@@ -130,7 +131,7 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
     }
 
     layer.fn.call(primus, req, res, function done(err) {
-      if (err) return next(err);
+      if (err) return middlewareError(err, req, res);
 
       iterate(index);
     });
