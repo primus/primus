@@ -1003,7 +1003,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         );
       });
 
-      it('should handle requests to non existing routes captured by primus', function(done) {
+      it('handles requests to non existing routes captured by primus', function (done) {
         this.timeout(100);
         request(
           server.addr + '/primus.js',
@@ -1013,6 +1013,19 @@ module.exports = function base(transformer, pathname, transformer_name) {
             done();
           }
         );
+      });
+
+      it('correctly handles requests when a middleware returns an error', function (done) {
+        primus.before('foo', function foo(req, res, next) {
+          next(new Error('foo failed'));
+        });
+
+        primus.on('connection', function (spark) {
+          throw new Error('connection should not be triggered');
+        });
+
+        var socket = new Socket(server.addr, { strategy: false });
+        socket.on('end', done);
       });
 
       it('correctly parses the ip address', function (done) {
