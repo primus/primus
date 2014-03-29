@@ -567,14 +567,21 @@ Primus.readable('plugin', function plugin(name) {
  * @param {String} name The name of the middleware.
  * @param {Function} fn The middleware that's called each time.
  * @param {Object} options Middleware configuration.
+ * @param {Number} level 0 based optional index for the middleware.
  * @returns {Primus}
  * @api public
  */
-Primus.readable('before', function before(name, fn, options) {
+Primus.readable('before', function before(name, fn, options, level) {
   if ('function' === typeof name) {
+    level = options;
     options = fn;
     fn = name;
     name = fn.name || 'pid_'+ Date.now();
+  }
+
+  if (!level && 'number' === typeof options) {
+    level = options;
+    options = {};
   }
 
   options = options || {};
@@ -594,18 +601,25 @@ Primus.readable('before', function before(name, fn, options) {
   }
 
   var layer = {
-    length: fn.length,                // Amount of arguments indicates if it's a sync
+    length: fn.length,                // Amount of arguments indicates if it's async.
     enabled: true,                    // Middleware is enabled by default.
     name: name,                       // Used for lookups.
     fn: fn                            // The actual middleware.
   }, index = this.indexOfLayer(name);
 
   //
-  // Override middleware layers if we already have a middleware layer with
+  // Override middleware layer if we already have a middleware layer with
   // exactly the same name.
   //
-  if (!~index) this.layers.push(layer);
-  else this.layers[index] = layer;
+  if (!~index) {
+    if (level >= 0 && level < this.layers.length) {
+      this.layers.splice(level, 0, layer);
+    } else {
+      this.layers.push(layer);
+    }
+  } else {
+    this.layers[index] = layer;
+  }
 
   return this;
 });
