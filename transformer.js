@@ -1,14 +1,8 @@
 'use strict';
 
 var middlewareError = require('./middleware/error')
-  , querystring = require('querystring').parse
   , url = require('url').parse
   , fuse = require('fusing');
-
-//
-// Used to fake middleware's as we don't have a next callback.
-//
-function noop() {}
 
 /**
  * Transformer skeletons

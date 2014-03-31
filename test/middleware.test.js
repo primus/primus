@@ -1,4 +1,4 @@
-describe('middleware', function () {
+describe('Middleware', function () {
   'use strict';
 
   var common = require('./common')
@@ -25,7 +25,7 @@ describe('middleware', function () {
       expect(primus.before('foo', function (req, res) {})).to.equal(primus);
     });
 
-    it('throws when no function is profided', function (done) {
+    it('throws when no function is provided', function (done) {
       try { primus.before('foo', new Date()); }
       catch (e) { done(); }
     });
