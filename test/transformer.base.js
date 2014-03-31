@@ -327,20 +327,35 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
       it('should clean up timers', function (done) {
         primus.on('connection', function (spark) {
+          if (!reconnected) {
+            reconnected = true;
+            return spark.end(null, { reconnect: true });
+          }
           spark.end();
         });
 
-        var socket = new Socket(server.addr);
+        var socket = new Socket(server.addr)
+          , reconnected = false
+          , closed = 0
+          , opened = 0;
 
         socket.on('open', function () {
-          expect(Object.keys(socket.timers).length).to.be.above(0);
+          if (++opened === 1) {
+            expect(Object.keys(socket.timers).length).to.be.above(0);
+            return;
+          }
+          expect(Object.keys(socket.timers).length).to.be.equal(0);
         });
 
         socket.on('close', function () {
+          closed++;
           expect(Object.keys(socket.timers).length).to.equal(0);
         });
 
-        socket.on('end', done);
+        socket.on('end', function () {
+          expect(closed).to.be.equal(2);
+          done();
+        });
       });
 
       it('should not reconnect when strategy is false', function (done) {
