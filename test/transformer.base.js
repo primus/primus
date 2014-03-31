@@ -327,108 +327,42 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
       it('should clean up timers', function (done) {
         primus.on('connection', function (spark) {
-          //
-          // Forcefully kill a connection to trigger a reconnect
-          //
-          switch (transformer.toLowerCase()) {
-            case 'socket.io':
-              primus.transformer.service.transports[spark.id].close();
-            break;
-
-            default:
-              spark.emit('outgoing::end');
-          }
+          spark.end();
         });
 
-        var socket = new Socket(server.addr, {
-          strategy: 'none'
+        var socket = new Socket(server.addr);
+
+        socket.on('open', function () {
+          expect(Object.keys(socket.timers).length).to.be.above(0);
         });
 
         socket.on('close', function () {
           expect(Object.keys(socket.timers).length).to.equal(0);
         });
 
-        socket.on('open', function () {
-          expect(Object.keys(socket.timers).length).to.be.above(0);
-          setTimeout(function () {
-            socket.end();
-            done();
-          }, 200);
-        });
+        socket.on('end', done);
       });
 
-      it('should not reconnect when strategy is none', function (done) {
+      it('should not reconnect when strategy is false', function (done) {
         primus.on('connection', function (spark) {
           //
-          // Forcefully kill a connection to trigger a reconnect
+          // Kill a connection to trigger a reconnect
           //
-          switch (transformer.toLowerCase()) {
-            case 'socket.io':
-              primus.transformer.service.transports[spark.id].close();
-            break;
-
-            default:
-              spark.emit('outgoing::end');
-          }
+          spark.end(null, { reconnect: true });
         });
 
-        var socket = new Socket(server.addr, {
-          strategy: 'none'
-        });
+        var socket = new Socket(server.addr, { strategy: false });
 
         socket.on('reconnect', function (message) {
           throw new Error('bad');
         });
 
-        socket.on('open', function () {
-          setTimeout(function () {
-            socket.end();
-            done();
-          }, 200);
-        });
+        socket.on('end', done);
       });
 
-      it('should reconnect when the connection closes unexpectedly', function (done) {
-        primus.on('connection', function (spark) {
-          if (!reconnected) {
-            reconnected = true;
-
-            //
-            // Forcefully kill a connection to trigger a reconnect
-            //
-            switch (transformer.toLowerCase()) {
-              case 'socket.io':
-                primus.transformer.service.transports[spark.id].close();
-              break;
-
-              default:
-                spark.emit('outgoing::end');
-            }
-          }
-        });
-
-        var socket = new Socket(server.addr)
-          , reconnected = false
-          , reconnect = false
-          , opened = 0;
-
-        socket.on('reconnect', function (message) {
-          reconnect = true;
-        });
-
-        socket.on('open', function () {
-          if (++opened !== 2) return;
-
-          expect(reconnect).to.equal(true);
-
-          primus.forEach(function (socket) {
-            socket.end();
-          });
-
-          done();
-        });
-      });
-
+      //
+      // This also tests the reconnection when the connection closes unexpectedly
+      //
       it('should allow to trigger a client-side reconnect from server', function (done) {
         primus.on('connection', function (spark) {
           if (!reconnected) {
@@ -450,13 +384,10 @@ module.exports = function base(transformer, pathname, transformer_name) {
           if (++opened !== 2) return;
 
           expect(reconnect).to.equal(true);
-
-          primus.forEach(function (socket) {
-            socket.end();
-          });
-
-          done();
+          socket.end();
         });
+
+        socket.on('end', done);
       });
 
       it('should allow access to the original HTTP request', function (done) {
