@@ -18,6 +18,7 @@ var argh = require('argh').argv
 // Create a socket that's compatible with the given parser and transformer.
 //
 Socket = Primus.createSocket({
+  pathname: argh.pathname || '/primusexample',
   transformer: argh.transformer,
   parser: argh.parser
 });
