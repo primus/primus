@@ -11,7 +11,7 @@
 // --url <value>          (the server we want to connect to)
 //
 var argh = require('argh').argv
-  , Primus = require('../')
+  , Primus = require('../../')
   , Socket;
 
 //
