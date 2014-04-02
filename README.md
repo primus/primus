@@ -474,17 +474,18 @@ provide users with highest level of customization:
 You can supply these options as a comma separated `String`:
 
 ```js
-var primus = new Primus(url, { strategy: 'online, timeout ,diScoNNect' })
+var primus = new Primus(url, { strategy: 'online, timeout ,disconnect' })
 ```
 
 Or as an `Array`:
 
 ```js
-var primus = new Primus(url, { strategy: [ 'online', 'timeout', 'diScoNNect' ]});
+var primus = new Primus(url, { strategy: [ 'online', 'timeout', 'disconnect' ]});
 ```
 
 We'll try to normalize everything as much as possible, we `toLowerCase` everything
-and join it back to a readable string.
+and join it back to a readable string so if you wrote `dIsconNect` it will get
+normalized to `disconnect`.
 
 **If you are using authentication you should disable the `timeout` strategy as
 there is no way of detecting the difference between a failed authorization and a
@@ -886,7 +887,7 @@ Event                 | Usage       | Location      | Description
 `incoming::end`       | private     | client/spark  | Transformer closed the connection.
 `outgoing::end`       | private     | client/spark  | Transformer should close connection.
 `end`                 | **public**  | client        | Primus has ended.
-`close`               | **public**  | client        | The underlaying connection is closed, we might retry.
+`close`               | **public**  | client        | The connection is closed by transformer, we might retry.
 `connection`          | **public**  | server        | We received a new connection.
 `disconnection`       | **public**  | server        | A connection closed.
 `initialised`         | **public**  | server        | The server is initialised.
