@@ -384,9 +384,17 @@ var primus = new Primus(url, { options });
 var primus = Primus.connect(url, { options });
 ```
 
-The `url` argument should be the base url to connect to, not including the
-`pathname` option of the `Primus` server (See: [getting-started](#getting-started).)
-If no `url` argument is passed, it will default to the current url.
+The URL should confirm the following conditions:
+
+- It should include the protocol it needs to connect with. This can either be
+  `http` or `https`. We recommend that you're using HTTPS for all your
+  connections as this prevents connection blocking by firewalls and anti-virus
+  programs.
+- The URL should not include a pathname. The pathname is configured by the
+  server (See: [getting-started](#getting-started)) and needs to be configured
+  there as it will be compiled in to the `primus.js` client file.
+
+If no `url` argument is passed, it will default to the current URL.
 
 The following options can be provided:
 
