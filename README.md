@@ -667,10 +667,26 @@ a server side client.
      , client = new Socket('http://localhost:8080');
   ```
 
-  If you do not know which transformer and parser are used on the server, we
-  expose a small JSON "spec" file that exposes this information. The
-  specification can be reached on the `/<pathname>/spec` and will output the
-  following JSON document:
+When you are using plugins with Primus make sure you add them **before** you
+reference the `primus.Socket` or it will compile a client without your plugins.
+If you're using the `primus.createSocket` api you can directly supply the
+plugins as part of the options as it supports `plugin` object:
+
+```js
+var Socket = Primus.createSocket({ 
+  transformer: transformer,
+  parser: parser,
+  plugin: {
+    'my-emitter': require('my-emitter'),
+    'substream': require('substream')
+  }
+});
+```
+
+If you do not know which transformer and parser are used on the server, we
+expose a small JSON "spec" file that exposes this information. The specification
+can be reached on the `/<pathname>/spec` and will output the following JSON
+document:
 
   ```json
   {
