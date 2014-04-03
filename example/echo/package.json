@@ -1,6 +1,6 @@
 {
   "name": "example",
-  "version": "0.0.2-3",
+  "version": "0.0.2-11",
   "description": "Example application written for Primus",
   "main": "index.js",
   "scripts": {
@@ -16,7 +16,7 @@
   "dependencies": {
     "argh": "*",
     "primus": "*",
-    "ws": "*"
+    "engine.io": "*"
   },
   "subdomain": "primus-example",
   "engines": {

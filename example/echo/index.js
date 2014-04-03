@@ -43,9 +43,9 @@ server = http.createServer(function server(req, res) {
 // Now that we've setup our basic server, we can setup our Primus server.
 //
 primus = new Primus(server, {
-  transformer: argh.transformer,
-  parser: argh.parser,
-  pathname: argh.pathname || '/primusexample'
+  transformer: argh.transformer || 'engine.io',
+  pathname: argh.pathname || '/primusexample',
+  parser: argh.parser
 });
 
 //
