@@ -422,6 +422,13 @@ try {
     }
 
     //
+    // Safari 5.1.7 (windows) quirk: When parsing an URL without a port number
+    // the `port` in the data object will default to "0" instead of the expected
+    // "". We're going to do an explicit check on "0" and force it "".
+    //
+    if ('0' === data.port) data.port = '';
+
+    //
     // Browsers do not parse authorization information, so we need to extract
     // that from the URL.
     //
