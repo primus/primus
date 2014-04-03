@@ -15,7 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "argh": "*",
-    "primus": "*",
+    "primus": "git://github.com/primus/primus",
     "engine.io": "*"
   },
   "subdomain": "primus-example",
