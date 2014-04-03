@@ -1,0 +1,13 @@
+diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
+index 151e3e1..96dc358 100644
+--- a/transformers/engine.io/library.js
++++ b/transformers/engine.io/library.js
+@@ -1130,7 +1130,7 @@ function polling (opts) {
+   opts.xdomain = xd;
+   xhr = new XMLHttpRequest(opts);
+ 
+-  if (xhr && !opts.forceJSONP) {
++  if ('open' in xhr && !opts.forceJSONP) {
+     return new XHR(opts);
+   } else {
+     return new JSONP(opts);
