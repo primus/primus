@@ -47,7 +47,7 @@
     "socket.io": "0.9.x",
     "socket.io-client": "0.9.x",
     "sockjs": "0.3.x",
-    "sockjs-client-node": "0.0.x",
+    "sockjs-client-node": "0.1.x",
     "ws": "0.4.x"
   }
 }
