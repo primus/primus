@@ -1190,6 +1190,25 @@ Primus.prototype.querystring = function querystring(query) {
 };
 
 /**
+ * Transform a query string object back in to string equiv.
+ *
+ * @param {Object} obj The query string object.
+ * @returns {String}
+ * @api private
+ */
+Primus.prototype.querystringify = function querystringify(obj) {
+  var pairs = [];
+
+  for (var key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      pairs.push(key +'='+ obj[key]);
+    }
+  }
+
+  return pairs.join('&');
+};
+
+/**
  * Generates a connection URI.
  *
  * @param {String} protocol The protocol that should used to crate the URI.
