@@ -1212,22 +1212,18 @@ Primus.prototype.querystringify = function querystringify(obj) {
  * Generates a connection URI.
  *
  * @param {String} protocol The protocol that should used to crate the URI.
- * @param {Boolean} querystring Do we need to include a query string.
  * @returns {String|options} The URL.
  * @api private
  */
-Primus.prototype.uri = function uri(options, querystring) {
+Primus.prototype.uri = function uri(options) {
   var url = this.url
-    , server = [];
+    , server = []
+    , qsa = false;
 
   //
-  // Backwards compatible with Primus 1.4.0
-  // @TODO Remove me for Primus 2.0
+  // Query strings are only allowed when we've received clearance for it.
   //
-  if ('string' === typeof options) {
-    options = { protocol: options };
-    if (querystring) options.query = querystring;
-  }
+  if (options.query) qsa = true;
 
   options = options || {};
   options.protocol = 'protocol' in options ? options.protocol : 'http';
@@ -1242,6 +1238,15 @@ Primus.prototype.uri = function uri(options, querystring) {
   // Allow transformation of the options before we construct a full URL from it.
   //
   this.emit('outgoing::url', options);
+
+  //
+  // We need to make sure that we create a unique connection URL every time to
+  // prevent bfcache back forward cache of becoming an issue. We're doing this
+  // by forcing an cache busting query string in to the URL.
+  //
+  var querystring = this.querystring(options.query || '');
+  querystring._primuscb = +new Date();
+  options.query = this.querystringify(querystring);
 
   //
   // Automatically suffix the protocol so we can supply `ws` and `http` and it gets
@@ -1262,7 +1267,8 @@ Primus.prototype.uri = function uri(options, querystring) {
   // Optionally add a search query, again, not supported by all Transformers.
   // SockJS is known to throw errors when a query string is included.
   //
-  if (options.query) server.push('?'+ options.query);
+  if (qsa) server.push('?'+ options.query);
+  else delete options.query;
 
   if (options.object) return options;
   return server.join('/');
