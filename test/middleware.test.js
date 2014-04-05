@@ -113,7 +113,6 @@ describe('Middleware', function () {
       expect(layer.length).to.equal(3);
       expect(layer.fn).to.equal(foo);
       expect(index).to.equal(3);
-      expect(index).to.equal(primus.indexOfLayer('authorization') - 1);
 
       primus.before(bar, 4);
 
@@ -125,7 +124,6 @@ describe('Middleware', function () {
       expect(layer.length).to.equal(3);
       expect(layer.fn).to.equal(bar);
       expect(index).to.equal(4);
-      expect(index).to.equal(primus.indexOfLayer('authorization') - 1);
 
       primus.before(function baz(options) {
         expect(this).to.equal(primus);
