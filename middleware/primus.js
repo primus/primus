@@ -35,7 +35,7 @@ module.exports = function configure() {
     res.setHeader('Content-Length', length);
     res.end(library);
 
-    return false;
+    return true;
   }
 
   //

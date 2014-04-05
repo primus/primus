@@ -24,7 +24,7 @@ module.exports = function configure() {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(primus.spec));
 
-    return false;
+    return true;
   }
 
   //

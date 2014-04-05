@@ -120,7 +120,7 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
     if (!layer.enabled || layer.fn[type] === false) return iterate(index);
 
     if (layer.length === 2) {
-      if (layer.fn.call(primus, req, res) === false) return;
+      if (layer.fn.call(primus, req, res)) return;
       return iterate(index);
     }
 
