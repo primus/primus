@@ -825,6 +825,99 @@ Primus.createSocket = function createSocket(options) {
   return primus.Socket;
 };
 
+/**
+ * Create a new Primus server.
+ *
+ * @param {Function} fn Request listener.
+ * @param {Object} options Configuration.
+ * @returns {Pipe}
+ * @api public
+ */
+Primus.createServer = function createServer(fn, options) {
+  if ('object' === typeof fn) {
+    options = fn;
+    fn = null;
+  }
+
+  options = options || {};
+
+  var port = options.port || 443            // Force HTTPS as default server.
+    , certs = options.key && options.cert   // Check HTTPS certificates.
+    , secure = certs || 443 === port        // Check for a true HTTPS
+    , spdy = 'spdy' in options              // Maybe.. We're SPDY
+    , server;
+
+  var path = require('path')
+    , fs = require('fs');
+
+  //
+  // We need to have SSL certs for SPDY and secure servers.
+  //
+  if ((secure || spdy) && !certs) {
+    throw new Error('Missing the SSL key or certificate files in the options.');
+  }
+
+  //
+  // When given a `options.root` assume that our SSL certs and keys are path
+  // references that still needs to be read. This allows a much more human
+  // readable interface for SSL.
+  //
+  if (secure && options.root) {
+    ['cert', 'key', 'ca', 'pfx', 'crl'].filter(function filter(key) {
+      return key in options;
+    }).forEach(function parse(key) {
+      var data = options[key];
+
+      if (Array.isArray(data)) {
+        options[key] = data.map(function read(file) {
+          return fs.readFileSync(path.join(options.root, file));
+        });
+      } else {
+        options[key] = fs.readFileSync(path.join(options.root, data));
+      }
+    });
+  }
+
+  if (spdy) {
+    server = require('spdy').createServer(options);
+  } else if (secure) {
+    server = require('https').createServer(options);
+
+    if (+options.redirect) require('http').createServer(function handle(req, res) {
+      res.statusCode = 404;
+
+      if (req.headers.host) {
+        res.statusCode = 301;
+        res.setHeader('Location', 'https://'+ req.headers.host + req.url);
+      }
+
+      res.end('');
+    }).listen(+options.redirect);
+  } else {
+    server = require('http').createServer();
+    if (!options.iknowhttpsisbetter) [
+      '',
+      'We\'ve detected that you\'re using a HTTP instead of a HTTPS server. Please',
+      'beaware real-time connections have less chance of being blocked by firewalls',
+      'and anti-virus scanners if they are encrypted. If you run your server behind',
+      'a reverse and HTTPS terminating proxy ignore this message, if not, you\'ve',
+      'been warned.',
+      ''
+    ].forEach(function each(line) {
+      console.log('primus: '+ line);
+    });
+  }
+
+  //
+  // Now that we've got a server, we can setup the Primus and start listening.
+  //
+  var application = new Primus(server, options);
+
+  if (fn) application.on('connection', fn);
+
+  return application.listen(port);
+};
+
 //
 // Expose the constructors of our Spark and Transformer so it can be extended by
 // a third party if needed.
