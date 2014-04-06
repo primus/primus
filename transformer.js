@@ -120,7 +120,25 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
     if (!layer.enabled || layer.fn[type] === false) return iterate(index);
 
     if (layer.length === 2) {
-      if (layer.fn.call(primus, req, res)) return;
+      var answered = layer.fn.call(primus, req, res);
+
+      //
+      // @TODO remove the warning and the unneeded code.
+      //
+      if (answered === false) {
+        answered = true;
+
+        if (!layer.warned) {
+          layer.warned = true;
+
+          var message = 'Returning `false` is deprecated and will execute ' +
+            'the next middleware in future releases.\nIf your middleware ' +
+            'has already answered the request you should return `true`.';
+          console.error(message);
+        }
+      }
+
+      if (answered) return;
       return iterate(index);
     }
 
