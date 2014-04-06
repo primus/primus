@@ -727,25 +727,11 @@ Primus.readable('destroy', function destroy(options, fn) {
     primus.emit('close', options);
     primus.transformer.emit('close', options);
 
-    if (fn && options.close === false) fn();
-  }
-
-  /**
-   * Clean up the server after it has been closed.
-   *
-   * @api private
-   */
-  function closed() {
-    if (primus.transformer) primus.transformer.removeAllListeners();
-    if (primus.server) primus.server.removeAllListeners();
-    primus.removeAllListeners();
-
     //
-    // The server has closed, but we didn't run any cleanups. Run them now
-    // before we kill the `primus.connections` object which will render the
-    // clean up process useless as there wouldn't be anything to iterate over.
+    // In the timeout case we did not prematurely remove listeners so that
+    // the cleanup was properly delayed
     //
-    if (!clean) cleanup();
+    if(+options.timeout) removeListeners();
 
     //
     // Null some potentially heavy objects to free some more memory instantly
@@ -757,7 +743,40 @@ Primus.readable('destroy', function destroy(options, fn) {
     primus.connections = Object.create(null);
     primus.ark = Object.create(null);
 
+    if (fn && options.close === false) fn();
+  }
+
+  /**
+   * Clean up the server after it has been closed.
+   *
+   * @api private
+   */
+  function closed() {
+    //
+    // The server has closed, but we didn't run any cleanups. Run them now
+    // before we kill the `primus.connections` object which will render the
+    // clean up process useless as there wouldn't be anything to iterate over.
+    // Do not automatically run cleanup if we set a timeout for this
+    //
+    if (!clean && !+options.timeout) cleanup();
+
+    //
+    // If we aren't dealing with a timeout remove listeners
+    //
+    if (!+options.timeout) removeListeners();
+
     if (fn) fn();
+  }
+
+  /**
+   * Remove all the listeners for primus
+   *
+   * @api private
+   */
+  function removeListeners() {
+    if (primus.transformer) primus.transformer.removeAllListeners();
+    if (primus.server) primus.server.removeAllListeners();
+    primus.removeAllListeners();
   }
 
   if (options.close !== false) {
