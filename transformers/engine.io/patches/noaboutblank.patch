@@ -1,0 +1,53 @@
+diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
+index 96dc358..2fbe35e 100644
+--- a/transformers/engine.io/library.js
++++ b/transformers/engine.io/library.js
+@@ -1583,10 +1583,8 @@ Request.prototype.create = function(isBinary, supportsBinary){
+     return;
+   }
+ 
+-  if (hasAttachEvent) {
+-    this.index = Request.requestsCount++;
+-    Request.requests[this.index] = this;
+-  }
++  this.index = Request.requestsCount++;
++  Request.requests[this.index] = this;
+ };
+ 
+ /**
+@@ -1629,7 +1627,7 @@ Request.prototype.onError = function(err){
+  */
+ 
+ Request.prototype.cleanup = function(){
+-  if ('undefined' == typeof this.xhr ) {
++  if (!this.xhr) {
+     return;
+   }
+   // xmlhttprequest
+@@ -1639,9 +1637,7 @@ Request.prototype.cleanup = function(){
+     this.xhr.abort();
+   } catch(e) {}
+ 
+-  if (hasAttachEvent) {
+-    delete Request.requests[this.index];
+-  }
++  delete Request.requests[this.index];
+ 
+   this.xhr = null;
+ };
+@@ -1661,10 +1657,13 @@ Request.prototype.abort = function(){
+  * that leak memory unless we abort request before unload.
+  */
+ 
++Request.requestsCount = 0;
++Request.requests = {};
++
+ if (hasAttachEvent) {
+-  Request.requestsCount = 0;
+-  Request.requests = {};
+   global.attachEvent('onunload', unloadHandler);
++} else if (global.addEventListener) {
++  global.addEventListener('beforeunload', unloadHandler, false);
+ }
+ 
+ function unloadHandler() {
