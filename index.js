@@ -702,18 +702,22 @@ Primus.readable('destroy', function destroy(options, fn) {
   }
 
   options = options || {};
-  var primus = this
-    , clean = false;
+  var primus = this;
 
   /**
-   * Clean up connections that are left open.
+   * Clean up some stuff.
    *
    * @api private
    */
   function cleanup() {
-    if (clean) return;
-    clean = true;
+    //
+    // Optionally close the server.
+    //
+    if (options.close !== false && primus.server) primus.server.close();
 
+    //
+    // Optionally close connections that are left open.
+    //
     if (options.end !== false) {
       primus.forEach(function shutdown(spark) {
         spark.end();
@@ -727,14 +731,13 @@ Primus.readable('destroy', function destroy(options, fn) {
     primus.emit('close', options);
     primus.transformer.emit('close', options);
 
-    //
-    // In the timeout case we did not prematurely remove listeners so that
-    // the cleanup was properly delayed
-    //
-    if(+options.timeout) removeListeners();
+    if (primus.server) primus.server.removeAllListeners();
+
+    primus.transformer.removeAllListeners();
+    primus.removeAllListeners();
 
     //
-    // Null some potentially heavy objects to free some more memory instantly
+    // Null some potentially heavy objects to free some more memory instantly.
     //
     primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
     primus.transformer = primus.encoder = primus.decoder = primus.server = null;
@@ -743,45 +746,7 @@ Primus.readable('destroy', function destroy(options, fn) {
     primus.connections = Object.create(null);
     primus.ark = Object.create(null);
 
-    if (fn && options.close === false) fn();
-  }
-
-  /**
-   * Clean up the server after it has been closed.
-   *
-   * @api private
-   */
-  function closed() {
-    //
-    // The server has closed, but we didn't run any cleanups. Run them now
-    // before we kill the `primus.connections` object which will render the
-    // clean up process useless as there wouldn't be anything to iterate over.
-    // Do not automatically run cleanup if we set a timeout for this
-    //
-    if (!clean && !+options.timeout) cleanup();
-
-    //
-    // If we aren't dealing with a timeout remove listeners
-    //
-    if (!+options.timeout) removeListeners();
-
     if (fn) fn();
-  }
-
-  /**
-   * Remove all the listeners for primus
-   *
-   * @api private
-   */
-  function removeListeners() {
-    if (primus.transformer) primus.transformer.removeAllListeners();
-    if (primus.server) primus.server.removeAllListeners();
-    primus.removeAllListeners();
-  }
-
-  if (options.close !== false) {
-    if (primus.server) primus.server.close(closed);
-    else setTimeout(closed, 0);
   }
 
   if (+options.timeout) {
