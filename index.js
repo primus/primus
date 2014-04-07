@@ -729,11 +729,13 @@ Primus.readable('destroy', function destroy(options, fn) {
     // references from all the event emitters.
     //
     primus.emit('close', options);
-    primus.transformer.emit('close', options);
+
+    if (primus.transformer) {
+      primus.transformer.emit('close', options);
+      primus.transformer.removeAllListeners();
+    }
 
     if (primus.server) primus.server.removeAllListeners();
-
-    primus.transformer.removeAllListeners();
     primus.removeAllListeners();
 
     //
