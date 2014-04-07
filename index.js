@@ -702,18 +702,22 @@ Primus.readable('destroy', function destroy(options, fn) {
   }
 
   options = options || {};
-  var primus = this
-    , clean = false;
+  var primus = this;
 
   /**
-   * Clean up connections that are left open.
+   * Clean up some stuff.
    *
    * @api private
    */
   function cleanup() {
-    if (clean) return;
-    clean = true;
+    //
+    // Optionally close the server.
+    //
+    if (options.close !== false && primus.server) primus.server.close();
 
+    //
+    // Optionally close connections that are left open.
+    //
     if (options.end !== false) {
       primus.forEach(function shutdown(spark) {
         spark.end();
@@ -725,30 +729,17 @@ Primus.readable('destroy', function destroy(options, fn) {
     // references from all the event emitters.
     //
     primus.emit('close', options);
-    primus.transformer.emit('close', options);
 
-    if (fn && options.close === false) fn();
-  }
+    if (primus.transformer) {
+      primus.transformer.emit('close', options);
+      primus.transformer.removeAllListeners();
+    }
 
-  /**
-   * Clean up the server after it has been closed.
-   *
-   * @api private
-   */
-  function closed() {
-    if (primus.transformer) primus.transformer.removeAllListeners();
     if (primus.server) primus.server.removeAllListeners();
     primus.removeAllListeners();
 
     //
-    // The server has closed, but we didn't run any cleanups. Run them now
-    // before we kill the `primus.connections` object which will render the
-    // clean up process useless as there wouldn't be anything to iterate over.
-    //
-    if (!clean) cleanup();
-
-    //
-    // Null some potentially heavy objects to free some more memory instantly
+    // Null some potentially heavy objects to free some more memory instantly.
     //
     primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
     primus.transformer = primus.encoder = primus.decoder = primus.server = null;
@@ -758,11 +749,6 @@ Primus.readable('destroy', function destroy(options, fn) {
     primus.ark = Object.create(null);
 
     if (fn) fn();
-  }
-
-  if (options.close !== false) {
-    if (primus.server) primus.server.close(closed);
-    else setTimeout(closed, 0);
   }
 
   if (+options.timeout) {
