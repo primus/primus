@@ -751,11 +751,10 @@ Primus.readable('destroy', function destroy(options, fn) {
     if (fn) fn();
   }
 
-  if (+options.timeout) {
-    setTimeout(cleanup, +options.timeout);
-  } else {
-    cleanup();
-  }
+  //
+  // Force a `0` as timeout to maintain a full async callback.
+  //
+  setTimeout(cleanup, +options.timeout || 0);
 
   return this;
 });
