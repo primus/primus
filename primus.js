@@ -41,24 +41,26 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
     , i;
 
   if (1 === length) {
+    if (fn.__EE3_once) this.removeListener(event, fn);
+
     switch (len) {
       case 1:
-        fn.call(fn.context || this);
+        fn.call(fn.__EE3_context || this);
       break;
       case 2:
-        fn.call(fn.context || this, a1);
+        fn.call(fn.__EE3_context || this, a1);
       break;
       case 3:
-        fn.call(fn.context || this, a1, a2);
+        fn.call(fn.__EE3_context || this, a1, a2);
       break;
       case 4:
-        fn.call(fn.context || this, a1, a2, a3);
+        fn.call(fn.__EE3_context || this, a1, a2, a3);
       break;
       case 5:
-        fn.call(fn.context || this, a1, a2, a3, a4);
+        fn.call(fn.__EE3_context || this, a1, a2, a3, a4);
       break;
       case 6:
-        fn.call(fn.context || this, a1, a2, a3, a4, a5);
+        fn.call(fn.__EE3_context || this, a1, a2, a3, a4, a5);
       break;
 
       default:
@@ -66,18 +68,16 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
           args[i - 1] = arguments[i];
         }
 
-        fn.apply(fn.context || this, args);
+        fn.apply(fn.__EE3_context || this, args);
     }
-
-    if (fn.once) this.removeListener(event, fn);
   } else {
     for (i = 1, args = new Array(len -1); i < len; i++) {
       args[i - 1] = arguments[i];
     }
 
     for (i = 0; i < length; fn = listeners[++i]) {
-      fn.apply(fn.context || this, args);
-      if (fn.once) this.removeListener(event, fn);
+      if (fn.__EE3_once) this.removeListener(event, fn);
+      fn.apply(fn.__EE3_context || this, args);
     }
   }
 
@@ -96,7 +96,7 @@ EventEmitter.prototype.on = function on(event, fn, context) {
   if (!this._events) this._events = {};
   if (!this._events[event]) this._events[event] = [];
 
-  fn.context = context;
+  fn.__EE3_context = context;
   this._events[event].push(fn);
 
   return this;
@@ -111,7 +111,7 @@ EventEmitter.prototype.on = function on(event, fn, context) {
  * @api public
  */
 EventEmitter.prototype.once = function once(event, fn, context) {
-  fn.once = true;
+  fn.__EE3_once = true;
   return this.on(event, fn, context);
 };
 
@@ -129,7 +129,7 @@ EventEmitter.prototype.removeListener = function removeListener(event, fn) {
     , events = [];
 
   for (var i = 0, length = listeners.length; i < length; i++) {
-    if (fn && listeners[i] !== fn && listeners[i].fn !== fn) {
+    if (fn && listeners[i] !== fn) {
       events.push(listeners[i]);
     }
   }
