@@ -48,9 +48,6 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
     afterEach(function afterEach(done) {
       primus.destroy(done);
-
-      try { destroy(); }
-      catch (e) {}
     });
 
     describe('.Socket', function () {
