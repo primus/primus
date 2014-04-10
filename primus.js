@@ -1240,6 +1240,14 @@ Primus.prototype.uri = function uri(options) {
   this.emit('outgoing::url', options);
 
   //
+  // `url.host` might be undefined (e.g. when using zombie) so we use the
+  // hostname and port defined above.
+  //
+  var host = (443 != options.port && 80 != options.port)
+    ? options.host +':'+ options.port
+    : options.host;
+
+  //
   // We need to make sure that we create a unique connection URL every time to
   // prevent bfcache back forward cache of becoming an issue. We're doing this
   // by forcing an cache busting query string in to the URL.
@@ -1254,8 +1262,8 @@ Primus.prototype.uri = function uri(options) {
   //
   server.push(options.secure ? options.protocol +'s:' : options.protocol +':', '');
 
-  if (options.auth) server.push(options.auth +'@'+ url.host);
-  else server.push(url.host);
+  if (options.auth) server.push(options.auth +'@'+ host);
+  else server.push(host);
 
   //
   // Pathnames are optional as some Transformers would just use the pathname
