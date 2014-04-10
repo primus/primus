@@ -413,11 +413,15 @@ try {
     // and guess at a value from the 'href' value
     //
     if (!data.port) {
-      if (!data.href) data.href = '';
-      if ((data.href.match(/\:/g) || []).length > 1) {
-        data.port = data.href.split(':')[2].split('/')[0];
-      } else {
-        data.port = ('https' === data.href.substr(0, 5)) ? 443 : 80;
+      var splits = (data.href || '').split('/');
+      if (splits.length > 2) {
+        var host = splits[2]
+          , atSignIndex = host.lastIndexOf('@');
+
+        if (~atSignIndex) host = host.slice(atSignIndex + 1);
+
+        splits = host.split(':');
+        if (splits.length === 2) data.port = splits[1];
       }
     }
 
