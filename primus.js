@@ -571,7 +571,7 @@ Primus.prototype.initialise = function initialise(options) {
     if (primus.attempt) primus.attempt = null;
 
     //
-    // The connection has been openend so we should set our state to
+    // The connection has been opened so we should set our state to
     // (writ|read)able so our stream compatibility works as intended.
     //
     primus.writable = true;
@@ -666,31 +666,38 @@ Primus.prototype.initialise = function initialise(options) {
     });
   });
 
-  primus.on('incoming::end', function end() {
+  //
+  // Clean up our internal state as our connection has been closed.
+  //
+  primus.on('close', function end() {
     var readyState = primus.readyState;
 
-    //
-    // Always set the readyState to closed, and if we're still connecting, close
-    // the connection so we're sure that everything after this if statement block
-    // is only executed because our readyState is set to `open`.
-    //
     primus.readyState = Primus.CLOSED;
     if (readyState !== Primus.CLOSED) {
       primus.emit('readyStateChange');
     }
 
-    if (primus.timers.connect) primus.end();
-    if (readyState !== Primus.OPEN) return;
-
-    this.writable = false;
-    this.readable = false;
+    primus.writable = false;
+    primus.readable = false;
 
     //
     // Clear all timers in case we're not going to reconnect.
     //
-    for (var timeout in this.timers) {
-      this.clearTimeout(timeout);
+    for (var timeout in primus.timers) {
+      primus.clearTimeout(timeout);
     }
+  });
+
+  primus.on('incoming::end', function end() {
+    var readyState = primus.readyState;
+
+    //
+    // If we're still connecting, close the connection.
+    // Everything after the following if statements is only executed when
+    // the readyState is set to `open`.
+    //
+    if (primus.timers.connect) primus.end();
+    if (readyState !== Primus.OPEN) return;
 
     //
     // Fire the `close` event as an indication of connection disruption.
@@ -1105,19 +1112,6 @@ Primus.prototype.end = function end(data) {
 
   if (this.readyState === Primus.CLOSED && !this.timers.connect) return this;
   if (data) this.write(data);
-
-  this.writable = false;
-  this.readable = false;
-
-  var readyState = this.readyState;
-  this.readyState = Primus.CLOSED;
-  if (readyState !== Primus.CLOSED) {
-    this.emit('readyStateChange');
-  }
-
-  for (var timeout in this.timers) {
-    this.clearTimeout(timeout);
-  }
 
   this.emit('outgoing::end');
   this.emit('close');
