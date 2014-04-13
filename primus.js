@@ -584,6 +584,8 @@ Primus.prototype.initialise = function initialise(options) {
       primus.emit('readyStateChange');
     }
 
+    primus.latency = +new Date() - start;
+
     primus.emit('open');
     primus.clearTimeout('ping', 'pong').heartbeat();
 
@@ -594,8 +596,6 @@ Primus.prototype.initialise = function initialise(options) {
 
       primus.buffer = [];
     }
-
-    primus.latency = +new Date() - start;
   });
 
   primus.on('incoming::pong', function pong(time) {
