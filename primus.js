@@ -1228,7 +1228,7 @@ Primus.prototype.uri = function uri(options) {
   options = options || {};
   options.protocol = 'protocol' in options ? options.protocol : 'http';
   options.query = url.search && 'query' in options ? (url.search.charAt(0) === '?' ? url.search.slice(1) : url.search) : false;
-  options.secure = 'secure' in options ? options.secure : url.protocol === 'https:';
+  options.secure = 'secure' in options ? options.secure : (url.protocol === 'https:' || url.protocol === 'wss:');
   options.auth = 'auth' in options ? options.auth : url.auth;
   options.pathname = 'pathname' in options ? options.pathname : this.pathname.slice(1);
   options.port = 'port' in options ? options.port : url.port || (options.secure ? 443 : 80);
