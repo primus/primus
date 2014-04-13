@@ -516,7 +516,7 @@ provide users with highest level of customization:
 You can supply these options as a comma separated `String`:
 
 ```js
-var primus = new Primus(url, { strategy: 'online, timeout ,disconnect' })
+var primus = new Primus(url, { strategy: 'online, timeout, disconnect' })
 ```
 
 Or as an `Array`:
@@ -545,8 +545,8 @@ reconnection, this is done by setting the `strategy` to `false`:
 var primus = new Primus(url, { strategy: false });
 ```
 If you want to manually control the reconnection you can call `primus.end()`
-to close the connection and `primus.open()` to enstablish a new one. **Don't
-do manual reconnection if you haven't set the strategy to false**.
+to close the connection and `primus.open()` to enstablish a new one. **Be sure
+to use `primus.open()` correctly, see below for details.**
 
 [reconnect]: #reconnect
 [strategy]: #strategy
@@ -568,6 +568,21 @@ consequences:
 
 Having that said, this gives you total freedom while still getting the benefits
 of Primus.
+
+#### primus.open()
+
+This method opens a connection with the server. By default it is called
+automatically when the Primus instance is created, but there are cases where
+is desiderable to open the connection manually. To do this set the `manual`
+option to `true` and when you have the Primus instance call the method:
+
+```js
+primus.open();
+```
+
+**When you call `primus.open()` you should make sure that the connection is
+totally dead (e.g. after an `end` event) and primus isn't already trying or
+planning to reconnect**.
 
 #### primus.write(message)
 
