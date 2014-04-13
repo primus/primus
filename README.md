@@ -118,7 +118,6 @@ var Primus = require('primus')
 var server = http.createServer(/* request handler */)
   , primus = new Primus(server, {/* options */});
 ```
-
 The following options can be provided:
 
 Name                | Description                               | Default       
@@ -156,7 +155,46 @@ you can supply a `parser` configuration option:
 var primus = new Primus(server, { parser: 'JSON' });
 ```
 
-All parsers have an `async` interface for error handling.
+All parsers have an `async` interface for error handling. If you don't have an
+pre-existing server where you want or can attach your Primus server to you can
+also use the `Primus.createServer` convenience method.  The `createServer method
+will automatically:
+
+- Setup a HTTP, HTTPS or SPDY server for you on the given port number.
+- Setup your Primus server with the given configuration.
+- Listen on the HTTP, HTTPS, SPDY server.
+- Attach an `primus.on('connection')` listener.
+- Return the created Primus instance.
+
+```js
+Primus.createServer(function connection(spark) {
+
+}, { port: 8080, transformer: 'websockets' });
+```
+
+The example above we create automatically create a HTTP server which will listen
+on port 8080, create a primus instance which a `websockets` transformer and
+listen for incomming connections. The supplied function in the
+`Primus.createServer` function is optional. You can just listen to the
+connectios your self with the returned Primus instance. If you want to listen to
+a HTTPS or SPDY server which is recommended you can directly pass the SPDY and
+HTTPS certs/keys/pfx files in the options object:
+
+```js
+var primus = Primus.createServer({
+  port: 443,
+  root: '/folder/with/https/cert/files',
+  cert: 'myfilename.cert',
+  key: 'myfilename.cert',
+  ca: 'myfilename.ca',
+  pfx: 'filename.pfx',
+  passphrase: 'my super sweet password'
+});
+
+primus.on('connection', function (spark) {
+  spark.write('hello connnection');
+});
+```
 
 #### Client library
 
