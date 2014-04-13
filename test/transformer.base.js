@@ -190,6 +190,25 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
       });
 
+      it('can be open and closed', function (done) {
+        primus.on('connection', function (spark) {
+          setTimeout(function () {
+            spark.end();
+          }, 10);
+        });
+
+        var socket = new Socket(server.addr);
+
+        socket.once('open', function () {
+          socket.once('end', function () {
+            socket.open();
+            socket.once('open', function () {
+              socket.once('end', done);
+            });
+          });
+        });
+      });
+
       it('emits a readyStateChange event', function (done) {
         var socket = new Socket(server.addr)
           , state = socket.readyState
