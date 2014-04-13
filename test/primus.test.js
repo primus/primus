@@ -502,4 +502,29 @@ describe('Primus', function () {
       expect(primus.reserved('ERROR')).to.equal(false);
     });
   });
+
+  describe('.createServer', function () {
+    it('returns a new primus instance', function (done) {
+      var port = common.port
+        , primus = Primus.createServer({ port: port });
+
+      expect(primus).to.be.instanceOf(Primus);
+      expect(primus.server).to.be.instanceOf(http.Server);
+
+      primus.server.once('listening', function () {
+        primus.end(done);
+      });
+    });
+
+    it('applies the options to the Primus server', function (done) {
+      var port = common.port
+        , primus = Primus.createServer({ port: port, transformer: 'engine.io' });
+
+      expect(primus.spec.transformer).to.equal('engine.io');
+
+      primus.server.once('listening', function () {
+        primus.end(done);
+      });
+    });
+  });
 });
