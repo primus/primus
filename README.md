@@ -406,7 +406,7 @@ ping                | Ping interval to test connection        | `25000` ms
 pong                | Time the server has to respond to ping  | `10000` ms
 [strategy]          | Our reconnect strategies                | `"disconnect,online,timeout"`
 manual              | Manually open the connection            | `false`
-websockets          | Should we AVOID the usage of WebSockets | Boolean, is detected
+websockets          | Should we use WebSockets                | Boolean, is detected
 network             | Use native `online`/`offline` detection | Boolean, is feature detected
 transport           | Transport specific configuration        | `{}`
 queueSize           | Number of messages that can be queued   | `Infinity`
