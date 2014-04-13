@@ -899,8 +899,9 @@ Primus.createServer = function createServer(fn, options) {
   var application = new Primus(server, options);
 
   if (fn) application.on('connection', fn);
+  server.listen(port);
 
-  return application.listen(port);
+  return application;
 };
 
 //
