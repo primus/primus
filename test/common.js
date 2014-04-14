@@ -43,7 +43,7 @@ exports.create = function create(transformer, fn, port) {
     } else {
       pathname = port;
       port = exports.port;
-      pathname = String(path.join(pathname, String(port)));
+      pathname = path.join(pathname, port + '');
     }
     if (fs.existsSync(pathname)) {
       fs.unlinkSync(pathname);
@@ -108,11 +108,11 @@ exports.create = function create(transformer, fn, port) {
   if (pathname) {
     server.make_addr = function (auth, query) {
       return 'ws+unix://' + (auth ? auth + '@' : '') + pathname;
-    }
+    };
   } else {
     server.make_addr = function (auth, query) {
       return 'http://' + (auth ? auth + '@' : '') + 'localhost:' + port + (query ? '/' + query : '');
-    }
+    };
   }
 
   server.addr = server.make_addr();
