@@ -1,5 +1,5 @@
 'use strict';
-/*globals faye*/
+/*globals MozWebSocket */
 
 /**
  * Minimum viable WebSocket client. This function is stringified and written in
@@ -13,64 +13,87 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available Socket.io constructor.
+  // Selects an available WebSocket constructor.
   //
-  var Factory = (function Factory() {
-    if ('undefined' !== typeof faye && faye.Client) return faye.Client;
-    try { return require('faye').Client; }
+  var Factory = (function factory() {
+    if ('undefined' !== typeof WebSocket) return WebSocket;
+    if ('undefined' !== typeof MozWebSocket) return MozWebSocket;
+
+    try { return Primus.require('faye-websocket').Client; }
     catch (e) {}
 
     return undefined;
   })();
 
-  if (!factory) return this.emit('error', new Error('No faye client factory'));
+  if (!Factory) return primus.critical(new Error('Missing required `faye-websocket` module. Please run `npm install --save faye-websocket`'));
+
 
   //
-  // Connect to the given url.
+  // Connect to the given URL.
   //
-  primus.on('outgoing::open', function open() {
-    if (socket) socket.disconnect();
+  primus.on('outgoing::open', function opening() {
+    if (socket) socket.close();
 
     //
-    // We need to remove the pathname here as socket.io will assume that we want
-    // to connect to a namespace instead.
+    // FireFox will throw an error when we try to establish a connection from
+    // a secure page to an unsecured WebSocket connection. This is inconsistent
+    // behaviour between different browsers. This should ideally be solved in
+    // Primus when we connect.
     //
-    socket = new Factory(primus.uri('http', true));
+    try {
+      //
+      // Only allow primus.transport object in Node.js, it will throw in
+      // browsers with a TypeError if we supply to much arguments.
+      //
+      var prot = primus.url.protocol === 'ws+unix:' ? 'ws+unix' : 'ws';
+      if (Factory.length === 3) {
+        primus.socket = socket = new Factory(
+          primus.uri({ protocol: prot, query: true }),  // URL
+          [],                                           // Sub protocols
+          primus.transport                              // options.
+        );
+      } else {
+        primus.socket = socket = new Factory(primus.uri({ protocol: prot, query: true }));
+      }
+    } catch (e) { return primus.emit('error', e); }
 
     //
     // Setup the Event handlers.
     //
-    socket.subscribe(primus.pathname, primus.emits('data'));
-    socket.bind('transport:up', primus.emits('open'));
-    socket.bind('transport:down', primus.emits('end'));
+    socket.binaryType = 'arraybuffer';
+    socket.on('open', primus.emits('open'));
+    socket.on('error', primus.emits('error'));
+    socket.on('close', primus.emits('end'));
+    socket.on('message', primus.emits('data', function parse(evt) {
+      return evt.data;
+    }));
   });
 
   //
   // We need to write a new message to the socket.
   //
   primus.on('outgoing::data', function write(message) {
-    if (socket) socket.publish(primus.pathname, message);
+    if (!socket || socket.readyState !== Factory.OPEN) return;
+
+    try { socket.send(message); }
+    catch (e) { primus.emit('incoming::error', e); }
   });
 
   //
-  // Attempt to reconnect the socket. It asumes that the `close` event is
-  // called if it failed to disconnect. Bypass the namespaces and use
-  // socket.socket.
+  // Attempt to reconnect the socket. It assumes that the `outgoing::end` event is
+  // called if it failed to disconnect.
   //
   primus.on('outgoing::reconnect', function reconnect() {
-    if (socket) {
-      socket.disconnect();
-      socket.connect();
-    }
+    if (socket) primus.emit('outgoing::end');
+    primus.emit('outgoing::open');
   });
 
   //
-  // We need to close the socket. Bypass the namespaces and disconnect using
-  // socket.socket.
+  // We need to close the socket.
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
-      socket.disconnect();
+      socket.close();
       socket = null;
     }
   });
