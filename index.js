@@ -713,7 +713,13 @@ Primus.readable('destroy', function destroy(options, fn) {
     //
     // Optionally close the server.
     //
-    if (options.close !== false && primus.server) primus.server.close();
+    if (options.close !== false && primus.server) {
+      //
+      // Closing a server that isn't started yet would throw an error.
+      //
+      try { primus.server.close(); }
+      catch (e) {}
+    }
 
     //
     // Optionally close connections that are left open.
