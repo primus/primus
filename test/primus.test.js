@@ -347,34 +347,28 @@ describe('Primus', function () {
     });
 
     it('iterates over all active connections asynchronously', function (done) {
-      var initial = 4
-        , iterations = 0;
+      var iterations = 0
+        , interval;
 
-      for (var i = 0; i < initial; i++) {
-        new primus.Spark();
-      }
+      for (var i = 0; i < 4; i++) new primus.Spark();
 
       (global.setImmediate || process.nextTick)(function () {
         expect(primus.connected).to.equal(4);
 
-        var first = true;
+        //
+        // Simulate new incoming connections while we iterate.
+        //
+        interval = setInterval(function () {
+          new primus.Spark();
+        }, 7);
 
         primus.forEach(function (spark, next) {
-          iterations++;
           expect(spark).to.be.instanceOf(primus.Spark);
-          setTimeout(function () {
-            next();
-
-            if (first) {
-              for (var i = 0; i < 4; i++) {
-                new primus.Spark();
-              }
-
-              first = false;
-            }
-          }, 2);
+          iterations++;
+          setTimeout(next, 3);
         }, function () {
-          expect(iterations).to.equal(8);
+          clearInterval(interval);
+          expect(iterations).to.equal(6);
           done();
         });
       });
