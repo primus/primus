@@ -347,15 +347,16 @@ describe('Primus', function () {
     });
 
     it('iterates over all active connections asynchronously', function (done) {
-      var iterations = 4
+      var initial = 4
+        , iterations = 0
+        , added = 0
         , interval;
 
-      while (iterations) {
-        iterations--;
+      for (var i = 0; i < initial; i++) {
         new primus.Spark();
       }
 
-      process.nextTick(function () {
+      setTimeout(function () {
         expect(primus.connected).to.equal(4);
 
         //
@@ -363,6 +364,7 @@ describe('Primus', function () {
         //
         interval = setInterval(function () {
           new primus.Spark();
+          added++;
         }, 4);
 
         primus.forEach(function (spark, next) {
@@ -370,8 +372,8 @@ describe('Primus', function () {
           expect(spark).to.be.instanceOf(primus.Spark);
           setTimeout(next, 2);
         }, function () {
-          expect(iterations).to.equal(7);
           clearInterval(interval);
+          expect(iterations).to.equal(added + initial);
           done();
         });
       });
@@ -425,10 +427,6 @@ describe('Primus', function () {
     it('includes the client plugins', function () {
       var primus = new Primus(server)
         , library;
-
-      function client() {
-        console.log();
-      }
 
       primus.use('log', { client: function () {
         console.log('i am a client plugin');
