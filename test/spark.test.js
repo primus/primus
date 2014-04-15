@@ -18,7 +18,8 @@ describe('Spark', function () {
   });
 
   afterEach(function afterEach(done) {
-    server.close(done);
+    try { server.close(done); }
+    catch (e) { done(); }
   });
 
   it('creates a id if none is supplied', function () {
@@ -168,6 +169,33 @@ describe('Spark', function () {
 
       var spark = new primus.Spark();
       spark.end();
+    });
+
+    it('emits `disconnection` events when the server gets destroyed', function (done) {
+      var create = 10
+        , connection = 0
+        , disconnection = 0;
+
+      primus.on('connection', function () {
+        connection++;
+      });
+
+      primus.on('disconnection', function () {
+        disconnection++;
+      });
+
+      for (var i = 0; i < create; i++) new primus.Spark();
+
+      setTimeout(function () {
+        expect(connection).to.equal(create);
+
+        primus.destroy(function () {
+          expect(connection).to.equal(create);
+          expect(disconnection).to.equal(create);
+
+          done();
+        });
+      }, 10);
     });
 
     it('removes all event listeners after the `end` event is emitted', function (done) {

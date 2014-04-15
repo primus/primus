@@ -102,7 +102,7 @@ describe('Primus', function () {
     expect(primus.connected).to.equal(0);
     var spark = new primus.Spark();
 
-    process.nextTick(function () {
+    setTimeout(function () {
       expect(primus.connected).to.equal(1);
       var sparks = new primus.Spark();
 
@@ -113,7 +113,7 @@ describe('Primus', function () {
 
         done();
       }, 0);
-    });
+    }, 0);
   });
 
   it('serves the primus client on /primus/primus.js', function (done) {
@@ -152,12 +152,12 @@ describe('Primus', function () {
     var spark = new primus.Spark()
       , sparks = new primus.Spark();
 
-    process.nextTick(function () {
+    setTimeout(function () {
       expect(primus.connected).to.equal(2);
       sparks.end();
       spark.end();
 
-      process.nextTick(function () {
+      setTimeout(function () {
         expect(primus.connected).to.equal(0);
         expect(Object.keys(primus.connections).length).to.equal(primus.connected);
 
@@ -328,7 +328,7 @@ describe('Primus', function () {
       var spark = new primus.Spark()
         , sparks = new primus.Spark();
 
-      process.nextTick(function () {
+      setTimeout(function () {
         expect(primus.connected).to.equal(2);
 
         var iterations = 0;

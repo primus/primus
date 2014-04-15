@@ -272,9 +272,10 @@ Spark.readable('__initialise', [function initialise() {
   });
 
   //
-  // Announce a new connection.
+  // Announce a new connection. This allows the transformers to change or listen
+  // to events before we announce it.
   //
-  process.nextTick(function tick() {
+  (global.setImmediate || process.nextTick)(function tick() {
     primus.emit('connection', spark);
   });
 }]);
@@ -438,23 +439,18 @@ Spark.readable('end', function end(data, options) {
   if (Spark.CLOSED === this.readyState) return this;
 
   options = options || {};
-  var spark = this;
-
-  if (data) spark.write(data);
+  if (data) this.write(data);
 
   //
   // If we want to trigger a reconnect do not send
   // `primus::server::close`, otherwise bypass the .write method
   // as this message should not be transformed.
   //
-  if (!options.reconnect) spark._write('primus::server::close');
+  if (!options.reconnect) this._write('primus::server::close');
 
-  spark.readyState = Spark.CLOSED;
-
-  process.nextTick(function tick() {
-    spark.emit('outgoing::end');
-    spark.emit('end');
-  });
+  this.readyState = Spark.CLOSED;
+  this.emit('outgoing::end');
+  this.emit('end');
 
   return this;
 });
