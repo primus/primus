@@ -919,6 +919,23 @@ primus.forEach(function (spark, id, connections) {
 });
 ```
 
+The method can be also used asynchronously. To enable the asynchronous iteration
+you have to call `Primus#forEach` with two arguments. The first is the iterator
+function that is called on every step. The iterator is called with a connection
+from the list and a callback for when it has finished. The second argument is
+the main callback and is called when the iteration has finished.
+
+```js
+primus.forEach(function (spark, next) {
+  //
+  // Do something and call next when done
+  //
+  next();
+}, function (err) {
+  console.log('We are done');
+});
+```
+
 ### Destruction
 
 In rare cases you might need to destroy the Primus instance you've created. You

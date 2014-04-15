@@ -271,13 +271,57 @@ Primus.readable('authorize', function authorize(auth) {
  * Iterate over the connections.
  *
  * @param {Function} fn The function that is called every iteration.
+ * @param {Function} done Optional callback, if you want to iterate asynchronously.
  * @returns {Primus}
  * @api public
  */
-Primus.readable('forEach', function forEach(fn) {
-  for (var stream in this.connections) {
-    fn(this.connections[stream], stream, this.connections);
+Primus.readable('forEach', function forEach(fn, done) {
+  if (!done) {
+    for (var id in this.connections) {
+      fn(this.connections[id], id, this.connections);
+    }
+
+    return this;
   }
+
+  var ids = Object.keys(this.connections)
+    , primus = this;
+
+  function pushId(spark) {
+    ids.push(spark.id);
+  }
+
+  //
+  // We are going to iterate through the connections asynchronously so
+  // we should handle new connections as they come in.
+  //
+  primus.on('connection', pushId);
+
+  (function iterate() {
+    var id = ids.shift()
+      , spark;
+
+    if (!id) {
+      primus.removeListener('connection', pushId);
+      return done();
+    }
+
+    spark = primus.connections[id];
+
+    //
+    // The connection may have already been closed.
+    //
+    if (!spark) return iterate();
+
+    fn(spark, function next(err) {
+      if (err) {
+        primus.removeListener('connection', pushId);
+        return done(err);
+      }
+
+      iterate();
+    });
+  }());
 
   return this;
 });
