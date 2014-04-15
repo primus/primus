@@ -345,6 +345,37 @@ describe('Primus', function () {
         done();
       });
     });
+
+    it('iterates over all active connections asynchronously', function (done) {
+      var iterations = 4
+        , interval;
+
+      while (iterations) {
+        iterations--;
+        new primus.Spark();
+      }
+
+      process.nextTick(function () {
+        expect(primus.connected).to.equal(4);
+
+        //
+        // Simulate new incoming connections while we iterate.
+        //
+        interval = setInterval(function () {
+          new primus.Spark();
+        }, 4);
+
+        primus.forEach(function (spark, next) {
+          iterations++;
+          expect(spark).to.be.instanceOf(primus.Spark);
+          setTimeout(next, 2);
+        }, function () {
+          expect(iterations).to.equal(7);
+          clearInterval(interval);
+          done();
+        });
+      });
+    });
   });
 
   describe('#library', function () {
