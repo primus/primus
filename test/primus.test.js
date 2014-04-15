@@ -102,7 +102,7 @@ describe('Primus', function () {
     expect(primus.connected).to.equal(0);
     var spark = new primus.Spark();
 
-    setTimeout(function () {
+    (global.setImmediate || process.nextTick)(function () {
       expect(primus.connected).to.equal(1);
       var sparks = new primus.Spark();
 
@@ -152,7 +152,7 @@ describe('Primus', function () {
     var spark = new primus.Spark()
       , sparks = new primus.Spark();
 
-    setTimeout(function () {
+    (global.setImmediate || process.nextTick)(function () {
       expect(primus.connected).to.equal(2);
       sparks.end();
       spark.end();
@@ -328,7 +328,7 @@ describe('Primus', function () {
       var spark = new primus.Spark()
         , sparks = new primus.Spark();
 
-      setTimeout(function () {
+      (global.setImmediate || process.nextTick)(function () {
         expect(primus.connected).to.equal(2);
 
         var iterations = 0;
@@ -348,32 +348,33 @@ describe('Primus', function () {
 
     it('iterates over all active connections asynchronously', function (done) {
       var initial = 4
-        , iterations = 0
-        , added = 0
-        , interval;
+        , iterations = 0;
 
       for (var i = 0; i < initial; i++) {
         new primus.Spark();
       }
 
-      setTimeout(function () {
+      (global.setImmediate || process.nextTick)(function () {
         expect(primus.connected).to.equal(4);
 
-        //
-        // Simulate new incoming connections while we iterate.
-        //
-        interval = setInterval(function () {
-          new primus.Spark();
-          added++;
-        }, 4);
+        var first = true;
 
         primus.forEach(function (spark, next) {
           iterations++;
           expect(spark).to.be.instanceOf(primus.Spark);
-          setTimeout(next, 2);
+          setTimeout(function () {
+            next();
+
+            if (first) {
+              for (var i = 0; i < 4; i++) {
+                new primus.Spark();
+              }
+
+              first = false;
+            }
+          }, 2);
         }, function () {
-          clearInterval(interval);
-          expect(iterations).to.equal(added + initial);
+          expect(iterations).to.equal(8);
           done();
         });
       });
