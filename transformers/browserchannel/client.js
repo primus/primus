@@ -75,11 +75,12 @@ module.exports = function client() {
       // the close call.
       //
       if (socket.readyState === socket.CONNECTING) {
-        return socket.onopen = function () {
+        return socket.onopen = function onopen() {
           primus.emit('outgoing::end');
         };
       }
 
+      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
       socket.close();
       socket = null;
     }

@@ -30,7 +30,7 @@ module.exports = function client() {
   // Connect to the given URL.
   //
   primus.on('outgoing::open', function opening() {
-    if (socket) socket.close();
+    primus.emit('outgoing::end');
 
     primus.socket = socket = factory(primus.merge(primus.transport,
       primus.url,
@@ -97,6 +97,7 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
+      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
       socket.close();
       socket = null;
     }

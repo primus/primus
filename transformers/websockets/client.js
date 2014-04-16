@@ -32,7 +32,7 @@ module.exports = function client() {
   // Connect to the given URL.
   //
   primus.on('outgoing::open', function opening() {
-    if (socket) socket.close();
+    primus.emit('outgoing::end');
 
     //
     // FireFox will throw an error when we try to establish a connection from
@@ -86,7 +86,7 @@ module.exports = function client() {
   // called if it failed to disconnect.
   //
   primus.on('outgoing::reconnect', function reconnect() {
-    if (socket) primus.emit('outgoing::end');
+    primus.emit('outgoing::end');
     primus.emit('outgoing::open');
   });
 
@@ -95,6 +95,7 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
+      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
       socket.close();
       socket = null;
     }

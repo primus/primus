@@ -30,8 +30,7 @@ module.exports = function client() {
   // Connect to the given URL.
   //
   primus.on('outgoing::open', function open() {
-    if (socket) try { socket.disconnect(); }
-    catch (e) {}
+    primus.emit('outgoing::end');
 
     var transports = factory.transports
       , Socket = factory.Socket;
@@ -58,11 +57,11 @@ module.exports = function client() {
     //
     // Setup the Event handlers.
     //
-    socket.on('connect', primus.emits('open'));
-    socket.on('connect_failed', primus.emits('error'));
     socket.on('error', primus.emits('error'));
+    socket.on('connect', primus.emits('open'));
     socket.on('message', primus.emits('data'));
     socket.on('disconnect', primus.emits('end'));
+    socket.on('connect_failed', primus.emits('error'));
   });
 
   //
@@ -83,7 +82,6 @@ module.exports = function client() {
       socket.connected = socket.socket.connecting = socket.socket.reconnecting = false;
       socket.socket.connect();
     } catch (e) {
-      socket = null;
       primus.emit('outgoing::open');
     }
   });
@@ -94,6 +92,12 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
+      socket.removeAllListeners('error')
+            .removeAllListeners('connect')
+            .removeAllListeners('message')
+            .removeAllListeners('disconnect')
+            .removeAllListeners('connect_failed');
+
       //
       // This method can throw an error if it failed to connect to the server.
       //
