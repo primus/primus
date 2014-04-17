@@ -277,6 +277,7 @@ function Primus(url, options) {
   primus.attempt = null;                        // Current back off attempt.
   primus.socket = null;                         // Reference to the internal connection.
   primus.latency = 0;                           // Latency between messages.
+  primus.disconnect = false;                    // Did we receive a disconnect packet?
   primus.transport = options.transport;         // Transport options.
   primus.transformers = {                       // Message transformers.
     outgoing: [],
@@ -674,6 +675,17 @@ Primus.prototype.initialise = function initialise(options) {
     var readyState = primus.readyState;
 
     //
+    // This `end` started with the receiving of a primus::server::close packet
+    // which indicated that the user/developer on the server closed the
+    // connection and it was not a result of a network disruption. So we should
+    // kill the connection without doing a reconnect.
+    //
+    if (primus.disconnect) {
+      primus.disconnect = false;
+      return primus.end();
+    }
+
+    //
     // Always set the readyState to closed, and if we're still connecting, close
     // the connection so we're sure that everything after this if statement block
     // is only executed because our readyState is set to `open`.
@@ -798,7 +810,9 @@ Primus.prototype.protocol = function protocol(msg) {
       // The server is closing the connection, forcefully disconnect so we don't
       // reconnect again.
       //
-      if ('close' === value) this.end();
+      if ('close' === value) {
+        this.disconnect = true;
+      }
     break;
 
     case 'id':
