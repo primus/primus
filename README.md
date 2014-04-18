@@ -1198,6 +1198,11 @@ var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
+**Note: Primus will never support Socket.IO 1.0. As it's just an abstraction build
+upon Engine.IO so it makes more sense to use Engine.IO in Primus directly.
+Socket.IO 0.9.x will be supported as it uses a completely different transport
+system.**
+
 As you can see from the examples above, it doesn't matter how you write the name
 of the transformer, we just `toLowerCase()` everything.
 
