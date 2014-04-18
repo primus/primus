@@ -10,7 +10,7 @@ var JSONH = require('jsonh');
  * @api public
  */
 exports.encoder = function encoder(data, fn) {
-var err;
+  var err;
 
   try { data = JSONH.stringify(data); }
   catch (e) { err = e; }
