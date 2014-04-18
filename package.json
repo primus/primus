@@ -29,13 +29,13 @@
     "access-control": "0.0.x",
     "eventemitter3": "0.1.x",
     "forwarded-for": "0.0.x",
-    "fusing": "0.1.x",
+    "fusing": "0.2.x",
     "load": "1.0.x",
     "setheader": "0.0.x"
   },
   "devDependencies": {
     "binary-pack": "0.0.x",
-    "browserchannel": "1.1.x",
+    "browserchannel": "1.2.x",
     "chai": "1.9.x",
     "e-json": "0.0.x",
     "engine.io": "1.0.x",
