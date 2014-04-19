@@ -22,13 +22,13 @@ describe('Spark', function () {
     catch (e) { done(); }
   });
 
-  it('creates a id if none is supplied', function () {
+  it('creates an id if none is supplied', function () {
     var spark = new primus.Spark();
 
     expect(spark.id).to.be.a('string');
   });
 
-  it('is an Stream instance', function () {
+  it('is a Stream instance', function () {
     expect(new primus.Spark()).to.be.instanceOf(require('stream'));
   });
 

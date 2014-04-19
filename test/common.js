@@ -1,10 +1,12 @@
 'use strict';
 
-var chai = require('chai');
-chai.config.includeStack = true;
+var chai = require('chai')
+  , http = require('http')
+  , path = require('path')
+  , fs = require('fs');
 
-var path = require('path');
-var fs = require('fs');
+chai.config.includeStack = true;
+http.globalAgent.maxSockets = 15;
 
 //
 // Expose primus
@@ -52,7 +54,7 @@ exports.create = function create(transformer, fn, port) {
     port = port || exports.port;
   }
 
-  var server = require('http').createServer(function handle(req, res) {
+  var server = http.createServer(function handle(req, res) {
     console.error('');
     console.error('Uncaught request', req.url);
     console.error('');
