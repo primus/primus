@@ -113,7 +113,7 @@ describe('Primus', function () {
 
         done();
       }, 0);
-    }, 0);
+    });
   });
 
   it('serves the primus client on /primus/primus.js', function (done) {

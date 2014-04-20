@@ -275,7 +275,7 @@ Spark.readable('__initialise', [function initialise() {
   // Announce a new connection. This allows the transformers to change or listen
   // to events before we announce it.
   //
-  (global.setImmediate || process.nextTick)(function tick() {
+  process.nextTick(function tick() {
     primus.emit('connection', spark);
   });
 }]);

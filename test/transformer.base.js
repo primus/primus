@@ -864,6 +864,23 @@ module.exports = function base(transformer, pathname, transformer_name) {
     });
 
     describe('Server', function () {
+      it('emits a `connection` event before any `data` event', function (done) {
+        var create = 10
+          , foo = 0;
+
+        primus.on('connection', function (spark) {
+          spark.on('data', function (data) {
+            if ('foo' === data) {
+              if (++foo === create) done();
+            }
+          });
+        });
+
+        for (var i = 0; i < create; i++) {
+          (new Socket(server.addr)).write('foo');
+        }
+      });
+
       it('emits `end` when the connection is closed', function (done) {
         primus.on('connection', function (spark) {
           spark.on('end', done);
