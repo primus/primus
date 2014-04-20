@@ -246,7 +246,6 @@ Spark.readable('__initialise', [function initialise() {
   //
   spark.on('end', function end() {
     clearTimeout(spark.timeout);
-    spark.removeAllListeners();
     primus.emit('disconnection', spark);
 
     //
@@ -268,6 +267,8 @@ Spark.readable('__initialise', [function initialise() {
       ].forEach(function each(key) {
         delete spark[key];
       });
+
+      spark.removeAllListeners();
     }, 10);
   });
 
