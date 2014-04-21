@@ -107,11 +107,11 @@ Spark.readable('heartbeat', function heartbeat() {
 
   var spark = this;
   this.timeout = setTimeout(function timeout() {
-    if (spark.readyState === Spark.CLOSED) return;
-
-    spark.readyState = Spark.CLOSED;
-    spark.emit('outgoing::end');
-    spark.emit('end');
+    //
+    // Set reconnect to true so we're not sending a `primus::server::close`
+    // packet.
+    //
+    spark.end(undefined, { reconnect: true });
   }, this.primus.timeout);
 
   return this;
