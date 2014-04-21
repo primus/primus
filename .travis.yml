@@ -2,9 +2,11 @@ language: node_js
 node_js:
   - "0.8"
   - "0.10"
-
+before_install:
+  - npm install -g npm
 notifications:
   irc:
-    channels: "irc.freenode.org#primus"
+    channels:
+      - "irc.freenode.org#primus"
     on_success: change
     on_failure: change
