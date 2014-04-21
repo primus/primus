@@ -224,6 +224,7 @@ Spark.readable('__initialise', [function initialise() {
 
     spark.readyState = Spark.CLOSED;
     spark.emit('end');
+    spark.removeAllListeners();
   });
 
   spark.on('incoming::error', function error(err) {
@@ -267,8 +268,6 @@ Spark.readable('__initialise', [function initialise() {
       ].forEach(function each(key) {
         delete spark[key];
       });
-
-      spark.removeAllListeners();
     }, 10);
   });
 
