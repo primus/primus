@@ -208,11 +208,11 @@ describe('Spark', function () {
       });
 
       spark.on('end', function () {
-        process.nextTick(function () {
-          spark.emit('data', 'foo');
+        setTimeout(function () {
+          spark.emit('data', 'aaaa');
           expect(data).to.equal(1);
           done();
-        });
+        }, 10);
       });
 
       spark.emit('data', 'foo');
