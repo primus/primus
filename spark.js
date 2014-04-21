@@ -451,8 +451,7 @@ Spark.readable('end', function end(data, options) {
   this.readyState = Spark.CLOSED;
   this.emit('outgoing::end');
   this.emit('end');
-
-  return this;
+  return this.removeAllListeners();
 });
 
 //
