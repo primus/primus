@@ -37,14 +37,17 @@ module.exports = function server() {
     );
 
     spark.on('outgoing::end', function end() {
-      socket.disconnect();
+      if (socket) socket.disconnect();
     }).on('outgoing::data', function write(data) {
       socket.send(data);
     });
 
-    socket.on('disconnect', spark.emits('end'));
     socket.on('message', spark.emits('data'));
     socket.on('error', spark.emits('error'));
+    socket.on('disconnect', spark.emits('end', function parser() {
+      socket.removeAllListeners();
+      socket = null;
+    }));
   });
 
   this.once('close', function close() {

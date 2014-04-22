@@ -9,8 +9,7 @@
  */
 module.exports = function server() {
   var Engine = require('engine.io').Server
-    , Spark = this.Spark
-    , primus = this.primus;
+    , Spark = this.Spark;
 
   var service = this.service = new Engine();
 
@@ -29,14 +28,17 @@ module.exports = function server() {
     );
 
     spark.on('outgoing::end', function end() {
-      socket.close();
+      if (socket) socket.close();
     }).on('outgoing::data', function write(data) {
       socket.write(data);
     });
 
     socket.on('error', spark.emits('error'));
-    socket.on('close', spark.emits('end'));
     socket.on('data', spark.emits('data'));
+    socket.on('close', spark.emits('end', function parser() {
+      socket.removeAllListeners();
+      socket = null;
+    }));
   });
 
   //

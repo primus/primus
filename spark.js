@@ -220,11 +220,10 @@ Spark.readable('__initialise', [function initialise() {
   // The client has disconnected.
   //
   spark.on('incoming::end', function disconnect() {
-    if (spark.readyState === Spark.CLOSED) return;
-
-    spark.readyState = Spark.CLOSED;
-    spark.emit('end');
-    spark.removeAllListeners();
+    //
+    // The socket is closed, sending data over it will throw an error.
+    //
+    spark.end(undefined, { reconnect: true });
   });
 
   spark.on('incoming::error', function error(err) {
