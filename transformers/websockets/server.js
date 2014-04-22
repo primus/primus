@@ -44,7 +44,7 @@ module.exports = function server() {
       );
 
       spark.on('outgoing::end', function end() {
-        socket.close();
+        if (socket) socket.close();
       }).on('outgoing::data', function write(data) {
         if (socket.readyState !== socket.OPEN) return;
         if ('string' === typeof data) return socket.send(data, noop);
@@ -52,9 +52,12 @@ module.exports = function server() {
         socket.send(data, { binary: true }, noop);
       });
 
-      socket.on('close', spark.emits('end'));
-      socket.on('error', spark.emits('error'));
       socket.on('message', spark.emits('data'));
+      socket.on('error', spark.emits('error'));
+      socket.on('close', spark.emits('end', function parser() {
+        socket.removeAllListeners();
+        socket = null;
+      }));
     });
   }).on('request', function request(req, res) {
     res.writeHead(400, {'content-type': 'text/plain'});
