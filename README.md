@@ -1656,8 +1656,8 @@ see it be merged automatically.
 </dl>
 
 
-In addition to these community provided plugins, the Primus project also
-provides the following plugins:
+**In addition to these community provided plugins, the Primus project also
+provides the following plugins:**
 
 
 <dl>
@@ -1673,6 +1673,21 @@ provides the following plugins:
     </a>
     <a href="http://badge.fury.io/js/substream">
       <img src="https://badge.fury.io/js/substream.png" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/primus/emit">primus-emit</a></dt>
+  <dd>
+    The emit module adds client->server and server->client event emitting to Primus.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/emit">
+      <img src="https://travis-ci.org/primus/emit.png?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-emit">
+      <img src="https://badge.fury.io/js/primus-emit.png" alt="NPM version" />
     </a>
   </dd>
 </dl>
