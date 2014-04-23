@@ -1,0 +1,44 @@
+diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
+index 2fbe35e..dddc248 100644
+--- a/transformers/engine.io/library.js
++++ b/transformers/engine.io/library.js
+@@ -1207,6 +1207,13 @@ function JSONPPolling (opts) {
+ 
+   // append to query string
+   this.query.j = this.index;
++
++  // prevent spurious errors from being emitted when the window is unloaded
++  if (global.document && global.addEventListener) {
++    global.addEventListener('beforeunload', function () {
++      if (self.script) self.script.onerror = empty;
++    });
++  }
+ }
+ 
+ /**
+@@ -1222,7 +1229,7 @@ util.inherits(JSONPPolling, Polling);
+ JSONPPolling.prototype.supportsBinary = false;
+ 
+ /**
+- * Closes the socket
++ * Closes the socket.
+  *
+  * @api private
+  */
+@@ -1248,7 +1255,7 @@ JSONPPolling.prototype.doClose = function () {
+  */
+ 
+ JSONPPolling.prototype.doPoll = function () {
+-	var self = this;
++  var self = this;
+   var script = document.createElement('script');
+ 
+   if (this.script) {
+@@ -1266,7 +1273,6 @@ JSONPPolling.prototype.doPoll = function () {
+   insertAt.parentNode.insertBefore(script, insertAt);
+   this.script = script;
+ 
+-
+   if (util.ua.gecko) {
+     setTimeout(function () {
+       var iframe = document.createElement('iframe');
