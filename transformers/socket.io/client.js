@@ -92,11 +92,7 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
-      socket.removeAllListeners('error')
-            .removeAllListeners('connect')
-            .removeAllListeners('message')
-            .removeAllListeners('disconnect')
-            .removeAllListeners('connect_failed');
+      socket.removeAllListeners();
 
       //
       // This method can throw an error if it failed to connect to the server.
