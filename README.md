@@ -1,7 +1,7 @@
 # Primus
 
-[![Build Status](https://travis-ci.org/primus/primus.png?branch=master)](https://travis-ci.org/primus/primus)
-[![NPM version](https://badge.fury.io/js/primus.png)](http://badge.fury.io/js/primus)
+[![Build Status](https://travis-ci.org/primus/primus.svg?branch=master)](https://travis-ci.org/primus/primus)
+[![NPM version](https://badge.fury.io/js/primus.svg)](http://badge.fury.io/js/primus)
 
 Primus, the creator god of transformers but now also known as universal wrapper
 for real-time frameworks. There are a lot of real-time frameworks available for
@@ -1482,10 +1482,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/cayasso/primus-rooms">
-      <img src="https://travis-ci.org/cayasso/primus-rooms.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/cayasso/primus-rooms.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-rooms">
-      <img src="https://badge.fury.io/js/primus-rooms.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-rooms.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1497,10 +1497,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/cayasso/primus-multiplex">
-      <img src="https://travis-ci.org/cayasso/primus-multiplex.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/cayasso/primus-multiplex.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-multiplex">
-      <img src="https://badge.fury.io/js/primus-multiplex.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-multiplex.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1512,10 +1512,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/cayasso/primus-emitter">
-      <img src="https://travis-ci.org/cayasso/primus-emitter.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/cayasso/primus-emitter.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-emitter">
-      <img src="https://badge.fury.io/js/primus-emitter.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-emitter.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1527,10 +1527,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/neoziro/primus-cluster">
-      <img src="https://travis-ci.org/neoziro/primus-cluster.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/neoziro/primus-cluster.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-cluster">
-      <img src="https://badge.fury.io/js/primus-cluster.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-cluster.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1542,10 +1542,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/swissmanu/primus-responder">
-      <img src="https://travis-ci.org/swissmanu/primus-responder.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/swissmanu/primus-responder.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-responder">
-      <img src="https://badge.fury.io/js/primus-responder.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-responder.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1558,10 +1558,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/mmalecki/primus-redis">
-      <img src="https://travis-ci.org/mmalecki/primus-redis.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/mmalecki/primus-redis.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-redis">
-      <img src="https://badge.fury.io/js/primus-redis.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-redis.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1573,10 +1573,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/mmalecki/primus-redis-rooms">
-      <img src="https://travis-ci.org/mmalecki/primus-redis-rooms.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/mmalecki/primus-redis-rooms.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-redis-rooms">
-      <img src="https://badge.fury.io/js/primus-redis-rooms.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-redis-rooms.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1588,10 +1588,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/cayasso/primus-resource">
-      <img src="https://travis-ci.org/cayasso/primus-resource.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/cayasso/primus-resource.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-resource">
-      <img src="https://badge.fury.io/js/primus-resource.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-resource.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1608,7 +1608,7 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="http://badge.fury.io/js/hapi_primus_sessions">
-      <img src="https://badge.fury.io/js/hapi_primus_sessions.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/hapi_primus_sessions.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1620,10 +1620,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/zeMirco/primus-express-session">
-      <img src="https://travis-ci.org/zeMirco/primus-express-session.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/zeMirco/primus-express-session.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-express-session">
-      <img src="https://badge.fury.io/js/primus-express-session.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-express-session.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1635,7 +1635,7 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/Shopetti/backbone.primus">
-      <img src="https://travis-ci.org/Shopetti/backbone.primus.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/Shopetti/backbone.primus.svg?branch=master" alt="Build Status" />
     </a>
   </dd>
 </dl>
@@ -1647,10 +1647,10 @@ see it be merged automatically.
   </dd>
   <dd>
     <a href="https://travis-ci.org/Fishrock123/primus-spark-latency">
-      <img src="https://travis-ci.org/Fishrock123/primus-spark-latency.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/Fishrock123/primus-spark-latency.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-spark-latency">
-      <img src="https://badge.fury.io/js/primus-spark-latency.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-spark-latency.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1669,10 +1669,10 @@ provides the following plugins:**
   </dd>
   <dd>
     <a href="https://travis-ci.org/primus/substream">
-      <img src="https://travis-ci.org/primus/substream.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/primus/substream.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/substream">
-      <img src="https://badge.fury.io/js/substream.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/substream.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1680,14 +1680,14 @@ provides the following plugins:**
 <dl>
   <dt><a href="http://github.com/primus/emit">primus-emit</a></dt>
   <dd>
-    The emit module adds client->server and server->client event emitting to Primus.
+    The emit module adds client -> server and server -> client event emitting to Primus.
   </dd>
   <dd>
     <a href="https://travis-ci.org/primus/emit">
-      <img src="https://travis-ci.org/primus/emit.png?branch=master" alt="Build Status" />
+      <img src="https://travis-ci.org/primus/emit.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-emit">
-      <img src="https://badge.fury.io/js/primus-emit.png" alt="NPM version" />
+      <img src="https://badge.fury.io/js/primus-emit.svg" alt="NPM version" />
     </a>
   </dd>
 </dl>
@@ -1846,7 +1846,7 @@ primus in a different language than JavaScript:
   <dt><a href="https://github.com/seegno/primus-objc">primus-objc</a></dt>
   <dd>
     <a href="https://travis-ci.org/seegno/primus-objc">
-      <img src="https://travis-ci.org/seegno/primus-objc.png" alt="Build Status" />
+      <img src="https://travis-ci.org/seegno/primus-objc.svg" alt="Build Status" />
     </a>
   </dd>
   <dd>
