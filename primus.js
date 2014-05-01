@@ -277,6 +277,7 @@ function Primus(url, options) {
   primus.attempt = null;                        // Current back off attempt.
   primus.socket = null;                         // Reference to the internal connection.
   primus.latency = 0;                           // Latency between messages.
+  primus.stamps = 0;                            // Counter to make timestamps unqiue.
   primus.disconnect = false;                    // Did we receive a disconnect packet?
   primus.transport = options.transport;         // Transport options.
   primus.transformers = {                       // Message transformers.
@@ -1274,7 +1275,7 @@ Primus.prototype.uri = function uri(options) {
   // by forcing an cache busting query string in to the URL.
   //
   var querystring = this.querystring(options.query || '');
-  querystring._primuscb = +new Date();
+  querystring._primuscb = +new Date() +'-'+ this.stamps++;
   options.query = this.querystringify(querystring);
 
   //
