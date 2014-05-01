@@ -1202,7 +1202,10 @@ Primus.prototype.querystring = function querystring(query) {
   // the lastIndex property so we can continue executing this loop until we've
   // parsed all results.
   //
-  for (; part = parser.exec(query); result[part[1]] = part[2]);
+  for (;
+    part = parser.exec(query);
+    result[decodeURIComponent(part[1])] = decodeURIComponent(part[2])
+  );
 
   return result;
 };
@@ -1219,7 +1222,7 @@ Primus.prototype.querystringify = function querystringify(obj) {
 
   for (var key in obj) {
     if (obj.hasOwnProperty(key)) {
-      pairs.push(key +'='+ obj[key]);
+      pairs.push(encodeURIComponent(key) +'='+ encodeURIComponent(obj[key]));
     }
   }
 
