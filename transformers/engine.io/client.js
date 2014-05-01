@@ -47,6 +47,13 @@ module.exports = function client() {
       // Binary support in Engine.IO breaks a shit things. Turn it off for now.
       //
       forceBase64: true,
+
+      //
+      // Force timestamps on every single connection. Engine.IO only does this
+      // for polling by default, but WebSockets require an explicit `true`
+      // boolean.
+      //
+      timestampRequests: true,
       path: this.pathname,
       transports: !primus.AVOID_WEBSOCKETS
         ? ['polling', 'websocket']
@@ -54,7 +61,7 @@ module.exports = function client() {
     }));
 
     //
-    // Nuke a growing memory leak as engine.io pushes instances in to an exposed
+    // Nuke a growing memory leak as Engine.IO pushes instances in to an exposed
     // `sockets` array.
     //
     if (factory.sockets && factory.sockets.length) {
