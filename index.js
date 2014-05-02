@@ -639,7 +639,7 @@ Primus.readable('before', function before(name, fn, options, level) {
   if (fn.length < 2) fn = fn.call(this, options);
 
   //
-  // Make sure that the given or returned function can
+  // Make sure that we have a function that takes at least 2 arguments.
   //
   if ('function' !== typeof fn || fn.length < 2) {
     throw new PrimusError('Middleware should be a function that accepts at least 2 args');
