@@ -1,0 +1,23 @@
+{
+  "name": "middleware",
+  "version": "0.0.0",
+  "description": "Sharing session data between Express and Primus",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "example",
+    "middleware",
+    "primus",
+    "session"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "cookie-parser": "^1.0.1",
+    "express": "^4.1.1",
+    "express-session": "^1.0.4"
+  }
+}
