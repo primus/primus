@@ -904,7 +904,7 @@ There are 2 different ways of doing broadcasting in Primus. The easiest way is t
 use the `Primus#write` method which will write a message to every connected user:
 
 ```js
-primus.write(message);
+primus.write('message');
 ```
 
 There are cases where you only want to broadcast a message to a smaller group of
@@ -935,6 +935,19 @@ primus.forEach(function (spark, next) {
   console.log('We are done');
 });
 ```
+
+There are also cases where you want to select a single `Spark`. To do this you
+can use the `Primus#spark` method.
+
+```js
+// Get a spark by its id
+var spark = primus.spark(id);
+
+spark.write('message');
+```
+
+This method returns a `Spark` or `undefined` if the given id doesn't match any
+of the active `Spark` ids on the server.
 
 ### Destruction
 
