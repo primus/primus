@@ -41,9 +41,20 @@ module.exports = function configure(options) {
     if (!sid) return next();
 
     //
+    // Pause the request before retrieving the session. This ensures that no
+    // `data` event is lost while we perform our async call.
+    //
+    req.pause();
+
+    //
     // Grab the session from the store.
     //
     store.get(sid, function (err, session) {
+      //
+      // At this point the request stream can resume emitting `data` events.
+      //
+      req.resume();
+
       //
       // We don't want to kill the connection when we get an error from the
       // session store so we just log the error.
@@ -55,7 +66,7 @@ module.exports = function configure(options) {
 
       if (session) req.session = session;
 
-      return next();
+      next();
     });
   }
 
