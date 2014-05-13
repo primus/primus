@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Primus</title>
+  <script src="/primus/primus.js"></script>
+  <style>
+    body { padding: 50px }
+    #output { width: 450px; height: 200px; display: block; border: 0; outline: 0 }
+    #echo { width: 400px; height: 25px; font-size: 16px }
+    button { border-radius: 5px; border: 0; background: #444; color: #FFF; padding: 10px }
+  </style>
+</head>
+<body>
+  <form id="write">
+    <textarea id="output" readonly></textarea>
+    <input placeholder="write message that should echo" id="echo" />
+    <button type="submit">
+      echo
+    </button>
+  </form>
+  <script>
+    var output = document.getElementById('output')
+      , echo = document.getElementById('echo');
+
+    //
+    // Tell primus to create a new connect to the current domain/port/protocol
+    //
+    var primus = new Primus();
+
+    //
+    // Listen for incoming data and log it in our textarea.
+    //
+    primus.on('data', function recieved(data) {
+      output.value += data +'\n';
+    });
+
+    //
+    // Listen for submits of the form so we can send the message to the server.
+    //
+    document.getElementById('write').onsubmit = function submit(e) {
+      if (e && e.preventDefault) e.preventDefault();
+
+      //
+      // Write the typed message.
+      //
+      primus.write(echo.value);
+      echo.value = '';
+    };
+  </script>
+</body>
