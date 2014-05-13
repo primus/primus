@@ -1,8 +1,10 @@
 # Example
 
-This is a small example on how you can setup your own `Primus` server and work
-with the API. Before you run this example you need to install the dependencies.
-It uses the `argh` module for some CLI magic.
+This is a "small" example which allows you to see what kind of **public** events
+Primus emits during the live cycle of a single connection.
+
+Before you run this example you need to install the dependencies. It uses the
+`argh` module for some CLI magic so you can easily switch between transformers.
 
 ```
 npm install .
