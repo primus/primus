@@ -1045,10 +1045,10 @@ And of course the `Primus` instance as well.
 ### Heartbeats and latency
 
 Heartbeats are used in Primus to figure out if we still have an active, working
-and reliable connection with the server. These heartbeats are send from the
+and reliable connection with the server. These heartbeats are sent from the
 **client** to the server.
 
-the heartbeats will only be send when there is an idle connection, so there is
+The heartbeats will only be sent when there is an idle connection, so there is
 very little to no overhead at all. The main reason for this is that we already
 know that the connection is alive when we receive data from the server.
 
@@ -1056,7 +1056,7 @@ The heartbeat package that we send over the connection is
 `primus::ping::<timestamp>`. The server will echo back the exact same package.
 This allows Primus to also calculate the latency between messages by simply
 getting the `<timestamp>` from echo and comparing it with the local time. This
-heartbeat is then stored in a `primus.latency` properly. The initial value of
+heartbeat is then stored in a `primus.latency` property. The initial value of
 the `primus.latency` is to the time it took to send an `open` package and to
 actually receive a confirmation that the connection has been opened.
 
