@@ -13,7 +13,7 @@ various of real-time frameworks.
 
 1. Effortless switching between real-time frameworks by changing one single line
    of code. No more API rewrites needed when your project requirements change,
-   the framework get abandoned or simply breaks down.
+   the framework gets abandoned or simply breaks down.
 2. Built-in reconnect, it just works. The reconnect is controlled by a
    randomised exponential back-off algorithm to reduce server stress.
 3. Offline detection, Primus is smart enough to detect when users drop their
@@ -21,15 +21,15 @@ various of real-time frameworks.
    reconnects when they are back online.
 4. Automatically encodes and decodes messages using custom parsers. Can be
    easily switched for binary encoding for example.
-5. A clean and stream compatible interface for the client and server. You can
+5. A clean,  stream-compatible interface for the client and server. You can
    just `stream#pipe` data around. In addition to that, the client works on
    Node.js as well, write once, run it everywhere.
-6. Fixes various of bugs in the supported frameworks and additions stability
+6. Fixes various of bugs in the supported frameworks and additional stability
    patches to improve real-time communication.
 8. Comes with an amazing plugin interface to keep the core library as fast and
    lean as possible while still allowing the server and the client to be
    extended.
-9. Last but not least, Primus is build with love, passion and dedication to the
+9. Last but not least, Primus is built with love, passion and dedication to the
    real-time web.
 
 ```
@@ -41,7 +41,7 @@ If you have questions or need help with primus, come chat in our IRC room:
 
 ### Installation
 
-Primus is released in `npm` and can be installed using:
+Primus is released on `npm` and can be installed using:
 
 ```
 npm install primus --save
@@ -50,8 +50,8 @@ npm install primus --save
 ### Before Starting
 
 If you deploy your application behind a reverse proxy (Nginx, HAProxy, etc.) you
-might need to add WebSocket specific settings to it's configuration files. If
-you intent to use WebSockets please ensure that these settings have been added.
+might need to add WebSocket specific settings to its configuration files. If
+you intend to use WebSockets, please ensure that these settings have been added.
 There are some example configuration files available in the
 [observing/balancerbattle](https://github.com/observing/balancerbattle)
 repository.
@@ -308,7 +308,7 @@ active at the time you access this property.*
 
 #### spark.query
 
-The `spark.query` contains the query string you used to connect to server. It's
+The `spark.query` contains the query string you used to connect to the server. It's
 parsed to an object. Please note that this is not available for all supported
 transformers, but it's proven to be to useful to not implement it because one
 silly transformer refuses to support it. Yes, I'm looking at you SockJS.
@@ -325,7 +325,7 @@ used for the duration of one single connection. You should not see this as a
 The `spark.request` gives you access to the HTTP request that was used to
 initiate the real-time connection with the server. Please note that this request
 is already answered and closed (in most cases) so do not attempt to write or
-answer it in anyway. But it might be useful to access methods that get added by
+answer it anyway. But it might be useful to access methods that get added by
 middleware layers, etc.
 
 #### spark.write(data)
@@ -457,8 +457,8 @@ There are 2 important options that we're going to look a bit closer at.
 
 ##### Reconnect
 
-When the connection goes down unexpectedly a automatic reconnect process is
-started. It's using a randomised exponential back-off algorithm to prevent
+When the connection goes down unexpectedly an automatic reconnect process is
+started. It uses a randomised exponential back-off algorithm to prevent
 clients from DDoSing your server when you reboot as they will all be re-connecting at
 different times. The reconnection can be configured using the `options` argument
 in `Primus` and you should add these options to the `reconnect` property:
@@ -485,7 +485,7 @@ so expect to have the slightly higher or lower values.
 
 Please note that when we reconnect, we will receive a new `connection` event on
 the server and a new `open` event on the client, as the previous connection was
-completely dead and should therefore be considered as new connection.
+completely dead and should therefore be considered a new connection.
 
 If you are interested in learning more about the backoff algorithm you might
 want to read http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
@@ -508,12 +508,12 @@ provide users with highest level of customization:
   <dt>timeout</dt>
   <dd>
     Reconnect when we failed to establish our initial connection. This can
-    happen because we took to long to connect or because there was an error
+    happen because we took too long to connect or because there was an error
     while we tried to connect (which happens when you connect to a dead server)
   </dd>
 </dl>
 
-You can supply these options as a comma separated `String`:
+You can supply these options as a comma-separated `String`:
 
 ```js
 var primus = new Primus(url, { strategy: 'online, timeout, disconnect' })
@@ -560,7 +560,7 @@ consequences:
 - Primus will try to override configuration properties that are needed to
   ensure a correct functioning.
 - We might start using options without any announcement or major version bump.
-- Expect your client and it's connection to malfunction once you switch between
+- Expect your client and its connection to malfunction once you switch between
   different transports, as these configurations are specific to the bundled
   transformer library/client.
 - Bugs and bug reports caused by using this functionality are closed
@@ -573,7 +573,7 @@ of Primus.
 
 This method opens a connection with the server. By default it is called
 automatically when the Primus instance is created, but there are cases where
-is desiderable to open the connection manually. To do this set the `manual`
+it's desiderable to open the connection manually. To do this set the `manual`
 option to `true` and when you have the Primus instance call the method:
 
 ```js
@@ -621,7 +621,7 @@ primus.on('data', function message(data) {
 #### primus.on('open')
 
 The `open` event is emitted when we've successfully created a connection with
-the server. It will also be emitted when we've successfully reconnected when the
+the server. It will also be emitted when we've successfully reconnected after the
 connection goes down unintentionally.
 
 ```js
@@ -758,7 +758,7 @@ document:
 
 #### Server
 
-Primus has a built in auth hook that allows you to leverage the basic auth
+Primus has a built-in auth hook that allows you to leverage the basic auth
 header to validate the connection. To setup the optional auth hook, use the
 `Primus#authorize` method:
 
@@ -1007,7 +1007,7 @@ As a rule of thumb assume that every event that is prefixed with `incoming::` or
 `outgoing::` is reserved for internal use only and that emitting such events your
 self will most likely result in c̮̫̞͚͉̮̙͕̳̲͉̤̗̹̮̦̪̖̱h̛͍͙̖̟͕̹͕̙̦̣̲̠̪̯̳͖̝̩a̴̝̦͇̥̠̟͚̳̤̹̗̻̭͍͖͕͓̻o̥̹̮̙͔̗͍͚͓̗̦̹͈͙͕̘̮͖̝ș̗̲̤̗̮͈̙͈̹̼̣̹̖̱̤̼̺̤ ̻͙̗̥̠̱͇̱̝̟̺͍̺̼͆̅̓̓̇a̜̖͈͇͎͙̲̙̗͇̫̘̖̹͖͓͔̺̱n̹͓̮͇̯̜̤̗͍̯̰̫̫̖̰ͬ͌ͬͫd͚̪͚̭͚̥̰̤̟͎̝̲̯̭̹̭̙̼̤ ͖̞̙̹͈͚̥̦͚͉͖̼̬͓͚̳͉͙͎d̴͚̱̮̗͍̩̻̰̣̫͉͈̞̲͉̫̞͔ẻͩͦ̃͌̿̐ͪͩ̌̇͂̆̑͐ͣ ҉̲͉͔͎̤̼̘͇̮̥̻̜̹̥͚̲̻̖s̶̗̻̫̼̠̳̗̺̤̗̳͈̪̮̗̝͇͈t̙͇͕̺̱̼̤̗̰̬̣͌ͬͧ͊́ͧͩ͌r͌̐̓̃ͥ̄ͤ͑̈ͬ͆ͬ͂̇̿̅ ҉̙̼̳̭̙͍̻̱̠͈̮̺̣̝̱̙̺͉ư̳͎̻͔̯̪̝͕͚̣̜̼̞͇̠̘̠̪c̨̫͙͙̬̰̰̫̐͋͊͑̌̾̉͆t͚̗͕̝̤̗͕̲̮̝̼̺͙͚̟͓̣̥͍ĭ͙̘̩̖͇͎̆̍̿̾ͤ̔̉̈̂̾̈ͭo̬̠̝͈̺̙̮̬̗̪̤͕͇͕̰̮͖͉̬n̙̪̤̝̹͖͖̻̬̹͙̞̗͓̞̭̜̠̟.
 
-To make it easier for developers to emit events on primus it self we've added an
+To make it easier for developers to emit events on primus itself, we've added a
 small helper function that checks if the event you want to emit is reserved for
 Primus only. This would be all `incoming::` and `outgoing::` prefixed events and
 the events listed above. This method is called `<class>.reserved()` and it's
@@ -1326,7 +1326,7 @@ primus.before('name', function (req, res) {
 
 #### Primus.remove(name)
 
-This method allows you to remove middleware's that are configured. This works
+This method allows you to remove configured middleware. This works
 for the middleware layers that you added but also the middleware layers that we
 add by default. If you want to use a different way to serve the `primus.js`
 file you can simply:
@@ -1597,7 +1597,7 @@ see it be merged automatically.
 <dl>
   <dt><a href="http://github.com/cayasso/primus-resource">primus-resource</a></dt>
   <dd>
-    Define resources with auto-binded methods that can be called remotely on top of Primus. 
+    Define resources with auto-bound methods that can be called remotely on top of Primus. 
   </dd>
   <dd>
     <a href="https://travis-ci.org/cayasso/primus-resource">
@@ -1709,7 +1709,7 @@ provides the following plugins:**
 
 ### Example
 
-There is a small example folder included in this repository which allows to
+There is a small example folder included in this repository which allows you to
 easily play with the real-time connection. The code in the example is heavily
 commented for your reading pleasure. The example requires some extra
 dependencies so don't forget to run `npm install .` in the folder. The example
@@ -1732,10 +1732,10 @@ your server/application.
 
 #### Community
 
-Using Primus in production or created an awesome demo using the technology?
+Deployed Primus to production or built an awesome demo using the technology?
 We've set up a special [wiki] page for it where you can show your awesome
 creations or learn from demo and example applications how to use Primus.
-Checkout the wiki page out at:
+Checkout the wiki page at:
 
 https://github.com/primus/primus/wiki/Production
 
