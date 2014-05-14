@@ -21,7 +21,7 @@ various of real-time frameworks.
    reconnects when they are back online.
 4. Automatically encodes and decodes messages using custom parsers. Can be
    easily switched for binary encoding for example.
-5. A clean,  stream-compatible interface for the client and server. You can
+5. A clean, stream-compatible interface for the client and server. You can
    just `stream#pipe` data around. In addition to that, the client works on
    Node.js as well, write once, run it everywhere.
 6. Fixes various of bugs in the supported frameworks and additional stability
@@ -120,7 +120,7 @@ var server = http.createServer(/* request handler */)
 ```
 The following options can be provided:
 
-Name                | Description                               | Default       
+Name                | Description                               | Default
 --------------------|-------------------------------------------|---------------
 authorization       | Authorization handler                     | `null`
 pathname            | The URL namespace that Primus can own     | `/primus`
@@ -281,7 +281,7 @@ primus.on('disconnection', function (spark) {
 The `spark` argument is the actual real-time socket/connection. Sparks have a really low
 level interface and only expose a couple properties that are cross engine
 supported. The interface is modeled towards a Node.js stream compatible
-interface. So this will include all methods that are available on the 
+interface. So this will include all methods that are available on the
 [stream interface](http://nodejs.org/api/stream.html) including `Spark#pipe`.
 
 #### spark.headers
@@ -440,7 +440,7 @@ If no `url` argument is passed, it will default to the current URL.
 
 The following options can be provided:
 
-Name                | Description                             | Default       
+Name                | Description                             | Default
 --------------------|-----------------------------------------|---------------
 [reconnect]         | Configures the exponential back off     | `{}`
 timeout             | Connect time out                        | `10000` ms
@@ -463,7 +463,7 @@ clients from DDoSing your server when you reboot as they will all be re-connecti
 different times. The reconnection can be configured using the `options` argument
 in `Primus` and you should add these options to the `reconnect` property:
 
-Name                | Description                             | Default       
+Name                | Description                             | Default
 --------------------|-----------------------------------------|---------------
 maxDelay            | The maximum delay of a reconnect        | `Infinity`
 minDelay            | The minium delay of the reconnect       | `500`
@@ -730,7 +730,7 @@ If you're using the `primus.createSocket` api you can directly supply the
 plugins as part of the options as it supports `plugin` object:
 
 ```js
-var Socket = Primus.createSocket({ 
+var Socket = Primus.createSocket({
   transformer: transformer,
   parser: parser,
   plugin: {
@@ -813,7 +813,7 @@ primus.authorize(function (req, done) {
 
   if (req.headers.authorization) {
     try { auth = authParser(req.headers.authorization) }
-    catch (ex) { 
+    catch (ex) {
       ex.statusCode = 500;
       return done(ex);
     }
@@ -1246,7 +1246,7 @@ Primus has two ways of extending the functionality. We have [plugins](#plugins)
 but also support middleware. And there is an important difference between these.
 The middleware layers allows you to modify the incoming requests **before** they
 are passed in to the transformers. The middleware layer is only ran for the
-requests that are handled by Primus. 
+requests that are handled by Primus.
 
 We support 2 kind of middleware, **async** and **sync** middleware. The main
 difference between these kinds is that sync middleware doesn't require a
@@ -1303,7 +1303,7 @@ to be triggered.
 ```js
 primus.before('name', function () {
   function middleware(req, res, next) {
-  
+
   }
 
   middleware.upgrade = false; // Don't run this middleware for upgrades
@@ -1597,7 +1597,7 @@ see it be merged automatically.
 <dl>
   <dt><a href="http://github.com/cayasso/primus-resource">primus-resource</a></dt>
   <dd>
-    Define resources with auto-bound methods that can be called remotely on top of Primus. 
+    Define resources with auto-bound methods that can be called remotely on top of Primus.
   </dd>
   <dd>
     <a href="https://travis-ci.org/cayasso/primus-resource">
@@ -1841,8 +1841,8 @@ semver as closely as possible but this is how we use our version numbering:
 
 #### Release cycle
 
-There isn't a steady or monthly release cycle. We usually release a new 
-version when:
+There isn't a steady or monthly release cycle. We usually release a new version
+when:
 
 1. A critical bug is discovered.
 2. There have been a lot of minor changes.
