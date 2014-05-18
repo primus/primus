@@ -421,6 +421,22 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.on('end', done);
       });
 
+      it('should allow to stop the reconnection procedure', function (done) {
+        primus.on('connection', function (spark) {
+          spark.end(null, { reconnect: true });
+        });
+
+        var socket = new Socket(server.addr);
+
+        socket.on('reconnecting', socket.end);
+
+        socket.on('reconnect', function (message) {
+          throw new Error('bad');
+        });
+
+        socket.on('end', done);
+      });
+
       it('should allow access to the original HTTP request', function (done) {
         primus.on('connection', function (spark) {
           expect(spark.request).to.not.equal(undefined);
