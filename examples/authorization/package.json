@@ -1,0 +1,24 @@
+{
+  "name": "authorization",
+  "version": "0.0.0",
+  "description": "Token based authorization",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "authorization",
+    "example",
+    "primus",
+    "token"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.2.0",
+    "express": "^4.2.0",
+    "jwt-simple": "^0.2.0",
+    "pwd": "^0.0.3"
+  }
+}
