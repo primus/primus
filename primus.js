@@ -1068,18 +1068,18 @@ Primus.prototype.backoff = function backoff(callback, opts) {
       ), opts.maxDelay)
     : opts.minDelay;
 
-  //
-  // Emit a `reconnecting` event with current reconnect options. This allows
-  // them to update the UI and provide their users with feedback.
-  //
-  primus.emit('reconnecting', opts);
-
   primus.timers.reconnect = setTimeout(function delay() {
     opts.backoff = false;
     primus.clearTimeout('reconnect');
 
     callback(undefined, opts);
   }, opts.timeout);
+
+  //
+  // Emit a `reconnecting` event with current reconnect options. This allows
+  // them to update the UI and provide their users with feedback.
+  //
+  primus.emit('reconnecting', opts);
 
   return primus;
 };
@@ -1122,7 +1122,19 @@ Primus.prototype.reconnect = function reconnect() {
 Primus.prototype.end = function end(data) {
   context(this, 'end');
 
-  if (this.readyState === Primus.CLOSED && !this.timers.connect) return this;
+  if (this.readyState === Primus.CLOSED && !this.timers.connect) {
+    //
+    // If we are reconnecting stop the reconnection procedure.
+    //
+    if (this.timers.reconnect) {
+      this.clearTimeout('reconnect');
+      this.attempt = null;
+      this.emit('end');
+    }
+
+    return this;
+  }
+
   if (data) this.write(data);
 
   this.writable = false;
