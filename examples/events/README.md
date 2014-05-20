@@ -18,5 +18,6 @@ between transformer using the `--tranformer <name>` flag. Parsers can be changed
 using `--parser <name>` and if you want to run it on different port then port
 `8080` you can use the `--port <number>` flag.
 
-Once the server is running you can go to http://localhost:8080 in your browser
-and open the console. You can interact with the `primus` variable.
+Once the server is running you can point your browser to
+[http://localhost:8080](http://localhost:8080), open the console and play with
+the `primus` variable.
