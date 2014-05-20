@@ -17,8 +17,32 @@ module.exports = function server() {
   //
   var service = this.service = new Engine(this, {
     'resource': primus.pathname,
+
+    //
+    // This is a security feature of Socket.IO which was build to prevent people
+    // from spamming your server with data. But as outlined in
+    // LearnBoost/socket.io#1519 they forgot to clear the internal _dataLength
+    // property. So long running connections or sending frequent data will
+    // result in to random disconnects. Setting this property to infinity solves
+    // the disconnects for now..
+    //
+    'destroy buffer size': Infinity,
+
+    //
+    // Don't destroy upgrades, this should be handled by Primus so it can return
+    // a human readable response.
+    //
     'destroy upgrade': false,
+
+    //
+    // We're not serving the Socket.IO client, disable this.
+    //
     'browser client': false,
+
+    //
+    // Use our own custom logger instance so we can emit `log` events instead of
+    // writing/spamming terminals.
+    //
     'logger': this.logger
   });
 
