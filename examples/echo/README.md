@@ -2,23 +2,6 @@
 
 The most minimal example of doing an echo using Primus.
 
-## Installation
-
-Simply run:
-
-```
-npm install .
-```
-
-In the current directory and start the server using:
-
-```
-node index.js
-```
-
-And open `http://localhost:8080` in your browser to send messages to the server
-which it will echo back.
-
-## License
-
-MIT
+To run the example start the server using `node index.js`. Once the server is
+running you can open http://localhost:8080 in your browser and send messages.
+Each message will be echoed back to the client.

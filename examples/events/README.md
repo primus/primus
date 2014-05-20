@@ -1,4 +1,4 @@
-# Example
+# Events
 
 This is a "small" example which allows you to see what kind of **public** events
 Primus emits during the live cycle of a single connection.
@@ -18,5 +18,5 @@ between transformer using the `--tranformer <name>` flag. Parsers can be changed
 using `--parser <name>` and if you want to run it on different port then port
 `8080` you can use the `--port <number>` flag.
 
-Once the server is running you can go to [http://localhost:8080] in your browser
+Once the server is running you can go to http://localhost:8080 in your browser
 and open the console. You can interact with the `primus` variable.

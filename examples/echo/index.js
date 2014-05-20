@@ -11,7 +11,7 @@ var server = require('http').createServer(function incoming(req, res) {
 //
 // Attach Primus to the HTTP server.
 //
-var Primus = require('primus')
+var Primus = require('../..')
   , primus = new Primus(server);
 
 //

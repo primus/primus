@@ -12,9 +12,5 @@
     "echo"
   ],
   "author": "Arnout Kazemier",
-  "license": "MIT",
-  "dependencies": {
-    "primus": "^2.2.1",
-    "ws": "^0.4.31"
-  }
+  "license": "MIT"
 }

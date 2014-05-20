@@ -7,7 +7,7 @@ var express = require('express')
   , expressSession = require('express-session')
   , cookieParser = require('cookie-parser')
   , http = require('http')
-  , Primus = require('../../')
+  , Primus = require('../..')
   , primusSession = require('./session');
 
 //
@@ -67,5 +67,5 @@ primus.on('connection', function connection(spark) {
 // Begin accepting connections.
 //
 server.listen(8080, function listening() {
-  console.log('server listening on port 8080');
+  console.log('Open http://localhost:8080 in your browser');
 });

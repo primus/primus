@@ -2,22 +2,21 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>Primus</title>
+  <title>Echo</title>
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/normalize/3.0.1/normalize.min.css">
   <script src="/primus/primus.js"></script>
   <style>
     body { padding: 50px }
-    #output { width: 450px; height: 200px; display: block; border: 0; outline: 0 }
+    #output { width: 450px; height: 200px; display: block; border: 0; outline: 0; margin: 0 0 4px }
     #echo { width: 400px; height: 25px; font-size: 16px }
-    button { border-radius: 5px; border: 0; background: #444; color: #FFF; padding: 10px }
+    button { border-radius: 5px; border: 0; background: #444; color: #FFF; padding: 6px }
   </style>
 </head>
 <body>
   <form id="write">
     <textarea id="output" readonly></textarea>
     <input placeholder="write message that should echo" id="echo" />
-    <button type="submit">
-      echo
-    </button>
+    <button type="submit">echo</button>
   </form>
   <script>
     var output = document.getElementById('output')
@@ -31,7 +30,7 @@
     //
     // Listen for incoming data and log it in our textarea.
     //
-    primus.on('data', function recieved(data) {
+    primus.on('data', function received(data) {
       output.value += data +'\n';
     });
 
