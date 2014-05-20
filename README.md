@@ -1255,8 +1255,10 @@ of components in Primus are implemented through middleware layers:
 
 - `cors`: Adds the Access Control headers.
 - `primus.js`: It serves our `primus.js` client file.
-- `spec`: It outputs the server specification.
-- `authorization` Our authorization handler.
+- `spec`: It outputs the server specification (version,transformer,path).
+- `authorization`: Our authorization handler, which is implemented as middleware.
+- `no-cache`: Add no-cache headers to every HTTP request in Primus.
+- `x-xss`: Add `X-XSS-Protection` headers to HTTP every request.
 
 #### Primus.before(name, fn, options, index)
 

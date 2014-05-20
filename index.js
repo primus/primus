@@ -235,6 +235,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   this.before('cors', require('./middleware/access-control'));
   this.before('primus.js', require('./middleware/primus'));
   this.before('spec', require('./middleware/spec'));
+  this.before('x-xss', require('./middleware/xss'));
   this.before('no-cache', require('./middleware/no-cache'));
   this.before('authorization', require('./middleware/authorization'));
 
