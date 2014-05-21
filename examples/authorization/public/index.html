@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Authorization</title>
+    <link rel="stylesheet" href="//cdn.jsdelivr.net/bootstrap/3.1.1/css/bootstrap.min.css">
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header">
+        <h1>Authorization</h1>
+      </div>
+      <p>
+        To open the connection you need an authorization token. Use the login
+        form with the credentials <span class="label label-info">foo:bar</span>
+        to get one. Messages sent when the connection is closed will be
+        automatically buffered by primus and dispatched as soon as the
+        connection will be established.
+      </p>
+      <div id="feedback" class="alert hidden"></div>
+      <h4>status: <small id="status">disconnected</small></h4>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="panel panel-default">
+            <div class="panel-body">
+              <ul class="list-unstyled" id="output" style="height:222px; overflow:auto; margin:0">
+              </ul>
+            </div>
+          </div>
+          <form id="echo" role="form">
+            <div class="form-group">
+              <label class="sr-only" for="message">Message</label>
+              <div class="input-group input-group-lg">
+                <input class="form-control" id="message" placeholder="Write something" type="text">
+                <span class="input-group-btn">
+                  <button class="btn btn-primary" type="submit">Send</button>
+                </span>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <div class="panel panel-default">
+            <div class="panel-heading">
+              <h3 class="panel-title"><strong>Login</strong></h3>
+            </div>
+            <div class="panel-body">
+              <form id="login" role="form">
+                <div class="form-group">
+                  <label for="username">Username</label>
+                  <input class="form-control" id="username" type="text">
+                </div>
+                <div class="form-group">
+                  <label for="password">Password</label>
+                  <input class="form-control" id="password" type="password">
+                </div>
+                <button type="submit" class="btn btn-primary">Login</button>
+              </form>
+            </div>
+          </div>
+          <button class="btn btn-success btn-lg btn-block" id="open" type="button">
+            Open connection
+          </button>
+        </div>
+      </div>
+    </div>
+    <script src="//cdn.jsdelivr.net/superagent/0.15.1/superagent.min.js"></script>
+    <script src="/primus/primus.js"></script>
+    <script src="/js/client.js"></script>
+  </body>
+</html>
