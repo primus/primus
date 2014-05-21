@@ -412,7 +412,7 @@ try {
 
     //
     // If we don't obtain a port number (e.g. when using zombie) then try
-    // and guess at a value from the 'href' value
+    // and guess at a value from the 'href' value.
     //
     if (!data.port) {
       var splits = (data.href || '').split('/');
@@ -428,9 +428,17 @@ try {
     }
 
     //
-    // Safari 5.1.7 (windows) quirk: When parsing an URL without a port number
+    // IE quirk: The `protocol` is parsed as ":" when a protocol agnostic URL
+    // is used. In this case we extract the value from the `href` value.
+    //
+    if (':' === data.protocol) {
+      data.protocol = data.href.substr(0, data.href.indexOf(':') + 1);
+    }
+
+    //
+    // Safari 5.1.7 (windows) quirk: When parsing a URL without a port number
     // the `port` in the data object will default to "0" instead of the expected
-    // "". We're going to do an explicit check on "0" and force it "".
+    // "". We're going to do an explicit check on "0" and force it to "".
     //
     if ('0' === data.port) data.port = '';
 
