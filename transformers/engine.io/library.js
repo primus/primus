@@ -17,7 +17,7 @@ module.exports = require('./socket');
  */
 module.exports.parser = require('engine.io-parser');
 
-},{"./socket":4,"engine.io-parser":15}],4:[function(require,module,exports){
+},{"./socket":4,"engine.io-parser":14}],4:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -95,8 +95,7 @@ function Socket(uri, opts){
   this.forceBase64 = !!opts.forceBase64;
   this.timestampParam = opts.timestampParam || 't';
   this.timestampRequests = opts.timestampRequests;
-  this.flashPath = opts.flashPath || '';
-  this.transports = opts.transports || ['polling', 'websocket', 'flashsocket'];
+  this.transports = opts.transports || ['polling', 'websocket'];
   this.readyState = '';
   this.writeBuffer = [];
   this.callbackBuffer = [];
@@ -165,7 +164,6 @@ Socket.prototype.createTransport = function (name) {
     forceBase64: this.forceBase64,
     timestampRequests: this.timestampRequests,
     timestampParam: this.timestampParam,
-    flashPath: this.flashPath,
     policyPort: this.policyPort,
     socket: this
   });
@@ -365,7 +363,6 @@ Socket.prototype.onOpen = function () {
   this.readyState = 'open';
   Socket.priorWebsocketSuccess = 'websocket' == this.transport.name;
   this.emit('open');
-  this.onopen && this.onopen.call(this);
   this.flush();
 
   // we check for `readyState` in case an `open`
@@ -649,7 +646,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":5,"./transports":7,"debug":13,"emitter":14,"engine.io-parser":15,"indexof":23,"parsejson":25,"parseqs":26,"parseuri":27}],5:[function(require,module,exports){
+},{"./transport":5,"./transports":6,"debug":12,"emitter":13,"engine.io-parser":14,"indexof":23,"parsejson":25,"parseqs":26,"parseuri":27}],5:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -799,291 +796,16 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"emitter":14,"engine.io-parser":15}],6:[function(require,module,exports){
-(function (global){
-
-/**
- * Module dependencies.
- */
-
-var WS = require('./websocket');
-var debug = require('debug')('engine.io-client:flashsocket');
-var inherit = require('inherits');
-
-/**
- * Module exports.
- */
-
-module.exports = FlashWS;
-
-/**
- * Obfuscated key for Blue Coat.
- */
-
-var xobject = global[['Active'].concat('Object').join('X')];
-
-/**
- * FlashWS constructor.
- *
- * @api public
- */
-
-function FlashWS(options){
-  WS.call(this, options);
-  this.flashPath = options.flashPath;
-  this.policyPort = options.policyPort;
-}
-
-/**
- * Inherits from WebSocket.
- */
-
-inherit(FlashWS, WS);
-
-/**
- * Transport name.
- *
- * @api public
- */
-
-FlashWS.prototype.name = 'flashsocket';
-
-/*
- * FlashSockets only support binary as base64 encoded strings
- */
-
-FlashWS.prototype.supportsBinary = false;
-
-/**
- * Opens the transport.
- *
- * @api public
- */
-
-FlashWS.prototype.doOpen = function(){
-  if (!this.check()) {
-    // let the probe timeout
-    return;
-  }
-
-  // instrument websocketjs logging
-  function log(type){
-    return function(){
-      var str = Array.prototype.join.call(arguments, ' ');
-      debug('[websocketjs %s] %s', type, str);
-    };
-  }
-
-  global.WEB_SOCKET_LOGGER = { log: log('debug'), error: log('error') };
-  global.WEB_SOCKET_SUPPRESS_CROSS_DOMAIN_SWF_ERROR = true;
-  global.WEB_SOCKET_DISABLE_AUTO_INITIALIZATION = true;
-
-  if (!global.WEB_SOCKET_SWF_LOCATION) {
-    global.WEB_SOCKET_SWF_LOCATION = this.flashPath + 'WebSocketMainInsecure.swf';
-  }
-
-  // dependencies
-  var deps = [this.flashPath + 'web_socket.js'];
-
-  if (!global.swfobject) {
-    deps.unshift(this.flashPath + 'swfobject.js');
-  }
-
-  var self = this;
-
-  load(deps, function(){
-    self.ready(function(){
-      WebSocket.__addTask(function () {
-        self.ws = new WebSocket(self.uri());
-        self.addEventListeners();
-      });
-    });
-  });
-};
-
-/**
- * Override to prevent closing uninitialized flashsocket.
- *
- * @api private
- */
-
-FlashWS.prototype.doClose = function(){
-  if (!this.ws) return;
-  var self = this;
-  WebSocket.__addTask(function(){
-    WS.prototype.doClose.call(self);
-  });
-};
-
-/**
- * Writes to the Flash socket.
- *
- * @api private
- */
-
-FlashWS.prototype.write = function(){
-  var self = this, args = arguments;
-  WebSocket.__addTask(function(){
-    WS.prototype.write.apply(self, args);
-  });
-};
-
-/**
- * Called upon dependencies are loaded.
- *
- * @api private
- */
-
-FlashWS.prototype.ready = function(fn){
-  if (typeof WebSocket == 'undefined' ||
-    !('__initialize' in WebSocket) || !global.swfobject) {
-    return;
-  }
-
-  if (global.swfobject.getFlashPlayerVersion().major < 10) {
-    return;
-  }
-
-  function init () {
-    // only start downloading the swf file when
-    // we checked that this browser actually supports it
-    if (!FlashWS.loaded) {
-      if (843 != self.policyPort) {
-        var policy = 'xmlsocket://' + self.hostname + ':' + self.policyPort;
-        WebSocket.loadFlashPolicyFile(policy);
-      }
-
-      WebSocket.__initialize();
-      FlashWS.loaded = true;
-    }
-
-    fn.call(self);
-  }
-
-  var self = this;
-  if (document.body) {
-    return init();
-  }
-  
-  if (global.document && document.readyState == 'complete') {
-    init();
-  } else {
-    if (global.attachEvent) {
-      global.attachEvent('onload', init);
-    } else if (global.addEventListener) {
-      global.addEventListener('load', init, false);
-    }
-  }
-};
-
-/**
- * Feature detection for flashsocket.
- *
- * @return {Boolean} whether this transport is available.
- * @api public
- */
-
-FlashWS.prototype.check = function(){
-  if ('undefined' == typeof window) {
-    return false;
-  }
-
-  if (typeof WebSocket != 'undefined' && !('__initialize' in WebSocket)) {
-    return false;
-  }
-
-  if (xobject) {
-    var control = null;
-    try {
-      control = new xobject('ShockwaveFlash.ShockwaveFlash');
-    } catch (e) { }
-    if (control) {
-      return true;
-    }
-  } else {
-    for (var i = 0, l = navigator.plugins.length; i < l; i++) {
-      for (var j = 0, m = navigator.plugins[i].length; j < m; j++) {
-        if (navigator.plugins[i][j].description == 'Shockwave Flash') {
-          return true;
-        }
-      }
-    }
-  }
-
-  return false;
-};
-
-/**
- * Lazy loading of scripts.
- * Based on $script by Dustin Diaz - MIT
- */
-
-var scripts = {};
-
-/**
- * Injects a script. Keeps tracked of injected ones.
- *
- * @param {String} path
- * @param {Function} callback
- * @api private
- */
-
-function create(path, fn){
-  if (scripts[path]) return fn();
-
-  var el = document.createElement('script');
-  var loaded = false;
-
-  debug('loading "%s"', path);
-  el.onload = el.onreadystatechange = function(){
-    if (loaded || scripts[path]) return;
-    var rs = el.readyState;
-    if (!rs || 'loaded' == rs || 'complete' == rs) {
-      debug('loaded "%s"', path);
-      el.onload = el.onreadystatechange = null;
-      loaded = true;
-      scripts[path] = true;
-      fn();
-    }
-  };
-
-  el.async = 1;
-  el.src = path;
-
-  var head = document.getElementsByTagName('head')[0];
-  head.insertBefore(el, head.firstChild);
-}
-
-/**
- * Loads scripts and fires a callback.
- *
- * @param {Array} paths
- * @param {Function} callback
- */
-
-function load(arr, fn){
-  function process(i){
-    if (!arr[i]) return fn();
-    create(arr[i], function () {
-      process(++i);
-    });
-  }
-
-  process(0);
-}
-
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./websocket":11,"debug":13,"inherits":24}],7:[function(require,module,exports){
+},{"emitter":13,"engine.io-parser":14}],6:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies
  */
 
-var XMLHttpRequest = require('xmlhttprequest')
-  , XHR = require('./polling-xhr')
-  , JSONP = require('./polling-jsonp')
-  , websocket = require('./websocket')
-  , flashsocket = require('./flashsocket')
+var XMLHttpRequest = require('xmlhttprequest');
+var XHR = require('./polling-xhr');
+var JSONP = require('./polling-jsonp');
+var websocket = require('./websocket');
 
 /**
  * Export transports.
@@ -1091,7 +813,6 @@ var XMLHttpRequest = require('xmlhttprequest')
 
 exports.polling = polling;
 exports.websocket = websocket;
-exports.flashsocket = flashsocket;
 
 /**
  * Polling transport polymorphic constructor.
@@ -1100,9 +821,9 @@ exports.flashsocket = flashsocket;
  * @api private
  */
 
-function polling (opts) {
-  var xhr
-    , xd = false;
+function polling(opts){
+  var xhr;
+  var xd = false;
 
   if (global.location) {
     var isSSL = 'https:' == location.protocol;
@@ -1124,10 +845,10 @@ function polling (opts) {
   } else {
     return new JSONP(opts);
   }
-};
+}
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./flashsocket":6,"./polling-jsonp":8,"./polling-xhr":9,"./websocket":11,"xmlhttprequest":12}],8:[function(require,module,exports){
+},{"./polling-jsonp":7,"./polling-xhr":8,"./websocket":10,"xmlhttprequest":11}],7:[function(require,module,exports){
 (function (global){
 
 /**
@@ -1148,6 +869,7 @@ module.exports = JSONPPolling;
  */
 
 var rNewline = /\n/g;
+var rEscapedNewline = /\\n/g;
 
 /**
  * Global JSONP callbacks.
@@ -1342,6 +1064,8 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
   initIframe();
 
   // escape \n to prevent it from being converted into \r\n by some UAs
+  // double escaping is required for escaped new lines because unescaping of new lines can be done safely on server-side
+  data = data.replace(rEscapedNewline, '\\\n');
   this.area.value = data.replace(rNewline, '\\n');
 
   try {
@@ -1360,7 +1084,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":10,"inherits":24}],9:[function(require,module,exports){
+},{"./polling":9,"inherits":24}],8:[function(require,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -1674,7 +1398,7 @@ function unloadHandler() {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":10,"debug":13,"emitter":14,"inherits":24,"xmlhttprequest":12}],10:[function(require,module,exports){
+},{"./polling":9,"debug":12,"emitter":13,"inherits":24,"xmlhttprequest":11}],9:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -1921,7 +1645,7 @@ Polling.prototype.uri = function(){
   return schema + '://' + this.hostname + port + this.path + query;
 };
 
-},{"../transport":5,"debug":13,"engine.io-parser":15,"inherits":24,"parseqs":26,"xmlhttprequest":12}],11:[function(require,module,exports){
+},{"../transport":5,"debug":12,"engine.io-parser":14,"inherits":24,"parseqs":26,"xmlhttprequest":11}],10:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -2152,7 +1876,7 @@ WS.prototype.check = function(){
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":5,"debug":13,"engine.io-parser":15,"inherits":24,"parseqs":26,"ws":28}],12:[function(require,module,exports){
+},{"../transport":5,"debug":12,"engine.io-parser":14,"inherits":24,"parseqs":26,"ws":28}],11:[function(require,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = require('has-cors');
 
@@ -2173,7 +1897,7 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":21}],13:[function(require,module,exports){
+},{"has-cors":21}],12:[function(require,module,exports){
 
 /**
  * Expose `debug()` as the module.
@@ -2312,7 +2036,7 @@ try {
   if (window.localStorage) debug.enable(localStorage.debug);
 } catch(e){}
 
-},{}],14:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -2476,7 +2200,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{"indexof":23}],15:[function(require,module,exports){
+},{"indexof":23}],14:[function(require,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -2486,6 +2210,7 @@ var keys = require('./keys');
 var sliceBuffer = require('arraybuffer.slice');
 var base64encoder = require('base64-arraybuffer');
 var after = require('after');
+var utf8 = require('utf8');
 
 /**
  * Check if we are running an android browser. That requires us to use
@@ -2567,7 +2292,7 @@ exports.encodePacket = function (packet, supportsBinary, callback) {
 
   // data fragment is optional
   if (undefined !== packet.data) {
-    encoded += String(packet.data);
+    encoded += utf8.encode(String(packet.data));
   }
 
   return callback('' + encoded);
@@ -2672,6 +2397,7 @@ exports.decodePacket = function (data, binaryType) {
       return exports.decodeBase64Packet(data.substr(1), binaryType);
     }
 
+    data = utf8.decode(data);
     var type = data.charAt(0);
 
     if (Number(type) != type || !packetslist[type]) {
@@ -3004,11 +2730,10 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
       } catch (e) {
         // iPhone Safari doesn't let you apply to typed arrays
         var typed = new Uint8Array(msg);
-        var basic = new Array(typed.length);
+        msg = '';
         for (var i = 0; i < typed.length; i++) {
-          basic[i] = typed[i];
+          msg += String.fromCharCode(typed[i]);
         }
-        msg = String.fromCharCode.apply(null, basic);
       }
     }
     buffers.push(msg);
@@ -3022,7 +2747,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":16,"after":17,"arraybuffer.slice":18,"base64-arraybuffer":19,"blob":20}],16:[function(require,module,exports){
+},{"./keys":15,"after":16,"arraybuffer.slice":17,"base64-arraybuffer":18,"blob":19,"utf8":20}],15:[function(require,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -3043,7 +2768,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],17:[function(require,module,exports){
+},{}],16:[function(require,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -3073,7 +2798,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],18:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -3104,7 +2829,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],19:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -3117,13 +2842,13 @@ module.exports = function(arraybuffer, start, end) {
 
   exports.encode = function(arraybuffer) {
     var bytes = new Uint8Array(arraybuffer),
-    i, len = bytes.buffer.byteLength, base64 = "";
+    i, len = bytes.length, base64 = "";
 
     for (i = 0; i < len; i+=3) {
-      base64 += chars[bytes.buffer[i] >> 2];
-      base64 += chars[((bytes.buffer[i] & 3) << 4) | (bytes.buffer[i + 1] >> 4)];
-      base64 += chars[((bytes.buffer[i + 1] & 15) << 2) | (bytes.buffer[i + 2] >> 6)];
-      base64 += chars[bytes.buffer[i + 2] & 63];
+      base64 += chars[bytes[i] >> 2];
+      base64 += chars[((bytes[i] & 3) << 4) | (bytes[i + 1] >> 4)];
+      base64 += chars[((bytes[i + 1] & 15) << 2) | (bytes[i + 2] >> 6)];
+      base64 += chars[bytes[i + 2] & 63];
     }
 
     if ((len % 3) === 2) {
@@ -3164,7 +2889,8 @@ module.exports = function(arraybuffer, start, end) {
     return arraybuffer;
   };
 })("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
-},{}],20:[function(require,module,exports){
+
+},{}],19:[function(require,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -3215,6 +2941,249 @@ module.exports = (function() {
     return undefined;
   }
 })();
+
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}],20:[function(require,module,exports){
+(function (global){
+/*! http://mths.be/utf8js v2.0.0 by @mathias */
+;(function(root) {
+
+	// Detect free variables `exports`
+	var freeExports = typeof exports == 'object' && exports;
+
+	// Detect free variable `module`
+	var freeModule = typeof module == 'object' && module &&
+		module.exports == freeExports && module;
+
+	// Detect free variable `global`, from Node.js or Browserified code,
+	// and use it as `root`
+	var freeGlobal = typeof global == 'object' && global;
+	if (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal) {
+		root = freeGlobal;
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	var stringFromCharCode = String.fromCharCode;
+
+	// Taken from http://mths.be/punycode
+	function ucs2decode(string) {
+		var output = [];
+		var counter = 0;
+		var length = string.length;
+		var value;
+		var extra;
+		while (counter < length) {
+			value = string.charCodeAt(counter++);
+			if (value >= 0xD800 && value <= 0xDBFF && counter < length) {
+				// high surrogate, and there is a next character
+				extra = string.charCodeAt(counter++);
+				if ((extra & 0xFC00) == 0xDC00) { // low surrogate
+					output.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);
+				} else {
+					// unmatched surrogate; only append this code unit, in case the next
+					// code unit is the high surrogate of a surrogate pair
+					output.push(value);
+					counter--;
+				}
+			} else {
+				output.push(value);
+			}
+		}
+		return output;
+	}
+
+	// Taken from http://mths.be/punycode
+	function ucs2encode(array) {
+		var length = array.length;
+		var index = -1;
+		var value;
+		var output = '';
+		while (++index < length) {
+			value = array[index];
+			if (value > 0xFFFF) {
+				value -= 0x10000;
+				output += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);
+				value = 0xDC00 | value & 0x3FF;
+			}
+			output += stringFromCharCode(value);
+		}
+		return output;
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	function createByte(codePoint, shift) {
+		return stringFromCharCode(((codePoint >> shift) & 0x3F) | 0x80);
+	}
+
+	function encodeCodePoint(codePoint) {
+		if ((codePoint & 0xFFFFFF80) == 0) { // 1-byte sequence
+			return stringFromCharCode(codePoint);
+		}
+		var symbol = '';
+		if ((codePoint & 0xFFFFF800) == 0) { // 2-byte sequence
+			symbol = stringFromCharCode(((codePoint >> 6) & 0x1F) | 0xC0);
+		}
+		else if ((codePoint & 0xFFFF0000) == 0) { // 3-byte sequence
+			symbol = stringFromCharCode(((codePoint >> 12) & 0x0F) | 0xE0);
+			symbol += createByte(codePoint, 6);
+		}
+		else if ((codePoint & 0xFFE00000) == 0) { // 4-byte sequence
+			symbol = stringFromCharCode(((codePoint >> 18) & 0x07) | 0xF0);
+			symbol += createByte(codePoint, 12);
+			symbol += createByte(codePoint, 6);
+		}
+		symbol += stringFromCharCode((codePoint & 0x3F) | 0x80);
+		return symbol;
+	}
+
+	function utf8encode(string) {
+		var codePoints = ucs2decode(string);
+
+		// console.log(JSON.stringify(codePoints.map(function(x) {
+		// 	return 'U+' + x.toString(16).toUpperCase();
+		// })));
+
+		var length = codePoints.length;
+		var index = -1;
+		var codePoint;
+		var byteString = '';
+		while (++index < length) {
+			codePoint = codePoints[index];
+			byteString += encodeCodePoint(codePoint);
+		}
+		return byteString;
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	function readContinuationByte() {
+		if (byteIndex >= byteCount) {
+			throw Error('Invalid byte index');
+		}
+
+		var continuationByte = byteArray[byteIndex] & 0xFF;
+		byteIndex++;
+
+		if ((continuationByte & 0xC0) == 0x80) {
+			return continuationByte & 0x3F;
+		}
+
+		// If we end up here, it’s not a continuation byte
+		throw Error('Invalid continuation byte');
+	}
+
+	function decodeSymbol() {
+		var byte1;
+		var byte2;
+		var byte3;
+		var byte4;
+		var codePoint;
+
+		if (byteIndex > byteCount) {
+			throw Error('Invalid byte index');
+		}
+
+		if (byteIndex == byteCount) {
+			return false;
+		}
+
+		// Read first byte
+		byte1 = byteArray[byteIndex] & 0xFF;
+		byteIndex++;
+
+		// 1-byte sequence (no continuation bytes)
+		if ((byte1 & 0x80) == 0) {
+			return byte1;
+		}
+
+		// 2-byte sequence
+		if ((byte1 & 0xE0) == 0xC0) {
+			var byte2 = readContinuationByte();
+			codePoint = ((byte1 & 0x1F) << 6) | byte2;
+			if (codePoint >= 0x80) {
+				return codePoint;
+			} else {
+				throw Error('Invalid continuation byte');
+			}
+		}
+
+		// 3-byte sequence (may include unpaired surrogates)
+		if ((byte1 & 0xF0) == 0xE0) {
+			byte2 = readContinuationByte();
+			byte3 = readContinuationByte();
+			codePoint = ((byte1 & 0x0F) << 12) | (byte2 << 6) | byte3;
+			if (codePoint >= 0x0800) {
+				return codePoint;
+			} else {
+				throw Error('Invalid continuation byte');
+			}
+		}
+
+		// 4-byte sequence
+		if ((byte1 & 0xF8) == 0xF0) {
+			byte2 = readContinuationByte();
+			byte3 = readContinuationByte();
+			byte4 = readContinuationByte();
+			codePoint = ((byte1 & 0x0F) << 0x12) | (byte2 << 0x0C) |
+				(byte3 << 0x06) | byte4;
+			if (codePoint >= 0x010000 && codePoint <= 0x10FFFF) {
+				return codePoint;
+			}
+		}
+
+		throw Error('Invalid UTF-8 detected');
+	}
+
+	var byteArray;
+	var byteCount;
+	var byteIndex;
+	function utf8decode(byteString) {
+		byteArray = ucs2decode(byteString);
+		byteCount = byteArray.length;
+		byteIndex = 0;
+		var codePoints = [];
+		var tmp;
+		while ((tmp = decodeSymbol()) !== false) {
+			codePoints.push(tmp);
+		}
+		return ucs2encode(codePoints);
+	}
+
+	/*--------------------------------------------------------------------------*/
+
+	var utf8 = {
+		'version': '2.0.0',
+		'encode': utf8encode,
+		'decode': utf8decode
+	};
+
+	// Some AMD build optimizers, like r.js, check for specific condition patterns
+	// like the following:
+	if (
+		typeof define == 'function' &&
+		typeof define.amd == 'object' &&
+		define.amd
+	) {
+		define(function() {
+			return utf8;
+		});
+	}	else if (freeExports && !freeExports.nodeType) {
+		if (freeModule) { // in Node.js or RingoJS v0.8.0+
+			freeModule.exports = utf8;
+		} else { // in Narwhal or RingoJS v0.7.0-
+			var object = {};
+			var hasOwnProperty = object.hasOwnProperty;
+			for (var key in utf8) {
+				hasOwnProperty.call(utf8, key) && (freeExports[key] = utf8[key]);
+			}
+		}
+	} else { // in Rhino or a web browser
+		root.utf8 = utf8;
+	}
+
+}(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],21:[function(require,module,exports){
