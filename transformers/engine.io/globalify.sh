@@ -11,7 +11,8 @@ if (!dir) {
   process.exit(1);
 }
 
-var fs = require('fs')
+var derequire = require('derequire')
+  , fs = require('fs')
   , globalWrap = require('global-wrap')
   , path = require('path');
 
@@ -39,5 +40,5 @@ globalWrap({
 }, function (err, output) {
   if (err) throw err;
   var dest = path.resolve(__dirname, 'library.js');
-  fs.writeFileSync(dest, output);
+  fs.writeFileSync(dest, derequire(output));
 });
