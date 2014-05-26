@@ -1,13 +1,13 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-self["eio"] = require("./index.js");
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+self["eio"] = _dereq_("./index.js");
 
-},{"./index.js":2}],2:[function(require,module,exports){
+},{"./index.js":2}],2:[function(_dereq_,module,exports){
 
-module.exports =  require('./lib/');
+module.exports =  _dereq_('./lib/');
 
-},{"./lib/":3}],3:[function(require,module,exports){
+},{"./lib/":3}],3:[function(_dereq_,module,exports){
 
-module.exports = require('./socket');
+module.exports = _dereq_('./socket');
 
 /**
  * Exports parser
@@ -15,22 +15,22 @@ module.exports = require('./socket');
  * @api public
  *
  */
-module.exports.parser = require('engine.io-parser');
+module.exports.parser = _dereq_('engine.io-parser');
 
-},{"./socket":4,"engine.io-parser":14}],4:[function(require,module,exports){
+},{"./socket":4,"engine.io-parser":14}],4:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
  */
 
-var transports = require('./transports');
-var Emitter = require('emitter');
-var debug = require('debug')('engine.io-client:socket');
-var index = require('indexof');
-var parser = require('engine.io-parser');
-var parseuri = require('parseuri');
-var parsejson = require('parsejson');
-var parseqs = require('parseqs');
+var transports = _dereq_('./transports');
+var Emitter = _dereq_('emitter');
+var debug = _dereq_('debug')('engine.io-client:socket');
+var index = _dereq_('indexof');
+var parser = _dereq_('engine.io-parser');
+var parseuri = _dereq_('parseuri');
+var parsejson = _dereq_('parsejson');
+var parseqs = _dereq_('parseqs');
 
 /**
  * Module exports.
@@ -128,9 +128,9 @@ Socket.protocol = parser.protocol; // this is an int
  */
 
 Socket.Socket = Socket;
-Socket.Transport = require('./transport');
-Socket.transports = require('./transports');
-Socket.parser = require('engine.io-parser');
+Socket.Transport = _dereq_('./transport');
+Socket.transports = _dereq_('./transports');
+Socket.parser = _dereq_('engine.io-parser');
 
 /**
  * Creates transport of the given type.
@@ -430,6 +430,8 @@ Socket.prototype.onHandshake = function (data) {
   this.pingInterval = data.pingInterval;
   this.pingTimeout = data.pingTimeout;
   this.onOpen();
+  // In case open handler closes socket
+  if  ('closed' == this.readyState) return;
   this.setPing();
 
   // Prolong liveness of socket on heartbeat
@@ -646,13 +648,13 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":5,"./transports":6,"debug":12,"emitter":13,"engine.io-parser":14,"indexof":23,"parsejson":25,"parseqs":26,"parseuri":27}],5:[function(require,module,exports){
+},{"./transport":5,"./transports":6,"debug":12,"emitter":13,"engine.io-parser":14,"indexof":23,"parsejson":25,"parseqs":26,"parseuri":27}],5:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
 
-var parser = require('engine.io-parser');
-var Emitter = require('emitter');
+var parser = _dereq_('engine.io-parser');
+var Emitter = _dereq_('emitter');
 
 /**
  * Module exports.
@@ -796,16 +798,16 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"emitter":13,"engine.io-parser":14}],6:[function(require,module,exports){
+},{"emitter":13,"engine.io-parser":14}],6:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies
  */
 
-var XMLHttpRequest = require('xmlhttprequest');
-var XHR = require('./polling-xhr');
-var JSONP = require('./polling-jsonp');
-var websocket = require('./websocket');
+var XMLHttpRequest = _dereq_('xmlhttprequest');
+var XHR = _dereq_('./polling-xhr');
+var JSONP = _dereq_('./polling-jsonp');
+var websocket = _dereq_('./websocket');
 
 /**
  * Export transports.
@@ -848,15 +850,15 @@ function polling(opts){
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":7,"./polling-xhr":8,"./websocket":10,"xmlhttprequest":11}],7:[function(require,module,exports){
+},{"./polling-jsonp":7,"./polling-xhr":8,"./websocket":10,"xmlhttprequest":11}],7:[function(_dereq_,module,exports){
 (function (global){
 
 /**
  * Module requirements.
  */
 
-var Polling = require('./polling');
-var inherit = require('inherits');
+var Polling = _dereq_('./polling');
+var inherit = _dereq_('inherits');
 
 /**
  * Module exports.
@@ -1084,17 +1086,17 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":9,"inherits":24}],8:[function(require,module,exports){
+},{"./polling":9,"inherits":24}],8:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module requirements.
  */
 
-var XMLHttpRequest = require('xmlhttprequest');
-var Polling = require('./polling');
-var Emitter = require('emitter');
-var debug = require('debug')('engine.io-client:polling-xhr');
-var inherit = require('inherits');
+var XMLHttpRequest = _dereq_('xmlhttprequest');
+var Polling = _dereq_('./polling');
+var Emitter = _dereq_('emitter');
+var debug = _dereq_('debug')('engine.io-client:polling-xhr');
+var inherit = _dereq_('inherits');
 
 /**
  * Module exports.
@@ -1398,16 +1400,16 @@ function unloadHandler() {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":9,"debug":12,"emitter":13,"inherits":24,"xmlhttprequest":11}],9:[function(require,module,exports){
+},{"./polling":9,"debug":12,"emitter":13,"inherits":24,"xmlhttprequest":11}],9:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
 
-var Transport = require('../transport');
-var parseqs = require('parseqs');
-var parser = require('engine.io-parser');
-var debug = require('debug')('engine.io-client:polling');
-var inherit = require('inherits');
+var Transport = _dereq_('../transport');
+var parseqs = _dereq_('parseqs');
+var parser = _dereq_('engine.io-parser');
+var debug = _dereq_('debug')('engine.io-client:polling');
+var inherit = _dereq_('inherits');
 
 /**
  * Module exports.
@@ -1420,7 +1422,7 @@ module.exports = Polling;
  */
 
 var hasXHR2 = (function() {
-  var XMLHttpRequest = require('xmlhttprequest');
+  var XMLHttpRequest = _dereq_('xmlhttprequest');
   var xhr = new XMLHttpRequest({ agent: this.agent, xdomain: false });
   return null != xhr.responseType;
 })();
@@ -1645,16 +1647,16 @@ Polling.prototype.uri = function(){
   return schema + '://' + this.hostname + port + this.path + query;
 };
 
-},{"../transport":5,"debug":12,"engine.io-parser":14,"inherits":24,"parseqs":26,"xmlhttprequest":11}],10:[function(require,module,exports){
+},{"../transport":5,"debug":12,"engine.io-parser":14,"inherits":24,"parseqs":26,"xmlhttprequest":11}],10:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
 
-var Transport = require('../transport');
-var parser = require('engine.io-parser');
-var parseqs = require('parseqs');
-var debug = require('debug')('engine.io-client:websocket');
-var inherit = require('inherits');
+var Transport = _dereq_('../transport');
+var parser = _dereq_('engine.io-parser');
+var parseqs = _dereq_('parseqs');
+var debug = _dereq_('debug')('engine.io-client:websocket');
+var inherit = _dereq_('inherits');
 
 /**
  * `ws` exposes a WebSocket-compatible interface in
@@ -1662,7 +1664,7 @@ var inherit = require('inherits');
  * in the browser.
  */
 
-var WebSocket = require('ws');
+var WebSocket = _dereq_('ws');
 
 /**
  * Module exports.
@@ -1876,9 +1878,9 @@ WS.prototype.check = function(){
   return !!WebSocket && !('__initialize' in WebSocket && this.name === WS.prototype.name);
 };
 
-},{"../transport":5,"debug":12,"engine.io-parser":14,"inherits":24,"parseqs":26,"ws":28}],11:[function(require,module,exports){
+},{"../transport":5,"debug":12,"engine.io-parser":14,"inherits":24,"parseqs":26,"ws":28}],11:[function(_dereq_,module,exports){
 // browser shim for xmlhttprequest module
-var hasCORS = require('has-cors');
+var hasCORS = _dereq_('has-cors');
 
 module.exports = function(opts) {
   var xdomain = opts.xdomain;
@@ -1897,7 +1899,7 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":21}],12:[function(require,module,exports){
+},{"has-cors":21}],12:[function(_dereq_,module,exports){
 
 /**
  * Expose `debug()` as the module.
@@ -2036,13 +2038,13 @@ try {
   if (window.localStorage) debug.enable(localStorage.debug);
 } catch(e){}
 
-},{}],13:[function(require,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
  */
 
-var index = require('indexof');
+var index = _dereq_('indexof');
 
 /**
  * Expose `Emitter`.
@@ -2200,17 +2202,17 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{"indexof":23}],14:[function(require,module,exports){
+},{"indexof":23}],14:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
  */
 
-var keys = require('./keys');
-var sliceBuffer = require('arraybuffer.slice');
-var base64encoder = require('base64-arraybuffer');
-var after = require('after');
-var utf8 = require('utf8');
+var keys = _dereq_('./keys');
+var sliceBuffer = _dereq_('arraybuffer.slice');
+var base64encoder = _dereq_('base64-arraybuffer');
+var after = _dereq_('after');
+var utf8 = _dereq_('utf8');
 
 /**
  * Check if we are running an android browser. That requires us to use
@@ -2253,7 +2255,7 @@ var err = { type: 'error', data: 'parser error' };
  * Create a blob api even for blob builder when vendor prefixes exist
  */
 
-var Blob = require('blob');
+var Blob = _dereq_('blob');
 
 /**
  * Encodes a packet.
@@ -2747,7 +2749,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":15,"after":16,"arraybuffer.slice":17,"base64-arraybuffer":18,"blob":19,"utf8":20}],15:[function(require,module,exports){
+},{"./keys":15,"after":16,"arraybuffer.slice":17,"base64-arraybuffer":18,"blob":19,"utf8":20}],15:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -2768,7 +2770,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],16:[function(require,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -2798,7 +2800,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],17:[function(require,module,exports){
+},{}],17:[function(_dereq_,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -2829,7 +2831,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],18:[function(require,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -2890,7 +2892,7 @@ module.exports = function(arraybuffer, start, end) {
   };
 })("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 
-},{}],19:[function(require,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -2943,7 +2945,7 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(require,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 (function (global){
 /*! http://mths.be/utf8js v2.0.0 by @mathias */
 ;(function(root) {
@@ -3186,13 +3188,13 @@ module.exports = (function() {
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],21:[function(require,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
  */
 
-var global = require('global');
+var global = _dereq_('global');
 
 /**
  * Module exports.
@@ -3211,7 +3213,7 @@ try {
   module.exports = false;
 }
 
-},{"global":22}],22:[function(require,module,exports){
+},{"global":22}],22:[function(_dereq_,module,exports){
 
 /**
  * Returns `this`. Execute this without a "context" (i.e. without it being
@@ -3221,7 +3223,7 @@ try {
 
 module.exports = (function () { return this; })();
 
-},{}],23:[function(require,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -3232,7 +3234,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],24:[function(require,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -3257,7 +3259,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],25:[function(require,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -3292,7 +3294,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(require,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -3331,7 +3333,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],27:[function(require,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 /**
  * Parses an URI
  *
@@ -3358,7 +3360,7 @@ module.exports = function parseuri(str) {
   return uri;
 };
 
-},{}],28:[function(require,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 
 /**
  * Module dependencies.
