@@ -1007,7 +1007,7 @@ As a rule of thumb assume that every event that is prefixed with `incoming::` or
 `outgoing::` is reserved for internal use only and that emitting such events your
 self will most likely result in c̮̫̞͚͉̮̙͕̳̲͉̤̗̹̮̦̪̖̱h̛͍͙̖̟͕̹͕̙̦̣̲̠̪̯̳͖̝̩a̴̝̦͇̥̠̟͚̳̤̹̗̻̭͍͖͕͓̻o̥̹̮̙͔̗͍͚͓̗̦̹͈͙͕̘̮͖̝ș̗̲̤̗̮͈̙͈̹̼̣̹̖̱̤̼̺̤ ̻͙̗̥̠̱͇̱̝̟̺͍̺̼͆̅̓̓̇a̜̖͈͇͎͙̲̙̗͇̫̘̖̹͖͓͔̺̱n̹͓̮͇̯̜̤̗͍̯̰̫̫̖̰ͬ͌ͬͫd͚̪͚̭͚̥̰̤̟͎̝̲̯̭̹̭̙̼̤ ͖̞̙̹͈͚̥̦͚͉͖̼̬͓͚̳͉͙͎d̴͚̱̮̗͍̩̻̰̣̫͉͈̞̲͉̫̞͔ẻͩͦ̃͌̿̐ͪͩ̌̇͂̆̑͐ͣ ҉̲͉͔͎̤̼̘͇̮̥̻̜̹̥͚̲̻̖s̶̗̻̫̼̠̳̗̺̤̗̳͈̪̮̗̝͇͈t̙͇͕̺̱̼̤̗̰̬̣͌ͬͧ͊́ͧͩ͌r͌̐̓̃ͥ̄ͤ͑̈ͬ͆ͬ͂̇̿̅ ҉̙̼̳̭̙͍̻̱̠͈̮̺̣̝̱̙̺͉ư̳͎̻͔̯̪̝͕͚̣̜̼̞͇̠̘̠̪c̨̫͙͙̬̰̰̫̐͋͊͑̌̾̉͆t͚̗͕̝̤̗͕̲̮̝̼̺͙͚̟͓̣̥͍ĭ͙̘̩̖͇͎̆̍̿̾ͤ̔̉̈̂̾̈ͭo̬̠̝͈̺̙̮̬̗̪̤͕͇͕̰̮͖͉̬n̙̪̤̝̹͖͖̻̬̹͙̞̗͓̞̭̜̠̟.
 
-To make it easier for developers to emit events on primus itself, we've added a
+To make it easier for developers to emit events on Primus itself, we've added a
 small helper function that checks if the event you want to emit is reserved for
 Primus only. This would be all `incoming::` and `outgoing::` prefixed events and
 the events listed above. This method is called `<class>.reserved()` and it's
@@ -1235,10 +1235,6 @@ of the transformer, we just `toLowerCase()` everything.
   side component. We're bundling a snapshot of these libraries inside of Primus.
   We will always be targeting the latest version of these transformers when we
   bundle the library.
-- There are small bugs in Engine.IO that are causing our tests to fail. I've
-  submitted patches for these bugs, but they have been rejected for silly reasons.
-  The bug causes closed connections to say open. If you're experiencing this you
-  can apply this [patch](http://github.com/3rd-Eden/engine.io/commit/0cf81270e9d5700).
 
 ### Middleware
 
