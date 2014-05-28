@@ -1,7 +1,9 @@
 'use strict';
 
+var PrimusError = require('../../errors').PrimusError;
+
 /**
- * Minimum viable WebSocket server for Node.js that works through the primus
+ * Minimum viable WebSocket server for Node.js that works through the Primus
  * interface.
  *
  * @runat server
@@ -13,17 +15,18 @@ module.exports = function server() {
     , primus = this.primus;
 
   //
-  //
+  // Socket.IO is not, and will never be supported as long as it's using
+    // Engine.IO.
   //
   if ('function' !== typeof Manager) {
-    throw new Error([
+    throw new PrimusError([
       '',
       'Primus does not support Socket.IO 1.0 as its just a layer on top of Engine.IO',
       'Its much more effecient to use Engine.IO directly as all features',
       'Either run `npm install --save engine.io` or `npm install --save socket.io@0.9.x`',
-      'See https://github.com/primus/primus#socketio for more information.'
+      'See https://github.com/primus/primus#socketio for more information.',
       ''
-    ].join('\n'));
+    ].join('\n'), primus);
   }
 
   //
