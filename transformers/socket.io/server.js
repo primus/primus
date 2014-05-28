@@ -13,6 +13,20 @@ module.exports = function server() {
     , primus = this.primus;
 
   //
+  //
+  //
+  if ('function' !== typeof Manager) {
+    throw new Error([
+      '',
+      'Primus does not support Socket.IO 1.0 as its just a layer on top of Engine.IO',
+      'Its much more effecient to use Engine.IO directly as all features',
+      'Either run `npm install --save engine.io` or `npm install --save socket.io@0.9.x`',
+      'See https://github.com/primus/primus#socketio for more information.'
+      ''
+    ].join('\n'));
+  }
+
+  //
   // Listen to upgrade requests.
   //
   var service = this.service = new Engine(this, {
