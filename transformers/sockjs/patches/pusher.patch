@@ -1,0 +1,57 @@
+diff --git a/transformers/sockjs/library.js b/transformers/sockjs/library.js
+index 0fb2ba0..7666a55 100644
+--- a/transformers/sockjs/library.js
++++ b/transformers/sockjs/library.js
+@@ -212,20 +212,34 @@ utils.random_number_string = function(max) {
+     return (p + utils.random_number(max)).slice(-t);
+ };
+ 
+-// Assuming that url looks like: http://asdasd:111/asd
+ utils.getOrigin = function(url) {
+-    url += '/';
+-    var parts = url.split('/').slice(0, 3);
+-    return parts.join('/');
++    if (url.match(/^file:\/\//)) {
++        // no origin when using file protocol
++        return null;
++    }
++
++    var parts = url.split('/');
++    var protocol = parts[0];
++    var host = parts[2];
++    var atSignIndex = host.lastIndexOf('@');
++    var hostname;
++    var port;
++
++    if (~atSignIndex) host = host.slice(atSignIndex + 1);
++
++    parts = host.split(':');
++    hostname = parts[0];
++    port = parts[1];
++
++    if (!port) port = (protocol === 'https:') ? 443 : 80;
++
++    return protocol + '//' + hostname + ':' + port;
+ };
+ 
+ utils.isSameOriginUrl = function(url_a, url_b) {
+     // location.origin would do, but it's not always available.
+     if (!url_b) url_b = _window.location.href;
+-
+-    return (url_a.split('/').slice(0,3).join('/')
+-                ===
+-            url_b.split('/').slice(0,3).join('/'));
++    return utils.getOrigin(url_a) === utils.getOrigin(url_b);
+ };
+ 
+ utils.getParentDomain = function(url) {
+@@ -1781,7 +1795,8 @@ IframeTransport.prototype.doCleanup = function() {
+ 
+ IframeTransport.prototype.onmessage = function(e) {
+     var that = this;
+-    if (e.origin !== that.origin) return;
++
++    if (!utils.isSameOriginUrl(e.origin, that.origin)) return;
+     var window_id = e.data.slice(0, 8);
+     var type = e.data.slice(8, 9);
+     var data = e.data.slice(9);
