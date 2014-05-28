@@ -18,7 +18,7 @@ module.exports = function server() {
   // Socket.IO is not, and will never be supported as long as it's using
     // Engine.IO.
   //
-  if ('function' !== typeof Manager) {
+  if ('function' !== typeof Engine) {
     throw new PrimusError([
       '',
       'Primus does not support Socket.IO 1.0 as its just a layer on top of Engine.IO.',
