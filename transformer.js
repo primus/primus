@@ -162,7 +162,7 @@ Transformer.readable('deprecate', function deprecate(data) {
     'answered the request it should return `true`.',
     ''
   ].forEach(function each(line) {
-    console.error('primus: '+ line);
+    console.error('Primus: '+ line);
   });
 
   data.warned = true;
