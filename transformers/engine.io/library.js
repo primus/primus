@@ -3161,17 +3161,7 @@ module.exports = (function() {
 		'decode': utf8decode
 	};
 
-	// Some AMD build optimizers, like r.js, check for specific condition patterns
-	// like the following:
-	if (
-		typeof define == 'function' &&
-		typeof define.amd == 'object' &&
-		define.amd
-	) {
-		define(function() {
-			return utf8;
-		});
-	}	else if (freeExports && !freeExports.nodeType) {
+	if (freeExports && !freeExports.nodeType) {
 		if (freeModule) { // in Node.js or RingoJS v0.8.0+
 			freeModule.exports = utf8;
 		} else { // in Narwhal or RingoJS v0.7.0-
