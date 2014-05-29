@@ -23,7 +23,7 @@ module.exports = function server() {
       '',
       'We\'ve detected that you are using Socket.IO 1.x',
       'This version is not supported as it\'s just a layer on top of Engine.IO.',
-      'It\'s much more effecient to use Engine.IO directly as all features of Socket.IO',
+      'It\'s much more efficient to use Engine.IO directly as all features of Socket.IO',
       'are already available in Primus and it\'s more stable due to our extra patches.',
       '',
       'Either run `npm install --save engine.io` or `npm install --save socket.io@0.9.x`',
