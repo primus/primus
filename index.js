@@ -287,7 +287,7 @@ Primus.readable('authorize', function authorize(auth) {
 Primus.readable('forEach', function forEach(fn, done) {
   if (!done) {
     for (var id in this.connections) {
-      fn(this.connections[id], id, this.connections);
+      if (fn(this.connections[id], id, this.connections) === false) break;
     }
 
     return this;
@@ -322,12 +322,13 @@ Primus.readable('forEach', function forEach(fn, done) {
     //
     if (!spark) return iterate();
 
-    fn(spark, function next(err) {
+    fn(spark, function next(err, forward) {
       if (err) {
         primus.removeListener('connection', pushId);
         return done(err);
       }
 
+      if (forward === false) return done();
       iterate();
     });
   }());
