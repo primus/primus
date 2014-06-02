@@ -3,6 +3,7 @@
 var PrimusError = require('./errors').PrimusError
   , EventEmitter = require('eventemitter3')
   , Transformer = require('./transformer')
+  , log = require('diagnostics')('primus')
   , Spark = require('./spark')
   , fuse = require('fusing')
   , fs = require('fs');
@@ -189,6 +190,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
     , transformer;
 
   if ('string' === typeof Transformer) {
+    log('transformer (%s) is a string, attempting to resolve location', Transformer);
     Transformer = transformer = Transformer.toLowerCase();
     this.spec.transformer = transformer;
 
@@ -196,6 +198,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
     // This is a unknown transporter, it could be people made a typo.
     //
     if (!(Transformer in Primus.transformers)) {
+      log('the supplied transformer %s is not supported, please use %s', transformer, Primus.transformers);
       throw new PrimusError(this.is(Transformer, Primus.transformers).unknown(), this);
     }
 
@@ -210,6 +213,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
       }
     }
   } else {
+    log('received a custom transformer');
     this.spec.transformer = 'custom';
   }
 
@@ -222,11 +226,15 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   this.on('connection', function connection(stream) {
     this.connected++;
     this.connections[stream.id] = stream;
+
+    log('connection: %s currently serving %d concurrent', stream.id, this.connected);
   });
 
   this.on('disconnection', function disconnected(stream) {
     this.connected--;
     delete this.connections[stream.id];
+
+    log('disconnection: %s currently serving %d concurrent', stream.id, this.connected);
   });
 
   //
