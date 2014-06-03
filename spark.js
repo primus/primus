@@ -197,7 +197,7 @@ Spark.readable('__initialise', [function initialise() {
       // Handle "primus::" prefixed protocol messages.
       //
       if (spark.protocol(data)) return;
-      spark.transforms(data, raw);
+      spark.transforms('incoming', data, raw);
     });
   });
 
@@ -271,11 +271,11 @@ Spark.readable('__initialise', [function initialise() {
  * @param {String} raw The raw encoded data.
  * @api private
  */
-Spark.readable('transforms', function transforms(data, raw) {
+Spark.readable('transforms', function transforms(type, data, raw) {
   var spark = this
     , primus = this.primus
     , packet = { data: data }
-    , incoming = primus.transformers.incoming;
+    , fns = primus.transformers[type];
 
   //
   // Iterate in series over the message transformers so we can allow optional
@@ -283,10 +283,10 @@ Spark.readable('transforms', function transforms(data, raw) {
   // additional data from the server, do extra decoding or even message
   // validation.
   //
-  (function transform(index, emit) {
-    var transformer = incoming[index++];
+  (function transform(index, done) {
+    var transformer = fns[index++];
 
-    if (!transformer) return emit();
+    if (!transformer) return done();
 
     if (1 === transformer.length) {
       if (false === transformer.call(spark, packet)) {
@@ -298,16 +298,17 @@ Spark.readable('transforms', function transforms(data, raw) {
         return;
       }
 
-      return transform(index, emit);
+      return transform(index, done);
     }
 
     transformer.call(spark, packet, function done(err) {
       if (err) return spark.emit('error', err), spark.primus.emit('log', 'error', err);
 
-      transform(index, emit);
+      transform(index, done);
     });
-  }(0, function emit() {
-    spark.emit('data', packet.data, raw);
+  }(0, function done() {
+    if ('incoming' === type) spark.emit('data', packet.data, raw);
+    else spark._write(packet.data);
   }));
 
   return this;
@@ -396,23 +397,8 @@ Spark.readable('write', function write(data) {
   // The connection is closed, return false.
   //
   if (Spark.CLOSED === this.readyState) return false;
+  this.transforms('outgoing', data);
 
-  for (var i = 0, length = primus.transformers.outgoing.length; i < length; i++) {
-    packet = { data: data };
-
-    if (false === primus.transformers.outgoing[i].call(this, packet)) {
-      //
-      // When false is returned by an incoming transformer it means that's
-      // being handled by the transformer and we should not emit the `data`
-      // event.
-      //
-      return;
-    }
-
-    data = packet.data;
-  }
-
-  this._write(data);
   return true;
 });
 
