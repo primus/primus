@@ -206,7 +206,7 @@ Spark.readable('__initialise', [function initialise() {
       // Handle "primus::" prefixed protocol messages.
       //
       if (spark.protocol(data)) return;
-      spark.transforms('incoming', data, raw);
+      spark.transforms(primus, spark, 'incoming', data, raw);
     });
   });
 
@@ -278,16 +278,18 @@ Spark.readable('__initialise', [function initialise() {
 
 /**
  * Execute the set message transformers from Primus on the incoming message.
+ * This function and it's content should be in sync with Primus#transforms in
+ * primus.js.
  *
+ * @param {Primus} primus Reference to the Primus instance with message transformers.
+ * @param {Spark|Primus} connection Connection that receives or sends data.
  * @param {Mixed} data The data that has been received.
  * @param {String} raw The raw encoded data.
  * @returns {Spark}
- * @api private
+ * @api public
  */
-Spark.readable('transforms', function transforms(type, data, raw) {
-  var spark = this
-    , primus = this.primus
-    , packet = { data: data }
+Spark.readable('transforms', function transforms(primus, connection, type, data, raw) {
+  var packet = { data: data }
     , fns = primus.transformers[type];
 
   //
@@ -302,7 +304,7 @@ Spark.readable('transforms', function transforms(type, data, raw) {
     if (!transformer) return done();
 
     if (1 === transformer.length) {
-      if (false === transformer.call(spark, packet)) {
+      if (false === transformer.call(connection, packet)) {
         //
         // When false is returned by an incoming transformer it means that's
         // being handled by the transformer and we should not emit the `data`
@@ -314,8 +316,9 @@ Spark.readable('transforms', function transforms(type, data, raw) {
       return transform(index, done);
     }
 
-    transformer.call(spark, packet, function finished(err) {
-      if (err) return spark.emit('error', err), primus.emit('log', 'error', err);
+    transformer.call(connection, packet, function finished(err, arg) {
+      if (err) return connection.emit('error', err);
+      if (false === arg) return;
 
       transform(index, done);
     });
@@ -327,9 +330,9 @@ Spark.readable('transforms', function transforms(type, data, raw) {
     // the raw string in your database or what ever so you don't have the
     // stringify overhead.
     //
-    if ('incoming' === type) return spark.emit('data', packet.data, raw);
+    if ('incoming' === type) return connection.emit('data', packet.data, raw);
 
-    spark._write(packet.data);
+    connection._write(packet.data);
   }));
 
   return this;
@@ -424,7 +427,7 @@ Spark.readable('write', function write(data) {
     return false;
   }
 
-  this.transforms('outgoing', data);
+  this.transforms(primus, this, 'outgoing', data);
 
   return true;
 });

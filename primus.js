@@ -653,7 +653,7 @@ Primus.prototype.initialise = function initialise(options) {
       // Handle all "primus::" prefixed protocol messages.
       //
       if (primus.protocol(data)) return;
-      primus.transforms('incoming', data, raw);
+      primus.transforms(primus, primus, 'incoming', data, raw);
     });
   });
 
@@ -818,15 +818,18 @@ Primus.prototype.protocol = function protocol(msg) {
 
 /**
  * Execute the set message transformers from Primus on the incoming message.
+ * This function and it's content should be in sync with Spark#transforms in
+ * spark.js.
  *
+ * @param {Primus} primus Reference to the Primus instance with message transformers.
+ * @param {Spark|Primus} connection Connection that receives or sends data.
  * @param {Mixed} data The data that has been received.
  * @param {String} raw The raw encoded data.
- * @returns {Spark}
- * @api private
+ * @returns {Primus}
+ * @api public
  */
-Primus.prototype.transforms = function transforms(type, data, raw) {
-  var primus = this
-    , packet = { data: data }
+Primus.prototype.transforms = function transforms(primus, connection, type, data, raw) {
+  var packet = { data: data }
     , fns = primus.transformers[type];
 
   //
@@ -841,7 +844,7 @@ Primus.prototype.transforms = function transforms(type, data, raw) {
     if (!transformer) return done();
 
     if (1 === transformer.length) {
-      if (false === transformer.call(primus, packet)) {
+      if (false === transformer.call(connection, packet)) {
         //
         // When false is returned by an incoming transformer it means that's
         // being handled by the transformer and we should not emit the `data`
@@ -853,8 +856,9 @@ Primus.prototype.transforms = function transforms(type, data, raw) {
       return transform(index, done);
     }
 
-    transformer.call(primus, packet, function finished(err) {
-      if (err) return primus.emit('error', err);
+    transformer.call(connection, packet, function finished(err, arg) {
+      if (err) return connection.emit('error', err);
+      if (false === arg) return;
 
       transform(index, done);
     });
@@ -866,9 +870,9 @@ Primus.prototype.transforms = function transforms(type, data, raw) {
     // the raw string in your database or what ever so you don't have the
     // stringify overhead.
     //
-    if ('incoming' === type) return primus.emit('data', packet.data, raw);
+    if ('incoming' === type) return connection.emit('data', packet.data, raw);
 
-    primus._write(packet.data);
+    connection._write(packet.data);
   }));
 
   return this;
@@ -919,7 +923,7 @@ Primus.prototype.write = function write(data) {
   context(this, 'write');
 
   if (Primus.OPEN === this.readyState) {
-    this.transforms('outgoing', data);
+    this.transforms(this, this, 'outgoing', data);
   } else {
     var buffer = this.buffer;
 
