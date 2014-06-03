@@ -423,7 +423,7 @@ Spark.readable('write', function write(data) {
   // The connection is closed, return false.
   //
   if (Spark.CLOSED === this.readyState) {
-    log('attempted to write but readyState was already set to CLOSED for %s', spark.id);
+    log('attempted to write but readyState was already set to CLOSED for %s', this.id);
     return false;
   }
 
