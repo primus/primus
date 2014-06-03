@@ -314,7 +314,7 @@ Spark.readable('transforms', function transforms(type, data, raw) {
       return transform(index, done);
     }
 
-    transformer.call(spark, packet, function done(err) {
+    transformer.call(spark, packet, function finished(err) {
       if (err) return spark.emit('error', err), primus.emit('log', 'error', err);
 
       transform(index, done);

@@ -853,7 +853,7 @@ Primus.prototype.transforms = function transforms(type, data, raw) {
       return transform(index, done);
     }
 
-    transformer.call(primus, packet, function done(err) {
+    transformer.call(primus, packet, function finished(err) {
       if (err) return primus.emit('error', err);
 
       transform(index, done);
