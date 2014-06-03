@@ -323,12 +323,11 @@ Primus.readable('forEach', function forEach(fn, done) {
     if (!spark) return iterate();
 
     fn(spark, function next(err, forward) {
-      if (err) {
+      if (err || forward === false) {
         primus.removeListener('connection', pushId);
         return done(err);
       }
 
-      if (forward === false) return done();
       iterate();
     });
   }());
