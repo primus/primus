@@ -653,30 +653,7 @@ Primus.prototype.initialise = function initialise(options) {
       // Handle all "primus::" prefixed protocol messages.
       //
       if (primus.protocol(data)) return;
-
-      for (var i = 0, length = primus.transformers.incoming.length; i < length; i++) {
-        var packet = { data: data };
-
-        if (false === primus.transformers.incoming[i].call(primus, packet)) {
-          //
-          // When false is returned by an incoming transformer it means that's
-          // being handled by the transformer and we should not emit the `data`
-          // event.
-          //
-          return;
-        }
-
-        data = packet.data;
-      }
-
-      //
-      // We always emit 2 arguments for the data event, the first argument is the
-      // parsed data and the second argument is the raw string that we received.
-      // This allows you to do some validation on the parsed data and then save
-      // the raw string in your database or what ever so you don't have the
-      // stringify overhead.
-      //
-      primus.emit('data', data, raw);
+      primus.transforms('incoming', data, raw);
     });
   });
 
@@ -840,6 +817,64 @@ Primus.prototype.protocol = function protocol(msg) {
 };
 
 /**
+ * Execute the set message transformers from Primus on the incoming message.
+ *
+ * @param {Mixed} data The data that has been received.
+ * @param {String} raw The raw encoded data.
+ * @returns {Spark}
+ * @api private
+ */
+Primus.prototype.transforms = function transforms(type, data, raw) {
+  var primus = this
+    , packet = { data: data }
+    , fns = primus.transformers[type];
+
+  //
+  // Iterate in series over the message transformers so we can allow optional
+  // asynchronous execution of message transformers which could example retrieve
+  // additional data from the server, do extra decoding or even message
+  // validation.
+  //
+  (function transform(index, done) {
+    var transformer = fns[index++];
+
+    if (!transformer) return done();
+
+    if (1 === transformer.length) {
+      if (false === transformer.call(primus, packet)) {
+        //
+        // When false is returned by an incoming transformer it means that's
+        // being handled by the transformer and we should not emit the `data`
+        // event.
+        //
+        return;
+      }
+
+      return transform(index, done);
+    }
+
+    transformer.call(primus, packet, function done(err) {
+      if (err) return primus.emit('error', err);
+
+      transform(index, done);
+    });
+  }(0, function done() {
+    //
+    // We always emit 2 arguments for the data event, the first argument is the
+    // parsed data and the second argument is the raw string that we received.
+    // This allows you to do some validation on the parsed data and then save
+    // the raw string in your database or what ever so you don't have the
+    // stringify overhead.
+    //
+    if ('incoming' === type) return primus.emit('data', packet.data, raw);
+
+    primus._write(packet.data);
+  }));
+
+  return this;
+};
+
+/**
  * Retrieve the current id from the server.
  *
  * @param {Function} fn Callback function.
@@ -881,45 +916,50 @@ Primus.prototype.open = function open() {
  * @api public
  */
 Primus.prototype.write = function write(data) {
-  var primus = this
-    , packet;
+  context(this, 'write');
 
-  context(primus, 'write');
-
-  if (Primus.OPEN === primus.readyState) {
-    for (var i = 0, length = primus.transformers.outgoing.length; i < length; i++) {
-      packet = { data: data };
-
-      if (false === primus.transformers.outgoing[i].call(primus, packet)) {
-        //
-        // When false is returned by an incoming transformer it means that's
-        // being handled by the transformer and we should not emit the `data`
-        // event.
-        //
-        return;
-      }
-
-      data = packet.data;
-    }
-
-    primus.encoder(data, function encoded(err, packet) {
-      //
-      // Do a "save" emit('error') when we fail to parse a message. We don't
-      // want to throw here as listening to errors should be optional.
-      //
-      if (err) return primus.listeners('error').length && primus.emit('error', err);
-      primus.emit('outgoing::data', packet);
-    });
+  if (Primus.OPEN === this.readyState) {
+    this.transforms('outgoing', data);
   } else {
-    var buffer = primus.buffer;
+    var buffer = this.buffer;
 
     //
     // If the buffer is at capacity, remove the first item.
     //
-    if (buffer.length === primus.options.queueSize) buffer.splice(0, 1);
+    if (buffer.length === this.options.queueSize) buffer.splice(0, 1);
 
     buffer.push(data);
   }
+
+  return true;
+};
+
+/**
+ * The actual message writer.
+ *
+ * @param {Mixed} data The message that needs to be written.
+ * @returns {Boolean}
+ * @api private
+ */
+Primus.prototype._write = function write(data) {
+  var primus = this;
+
+  //
+  // The connection is closed, normally this would already be done in the
+  // `spark.write` method, but as `_write` is used internally, we should also
+  // add the same check here to prevent potential crashes by writing to a dead
+  // socket.
+  //
+  if (Primus.CLOSED === primus.readyState) return false;
+
+  primus.encoder(data, function encoded(err, packet) {
+    //
+    // Do a "save" emit('error') when we fail to parse a message. We don't
+    // want to throw here as listening to errors should be optional.
+    //
+    if (err) return primus.listeners('error').length && primus.emit('error', err);
+    primus.emit('outgoing::data', packet);
+  });
 
   return true;
 };

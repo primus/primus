@@ -1,6 +1,7 @@
 'use strict';
 
 var ParserError = require('./errors').ParserError
+  , log = require('diagnostics')('primus:spark')
   , parse = require('querystring').parse
   , forwarded = require('forwarded-for')
   , fuse = require('fusing')
@@ -269,6 +270,7 @@ Spark.readable('__initialise', [function initialise() {
  *
  * @param {Mixed} data The data that has been received.
  * @param {String} raw The raw encoded data.
+ * @returns {Spark}
  * @api private
  */
 Spark.readable('transforms', function transforms(type, data, raw) {
@@ -302,13 +304,21 @@ Spark.readable('transforms', function transforms(type, data, raw) {
     }
 
     transformer.call(spark, packet, function done(err) {
-      if (err) return spark.emit('error', err), spark.primus.emit('log', 'error', err);
+      if (err) return spark.emit('error', err), primus.emit('log', 'error', err);
 
       transform(index, done);
     });
   }(0, function done() {
-    if ('incoming' === type) spark.emit('data', packet.data, raw);
-    else spark._write(packet.data);
+    //
+    // We always emit 2 arguments for the data event, the first argument is the
+    // parsed data and the second argument is the raw string that we received.
+    // This allows you to do some validation on the parsed data and then save
+    // the raw string in your database or what ever so you don't have the
+    // stringify overhead.
+    //
+    if ('incoming' === type) return spark.emit('data', packet.data, raw);
+
+    spark._write(packet.data);
   }));
 
   return this;
@@ -406,6 +416,7 @@ Spark.readable('write', function write(data) {
  * The actual message writer.
  *
  * @param {Mixed} data The message that needs to be written.
+ * @returns {Boolean}
  * @api private
  */
 Spark.readable('_write', function _write(data) {
@@ -442,6 +453,8 @@ Spark.readable('_write', function _write(data) {
 
     spark.emit('outgoing::data', packet);
   });
+
+  return true;
 });
 
 /**
