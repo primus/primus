@@ -634,6 +634,37 @@ module.exports = function base(transformer, pathname, transformer_name) {
             });
           });
 
+          it('rewrites the incoming message async', function (done) {
+            var socket = new Socket(server.addr);
+
+            primus.on('connection', function (spark) {
+              spark.write('foo');
+            });
+
+            socket.transform('incoming', function (data, next) {
+              expect(data).to.be.a('object');
+              expect(data.data).to.equal('foo');
+
+              setTimeout(function () {
+                data.data = {
+                  message: 'foo',
+                  meta: 'meta'
+                };
+
+                next();
+              }, 100);
+            });
+
+            socket.on('data', function (data) {
+              expect(data).to.be.a('object');
+              expect(data.meta).to.equal('meta');
+              expect(data.message).to.equal('foo');
+
+              socket.end();
+              done();
+            });
+          });
+
           it('prevents the message from being emitted', function (done) {
             var socket = new Socket(server.addr);
 
@@ -648,6 +679,29 @@ module.exports = function base(transformer, pathname, transformer_name) {
               }, 0);
 
               return false;
+            });
+
+            socket.on('data', function () {
+              throw new Error('return false should prevent this emit');
+            });
+          });
+
+          it('prevents the message from being emitted async', function (done) {
+            var socket = new Socket(server.addr);
+
+            primus.on('connection', function (spark) {
+              spark.write('foo');
+            });
+
+            socket.transform('incoming', function (data, next) {
+              setTimeout(function () {
+                setTimeout(function () {
+                  socket.end();
+                  done();
+                }, 100);
+
+                next(undefined, false);
+              }, 10);
             });
 
             socket.on('data', function () {
