@@ -154,6 +154,7 @@ Spark.readable('initialise', {
   get: function get() {
     return this.__initialise[this.__initialise.length - 1];
   },
+
   set: function set(initialise) {
     if ('function' === typeof initialise) this.__initialise.push(initialise);
   }
@@ -196,23 +197,7 @@ Spark.readable('__initialise', [function initialise() {
       // Handle "primus::" prefixed protocol messages.
       //
       if (spark.protocol(data)) return;
-
-      for (var i = 0, length = primus.transformers.incoming.length; i < length; i++) {
-        var packet = { data: data };
-
-        if (false === primus.transformers.incoming[i].call(spark, packet)) {
-          //
-          // When false is returned by an incoming transformer it means that's
-          // being handled by the transformer and we should not emit the `data`
-          // event.
-          //
-          return;
-        }
-
-        data = packet.data;
-      }
-
-      spark.emit('data', data, raw);
+      spark.transforms(data, raw);
     });
   });
 
@@ -278,6 +263,55 @@ Spark.readable('__initialise', [function initialise() {
     primus.emit('connection', spark);
   });
 }]);
+
+/**
+ * Execute the set message transformers from Primus on the incoming message.
+ *
+ * @param {Mixed} data The data that has been received.
+ * @param {String} raw The raw encoded data.
+ * @api private
+ */
+Spark.readable('transforms', function transforms(data, raw) {
+  var spark = this
+    , primus = this.primus
+    , packet = { data: data }
+    , incoming = primus.transformers.incoming;
+
+  //
+  // Iterate in series over the message transformers so we can allow optional
+  // asynchronous execution of message transformers which could example retrieve
+  // additional data from the server, do extra decoding or even message
+  // validation.
+  //
+  (function transform(index, emit) {
+    var transformer = incoming[index++];
+
+    if (!transformer) return emit();
+
+    if (1 === transformer.length) {
+      if (false === transformer.call(spark, packet)) {
+        //
+        // When false is returned by an incoming transformer it means that's
+        // being handled by the transformer and we should not emit the `data`
+        // event.
+        //
+        return;
+      }
+
+      return transform(index, emit);
+    }
+
+    transformer.call(spark, packet, function done(err) {
+      if (err) return spark.emit('error', err), spark.primus.emit('log', 'error', err);
+
+      transform(index, emit);
+    });
+  }(0, function emit() {
+    spark.emit('data', packet.data, raw);
+  }));
+
+  return this;
+});
 
 /**
  * Generate a unique UUID.
