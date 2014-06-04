@@ -575,7 +575,7 @@ Primus.prototype.initialise = function initialise(options) {
 
     primus.readyState = Primus.OPENING;
     if (readyState !== primus.readyState) {
-      primus.emit('readyStateChange');
+      primus.emit('readyStateChange', 'opening');
     }
 
     start = +new Date();
@@ -595,7 +595,7 @@ Primus.prototype.initialise = function initialise(options) {
 
     primus.readyState = Primus.OPEN;
     if (readyState !== primus.readyState) {
-      primus.emit('readyStateChange');
+      primus.emit('readyStateChange', 'open');
     }
 
     primus.latency = +new Date() - start;
@@ -605,7 +605,7 @@ Primus.prototype.initialise = function initialise(options) {
 
     if (primus.buffer.length) {
       for (var i = 0, length = primus.buffer.length; i < length; i++) {
-        primus.write(primus.buffer[i]);
+        primus._write(primus.buffer[i]);
       }
 
       primus.buffer = [];
@@ -678,7 +678,7 @@ Primus.prototype.initialise = function initialise(options) {
     //
     primus.readyState = Primus.CLOSED;
     if (readyState !== primus.readyState) {
-      primus.emit('readyStateChange');
+      primus.emit('readyStateChange', 'end');
     }
 
     if (primus.timers.connect) primus.end();
@@ -923,19 +923,7 @@ Primus.prototype.open = function open() {
  */
 Primus.prototype.write = function write(data) {
   context(this, 'write');
-
-  if (Primus.OPEN === this.readyState) {
-    this.transforms(this, this, 'outgoing', data);
-  } else {
-    var buffer = this.buffer;
-
-    //
-    // If the buffer is at capacity, remove the first item.
-    //
-    if (buffer.length === this.options.queueSize) buffer.splice(0, 1);
-
-    buffer.push(data);
-  }
+  this.transforms(this, this, 'outgoing', data);
 
   return true;
 };
@@ -956,7 +944,17 @@ Primus.prototype._write = function write(data) {
   // add the same check here to prevent potential crashes by writing to a dead
   // socket.
   //
-  if (Primus.CLOSED === primus.readyState) return false;
+  if (Primus.CLOSED === primus.readyState) {
+    //
+    // If the buffer is at capacity, remove the first item.
+    //
+    if (this.buffer.length === this.options.queueSize) {
+      this.buffer.splice(0, 1);
+    }
+
+    this.buffer.push(data);
+    return false;
+  }
 
   primus.encoder(data, function encoded(err, packet) {
     //
@@ -1171,6 +1169,7 @@ Primus.prototype.reconnect = function reconnect() {
  * Close the connection.
  *
  * @param {Mixed} data last packet of data.
+ * @returns {Primus}
  * @api public
  */
 Primus.prototype.end = function end(data) {
@@ -1198,7 +1197,7 @@ Primus.prototype.end = function end(data) {
   this.readyState = Primus.CLOSED;
 
   if (readyState !== this.readyState) {
-    this.emit('readyStateChange');
+    this.emit('readyStateChange', 'end');
   }
 
   for (var timeout in this.timers) {
@@ -1332,7 +1331,7 @@ Primus.prototype.uri = function uri(options) {
   // `url.host` might be undefined (e.g. when using zombie) so we use the
   // hostname and port defined above.
   //
-  var host = (443 != options.port && 80 != options.port)
+  var host = (443 !== options.port && 80 !== options.port)
     ? options.host +':'+ options.port
     : options.host;
 
