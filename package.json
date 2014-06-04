@@ -40,7 +40,7 @@
     "browserchannel": "1.2.x",
     "chai": "1.9.x",
     "derequire": "0.8.x",
-    "e-json": "0.0.x",
+    "ejson": "1.0.x",
     "engine.io": "1.2.x",
     "engine.io-client": "1.2.x",
     "global-wrap": "1.4.x",
