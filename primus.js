@@ -574,7 +574,7 @@ Primus.prototype.initialise = function initialise(options) {
     var readyState = primus.readyState;
 
     primus.readyState = Primus.OPENING;
-    if (readyState !== Primus.OPENING) {
+    if (readyState !== primus.readyState) {
       primus.emit('readyStateChange');
     }
 
@@ -594,7 +594,7 @@ Primus.prototype.initialise = function initialise(options) {
     var readyState = primus.readyState;
 
     primus.readyState = Primus.OPEN;
-    if (readyState !== Primus.OPEN) {
+    if (readyState !== primus.readyState) {
       primus.emit('readyStateChange');
     }
 
@@ -677,7 +677,7 @@ Primus.prototype.initialise = function initialise(options) {
     // is only executed because our readyState is set to `open`.
     //
     primus.readyState = Primus.CLOSED;
-    if (readyState !== Primus.CLOSED) {
+    if (readyState !== primus.readyState) {
       primus.emit('readyStateChange');
     }
 
@@ -1196,7 +1196,8 @@ Primus.prototype.end = function end(data) {
 
   var readyState = this.readyState;
   this.readyState = Primus.CLOSED;
-  if (readyState !== Primus.CLOSED) {
+
+  if (readyState !== this.readyState) {
     this.emit('readyStateChange');
   }
 
