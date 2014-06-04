@@ -277,13 +277,15 @@ Spark.readable('__initialise', [function initialise() {
 }]);
 
 /**
- * Execute the set message transformers from Primus on the incoming message.
+ * Execute the set of message transformers from Primus on the incoming or
+ * outgoing message.
  * This function and it's content should be in sync with Primus#transforms in
  * primus.js.
  *
  * @param {Primus} primus Reference to the Primus instance with message transformers.
  * @param {Spark|Primus} connection Connection that receives or sends data.
- * @param {Mixed} data The data that has been received.
+ * @param {String} type The type of message, 'incoming' or 'outgoing'.
+ * @param {Mixed} data The data to send or that has been received.
  * @param {String} raw The raw encoded data.
  * @returns {Spark}
  * @api public
@@ -294,9 +296,9 @@ Spark.readable('transforms', function transforms(primus, connection, type, data,
 
   //
   // Iterate in series over the message transformers so we can allow optional
-  // asynchronous execution of message transformers which could example retrieve
-  // additional data from the server, do extra decoding or even message
-  // validation.
+  // asynchronous execution of message transformers which could for example
+  // retrieve additional data from the server, do extra decoding or even
+  // message validation.
   //
   (function transform(index, done) {
     var transformer = fns[index++];
@@ -326,9 +328,9 @@ Spark.readable('transforms', function transforms(primus, connection, type, data,
     //
     // We always emit 2 arguments for the data event, the first argument is the
     // parsed data and the second argument is the raw string that we received.
-    // This allows you to do some validation on the parsed data and then save
-    // the raw string in your database or what ever so you don't have the
-    // stringify overhead.
+    // This allows you, for exampele, to do some validation on the parsed data
+    // and then save the raw string in your database without the stringify
+    // overhead.
     //
     if ('incoming' === type) return connection.emit('data', packet.data, raw);
 
