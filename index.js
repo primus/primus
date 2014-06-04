@@ -941,11 +941,11 @@ Primus.createServer = function createServer(fn, options) {
     server = require('http').createServer();
     if (!options.iknowhttpsisbetter) [
       '',
-      'We\'ve detected that you\'re using a HTTP instead of a HTTPS server. Please',
-      'beaware real-time connections have less chance of being blocked by firewalls',
-      'and anti-virus scanners if they are encrypted. If you run your server behind',
-      'a reverse and HTTPS terminating proxy ignore this message, if not, you\'ve',
-      'been warned.',
+      'We\'ve detected that you\'re using a HTTP instead of a HTTPS server.',
+      'Please beaware that real-time connections have less chance of being blocked',
+      'by firewalls and anti-virus scanners if they are encrypted (using SSL). If',
+      'you run your server behind a reverse and HTTPS terminating proxy ignore',
+      'this message, if not, you\'ve been warned.',
       ''
     ].forEach(function each(line) {
       console.log('primus: '+ line);
