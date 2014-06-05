@@ -126,18 +126,8 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
 
     if (layer.length === 2) {
       log('executing middleware (%s) synchronously', layer.name);
-      var answered = layer.fn.call(primus, req, res);
 
-      //
-      // @TODO remove the warning and the unneeded code.
-      //
-      if (answered === false) {
-        answered = true;
-
-        if (!layer.warned) transformer.deprecate(layer);
-      }
-
-      if (answered) return;
+      if (layer.fn.call(primus, req, res)) return;
       return iterate(index);
     }
 
@@ -150,29 +140,6 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
   }(0));
 
   return transformer;
-});
-
-/**
- * Issue a deprecation warning.
- *
- * @param {String} data The object we're trying to deprecate.
- * @api private
- */
-Transformer.readable('deprecate', function deprecate(data) {
-  var name = data.name;
-
-  [
-    '',
-    'We\'ve detected that your middleware layer ('+ name +') is returning `false`',
-    'which will be deprecated in future releases. If this middleware has already',
-    'answered the request it should return `true`.',
-    ''
-  ].forEach(function each(line) {
-    console.error('Primus: '+ line);
-  });
-
-  data.warned = true;
-  return data;
 });
 
 /**
