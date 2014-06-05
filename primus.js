@@ -944,7 +944,7 @@ Primus.prototype._write = function write(data) {
   // add the same check here to prevent potential crashes by writing to a dead
   // socket.
   //
-  if (Primus.CLOSED === primus.readyState) {
+  if (Primus.OPEN !== primus.readyState) {
     //
     // If the buffer is at capacity, remove the first item.
     //
