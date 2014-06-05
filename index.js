@@ -190,7 +190,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
     , transformer;
 
   if ('string' === typeof Transformer) {
-    log('transformer (%s) is a string, attempting to resolve location', Transformer);
+    log('transformer `%s` is a string, attempting to resolve location', Transformer);
     Transformer = transformer = Transformer.toLowerCase();
     this.spec.transformer = transformer;
 
@@ -207,8 +207,10 @@ Primus.readable('initialise', function initialise(Transformer, options) {
       this.transformer = new Transformer(this);
     } catch (e) {
       if (e.code === 'MODULE_NOT_FOUND') {
+        log('the supplied transformer `%s` is missing', transformer);
         throw new PrimusError(this.is(transformer, Primus.transformers).missing(), this);
       } else {
+        log(e);
         throw e;
       }
     }
@@ -272,6 +274,7 @@ Primus.readable('authorize', function authorize(auth) {
     throw new PrimusError('Authorize function requires more arguments', this);
   }
 
+  log('setting an authorization function');
   this.auth = auth;
   return this;
 });
@@ -295,6 +298,8 @@ Primus.readable('forEach', function forEach(fn, done) {
 
   var ids = Object.keys(this.connections)
     , primus = this;
+
+  log('iterating over %d connections', ids.length);
 
   function pushId(spark) {
     ids.push(spark.id);
@@ -361,6 +366,7 @@ Primus.readable('parsers', function parsers(parser) {
   parser = parser || 'json';
 
   if ('string' === typeof parser) {
+    log('transformer `%s` is a string, attempting to resolve location', parser);
     parser = parser.toLowerCase();
     this.spec.parser = parser;
 
@@ -368,14 +374,17 @@ Primus.readable('parsers', function parsers(parser) {
     // This is a unknown parser, it could be people made a typo.
     //
     if (!(parser in Primus.parsers)) {
+      log('the supplied parser `%s` is not supported please use %s', parser, Primus.parsers);
       throw new PrimusError(this.is(parser, Primus.parsers).unknown(), this);
     }
 
     try { parser = require('./parsers/'+ parser); }
     catch (e) {
       if (e.code === 'MODULE_NOT_FOUND') {
+        log('the supplied parser `%s` is missing', parser);
         throw new PrimusError(this.is(parser, Primus.parsers).missing(), this);
       } else {
+        log(e);
         throw e;
       }
     }
@@ -409,7 +418,10 @@ Primus.readable('transform', function transform(type, fn) {
     throw new PrimusError('Invalid transformer type', this);
   }
 
-  if (~this.transformers[type].indexOf(fn)) return this;
+  if (~this.transformers[type].indexOf(fn)) {
+    log('the %s message transformer already exists, not adding it', type);
+    return this;
+  }
 
   this.transformers[type].push(fn);
   return this;
@@ -472,13 +484,17 @@ Primus.readable('library', function compile(nodejs) {
   //
   if ('number' === typeof this.timeout) {
     var timeout = this.timeout - 10000;
+    log('adding a custom timeout to the client');
     client = client.replace('options.ping : 25e3;', 'options.ping : '+ timeout +';');
   }
 
   //
   // Add the parser inside the closure, to prevent global leaking.
   //
-  if (parser && parser.length) client += parser;
+  if (parser && parser.length) {
+    log('adding parser to the client file');
+    client += parser;
+  }
 
   //
   // Iterate over the parsers, and register the client side plugins. If there's
@@ -490,9 +506,14 @@ Primus.readable('library', function compile(nodejs) {
     plugin = this.ark[name];
     name = JSON.stringify(name);
 
-    if (plugin.library) library.push(plugin.library);
+    if (plugin.library) {
+      log('adding the library of the %s plugin to the client file', name);
+      library.push(plugin.library);
+    }
+
     if (!plugin.client) continue;
 
+    log('adding the client code of the %s plugin to the client file', name);
     client += 'Primus.prototype.ark['+ name +'] = '+ plugin.client.toString() + '\n';
   }
 
@@ -567,7 +588,10 @@ Primus.readable('use', function use(name, energon) {
     throw new PrimusError('Plugin names should be a string', this);
   }
 
-  if ('string' === typeof energon) energon = require(energon);
+  if ('string' === typeof energon) {
+    log('plugin was passed as a string, attempting to require %s', energon);
+    energon = require(energon);
+  }
 
   //
   // Plugin accepts an object or a function only.
@@ -583,14 +607,22 @@ Primus.readable('use', function use(name, energon) {
     throw new PrimusError('The plugin in missing a client or server function', this);
   }
 
+  //
+  // Don't allow duplicate plugins or plugin override as this is most likely
+  // unintentional.
+  //
   if (name in this.ark) {
     throw new PrimusError('The plugin name was already defined', this);
   }
 
+  log('adding %s as new plugin', name);
   this.ark[name] = energon;
+
   if (!energon.server) return this;
 
+  log('calling the %s plugin\'s server code', name);
   energon.server.call(this, this, this.options);
+
   return this;
 });
 
@@ -645,7 +677,10 @@ Primus.readable('before', function before(name, fn, options, level) {
   // is a special initialisation process where we pass in a reference to the
   // initialised Primus instance so a pre-compiling process can be done.
   //
-  if (fn.length < 2) fn = fn.call(this, options);
+  if (fn.length < 2) {
+    log('automatically configuring middleware `%s`', name);
+    fn = fn.call(this, options);
+  }
 
   //
   // Make sure that we have a function that takes at least 2 arguments.
@@ -667,6 +702,7 @@ Primus.readable('before', function before(name, fn, options, level) {
   //
   if (!~index) {
     if (level >= 0 && level < this.layers.length) {
+      log('adding middleware `%s` to the supplied index at %d', name, level);
       this.layers.splice(level, 0, layer);
     } else {
       this.layers.push(layer);
@@ -688,7 +724,11 @@ Primus.readable('before', function before(name, fn, options, level) {
 Primus.readable('remove', function remove(name) {
   var index = this.indexOfLayer(name);
 
-  if (~index) this.layers.splice(index, 1);
+  if (~index) {
+    log('removing middleware `%s`', name);
+    this.layers.splice(index, 1);
+  }
+
   return this;
 });
 
@@ -702,7 +742,10 @@ Primus.readable('remove', function remove(name) {
 Primus.readable('enable', function enable(name) {
   var index = this.indexOfLayer(name);
 
-  if (~index) this.layers[index].enabled = true;
+  if (~index) {
+    log('enabling middleware `%s`', name);
+    this.layers[index].enabled = true;
+  }
   return this;
 });
 
@@ -716,7 +759,11 @@ Primus.readable('enable', function enable(name) {
 Primus.readable('disable', function disable(name) {
   var index = this.indexOfLayer(name);
 
-  if (~index) this.layers[index].enabled = false;
+  if (~index) {
+    log('disabling middleware `%s`', name);
+    this.layers[index].enabled = false;
+  }
+
   return this;
 });
 
