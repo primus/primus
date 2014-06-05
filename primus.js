@@ -1319,7 +1319,7 @@ Primus.prototype.uri = function uri(options) {
   options.secure = 'secure' in options ? options.secure : (url.protocol === 'https:' || url.protocol === 'wss:');
   options.auth = 'auth' in options ? options.auth : url.auth;
   options.pathname = 'pathname' in options ? options.pathname : this.pathname.slice(1);
-  options.port = 'port' in options ? options.port : url.port || (options.secure ? 443 : 80);
+  options.port = 'port' in options ? +options.port : +url.port || (options.secure ? 443 : 80);
   options.host = 'host' in options ? options.host : url.hostname || url.host.replace(':'+ url.port, '');
 
   //
