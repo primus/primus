@@ -3,6 +3,7 @@
 var PrimusError = require('./errors').PrimusError
   , EventEmitter = require('eventemitter3')
   , Transformer = require('./transformer')
+  , log = require('diagnostics')('primus')
   , Spark = require('./spark')
   , fuse = require('fusing')
   , fs = require('fs');
@@ -189,6 +190,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
     , transformer;
 
   if ('string' === typeof Transformer) {
+    log('transformer (%s) is a string, attempting to resolve location', Transformer);
     Transformer = transformer = Transformer.toLowerCase();
     this.spec.transformer = transformer;
 
@@ -196,6 +198,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
     // This is a unknown transporter, it could be people made a typo.
     //
     if (!(Transformer in Primus.transformers)) {
+      log('the supplied transformer %s is not supported, please use %s', transformer, Primus.transformers);
       throw new PrimusError(this.is(Transformer, Primus.transformers).unknown(), this);
     }
 
@@ -210,6 +213,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
       }
     }
   } else {
+    log('received a custom transformer');
     this.spec.transformer = 'custom';
   }
 
@@ -222,11 +226,15 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   this.on('connection', function connection(stream) {
     this.connected++;
     this.connections[stream.id] = stream;
+
+    log('connection: %s currently serving %d concurrent', stream.id, this.connected);
   });
 
   this.on('disconnection', function disconnected(stream) {
     this.connected--;
     delete this.connections[stream.id];
+
+    log('disconnection: %s currently serving %d concurrent', stream.id, this.connected);
   });
 
   //
@@ -279,7 +287,7 @@ Primus.readable('authorize', function authorize(auth) {
 Primus.readable('forEach', function forEach(fn, done) {
   if (!done) {
     for (var id in this.connections) {
-      fn(this.connections[id], id, this.connections);
+      if (fn(this.connections[id], id, this.connections) === false) break;
     }
 
     return this;
@@ -314,8 +322,8 @@ Primus.readable('forEach', function forEach(fn, done) {
     //
     if (!spark) return iterate();
 
-    fn(spark, function next(err) {
-      if (err) {
+    fn(spark, function next(err, forward) {
+      if (err || forward === false) {
         primus.removeListener('connection', pushId);
         return done(err);
       }
@@ -933,11 +941,11 @@ Primus.createServer = function createServer(fn, options) {
     server = require('http').createServer();
     if (!options.iknowhttpsisbetter) [
       '',
-      'We\'ve detected that you\'re using a HTTP instead of a HTTPS server. Please',
-      'beaware real-time connections have less chance of being blocked by firewalls',
-      'and anti-virus scanners if they are encrypted. If you run your server behind',
-      'a reverse and HTTPS terminating proxy ignore this message, if not, you\'ve',
-      'been warned.',
+      'We\'ve detected that you\'re using a HTTP instead of a HTTPS server.',
+      'Please beaware that real-time connections have less chance of being blocked',
+      'by firewalls and anti-virus scanners if they are encrypted (using SSL). If',
+      'you run your server behind a reverse and HTTPS terminating proxy ignore',
+      'this message, if not, you\'ve been warned.',
       ''
     ].forEach(function each(line) {
       console.log('primus: '+ line);

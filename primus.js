@@ -574,8 +574,8 @@ Primus.prototype.initialise = function initialise(options) {
     var readyState = primus.readyState;
 
     primus.readyState = Primus.OPENING;
-    if (readyState !== Primus.OPENING) {
-      primus.emit('readyStateChange');
+    if (readyState !== primus.readyState) {
+      primus.emit('readyStateChange', 'opening');
     }
 
     start = +new Date();
@@ -594,8 +594,8 @@ Primus.prototype.initialise = function initialise(options) {
     var readyState = primus.readyState;
 
     primus.readyState = Primus.OPEN;
-    if (readyState !== Primus.OPEN) {
-      primus.emit('readyStateChange');
+    if (readyState !== primus.readyState) {
+      primus.emit('readyStateChange', 'open');
     }
 
     primus.latency = +new Date() - start;
@@ -605,7 +605,7 @@ Primus.prototype.initialise = function initialise(options) {
 
     if (primus.buffer.length) {
       for (var i = 0, length = primus.buffer.length; i < length; i++) {
-        primus.write(primus.buffer[i]);
+        primus._write(primus.buffer[i]);
       }
 
       primus.buffer = [];
@@ -653,30 +653,7 @@ Primus.prototype.initialise = function initialise(options) {
       // Handle all "primus::" prefixed protocol messages.
       //
       if (primus.protocol(data)) return;
-
-      for (var i = 0, length = primus.transformers.incoming.length; i < length; i++) {
-        var packet = { data: data };
-
-        if (false === primus.transformers.incoming[i].call(primus, packet)) {
-          //
-          // When false is returned by an incoming transformer it means that's
-          // being handled by the transformer and we should not emit the `data`
-          // event.
-          //
-          return;
-        }
-
-        data = packet.data;
-      }
-
-      //
-      // We always emit 2 arguments for the data event, the first argument is the
-      // parsed data and the second argument is the raw string that we received.
-      // This allows you to do some validation on the parsed data and then save
-      // the raw string in your database or what ever so you don't have the
-      // stringify overhead.
-      //
-      primus.emit('data', data, raw);
+      primus.transforms(primus, primus, 'incoming', data, raw);
     });
   });
 
@@ -700,8 +677,8 @@ Primus.prototype.initialise = function initialise(options) {
     // is only executed because our readyState is set to `open`.
     //
     primus.readyState = Primus.CLOSED;
-    if (readyState !== Primus.CLOSED) {
-      primus.emit('readyStateChange');
+    if (readyState !== primus.readyState) {
+      primus.emit('readyStateChange', 'end');
     }
 
     if (primus.timers.connect) primus.end();
@@ -840,6 +817,70 @@ Primus.prototype.protocol = function protocol(msg) {
 };
 
 /**
+ * Execute the set of message transformers from Primus on the incoming or
+ * outgoing message.
+ * This function and it's content should be in sync with Spark#transforms in
+ * spark.js.
+ *
+ * @param {Primus} primus Reference to the Primus instance with message transformers.
+ * @param {Spark|Primus} connection Connection that receives or sends data.
+ * @param {String} type The type of message, 'incoming' or 'outgoing'.
+ * @param {Mixed} data The data to send or that has been received.
+ * @param {String} raw The raw encoded data.
+ * @returns {Primus}
+ * @api public
+ */
+Primus.prototype.transforms = function transforms(primus, connection, type, data, raw) {
+  var packet = { data: data }
+    , fns = primus.transformers[type];
+
+  //
+  // Iterate in series over the message transformers so we can allow optional
+  // asynchronous execution of message transformers which could for example
+  // retrieve additional data from the server, do extra decoding or even
+  // message validation.
+  //
+  (function transform(index, done) {
+    var transformer = fns[index++];
+
+    if (!transformer) return done();
+
+    if (1 === transformer.length) {
+      if (false === transformer.call(connection, packet)) {
+        //
+        // When false is returned by an incoming transformer it means that's
+        // being handled by the transformer and we should not emit the `data`
+        // event.
+        //
+        return;
+      }
+
+      return transform(index, done);
+    }
+
+    transformer.call(connection, packet, function finished(err, arg) {
+      if (err) return connection.emit('error', err);
+      if (false === arg) return;
+
+      transform(index, done);
+    });
+  }(0, function done() {
+    //
+    // We always emit 2 arguments for the data event, the first argument is the
+    // parsed data and the second argument is the raw string that we received.
+    // This allows you, for exampele, to do some validation on the parsed data
+    // and then save the raw string in your database without the stringify
+    // overhead.
+    //
+    if ('incoming' === type) return connection.emit('data', packet.data, raw);
+
+    connection._write(packet.data);
+  }));
+
+  return this;
+};
+
+/**
  * Retrieve the current id from the server.
  *
  * @param {Function} fn Callback function.
@@ -881,45 +922,48 @@ Primus.prototype.open = function open() {
  * @api public
  */
 Primus.prototype.write = function write(data) {
-  var primus = this
-    , packet;
+  context(this, 'write');
+  this.transforms(this, this, 'outgoing', data);
 
-  context(primus, 'write');
+  return true;
+};
 
-  if (Primus.OPEN === primus.readyState) {
-    for (var i = 0, length = primus.transformers.outgoing.length; i < length; i++) {
-      packet = { data: data };
+/**
+ * The actual message writer.
+ *
+ * @param {Mixed} data The message that needs to be written.
+ * @returns {Boolean}
+ * @api private
+ */
+Primus.prototype._write = function write(data) {
+  var primus = this;
 
-      if (false === primus.transformers.outgoing[i].call(primus, packet)) {
-        //
-        // When false is returned by an incoming transformer it means that's
-        // being handled by the transformer and we should not emit the `data`
-        // event.
-        //
-        return;
-      }
-
-      data = packet.data;
-    }
-
-    primus.encoder(data, function encoded(err, packet) {
-      //
-      // Do a "save" emit('error') when we fail to parse a message. We don't
-      // want to throw here as listening to errors should be optional.
-      //
-      if (err) return primus.listeners('error').length && primus.emit('error', err);
-      primus.emit('outgoing::data', packet);
-    });
-  } else {
-    var buffer = primus.buffer;
-
+  //
+  // The connection is closed, normally this would already be done in the
+  // `spark.write` method, but as `_write` is used internally, we should also
+  // add the same check here to prevent potential crashes by writing to a dead
+  // socket.
+  //
+  if (Primus.CLOSED === primus.readyState) {
     //
     // If the buffer is at capacity, remove the first item.
     //
-    if (buffer.length === primus.options.queueSize) buffer.splice(0, 1);
+    if (this.buffer.length === this.options.queueSize) {
+      this.buffer.splice(0, 1);
+    }
 
-    buffer.push(data);
+    this.buffer.push(data);
+    return false;
   }
+
+  primus.encoder(data, function encoded(err, packet) {
+    //
+    // Do a "save" emit('error') when we fail to parse a message. We don't
+    // want to throw here as listening to errors should be optional.
+    //
+    if (err) return primus.listeners('error').length && primus.emit('error', err);
+    primus.emit('outgoing::data', packet);
+  });
 
   return true;
 };
@@ -1125,6 +1169,7 @@ Primus.prototype.reconnect = function reconnect() {
  * Close the connection.
  *
  * @param {Mixed} data last packet of data.
+ * @returns {Primus}
  * @api public
  */
 Primus.prototype.end = function end(data) {
@@ -1150,8 +1195,9 @@ Primus.prototype.end = function end(data) {
 
   var readyState = this.readyState;
   this.readyState = Primus.CLOSED;
-  if (readyState !== Primus.CLOSED) {
-    this.emit('readyStateChange');
+
+  if (readyState !== this.readyState) {
+    this.emit('readyStateChange', 'end');
   }
 
   for (var timeout in this.timers) {
@@ -1285,7 +1331,7 @@ Primus.prototype.uri = function uri(options) {
   // `url.host` might be undefined (e.g. when using zombie) so we use the
   // hostname and port defined above.
   //
-  var host = (443 != options.port && 80 != options.port)
+  var host = (443 !== options.port && 80 !== options.port)
     ? options.host +':'+ options.port
     : options.host;
 

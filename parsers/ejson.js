@@ -1,6 +1,6 @@
 'use strict';
 
-var EJSON = require('e-json');
+var EJSON = require('ejson');
 
 /**
  * Message encoder.
@@ -35,6 +35,7 @@ exports.decoder = function decoder(data, fn) {
 };
 
 //
-// Expose the library so it can be added in our Primus module.
+// Expose the library which is compiled for global consumption instead of
+// browserify.
 //
-exports.library = EJSON.source;
+exports.library = require('ejson/source');

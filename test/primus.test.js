@@ -346,6 +346,26 @@ describe('Primus', function () {
       });
     });
 
+    it('can bailout by returning false', function (done) {
+      var spark = new primus.Spark()
+        , sparks = new primus.Spark();
+
+      (global.setImmediate || process.nextTick)(function () {
+        expect(primus.connected).to.equal(2);
+
+        var iterations = 0;
+
+        primus.forEach(function (client, id, connections) {
+          iterations++;
+
+          return false;
+        });
+
+        expect(iterations).to.equal(1);
+        done();
+      });
+    });
+
     it('iterates over all active connections asynchronously', function (done) {
       var initial = 4
         , iterations = 0;
@@ -375,6 +395,30 @@ describe('Primus', function () {
           }, 2);
         }, function () {
           expect(iterations).to.equal(8);
+          done();
+        });
+      });
+    });
+
+    it('can bailout async', function (done) {
+      var initial = 4
+        , iterations = 0;
+
+      for (var i = 0; i < initial; i++) {
+        new primus.Spark();
+      }
+
+      (global.setImmediate || process.nextTick)(function () {
+        expect(primus.connected).to.equal(4);
+
+        var first = true;
+
+        primus.forEach(function (spark, next) {
+          iterations++;
+          expect(spark).to.be.instanceOf(primus.Spark);
+          next(undefined, false);
+        }, function () {
+          expect(iterations).to.equal(1);
           done();
         });
       });

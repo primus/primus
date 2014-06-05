@@ -1,6 +1,7 @@
 'use strict';
 
-var middlewareError = require('./middleware/error')
+var log = require('diagnostics')('primus:transformer')
+  , middlewareError = require('./middleware/error')
   , url = require('url').parse
   , fuse = require('fusing');
 
@@ -51,10 +52,12 @@ Transformer.readable('initialise', function initialise() {
     , transformer = this;
 
   server.listeners('request').forEach(function each(fn) {
+    log('found existing request handlers on the HTTP server, moving Primus as first');
     transformer.on('previous::request', fn);
   });
 
   server.listeners('upgrade').forEach(function each(fn) {
+    log('found existing upgrade handlers on the HTTP server, moving Primus as first');
     transformer.on('previous::upgrade', fn);
   });
 
@@ -69,6 +72,7 @@ Transformer.readable('initialise', function initialise() {
   // Emit a close event.
   //
   server.on('close', function close() {
+    log('the HTTP server is closing');
     transformer.emit('close');
   });
 
@@ -121,6 +125,7 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
     if (!layer.enabled || layer.fn[type] === false) return iterate(index);
 
     if (layer.length === 2) {
+      log('executing middleware (%s) synchronously', layer.name);
       var answered = layer.fn.call(primus, req, res);
 
       //
@@ -136,6 +141,7 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
       return iterate(index);
     }
 
+    log('executing middleware (%s) asynchronously', layer.name);
     layer.fn.call(primus, req, res, function done(err) {
       if (err) return middlewareError(err, req, res);
 
@@ -200,6 +206,7 @@ Transformer.readable('request', function request(req, res) {
   // field that is accessible through all transformers.
   //
 
+  log('handling HTTP request for url: %s', req.url);
   this.forEach('http', req, res, this.emits('request', req, res));
 });
 
@@ -230,6 +237,7 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
     delete req.headers['primus::req::backup'];
   });
 
+  log('handling HTTP upgrade for url: %s', req.url);
   this.forEach('upgrade', req, socket, this.emits('upgrade', req, socket, buffy));
 });
 

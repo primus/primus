@@ -1,6 +1,7 @@
 'use strict';
 
 var ParserError = require('./errors').ParserError
+  , log = require('diagnostics')('primus:spark')
   , parse = require('querystring').parse
   , forwarded = require('forwarded-for')
   , fuse = require('fusing')
@@ -101,18 +102,21 @@ Spark.readable('address', { get: function address() {
  * @api private
  */
 Spark.readable('heartbeat', function heartbeat() {
-  clearTimeout(this.timeout);
-
-  if ('number' !== typeof this.primus.timeout) return this;
-
   var spark = this;
+
+  clearTimeout(spark.timeout);
+
+  if ('number' !== typeof spark.primus.timeout) return spark;
+
+  log('setting new heartbeat timeout for %s', spark.id);
+
   this.timeout = setTimeout(function timeout() {
     //
     // Set reconnect to true so we're not sending a `primus::server::close`
     // packet.
     //
     spark.end(undefined, { reconnect: true });
-  }, this.primus.timeout);
+  }, spark.primus.timeout);
 
   return this;
 });
@@ -154,6 +158,7 @@ Spark.readable('initialise', {
   get: function get() {
     return this.__initialise[this.__initialise.length - 1];
   },
+
   set: function set(initialise) {
     if ('function' === typeof initialise) this.__initialise.push(initialise);
   }
@@ -173,7 +178,9 @@ Spark.readable('__initialise', [function initialise() {
   // Prevent double initialization of the spark. If we already have an
   // `incoming::data` handler we assume that all other cases are handled as well.
   //
-  if (this.listeners('incoming::data').length) return;
+  if (this.listeners('incoming::data').length) {
+    return log('already has incoming::data listeners, bailing out');
+  }
 
   //
   // We've received new data from our client, decode and emit it.
@@ -190,29 +197,16 @@ Spark.readable('__initialise', [function initialise() {
       // Do a "save" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
-      if (err) return new ParserError('Failed to decode incoming data: '+ err.message, spark, err);
+      if (err) {
+        log('failed to decode the incoming data for %s', spark.id);
+        return new ParserError('Failed to decode incoming data: '+ err.message, spark, err);
+      }
 
       //
       // Handle "primus::" prefixed protocol messages.
       //
       if (spark.protocol(data)) return;
-
-      for (var i = 0, length = primus.transformers.incoming.length; i < length; i++) {
-        var packet = { data: data };
-
-        if (false === primus.transformers.incoming[i].call(spark, packet)) {
-          //
-          // When false is returned by an incoming transformer it means that's
-          // being handled by the transformer and we should not emit the `data`
-          // event.
-          //
-          return;
-        }
-
-        data = packet.data;
-      }
-
-      spark.emit('data', data, raw);
+      spark.transforms(primus, spark, 'incoming', data, raw);
     });
   });
 
@@ -223,6 +217,7 @@ Spark.readable('__initialise', [function initialise() {
     //
     // The socket is closed, sending data over it will throw an error.
     //
+    log('transformer closed connection for %s', spark.id);
     spark.end(undefined, { reconnect: true });
   });
 
@@ -238,6 +233,7 @@ Spark.readable('__initialise', [function initialise() {
     if (spark.listeners('error').length) spark.emit('error', err);
     spark.primus.emit('log', 'error', err);
 
+    log('transformer received error `%s` for %s', err.message, spark.id);
     spark.end();
   });
 
@@ -258,6 +254,7 @@ Spark.readable('__initialise', [function initialise() {
     // use these references for the last time.
     //
     setTimeout(function timeout() {
+      log('releasing references from our spark object for %s', spark.id);
       //
       // Release references.
       // @TODO also remove the references that we're set by users.
@@ -278,6 +275,70 @@ Spark.readable('__initialise', [function initialise() {
     primus.emit('connection', spark);
   });
 }]);
+
+/**
+ * Execute the set of message transformers from Primus on the incoming or
+ * outgoing message.
+ * This function and it's content should be in sync with Primus#transforms in
+ * primus.js.
+ *
+ * @param {Primus} primus Reference to the Primus instance with message transformers.
+ * @param {Spark|Primus} connection Connection that receives or sends data.
+ * @param {String} type The type of message, 'incoming' or 'outgoing'.
+ * @param {Mixed} data The data to send or that has been received.
+ * @param {String} raw The raw encoded data.
+ * @returns {Spark}
+ * @api public
+ */
+Spark.readable('transforms', function transforms(primus, connection, type, data, raw) {
+  var packet = { data: data }
+    , fns = primus.transformers[type];
+
+  //
+  // Iterate in series over the message transformers so we can allow optional
+  // asynchronous execution of message transformers which could for example
+  // retrieve additional data from the server, do extra decoding or even
+  // message validation.
+  //
+  (function transform(index, done) {
+    var transformer = fns[index++];
+
+    if (!transformer) return done();
+
+    if (1 === transformer.length) {
+      if (false === transformer.call(connection, packet)) {
+        //
+        // When false is returned by an incoming transformer it means that's
+        // being handled by the transformer and we should not emit the `data`
+        // event.
+        //
+        return;
+      }
+
+      return transform(index, done);
+    }
+
+    transformer.call(connection, packet, function finished(err, arg) {
+      if (err) return connection.emit('error', err);
+      if (false === arg) return;
+
+      transform(index, done);
+    });
+  }(0, function done() {
+    //
+    // We always emit 2 arguments for the data event, the first argument is the
+    // parsed data and the second argument is the raw string that we received.
+    // This allows you, for exampele, to do some validation on the parsed data
+    // and then save the raw string in your database without the stringify
+    // overhead.
+    //
+    if ('incoming' === type) return connection.emit('data', packet.data, raw);
+
+    connection._write(packet.data);
+  }));
+
+  return this;
+});
 
 /**
  * Generate a unique UUID.
@@ -322,9 +383,11 @@ Spark.readable('protocol', function protocol(msg) {
     // messages.
     //
     default:
+      log('message `%s` was prefixed with primus:: but not supported', msg);
       return false;
   }
 
+  log('processed a primus protocol message `%s`', msg);
   return true;
 });
 
@@ -361,24 +424,13 @@ Spark.readable('write', function write(data) {
   //
   // The connection is closed, return false.
   //
-  if (Spark.CLOSED === this.readyState) return false;
-
-  for (var i = 0, length = primus.transformers.outgoing.length; i < length; i++) {
-    packet = { data: data };
-
-    if (false === primus.transformers.outgoing[i].call(this, packet)) {
-      //
-      // When false is returned by an incoming transformer it means that's
-      // being handled by the transformer and we should not emit the `data`
-      // event.
-      //
-      return;
-    }
-
-    data = packet.data;
+  if (Spark.CLOSED === this.readyState) {
+    log('attempted to write but readyState was already set to CLOSED for %s', this.id);
+    return false;
   }
 
-  this._write(data);
+  this.transforms(primus, this, 'outgoing', data);
+
   return true;
 });
 
@@ -386,6 +438,7 @@ Spark.readable('write', function write(data) {
  * The actual message writer.
  *
  * @param {Mixed} data The message that needs to be written.
+ * @returns {Boolean}
  * @api private
  */
 Spark.readable('_write', function _write(data) {
@@ -398,7 +451,10 @@ Spark.readable('_write', function _write(data) {
   // add the same check here to prevent potential crashes by writing to a dead
   // socket.
   //
-  if (Spark.CLOSED === spark.readyState) return false;
+  if (Spark.CLOSED === spark.readyState) {
+    log('attempted to _write but readyState was already set to CLOSED for %s', spark.id);
+    return false;
+  }
 
   primus.encoder.call(spark, data, function encoded(err, packet) {
     //
@@ -406,7 +462,7 @@ Spark.readable('_write', function _write(data) {
     // want to throw here as listening to errors should be optional.
     //
     if (err) return new ParserError('Failed to encode outgoing data: '+ err.message, spark, err);
-    if (!packet) return;
+    if (!packet) return log('nothing to write, bailing out for %s', spark.id);
 
     //
     // Hack 1: \u2028 and \u2029 are allowed inside string in JSON. But JavaScript
@@ -422,6 +478,8 @@ Spark.readable('_write', function _write(data) {
 
     spark.emit('outgoing::data', packet);
   });
+
+  return true;
 });
 
 /**
@@ -436,6 +494,8 @@ Spark.readable('_write', function _write(data) {
  */
 Spark.readable('end', function end(data, options) {
   if (Spark.CLOSED === this.readyState) return this;
+
+  log('end initiated by developer for %s', this.id);
 
   options = options || {};
   if (data) this.write(data);
