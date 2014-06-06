@@ -28,7 +28,8 @@ function Primus(server, options) {
   options = options || {};
   this.fuse();
 
-  var primus = this;
+  var primus = this
+    , key;
 
   this.auth = options.authorization || null;  // Do we have an authorization handler.
   this.connections = Object.create(null);     // Connection storage.
@@ -84,7 +85,9 @@ function Primus(server, options) {
   // Copy over the original Spark static properties and methods so readable and
   // writable can also be used.
   //
-  for (var key in Spark) this.Spark[key] = Spark[key];
+  for (key in Spark) {
+    this.Spark[key] = Spark[key];
+  }
 
   this.parsers(options.parser);
   this.initialise(options.transformer || options.transport, options);
@@ -93,8 +96,17 @@ function Primus(server, options) {
   // If the plugins are supplied through the options, also initialise them. This
   // allows us to do `primus.createSocket({})` to also use plugins.
   //
-  if ('object' === typeof options.plugin) for (var key in options.plugin) {
-    this.use(key, options.plugin[key]);
+  if ('string' === typeof options.plugin) {
+    options.plugin = options.plugin.split(/[\s|\,]+/g).reduce(function reduce(plugins, name) {
+      plugins[name] = name;
+      return plugins;
+    }, {});
+  }
+
+  if ('object' === typeof options.plugin) {
+    for (key in options.plugin) {
+      this.use(key, options.plugin[key]);
+    }
   }
 }
 
