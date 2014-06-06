@@ -1004,8 +1004,10 @@ Primus.prototype.heartbeat = function heartbeat() {
    * @api private
    */
   function ping() {
-    primus.clearTimeout('ping').write('primus::ping::'+ (+new Date));
-    primus.emit('outgoing::ping');
+    var value = +new Date();
+
+    primus.clearTimeout('ping').write('primus::ping::'+ value);
+    primus.emit('outgoing::ping', value);
     primus.timers.pong = setTimeout(pong, primus.options.pong);
   }
 

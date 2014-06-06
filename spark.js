@@ -372,6 +372,7 @@ Spark.readable('protocol', function protocol(msg) {
   switch (msg.slice(8,  last)) {
     case 'ping':
       this._write('primus::pong::'+ value);
+      this.emit('incoming::pong', value);
     break;
 
     case 'id':

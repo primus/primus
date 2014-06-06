@@ -995,7 +995,7 @@ Event                 | Usage       | Location      | Description
 `disconnection`       | **public**  | server        | A connection closed.
 `initialised`         | **public**  | server        | The server is initialised.
 `close`               | **public**  | server        | The server has been destroyed.
-`incoming::pong`      | private     | client        | We received a pong message.
+`incoming::pong`      | private     | client,spark  | We received a pong message.
 `outgoing::ping`      | private     | client        | We're sending a ping message.
 `online`              | **public**  | client        | We've regained a network connection
 `offline`             | **public**  | client        | We've lost our internet connection
