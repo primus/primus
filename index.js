@@ -97,10 +97,11 @@ function Primus(server, options) {
   // allows us to do `primus.createSocket({})` to also use plugins.
   //
   if ('string' === typeof options.plugin) {
-    options.plugin = options.plugin.split(/[\s|\,]+/g).reduce(function reduce(plugins, name) {
-      plugins[name] = name;
-      return plugins;
-    }, {});
+    options.plugin.split(/[\s|,]+/).forEach(function register(name) {
+      primus.use(name, name);
+    });
+
+    return;
   }
 
   if ('object' === typeof options.plugin) {
@@ -615,7 +616,7 @@ Primus.readable('use', function use(name, energon) {
   //
   // Plugin require a client, server or both to be specified in the object.
   //
-  if (!('server' in energon || 'client' in energon)) {
+  if (!energon.server && !energon.client) {
     throw new PrimusError('The plugin in missing a client or server function', this);
   }
 
