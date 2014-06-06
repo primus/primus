@@ -1478,6 +1478,35 @@ primus.use('name', {
 });
 ```
 
+We also expose asynchronous interfaces for these transformers. If you function
+accepts 2 arguments we automatically assume it's async and that the last
+argument is the callback variable:
+
+```js
+primus.transforms('outgoing', function (packet, next) {
+  asyncprocess(packet.data, function (err, data) {
+    //
+    // If you return an error here, it will be emitted as `error` on the
+    // spark/client and no `data` event will be emitted. 
+    //
+    if (err) return next(err);
+
+    //
+    // If you just wanted to ignore this message instead of emitting an error
+    // you can do: 
+    //
+    if (err) return next(undefined, false);
+
+    //
+    // To update the data, just re-assign the `data` property on the packet you
+    // received and call the next callback
+    //
+    packet.data = data;
+    next();
+  });
+});
+```
+
 #### Community Plugins
 
 These are plugins created by our amazing community. Do you have a module that
