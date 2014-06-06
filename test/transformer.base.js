@@ -588,6 +588,37 @@ module.exports = function base(transformer, pathname, transformer_name) {
             socket.write('foo');
           });
 
+          it('rewrites the outgoing message async', function (done) {
+            var socket = new Socket(server.addr);
+
+            primus.on('connection', function (spark) {
+              spark.on('data', function (data) {
+                expect(data).to.be.a('object');
+                expect(data.meta).to.equal('meta');
+                expect(data.message).to.equal('foo');
+
+                spark.end();
+                done();
+              });
+            });
+
+            socket.transform('outgoing', function (data, next) {
+              expect(data).to.be.a('object');
+              expect(data.data).to.equal('foo');
+
+              setTimeout(function () {
+                data.data = {
+                  message: 'foo',
+                  meta: 'meta'
+                };
+
+                next();
+              }, 10);
+            });
+
+            socket.write('foo');
+          });
+
           it('prevents the message from being written', function (done) {
             var socket = new Socket(server.addr);
 
@@ -598,6 +629,25 @@ module.exports = function base(transformer, pathname, transformer_name) {
               }, 0);
 
               return false;
+            });
+
+            socket.on('outgoing::data', function () {
+              throw new Error('return false should prevent this emit');
+            }).write('foo');
+          });
+
+          it('prevents the message from being written async', function (done) {
+            var socket = new Socket(server.addr);
+
+            socket.transform('outgoing', function (data, next) {
+              setTimeout(function () {
+                next(undefined, false);
+
+                setTimeout(function () {
+                  socket.end();
+                  done();
+                }, 100);
+              }, 10);
             });
 
             socket.on('outgoing::data', function () {
