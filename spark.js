@@ -211,6 +211,14 @@ Spark.readable('__initialise', [function initialise() {
   });
 
   //
+  // We've received a ping message.
+  //
+  spark.on('incoming::ping', function ping(time) {
+    spark.emit('outgoing::pong', time);
+    spark._write('primus::pong::'+ time);
+  });
+
+  //
   // The client has disconnected.
   //
   spark.on('incoming::end', function disconnect() {
@@ -371,8 +379,7 @@ Spark.readable('protocol', function protocol(msg) {
 
   switch (msg.slice(8,  last)) {
     case 'ping':
-      this._write('primus::pong::'+ value);
-      this.emit('incoming::pong', value);
+      this.emit('incoming::ping', value);
     break;
 
     case 'id':

@@ -989,16 +989,18 @@ Event                 | Usage       | Location      | Description
 `data`                | **public**  | client/spark  | We received data.
 `incoming::end`       | private     | client/spark  | Transformer closed the connection.
 `outgoing::end`       | private     | client/spark  | Transformer should close connection.
-`end`                 | **public**  | client/spark  | The connection has ended
+`end`                 | **public**  | client/spark  | The connection has ended.
 `close`               | **public**  | client/server | The connection is closed by transformer, we might retry. And the server has shutdown.
 `connection`          | **public**  | server        | We received a new connection.
 `disconnection`       | **public**  | server        | A connection closed.
 `initialised`         | **public**  | server        | The server is initialised.
 `close`               | **public**  | server        | The server has been destroyed.
-`incoming::pong`      | private     | client,spark  | We received a pong message.
+`incoming::ping`      | private     | spark         | We received a ping message.
 `outgoing::ping`      | private     | client        | We're sending a ping message.
-`online`              | **public**  | client        | We've regained a network connection
-`offline`             | **public**  | client        | We've lost our internet connection
+`incoming::pong`      | private     | client        | We received a pong message.
+`outgoing::pong`      | private     | spark         | We're sending a pong message.
+`online`              | **public**  | client        | We've regained a network connection.
+`offline`             | **public**  | client        | We've lost our internet connection.
 `log`                 | **public**  | server        | Log messages.
 `readyStateChange`    | **public**  | client/spark  | The readyState has changed.
 `outgoing::url`       | private     | client        | The options used to construct the URL.
