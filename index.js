@@ -849,25 +849,27 @@ Primus.readable('destroy', function destroy(options, fn) {
     //
     primus.emit('close', options);
 
-    if (primus.transformer) {
-      primus.transformer.emit('close', options);
-      primus.transformer.removeAllListeners();
-    }
+    setTimeout(function timeout() {
+      if (primus.transformer) {
+        primus.transformer.emit('close', options);
+        primus.transformer.removeAllListeners();
+      }
 
-    if (primus.server) primus.server.removeAllListeners();
-    primus.removeAllListeners();
+      if (primus.server) primus.server.removeAllListeners();
+      primus.removeAllListeners();
 
-    //
-    // Null some potentially heavy objects to free some more memory instantly.
-    //
-    primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
-    primus.transformer = primus.encoder = primus.decoder = primus.server = null;
-    primus.sparks = primus.connected = 0;
+      //
+      // Null some potentially heavy objects to free some more memory instantly.
+      //
+      primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
+      primus.transformer = primus.encoder = primus.decoder = primus.server = null;
+      primus.sparks = primus.connected = 0;
 
-    primus.connections = Object.create(null);
-    primus.ark = Object.create(null);
+      primus.connections = Object.create(null);
+      primus.ark = Object.create(null);
 
-    if (fn) fn();
+      if (fn) fn();
+    }, 0);
   }
 
   //
