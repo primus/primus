@@ -845,18 +845,20 @@ The WebSocket transformer's underlying transport socket will fire an
 `unexpected-response` event with the HTTP request and response:
 
 ```js
-client.on('outgoing::open', function ()
-{
-  client.socket.on('unexpected-response', function (req, res)
-  {
+primus.on('outgoing::open', function () {
+  primus.socket.on('unexpected-response', function (req, res) {
     console.error(res.statusCode);
     console.error(res.headers['www-authenticate']);
 
-    // it's up to us to close the request (although it will time out)
+    //
+    // It's up to us to close the request (although it will time out).
+    //
     req.abort();
 
-    // it's also up to us to emit an error so primus can clean up
-    socket.socket.emit('error', 'authorization failed: ' + res.statusCode);
+    //
+    // It's also up to us to emit an error so primus can clean up.
+    //
+    primus.socket.emit('error', 'authorization failed: ' + res.statusCode);
   });
 });
 ```
@@ -864,10 +866,8 @@ client.on('outgoing::open', function ()
 If you want to read the response body then you can do something like this:
 
 ```js
-client.on('outgoing::open', function ()
-{
-  client.socket.on('unexpected-response', function (req, res)
-  {
+primus.on('outgoing::open', function () {
+  primus.socket.on('unexpected-response', function (req, res) {
     console.error(res.statusCode);
     console.error(res.headers['www-authenticate']);
 
@@ -878,8 +878,10 @@ client.on('outgoing::open', function ()
     });
 
     res.on('end', function () {
-      // remember error message is in the 'error' property
-      socket.socket.emit('error', new Error(obj.error));
+      //
+      // Remember error message is in the 'error' property.
+      //
+      primus.socket.emit('error', new Error(JSON.parse(data).error));
     });
   });
 });
@@ -890,7 +892,7 @@ being used or you don't listen for it) then you'll get an `error` event:
 
 ```js
 primus.on('error', function error(err) {
-  console.error('Something horrible has happened', err, err.message);
+  console.error('Something horrible has happened', err.stack);
 });
 ```
 
@@ -1480,7 +1482,7 @@ primus.use('name', {
 });
 ```
 
-We also expose asynchronous interfaces for these transformers. If you function
+We also expose asynchronous interfaces for these transformers. If your function
 accepts 2 arguments we automatically assume it's async and that the last
 argument is the callback variable:
 
@@ -1489,19 +1491,19 @@ primus.transforms('outgoing', function (packet, next) {
   asyncprocess(packet.data, function (err, data) {
     //
     // If you return an error here, it will be emitted as `error` on the
-    // spark/client and no `data` event will be emitted. 
+    // spark/client and no `data` event will be emitted.
     //
     if (err) return next(err);
 
     //
     // If you just wanted to ignore this message instead of emitting an error
-    // you can do: 
+    // you can do:
     //
     if (err) return next(undefined, false);
 
     //
     // To update the data, just re-assign the `data` property on the packet you
-    // received and call the next callback
+    // received and call the next callback.
     //
     packet.data = data;
     next();
