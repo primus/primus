@@ -815,14 +815,10 @@ Primus.readable('destroy', function destroy(options, fn) {
   }
 
   options = options || {};
+
   var primus = this;
 
-  /**
-   * Clean up some stuff.
-   *
-   * @api private
-   */
-  function cleanup() {
+  setTimeout(function cleanup() {
     //
     // Optionally close the server.
     //
@@ -847,9 +843,12 @@ Primus.readable('destroy', function destroy(options, fn) {
     // Emit some final closing events right before we remove all listener
     // references from all the event emitters.
     //
-    primus.emit('close', options);
+    primus.asyncemit('close', options, function done(err) {
+      if (err) {
+        if (fn) return fn(err);
+        throw err;
+      }
 
-    setTimeout(function timeout() {
       if (primus.transformer) {
         primus.transformer.emit('close', options);
         primus.transformer.removeAllListeners();
@@ -869,13 +868,51 @@ Primus.readable('destroy', function destroy(options, fn) {
       primus.ark = Object.create(null);
 
       if (fn) fn();
-    }, 0);
-  }
+    });
+  }, +options.timeout || 0);
 
-  //
-  // Force a `0` as timeout to maintain a full async callback.
-  //
-  setTimeout(cleanup, +options.timeout || 0);
+  return this;
+});
+
+/**
+ * Async emit an event. We make a really broad assumption here and that is they
+ * have the same amount of arguments as the supplied arguments (excluding the
+ * event name).
+ *
+ * @returns {Primus}
+ * @api private
+ */
+Primus.readable('asyncemit', function asyncemit() {
+  var args = Array.prototype.slice.call(arguments, 0)
+    , async = args.length - 1
+    , fn = args.pop();
+
+  (function each(stack) {
+    if (!stack.length) return fn();
+
+    var event = stack.shift();
+
+    if (event.__EE3_once) {
+      this.removeListener(args[0], event);
+    }
+
+    if (event.length !== async) {
+      event.apply(event.__EE3_context || this, args);
+      return each(stack);
+    }
+
+    //
+    // Async operation
+    //
+    event.apply(
+      event.__EE3_context || this,
+      args.concat(function done(err) {
+        if (err) return fn(err);
+
+        each(stack);
+      })
+    );
+  })(this.listeners(args.shift()));
 
   return this;
 });
