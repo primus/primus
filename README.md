@@ -633,13 +633,21 @@ primus.on('open', function open() {
 #### primus.on('error')
 
 The `error` event is emitted when something breaks that is out of our control.
-Unlike Node.js, we do not throw an error if no error event listener is
-specified. The cause of an error could be that we've failed to encode or decode
-a message or we failed to create a connection.
+Unlike Node.js, we do not throw an error if no `error` event listener is
+specified. In general, when there is an active connection, it is not directly
+closed when an `error` event is emitted. The cause of an error, in fact, could
+be that the parser failed to encode or decode a message. In this case we only
+emit the error, discard the message and keep the connection alive. An `error`
+event can also be emitted when a connection fails to establish. When this
+happens the client automatically tries to reconnect, unless the connection gets
+closed for some other reason. The only exception is when there is an
+authorization hook. If we get an error when connecting to a server where
+authorization is required, we simply close the connection, as we can't
+determinate if the error is the result of an unauthorized access or not.
 
 ```js
 primus.on('error', function error(err) {
-  console.error('Something horrible has happened', err, err.message);
+  console.error('Something horrible has happened', err.stack);
 });
 ```
 
