@@ -620,7 +620,8 @@ Primus.prototype.initialise = function initialise(options) {
   });
 
   primus.on('incoming::error', function error(e) {
-    var connect = primus.timers.connect;
+    var connect = primus.timers.connect
+      , err = e;
 
     //
     // We're still doing a reconnect attempt, it could be that we failed to
@@ -628,7 +629,24 @@ Primus.prototype.initialise = function initialise(options) {
     // always emit an `error` event instead of a `open` event.
     //
     if (primus.attempt) return primus.reconnect();
-    if (primus.listeners('error').length) primus.emit('error', e);
+
+    //
+    // When the error is not an Error instance we try to normalize it.
+    //
+    if ('string' === typeof e) {
+      err = new Error(e);
+    } else if (!(e instanceof Error) && 'object' === typeof e) {
+      //
+      // BrowserChannel and SockJS returns an object which contains some
+      // details of the error. In order to have a proper error we "copy" the
+      // details in an Error instance.
+      //
+      err = new Error(e.message || e.reason);
+      for (var key in e) {
+        if (e.hasOwnProperty(key)) err[key] = e[key];
+      }
+    }
+    if (primus.listeners('error').length) primus.emit('error', err);
 
     //
     // We received an error while connecting, this most likely the result of an
