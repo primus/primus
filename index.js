@@ -885,7 +885,8 @@ Primus.readable('destroy', function destroy(options, fn) {
 Primus.readable('asyncemit', function asyncemit() {
   var args = Array.prototype.slice.call(arguments, 0)
     , async = args.length - 1
-    , fn = args.pop();
+    , fn = args.pop()
+    , primus = this;
 
   (function each(stack) {
     if (!stack.length) return fn();
@@ -893,11 +894,11 @@ Primus.readable('asyncemit', function asyncemit() {
     var event = stack.shift();
 
     if (event.__EE3_once) {
-      this.removeListener(args[0], event);
+      primus.removeListener(args[0], event);
     }
 
     if (event.length !== async) {
-      event.apply(event.__EE3_context || this, args);
+      event.apply(event.__EE3_context || primus, args);
       return each(stack);
     }
 
@@ -905,7 +906,7 @@ Primus.readable('asyncemit', function asyncemit() {
     // Async operation
     //
     event.apply(
-      event.__EE3_context || this,
+      event.__EE3_context || primus,
       args.concat(function done(err) {
         if (err) return fn(err);
 
