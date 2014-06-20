@@ -1707,10 +1707,7 @@ see it be merged automatically.
   </dd>
 </dl>
 
-
-**In addition to these community provided plugins, the Primus project also
-provides the following plugins:**
-
+#### In addition to these community provided plugins, the Primus project also provides the following plugins
 
 <dl>
   <dt><a href="http://github.com/primus/substream">substream</a></dt>
