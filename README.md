@@ -1671,8 +1671,8 @@ see it be merged automatically.
     Share a user session between Express and Primus.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/zeMirco/primus-express-session">
-      <img src="https://travis-ci.org/zeMirco/primus-express-session.svg?branch=master" alt="Build Status" />
+    <a href="https://travis-ci.org/zemirco/primus-express-session">
+      <img src="https://travis-ci.org/zemirco/primus-express-session.svg?branch=master" alt="Build Status" />
     </a>
     <a href="http://badge.fury.io/js/primus-express-session">
       <img src="https://badge.fury.io/js/primus-express-session.svg" alt="NPM version" />
