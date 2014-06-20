@@ -1744,6 +1744,56 @@ provides the following plugins:**
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="http://github.com/primus/omega-supreme">omega-supreme</a></dt>
+  <dd>
+    Omega Supreme allows you to broadcast messages to Primus using a regular
+    HTTP request. These messages can be broacasted to every spark, single spark
+    or a collection of sparks.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/omega-supreme">
+      <img src="https://travis-ci.org/primus/omega-supreme.svg?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/omega-supreme">
+      <img src="https://badge.fury.io/js/omega-supreme.svg" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/primus/metroplex">metroplex</a></dt>
+  <dd>
+    Metroplex a Redis based spark/connection registry for Primus. It stores the
+    sparks and their server address. So you can cluster multiple primus's
+    together with Metroplex and Omega Supreme
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/metroplex">
+      <img src="https://travis-ci.org/primus/metroplex.svg?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/metroplex">
+      <img src="https://badge.fury.io/js/metroplex" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/primus/fortress-maximus">fortess-maximus</a></dt>
+  <dd>
+    Fortress Maximus validates every incoming message on your Primus server as all
+    user input should be seen as a potential security risk.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/fortress-maximus">
+      <img src="https://travis-ci.org/primus/fortress-maximus.svg?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/fortress-maximus">
+      <img src="https://badge.fury.io/js/fortress-maximus" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
 [Travis CI]: https://travis-ci.org/
 
 ### Example
