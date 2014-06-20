@@ -61,7 +61,7 @@ repository.
 - [Introduction](#primus)
   - [Advantages](#advantages)
 - [Installation](#installation)
-- [Getting Started](#getting-started)
+- [Getting started](#getting-started)
   - [Client library](#client-library)
 - [Connecting from the browser](#connecting-from-the-browser)
 - [Connecting from the server](#connecting-from-the-server)
@@ -76,12 +76,13 @@ repository.
   - [BrowserChannel](#browserchannel)
   - [SockJS](#sockjs)
   - [Socket.IO](#socketio)
-- [Transformer Inconsistencies](#transformer-inconsistencies)
+- [Transformer inconsistencies](#transformer-inconsistencies)
 - [Middleware](#middleware)
 - [Plugins](#plugins)
   - [Extending the Spark / Socket](#extending-the-spark--socket)
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
-  - [Community Plugins](#community-plugins)
+  - [Primus project plugins](#primus-project-plugins)
+  - [Community plugins](#community-plugins)
 - [Example](#example)
    - [Community](#community)
 - [FAQ](#FAQ)
@@ -96,7 +97,7 @@ repository.
 - [Other languages](#other-languages)
 - [License](#license)
 
-### Getting Started
+### Getting started
 
 Primus doesn't ship with real-time frameworks as dependencies, it assumes that
 you as user add them yourself as a dependency. This is done to keep the module
@@ -1231,7 +1232,7 @@ system.**
 As you can see from the examples above, it doesn't matter how you write the name
 of the transformer, we just `toLowerCase()` everything.
 
-### Transformer Inconsistencies
+### Transformer inconsistencies
 
 - BrowserChannel does not give you access to the `remotePort` of the incoming
   connection. So when you access `spark.address` the `port` property will be set
@@ -1519,12 +1520,98 @@ primus.transforms('outgoing', function (packet, next) {
 });
 ```
 
-#### Community Plugins
+#### Primus project plugins
 
-These are plugins created by our amazing community. Do you have a module that
-you want to have listed here? Make sure it has test suite and runs on [Travis CI].
-After that open a pull request where you added your module to this README.md and
-see it be merged automatically.
+The following plugins are part of the Primus project.
+
+<dl>
+  <dt><a href="http://github.com/primus/substream">substream</a></dt>
+  <dd>
+    Substream is an opinionated but stream compatible connection multiplexer on
+    top of the Primus connections. These streams can be created without
+    pre-defining them on the server or client.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/substream">
+      <img src="https://travis-ci.org/primus/substream.svg?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/substream">
+      <img src="https://badge.fury.io/js/substream.svg" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/primus/emit">primus-emit</a></dt>
+  <dd>
+    The emit module adds client -> server and server -> client event emitting to Primus.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/emit">
+      <img src="https://travis-ci.org/primus/emit.svg?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/primus-emit">
+      <img src="https://badge.fury.io/js/primus-emit.svg" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/primus/omega-supreme">omega-supreme</a></dt>
+  <dd>
+    Omega Supreme allows you to broadcast messages to Primus using a regular
+    HTTP request. These messages can be broacasted to every spark, single spark
+    or a collection of sparks.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/omega-supreme">
+      <img src="https://travis-ci.org/primus/omega-supreme.svg?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/omega-supreme">
+      <img src="https://badge.fury.io/js/omega-supreme.svg" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/primus/metroplex">metroplex</a></dt>
+  <dd>
+    Metroplex a Redis based spark/connection registry for Primus. It stores the
+    sparks and their server address. So you can cluster multiple primus's
+    together with Metroplex and Omega Supreme
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/metroplex">
+      <img src="https://travis-ci.org/primus/metroplex.svg?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/metroplex">
+      <img src="https://badge.fury.io/js/metroplex.svg" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="http://github.com/primus/fortress-maximus">fortess-maximus</a></dt>
+  <dd>
+    Fortress Maximus validates every incoming message on your Primus server as all
+    user input should be seen as a potential security risk.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/primus/fortress-maximus">
+      <img src="https://travis-ci.org/primus/fortress-maximus.svg?branch=master" alt="Build Status" />
+    </a>
+    <a href="http://badge.fury.io/js/fortress-maximus">
+      <img src="https://badge.fury.io/js/fortress-maximus.svg" alt="NPM version" />
+    </a>
+  </dd>
+</dl>
+
+#### Community plugins
+
+These are also plugins created by our amazing community. Do you have a module
+that you want to have listed here? Make sure it has test suite and runs on
+[Travis CI]. After that open a pull request where you added your module to this
+README.md and see it be merged automatically.
 
 <dl>
   <dt><a href="http://github.com/cayasso/primus-rooms">primus-rooms</a></dt>
@@ -1703,90 +1790,6 @@ see it be merged automatically.
     </a>
     <a href="http://badge.fury.io/js/primus-spark-latency">
       <img src="https://badge.fury.io/js/primus-spark-latency.svg" alt="NPM version" />
-    </a>
-  </dd>
-</dl>
-
-#### In addition to these community provided plugins, the Primus project also provides the following plugins
-
-<dl>
-  <dt><a href="http://github.com/primus/substream">substream</a></dt>
-  <dd>
-    Substream is an opinionated but stream compatible connection multiplexer on
-    top of the Primus connections. These streams can be created without
-    pre-defining them on the server or client.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/primus/substream">
-      <img src="https://travis-ci.org/primus/substream.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/substream">
-      <img src="https://badge.fury.io/js/substream.svg" alt="NPM version" />
-    </a>
-  </dd>
-</dl>
-
-<dl>
-  <dt><a href="http://github.com/primus/emit">primus-emit</a></dt>
-  <dd>
-    The emit module adds client -> server and server -> client event emitting to Primus.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/primus/emit">
-      <img src="https://travis-ci.org/primus/emit.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-emit">
-      <img src="https://badge.fury.io/js/primus-emit.svg" alt="NPM version" />
-    </a>
-  </dd>
-</dl>
-
-<dl>
-  <dt><a href="http://github.com/primus/omega-supreme">omega-supreme</a></dt>
-  <dd>
-    Omega Supreme allows you to broadcast messages to Primus using a regular
-    HTTP request. These messages can be broacasted to every spark, single spark
-    or a collection of sparks.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/primus/omega-supreme">
-      <img src="https://travis-ci.org/primus/omega-supreme.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/omega-supreme">
-      <img src="https://badge.fury.io/js/omega-supreme.svg" alt="NPM version" />
-    </a>
-  </dd>
-</dl>
-
-<dl>
-  <dt><a href="http://github.com/primus/metroplex">metroplex</a></dt>
-  <dd>
-    Metroplex a Redis based spark/connection registry for Primus. It stores the
-    sparks and their server address. So you can cluster multiple primus's
-    together with Metroplex and Omega Supreme
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/primus/metroplex">
-      <img src="https://travis-ci.org/primus/metroplex.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/metroplex">
-      <img src="https://badge.fury.io/js/metroplex" alt="NPM version" />
-    </a>
-  </dd>
-</dl>
-
-<dl>
-  <dt><a href="http://github.com/primus/fortress-maximus">fortess-maximus</a></dt>
-  <dd>
-    Fortress Maximus validates every incoming message on your Primus server as all
-    user input should be seen as a potential security risk.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/primus/fortress-maximus">
-      <img src="https://travis-ci.org/primus/fortress-maximus.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/fortress-maximus">
-      <img src="https://badge.fury.io/js/fortress-maximus" alt="NPM version" />
     </a>
   </dd>
 </dl>
