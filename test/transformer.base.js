@@ -38,7 +38,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
       , primus;
 
     beforeEach(function beforeEach(done) {
-      var services = create(transformer, done, pathname);
+      var services = create(transformer, 'json', done, pathname);
 
       destroy = services.destroy;
       Socket = services.Socket;
@@ -502,7 +502,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
           catch (e) { return done(e); }
 
           setTimeout(function () {
-            var services = create(transformer, function () {}, server.portnumber);
+            var services = create(transformer, 'json', function () {}, server.portnumber);
 
             destroy = services.destroy;
             Socket = services.Socket;

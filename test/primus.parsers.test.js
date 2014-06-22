@@ -1,3 +1,5 @@
+var assert = require('assert')
+
 describe('Parsers', function () {
   'use strict';
 
@@ -8,6 +10,36 @@ describe('Parsers', function () {
     , server
     , primus;
 
+  function connectsTest(parser, done) {
+    var primus = new Primus(server, { parser: parser })
+      , Socket = primus.Socket;
+
+    var socket = new Socket('http://localhost:' + server.portnumber);
+
+    socket.on('open', function () {
+      primus.destroy(done);
+    });
+  }
+
+  function sendsAndReceivesTest(parser, done) {
+    var create = common.create
+      , services = create('websockets', parser, function () {})
+      , Socket = services.Socket
+      , primus = services.primus
+      , server = services.server;
+
+    var socket = new Socket('http://localhost:' + server.portnumber);
+
+    socket.on('open', function () {
+      socket.on('data', function (data) {
+        assert.equal(data, 'hello')
+        primus.destroy(done);
+      });
+
+      socket.write({ echo: 'hello' });
+    });
+  }
+
   beforeEach(function beforeEach(done) {
     server = http.createServer();
     server.portnumber = common.port;
@@ -15,28 +47,26 @@ describe('Parsers', function () {
   });
 
   describe('binary', function () {
+
     it('connects with the parser', function (done) {
-      var primus = new Primus(server, { parser: 'binary' })
-        , Socket = primus.Socket;
-
-      var socket = new Socket('http://localhost:' + server.portnumber);
-
-      socket.on('open', function () {
-        primus.destroy(done);
-      });
+      connectsTest('binary', done);
     });
+
+    it('sends and receives data using the parser', function (done) {
+      sendsAndReceivesTest('binary', done);
+    });
+
   });
 
   describe('ejson', function () {
+
     it('connects with the parser', function (done) {
-      var primus = new Primus(server, { parser: 'ejson' })
-        , Socket = primus.Socket;
-
-      var socket = new Socket('http://localhost:' + server.portnumber);
-
-      socket.on('open', function () {
-        primus.destroy(done);
-      });
+      connectsTest('ejson', done);
     });
+
+    it('sends and receives data using the parser', function (done) {
+      sendsAndReceivesTest('binary', done);
+    });
+
   });
 });

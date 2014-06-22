@@ -28,8 +28,6 @@ exports.encoder = function encoder(data, fn) {
 exports.decoder = function decoder(data, fn) {
   var err;
 
-  if ('string' !== typeof data) return fn(err, data);
-
   try { data = BinaryPack.unpack(data); }
   catch (e) { err = e; }
 
