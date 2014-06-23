@@ -63,7 +63,7 @@ describe('Parsers', function () {
     });
 
     it('sends and receives data using the parser', function (done) {
-      sendsAndReceivesTest('binary', done);
+      sendsAndReceivesTest('ejson', done);
     });
 
   });
