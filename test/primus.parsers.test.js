@@ -5,8 +5,7 @@ describe('Parsers', function () {
     , Primus = common.Primus
     , http = require('http')
     , expect = common.expect
-    , server
-    , primus;
+    , server;
 
   function connectsTest(parser, done) {
     var primus = new Primus(server, { parser: parser })
@@ -28,14 +27,12 @@ describe('Parsers', function () {
 
     var socket = new Socket('http://localhost:' + server.portnumber);
 
-    socket.on('open', function () {
-      socket.on('data', function (data) {
-        expect(data).to.equal('hello')
-        primus.destroy(done);
-      });
-
-      socket.write({ echo: 'hello' });
+    socket.on('data', function (data) {
+      expect(data).to.equal('hello');
+      primus.destroy(done);
     });
+
+    socket.write({ echo: 'hello' });
   }
 
   beforeEach(function beforeEach(done) {
