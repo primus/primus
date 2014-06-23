@@ -36,7 +36,7 @@ Object.defineProperty(exports, 'port', {
 //
 // Expose a server creation utility.
 //
-exports.create = function create(transformer, fn, port) {
+exports.create = function create(transformer, parser, fn, port) {
   var pathname;
 
   if (typeof port === 'string') {
@@ -65,7 +65,8 @@ exports.create = function create(transformer, fn, port) {
 
   var primus = new exports.Primus(server, {
     transformer: transformer,
-    pathname: pathname
+    pathname: pathname,
+    parser: parser
   });
 
   primus.on('connection', function connection(spark) {
