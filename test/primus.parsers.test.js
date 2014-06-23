@@ -1,5 +1,3 @@
-var assert = require('assert')
-
 describe('Parsers', function () {
   'use strict';
 
@@ -32,7 +30,7 @@ describe('Parsers', function () {
 
     socket.on('open', function () {
       socket.on('data', function (data) {
-        assert.equal(data, 'hello')
+        expect(data).to.equal('hello')
         primus.destroy(done);
       });
 
