@@ -28,7 +28,8 @@
   "license": "MIT",
   "dependencies": {
     "access-control": "0.0.x",
-    "diagnostics": "0.0.2",
+    "create-server": "0.0.x",
+    "diagnostics": "0.0.x",
     "eventemitter3": "0.1.x",
     "forwarded-for": "0.0.x",
     "fusing": "0.3.x",
