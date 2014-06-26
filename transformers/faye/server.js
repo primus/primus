@@ -1,47 +1,52 @@
 'use strict';
 
+var http = require('http')
+  , parse = require('url').parse;
+
 /**
- * Minimum viable WebSocket server for Node.js that works through the primus
+ * Minimum viable WebSocket server for Node.js that works through the Primus
  * interface.
  *
  * @runat server
  * @api private
  */
 module.exports = function server() {
-  var faye = require('faye')
-    , primus = this.primus
+  var Faye = require('faye-websocket')
     , Spark = this.Spark;
 
-  this.service = new faye.NodeAdapter({
-      mount: primus.pathname
-    , timeout: 45
-  });
+  //
+  // Listen to upgrade requests
+  //
+  this.on('upgrade', function upgrade(req, socket, head) {
+    if (!Faye.isWebSocket(req)) return socket.destroy();
 
-  //
-  // We've received a new connection, create a new Spark. The Spark will
-  // automatically announce it self as a new connection once it's created (after
-  // the next tick).
-  //
-  this.service.on('connection', function connection(socket) {
-    var spark = new Spark(
-        socket.handshake.headers  // HTTP request headers.
-      , socket.handshake.address  // IP address.
-      , socket.handshake.query    // Optional query string.
-      , socket.id                 // Unique connection id
+    var websocket = new Faye(req, socket, head)
+      , spark = new Spark(
+          req.headers                             // HTTP request headers.
+        , req                                     // IP address location.
+        , parse(req.url).query                    // Optional query string.
+        , null                                    // We don't have an unique id.
+        , req                                     // Reference to the HTTP req.
     );
 
     spark.on('outgoing::end', function end() {
-      socket.disconnect();
+      if (websocket) websocket.close();
     }).on('outgoing::data', function write(data) {
-      socket.send(data);
+      if ('string' === typeof data) return websocket.send(data);
+
+      websocket.send(data, { binary: true });
     });
 
-    socket.on('disconnect', spark.emits('end'));
-    socket.on('message', spark.emits('data'));
+    websocket.on('error', spark.emits('error'));
+    websocket.on('message', spark.emits('data', function parse(evt) {
+      return evt.data;
+    }));
+    websocket.on('close', spark.emits('end', function close() {
+      websocket.removeAllListeners();
+      websocket = null;
+    }));
+  }).on('request', function request(req, res) {
+    res.writeHead(400, { 'content-type': 'text/plain' });
+    res.end(http.STATUS_CODES[400]);
   });
-
-  //
-  // Listen to upgrade requests.
-  //
-  this.service.attach(this);
 };

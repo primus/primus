@@ -73,6 +73,7 @@ repository.
 - [Supported real-time frameworks](#supported-real-time-frameworks)
   - [Engine.IO](#engineio)
   - [WebSockets](#websockets)
+  - [Faye](#faye)
   - [BrowserChannel](#browserchannel)
   - [SockJS](#sockjs)
   - [Socket.IO](#socketio)
@@ -1127,7 +1128,32 @@ And tell `Primus` that you want to use `WebSockets` as transformer:
 var primus = new Primus(server, { transformer: 'websockets' });
 ```
 
-The `WebSockets` transformer comes with built-in client support and can be
+The `WebSockets` transformer comes with built-in node client support and can be
+accessed using:
+
+```js
+var Socket = primus.Socket
+  , socket = new Socket('url');
+```
+
+#### Faye
+
+Faye is an alternative WebSocket only transformer. It uses the `faye-websocket`
+module which is part of the [Faye](http://faye.jcoglan.com/) project and
+supports all protocol specifications. To use this you need to install the
+`faye-websocket` module:
+
+```
+npm install faye-websocket --save
+```
+
+And tell `Primus` that you want to use `faye` as transformer:
+
+```js
+var primus = new Primus(server, { transformer: 'faye' });
+```
+
+The `faye` transformer comes with built-in node client support and can be
 accessed using:
 
 ```js

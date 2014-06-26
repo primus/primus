@@ -194,7 +194,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         primus.on('connection', function (spark) {
           setTimeout(function () {
             spark.end();
-          }, 10);
+          }, 100);
         });
 
         var socket = new Socket(server.addr);
@@ -202,6 +202,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.once('open', function () {
           socket.once('end', function () {
             socket.open();
+
             socket.once('open', function () {
               socket.once('end', done);
             });

@@ -18,5 +18,9 @@
   "sockjs": {
     "server": "sockjs",
     "client": "sockjs-client-node"
+  },
+  "faye": {
+    "server": "faye-websocket",
+    "client": "faye-websocket"
   }
 }
