@@ -46,7 +46,7 @@ module.exports = function server() {
       websocket = null;
     }));
   }).on('request', function request(req, res) {
-    res.writeHead(400, { 'content-type': 'text/plain' });
-    res.end(http.STATUS_CODES[400]);
+    res.writeHead(426, { 'content-type': 'text/plain' });
+    res.end(http.STATUS_CODES[426]);
   });
 };
