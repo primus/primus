@@ -12,14 +12,13 @@ var http = require('http')
  */
 module.exports = function server() {
   var Faye = require('faye-websocket')
-    , logger = this.logger
     , Spark = this.Spark;
 
   //
   // Listen to upgrade requests
   //
   this.on('upgrade', function upgrade(req, socket, head) {
-    if (Faye.isWebSocket(req)) return socket.destroy();
+    if (!Faye.isWebSocket(req)) return socket.destroy();
 
     var websocket = new Faye(req, socket, head)
       , spark = new Spark(
@@ -31,18 +30,23 @@ module.exports = function server() {
     );
 
     spark.on('outgoing::end', function end() {
-      websocket.close();
+      if (websocket) websocket.close();
     }).on('outgoing::data', function write(data) {
-      if (websocket.readyState !== websocket.OPEN) return;
       if ('string' === typeof data) return websocket.send(data);
 
       websocket.send(data, { binary: true });
     });
 
-    websocket.on('close', spark.emits('end'));
     websocket.on('error', spark.emits('error'));
     websocket.on('message', spark.emits('data', function parse(evt) {
       return evt.data;
     }));
+    websocket.on('close', spark.emits('end', function close() {
+      websocket.removeAllListeners();
+      websocket = null;
+    }));
+  }).on('request', function request(req, res) {
+    res.writeHead(400, { 'content-type': 'text/plain' });
+    res.end(http.STATUS_CODES[400]);
   });
 };
