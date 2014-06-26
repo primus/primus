@@ -133,7 +133,7 @@ timeout             | The heartbeat timeout                     | `35000`
 origins             | **cors** List of origins                  | `*`
 methods             | **cors** List of accepted HTTP methods    | `GET,HEAD,PUT,POST,DELETE,OPTIONS`
 credentials         | **cors** Allow sending of credentials     | `true`
-maxAge              | **cors** Cache duration of cors preflight | `30 days`
+maxAge              | **cors** Cache duration of CORS preflight | `30 days`
 headers             | **cors** Allowed headers                  | `false`
 exposed             | **cors** Headers exposed to the client    | `false`
 
