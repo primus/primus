@@ -61,19 +61,19 @@ module.exports = function client() {
     // Setup the Event handlers.
     //
     socket.binaryType = 'arraybuffer';
-    socket.on('open', primus.emits('open'));
-    socket.on('error', primus.emits('error'));
-    socket.on('close', primus.emits('end'));
-    socket.on('message', primus.emits('data', function parse(evt) {
+    socket.onopen = primus.emits('open');
+    socket.onerror = primus.emits('error');
+    socket.onclose = primus.emits('end');
+    socket.onmessage = primus.emits('data', function parse(evt) {
       return evt.data;
-    }));
+    });
   });
 
   //
   // We need to write a new message to the socket.
   //
   primus.on('outgoing::data', function write(message) {
-    if (!socket || socket.readyState !== Factory.OPEN) return;
+    if (!socket || socket.readyState !== 1) return;
 
     try { socket.send(message); }
     catch (e) { primus.emit('incoming::error', e); }
@@ -93,6 +93,7 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
+      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = null;
       socket.close();
       socket = null;
     }
