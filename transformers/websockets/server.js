@@ -31,7 +31,7 @@ module.exports = function server() {
   }
 
   //
-  // Listen to upgrade requests
+  // Listen to upgrade requests.
   //
   this.on('upgrade', function upgrade(req, socket, head) {
     this.service.handleUpgrade(req, socket, head, function create(socket) {
@@ -59,8 +59,13 @@ module.exports = function server() {
         socket = null;
       }));
     });
-  }).on('request', function request(req, res) {
-    res.writeHead(426, {'content-type': 'text/plain'});
+  });
+
+  //
+  // Listen to non-upgrade requests.
+  // 
+  this.on('request', function request(req, res) {
+    res.writeHead(426, { 'content-type': 'text/plain' });
     res.end(http.STATUS_CODES[426]);
   });
 
