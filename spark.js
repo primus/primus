@@ -426,8 +426,7 @@ Spark.readable('emits', function emits(event, parser) {
  * @api public
  */
 Spark.readable('write', function write(data) {
-  var primus = this.primus
-    , packet;
+  var primus = this.primus;
 
   //
   // The connection is closed, return false.
