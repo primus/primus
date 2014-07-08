@@ -70,7 +70,7 @@
     "jsonh": "0.0.x",
     "mocha": "1.20.x",
     "pre-commit": "0.0.x",
-    "request": "2.36.x",
+    "request": "2.37.x",
     "socket.io": "0.9.x",
     "socket.io-client": "0.9.x",
     "sockjs": "0.3.x",
