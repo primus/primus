@@ -1424,7 +1424,9 @@ Primus.prototype.emits = function emits(event, parser) {
     // as we cannot be certain that all frameworks fix these issues.
     //
     setTimeout(function timeout() {
-      primus.emit('incoming::'+ event, data);
+      if ((event !== 'data') || (primus.readyState !== Primus.CLOSED)) {
+        primus.emit('incoming::'+ event, data);
+      }
     }, 0);
   };
 };
