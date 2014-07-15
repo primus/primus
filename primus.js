@@ -892,7 +892,13 @@ Primus.prototype.transforms = function transforms(primus, connection, type, data
     // and then save the raw string in your database without the stringify
     // overhead.
     //
-    if ('incoming' === type) return connection.emit('data', packet.data, raw);
+    if ('incoming' === type) {
+      if (primus.readyState !== Primus.CLOSED) {
+        connection.emit('data', packet.data, raw);
+      }
+
+      return;
+    } 
 
     connection._write(packet.data);
   }));
@@ -1424,9 +1430,7 @@ Primus.prototype.emits = function emits(event, parser) {
     // as we cannot be certain that all frameworks fix these issues.
     //
     setTimeout(function timeout() {
-      if ((event !== 'data') || (primus.readyState !== Primus.CLOSED)) {
-        primus.emit('incoming::'+ event, data);
-      }
+      primus.emit('incoming::'+ event, data);
     }, 0);
   };
 };

@@ -244,8 +244,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
             orig_emits = socket.emits,
             ended = false;
 
-        socket.emits = function (event, parser)
-        {
+        socket.emits = function (event, parser) {
           var f = orig_emits.apply(this, arguments);
 
           if (event !== 'data') {
@@ -265,7 +264,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         };
 
         socket.on('data', function (message) {
-          // if we get data it should be after we ended
+          // if we get data it should be before we ended
           expect(ended).to.be.false;
         });
 
