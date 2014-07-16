@@ -41,6 +41,10 @@ exports.library = [
   'var BinaryPack = (function () {',
   '  try { return require("binary-pack"); }',
   '  catch (e) {}',
-  BinaryPack.BrowserSource,
+  '  var exports = {};',
+  '  (function () { ',
+      BinaryPack.BrowserSource,
+  '  }).call(exports);',
+  '  return exports;',
   '})();'
 ].join('\n');
