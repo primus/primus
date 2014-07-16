@@ -45,6 +45,6 @@ exports.library = [
   '  (function () { ',
       BinaryPack.BrowserSource,
   '  }).call(exports);',
-  '  return exports;',
+  '  return exports.BinaryPack;',
   '})();'
 ].join('\n');
