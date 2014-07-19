@@ -617,7 +617,7 @@ Primus.readable('use', function use(name, energon) {
   // Plugin require a client, server or both to be specified in the object.
   //
   if (!energon.server && !energon.client) {
-    throw new PrimusError('The plugin in missing a client or server function', this);
+    throw new PrimusError('The plugin is missing a client or server function', this);
   }
 
   //
