@@ -546,6 +546,28 @@ module.exports = function base(transformer, pathname, transformer_name) {
         done();
       });
 
+      it('supports async connection events', function (done) {
+        var pre;
+
+        primus.on('connection', function (spark, next) {
+          setTimeout(function () {
+            pre = 'async';
+            next();
+          }, 10);
+        });
+
+        primus.on('connection', function (spark) {
+          expect(pre).to.equal('async');
+          spark.end();
+          done();
+        });
+
+        //
+        // Connect AFTER the things are called
+        //
+        var socket = new Socket(server.addr);
+      });
+
       describe('#transform', function () {
         it('thrown an error if an invalid type is given', function (done) {
           var socket = new Socket(server.addr);
