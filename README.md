@@ -280,11 +280,11 @@ primus.on('disconnection', function (spark) {
 });
 ```
 
-The `spark` argument is the actual real-time socket/connection. Sparks have a really low
-level interface and only expose a couple properties that are cross engine
-supported. The interface is modeled towards a Node.js stream compatible
-interface. So this will include all methods that are available on the
-[stream interface](http://nodejs.org/api/stream.html) including `Spark#pipe`.
+The `spark` argument is the actual real-time socket/connection. Sparks have a
+really low level interface and only expose a couple properties that are cross
+engine supported. The interface is modeled towards a Node.js stream compatible
+interface. So this will include all methods that are available on the [stream
+interface](http://nodejs.org/api/stream.html) including `Spark#pipe`.
 
 #### spark.headers
 
@@ -1280,8 +1280,9 @@ of the transformer, we just `toLowerCase()` everything.
 Primus has two ways of extending the functionality. We have [plugins](#plugins)
 but also support middleware. And there is an important difference between these.
 The middleware layers allows you to modify the incoming requests **before** they
-are passed in to the transformers. The middleware layer is only ran for the
-requests that are handled by Primus.
+are passed in to the transformers. Plugins allow you to modify and interact with
+the sparks. The middleware layer is only ran for the requests that are handled
+by Primus.
 
 We support 2 kind of middleware, **async** and **sync** middleware. The main
 difference between these kinds is that sync middleware doesn't require a
@@ -1405,6 +1406,14 @@ allows you to extend Primus's functionality.
 Plugins are added on the server side in the form of an `Object`:
 
 ```js
+//
+// Require a plugin directly.
+//
+primus.use('name', require('metroplex'));
+
+//
+// Or supply it manually with the required object structure
+//
 primus.use('name', {
   server: function (primus, options) {},
   client: function (primus, options) {},
@@ -1422,6 +1431,13 @@ var primus = new Primus(server, { plugin: {
     library: 'client side library'
   }
 }})
+```
+
+And last but not least, you can also supply the constructor with a comma or
+space separated list of plugin names which will be required automatically:
+
+```js
+var primus = new Primus(server, { plugin: 'metroplex, primus-emit' })
 ```
 
 The server function is only executed on the server side and receives 2
@@ -1442,6 +1458,38 @@ using `toString()` so it cannot have any references outside the client's
 closure. But luckily, there's a `library` property that will also be included on
 the client side when it's specified. The `library` property should be an
 absolute path to the library file.
+
+#### Intercepting the `connection` events
+
+The `connection` event is emitted using a `async` emitter. It checks if your
+supplied event emitter function has extra callback function. When it detects
+this it will wait with the execution of the other assigned listeners until the
+callback has been called. Please note that the order of assigning event
+listeners is still respected so if you've assigned a `connection` listener
+before an async connection listener it will still be executed first.
+
+```js
+primus.on('connection', function (spark) {
+  console.log('first call, i have no spark.newproperty', spark.newproperty);
+});
+
+primus.on('connection', function (spark, next) {
+  longrunningasynmethod(spark.query, function (err, data) {
+    spark.newproperty = data;
+
+    console.log('second call, i added the new property');
+    next(err);
+  });
+});
+
+primus.on('connection', function (spark) {
+  console.log('third call, i can read the ', spark.newproperty);
+});
+```
+
+When an error argument is supplied it will automatically end the connection and
+emit an `error` event on the spark. If you are coming from Socket.IO 1.0 >=,
+this will basically work the same way as their middleware system.
 
 #### Extending the Spark / Socket
 
