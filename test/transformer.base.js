@@ -1190,8 +1190,8 @@ module.exports = function base(transformer, pathname, transformer_name) {
           //
           // Side note here, we don't want to re-use the detection from the
           // middleware here as we don't want to go through the hassle of adding
-          // a real-proxy in our tests. We merely want to test if it will at the
-          // x-forwarded-headers instead of the pure IP address.
+          // a real-proxy in our tests. We merely want to test if it will look
+          // at the x-forwarded-headers instead of the pure IP address.
           //
           delete spark.request.forwarded;
 
