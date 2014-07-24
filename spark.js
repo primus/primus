@@ -280,7 +280,12 @@ Spark.readable('__initialise', [function initialise() {
   // to events before we announce it.
   //
   process.nextTick(function tick() {
-    primus.emit('connection', spark);
+    primus.asyncemit('connection', spark, function damn(err) {
+      if (!err) return;
+
+      spark.emit('error', err);
+      spark.end();
+    });
   });
 }]);
 

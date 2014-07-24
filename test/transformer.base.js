@@ -933,6 +933,24 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.write('balls');
       });
 
+      it('receives pre-parsed ip adresses', function (done) {
+        primus.authorize(function auth(req, next) {
+          expect(req.forward).to.be.a('object');
+          expect(req.forwarded.ip).to.be.a('string');
+          expect(req.forwarded.port).to.be.a('number');
+
+          setTimeout(next, 0);
+        });
+
+        primus.on('connection', function (spark) {
+          spark.end();
+        });
+
+        var socket = new Socket(server.addr);
+        socket.on('end', done);
+        socket.write('balls');
+      });
+
       if (transformer.toLowerCase() === 'websockets')
       it('should connect using basic auth', function (done) {
         primus.on('connection', function (spark) {
