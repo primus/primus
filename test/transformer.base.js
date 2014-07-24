@@ -935,7 +935,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
       it('receives pre-parsed ip adresses', function (done) {
         primus.authorize(function auth(req, next) {
-          expect(req.forward).to.be.a('object');
+          expect(req.forwarded).to.be.a('object');
           expect(req.forwarded.ip).to.be.a('string');
           expect(req.forwarded.port).to.be.a('number');
 
@@ -1164,6 +1164,14 @@ module.exports = function base(transformer, pathname, transformer_name) {
         primus.on('connection', function (spark) {
           spark.headers['x-forwarded-for'] = '13.3.37.1,12.12.12.12';
           spark.headers['x-forwarded-port'] = '9083,1334';
+
+          //
+          // Side note here, we don't want to re-use the detection from the
+          // middleware here as we don't want to go through the hassle of adding
+          // a real-proxy in our tests. We merely want to test if it will at the
+          // x-forwarded-headers instead of the pure IP address.
+          //
+          delete spark.request.forwarded;
 
           expect(spark.address.ip).to.equal('13.3.37.1');
           expect(spark.address.port).to.equal(9083);
