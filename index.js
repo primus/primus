@@ -255,6 +255,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   //
   // Add our default middleware layers.
   //
+  this.before('forwarded', require('./middleware/forwarded'));
   this.before('cors', require('./middleware/access-control'));
   this.before('primus.js', require('./middleware/primus'));
   this.before('spec', require('./middleware/spec'));

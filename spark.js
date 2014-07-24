@@ -92,7 +92,7 @@ Spark.writable('__readyState', Spark.OPEN);
 // interested in this, we're going to defer parsing until it's actually needed.
 //
 Spark.readable('address', { get: function address() {
-  return forwarded(this.remote, this.headers, this.primus.whitelist);
+  return this.request.forwarded || forwarded(this.remote, this.headers, this.primus.whitelist);
 }}, true);
 
 /**
