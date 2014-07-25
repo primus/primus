@@ -5,7 +5,7 @@ var EJSON = require('ejson');
 /**
  * Message encoder.
  *
- * @param {Mixed} data The data that needs to be transformed in to a string.
+ * @param {Mixed} data The data that needs to be transformed into a string.
  * @param {Function} fn Completion callback.
  * @api public
  */
@@ -19,9 +19,9 @@ exports.encoder = function encoder(data, fn) {
 };
 
 /**
- * Message encoder.
+ * Message decoder.
  *
- * @param {Mixed} data The data that needs to be transformed in to a string.
+ * @param {Mixed} data The data that needs to be parsed from a string.
  * @param {Function} fn Completion callback.
  * @api public
  */
