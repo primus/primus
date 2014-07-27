@@ -283,8 +283,7 @@ Spark.readable('__initialise', [function initialise() {
     primus.asyncemit('connection', spark, function damn(err) {
       if (!err) return;
 
-      spark.emit('error', err);
-      spark.end();
+      spark.emit('incoming::error', err);
     });
   });
 }]);
