@@ -885,36 +885,37 @@ Primus.readable('destroy', function destroy(options, fn) {
  */
 Primus.readable('asyncemit', function asyncemit() {
   var args = Array.prototype.slice.call(arguments, 0)
-    , async = args.length - 1
+    , event = args.shift()
+    , async = args.length
     , fn = args.pop()
     , primus = this;
 
   (function each(stack) {
     if (!stack.length) return fn();
 
-    var event = stack.shift();
+    var listener = stack.shift();
 
-    if (event.__EE3_once) {
-      primus.removeListener(args[0], event);
+    if (listener.__EE3_once) {
+      primus.removeListener(event, listener);
     }
 
-    if (event.length !== async) {
-      event.apply(event.__EE3_context || primus, args);
+    if (listener.length !== async) {
+      listener.apply(listener.__EE3_context || primus, args);
       return each(stack);
     }
 
     //
     // Async operation
     //
-    event.apply(
-      event.__EE3_context || primus,
+    listener.apply(
+      listener.__EE3_context || primus,
       args.concat(function done(err) {
         if (err) return fn(err);
 
         each(stack);
       })
     );
-  })(this.listeners(args.shift()));
+  })(this.listeners(event));
 
   return this;
 });
