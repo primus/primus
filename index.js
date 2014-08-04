@@ -59,7 +59,8 @@ function Primus(server, options) {
   //
   this.spec = {
     version: this.version,
-    pathname: this.pathname
+    pathname: this.pathname,
+    timeout: this.timeout
   };
 
   //
