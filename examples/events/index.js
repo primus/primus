@@ -55,6 +55,8 @@ primus.on('connection', function connection(spark) {
   console.log('new connection');
 
   spark.on('data', function data(packet) {
+    if (!packet) return;
+
     console.log('incoming:', packet);
 
     //
