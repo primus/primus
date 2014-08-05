@@ -6,8 +6,7 @@ var ParserError = require('./errors').ParserError
   , forwarded = require('forwarded-for')
   , fuse = require('fusing')
   , u2028 = /\u2028/g
-  , u2029 = /\u2029/g
-  , undefined;
+  , u2029 = /\u2029/g;
 
 /**
  * The Spark is an indefinable, indescribable energy or soul of a transformer
