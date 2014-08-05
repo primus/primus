@@ -6,7 +6,8 @@ var ParserError = require('./errors').ParserError
   , forwarded = require('forwarded-for')
   , fuse = require('fusing')
   , u2028 = /\u2028/g
-  , u2029 = /\u2029/g;
+  , u2029 = /\u2029/g
+  , undefined;
 
 /**
  * The Spark is an indefinable, indescribable energy or soul of a transformer
@@ -509,7 +510,7 @@ Spark.readable('end', function end(data, options) {
   log('end initiated by developer for %s', this.id);
 
   options = options || {};
-  if (data) this.write(data);
+  if (data !== undefined) this.write(data);
 
   //
   // If we want to trigger a reconnect do not send

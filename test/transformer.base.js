@@ -1022,6 +1022,45 @@ module.exports = function base(transformer, pathname, transformer_name) {
           done();
         });
       });
+
+      it('emits a `reconnected` event', function (done) {
+        var socket = new Socket(server.addr);
+
+        primus.once('connection', function (spark) {
+          setTimeout(function () {
+            spark.end(undefined, { reconnect: true });
+          }, 10);
+        });
+
+        socket.once('reconnected', function () {
+          socket.end();
+          done();
+        });
+      });
+
+      it('can send a 0', function (done) {
+        var socket = new Socket(server.addr)
+          , zeros = 0;
+
+        primus.once('connection', function (spark) {
+          spark.on('data', function (msg) {
+            expect(msg).to.equal(0);
+            spark.write(0);
+            spark.end(0);
+          });
+        });
+
+        socket.on('data', function (msg) {
+          expect(msg).to.equal(0);
+
+          if (++zeros === 2) {
+            socket.end();
+            done();
+          }
+        });
+
+        socket.write(0);
+      });
     });
 
     describe('Server', function () {

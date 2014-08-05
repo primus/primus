@@ -550,6 +550,7 @@ Primus.prototype.reserved = function reserved(evt) {
 Primus.prototype.reserved.events = {
   readyStateChange: 1,
   reconnecting: 1,
+  reconnected: 1,
   reconnect: 1,
   offline: 1,
   timeout: 1,
@@ -584,6 +585,9 @@ Primus.prototype.initialise = function initialise(options) {
   });
 
   primus.on('incoming::open', function opened() {
+    var readyState = primus.readyState
+      , reconnect = primus.attempt;
+
     if (primus.attempt) primus.attempt = null;
 
     //
@@ -593,7 +597,14 @@ Primus.prototype.initialise = function initialise(options) {
     primus.writable = true;
     primus.readable = true;
 
-    var readyState = primus.readyState;
+    //
+    // Make sure we are flagged as `online` as we've successfully opened the
+    // connection.
+    //
+    if (!primus.online) {
+      primus.online = true;
+      primus.emit('online');
+    }
 
     primus.readyState = Primus.OPEN;
     if (readyState !== primus.readyState) {
@@ -603,6 +614,8 @@ Primus.prototype.initialise = function initialise(options) {
     primus.latency = +new Date() - start;
 
     primus.emit('open');
+    if (reconnect) primus.emit('reconnected');
+
     primus.clearTimeout('ping', 'pong').heartbeat();
 
     if (primus.buffer.length) {
