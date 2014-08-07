@@ -358,7 +358,7 @@ You can change this behavior and trigger a client-side reconnection using the
 `reconnect` option.
 
 ```js
-spark.end(null, { reconnect: true }); // trigger a client-side reconnection
+spark.end(undefined, { reconnect: true }); // trigger a client-side reconnection
 ```
 
 #### spark.emits(event, parser)

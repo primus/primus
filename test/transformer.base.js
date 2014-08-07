@@ -346,7 +346,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         primus.on('connection', function (spark) {
           if (!reconnected) {
             reconnected = true;
-            return spark.end(null, { reconnect: true });
+            return spark.end(undefined, { reconnect: true });
           }
           spark.end();
         });
@@ -380,7 +380,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
           //
           // Kill a connection to trigger a reconnect
           //
-          spark.end(null, { reconnect: true });
+          spark.end(undefined, { reconnect: true });
         });
 
         var socket = new Socket(server.addr, { strategy: false });
@@ -399,7 +399,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         primus.on('connection', function (spark) {
           if (!reconnected) {
             reconnected = true;
-            spark.end(null, { reconnect: true });
+            spark.end(undefined, { reconnect: true });
           }
         });
 
@@ -424,7 +424,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
       it('should allow to stop the reconnection procedure', function (done) {
         primus.on('connection', function (spark) {
-          spark.end(null, { reconnect: true });
+          spark.end(undefined, { reconnect: true });
         });
 
         var socket = new Socket(server.addr);
@@ -540,7 +540,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         // open is done in a setTimeout 0 so if we end it now then we'll
         // miss the connection
         socket.on('open', function () {
-            socket.end();
+          socket.end();
         });
 
         done();
@@ -1284,7 +1284,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
       it('should make the spark available to the parser', function (done) {
         var rnd = Math.random(),
-            parser = primus.parser;
+          parser = primus.parser;
 
         primus.parsers({
           decoder: function (data, fn) {

@@ -1232,7 +1232,7 @@ Primus.prototype.end = function end(data) {
     return this;
   }
 
-  if (data) this.write(data);
+  if (data !== undefined) this.write(data);
 
   this.writable = false;
   this.readable = false;
