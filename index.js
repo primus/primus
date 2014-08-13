@@ -123,8 +123,11 @@ fuse(Primus, EventEmitter);
 //
 Object.defineProperty(Primus.prototype, 'client', {
   get: function read() {
-    read.primus = read.primus || fs.readFileSync(__dirname + '/primus.js', 'utf-8');
-    return this._clientClassNameReplace(read.primus);
+    if (!read.primus) {
+      read.primus = fs.readFileSync(__dirname + '/primus.js', 'utf-8');
+    }
+
+    return this.customGlobal(read.primus);
   }
 });
 
@@ -140,24 +143,31 @@ Object.defineProperty(Primus.prototype, 'Socket', {
   }
 });
 
-Primus.prototype._clientClassNameReplace = function(input) {
-    if (!this.options.className) return input;
+/**
+ * Change the default Primus global which we use in client code to something
+ * custom. This makes it easier for people to integrate libraries in to their
+ * own custom code bases.
+ *
+ * @param {String} input The library code.
+ * @returns {String} The updated library code with the global replacements.
+ * @api private
+ */
+Primus.prototype.customGlobal = function customGlobal(input) {
+  var libraryNameLength = 'Primus'.length
+    , global = this.options.global;
+
+  if (!global) return input;
+
+  input.match(/Primus[^\ ]/g).filter(function filter(e, i, values) {
+    return values.lastIndexOf(e) === i;
+  }).forEach(function each(match, index) {
     //
-    // Get matches but don't repeat them
+    // Doing a split then join prevents us needing to escape for RegExp
     //
-    var matches = input.match(new RegExp('Primus[^\ ]', 'g'))
-        .filter(function (e, i, values) {
-            return values.lastIndexOf(e) === i;
-        });
-    var libraryNameLength = 'Primus'.length;
-    matches.forEach(function(match, index) {
-        //
-        // Doing a split then join prevents us needing to escape for regexp
-        //
-        input = input.split(match)
-            .join(this.options.className + match.substr(libraryNameLength, 1));
-    }, this);
-    return input;
+    input = input.split(match).join(global + match.substr(libraryNameLength, 1));
+  });
+
+  return input;
 };
 
 //
@@ -484,10 +494,9 @@ Primus.readable('library', function compile(nodejs) {
   var encoder = this.encoder.client || this.encoder
     , decoder = this.decoder.client || this.decoder
     , library = [ !nodejs ? this.transformer.library : null ]
+    , global = this.options.global || 'Primus'
     , transport = this.transformer.client
     , parser = this.parser.library || '';
-
-  var className = this.options.className || 'Primus';
 
   //
   // Add a simple export wrapper so it can be used as Node.js, AMD or browser
@@ -500,7 +509,7 @@ Primus.readable('library', function compile(nodejs) {
     + '  } else if (typeof define == "function" && define.amd) {'
     + '    define(function reference() { return context[name]; });'
     + '  }'
-    + '})("'+ className +'", this, function '+ className +'() {'
+    + '})("'+ global +'", this, function '+ global +'() {'
     + this.client;
 
   //
@@ -538,21 +547,21 @@ Primus.readable('library', function compile(nodejs) {
   // a library bundled, add it the library array as there were some issues with
   // frameworks that get included in module wrapper as it forces strict mode.
   //
-  var name, plugin, className = this.options.className || 'Primus';
-    
+  var name, plugin;
+
   for (name in this.ark) {
     plugin = this.ark[name];
     name = JSON.stringify(name);
 
     if (plugin.library) {
       log('adding the library of the %s plugin to the client file', name);
-      library.push(this._clientClassNameReplace(plugin.library));
+      library.push(this.customGlobal(plugin.library));
     }
 
     if (!plugin.client) continue;
 
     log('adding the client code of the %s plugin to the client file', name);
-    client += className +'.prototype.ark['+ name +'] = '+ plugin.client.toString() + '\n';
+    client += global +'.prototype.ark['+ name +'] = '+ plugin.client.toString() + '\n';
   }
 
   //
@@ -562,8 +571,7 @@ Primus.readable('library', function compile(nodejs) {
   // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client +' return '+ className +'; });'+ library
-    .filter(Boolean).join('\n');
+  return client +' return '+ global +'; });'+ library.filter(Boolean).join('\n');
 });
 
 /**

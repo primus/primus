@@ -136,7 +136,7 @@ credentials         | **cors** Allow sending of credentials     | `true`
 maxAge              | **cors** Cache duration of CORS preflight | `30 days`
 headers             | **cors** Allowed headers                  | `false`
 exposed             | **cors** Headers exposed to the client    | `false`
-className           | Set a custom client class name            | Primus
+global              | Set a custom client class/global name     | `Primus`
 
 The options that are prefixed with **cors** are supplied to our
 [access-control](http://github.com/primus/access-control) module which handles
