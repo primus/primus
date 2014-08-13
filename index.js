@@ -133,11 +133,10 @@ Object.defineProperty(Primus.prototype, 'client', {
 //
 Object.defineProperty(Primus.prototype, 'Socket', {
   get: function () {
-    var Socket = require('load').compiler(this.library(true), 'primus.js', {
+    return require('load').compiler(this.library(true), 'primus.js', {
       __filename: 'primus.js',
       __dirname: process.cwd()
     }).Primus;
-    return this._clientClassNameReplace(Socket)
   }
 });
 
