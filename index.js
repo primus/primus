@@ -538,8 +538,7 @@ Primus.readable('library', function compile(nodejs) {
   // a library bundled, add it the library array as there were some issues with
   // frameworks that get included in module wrapper as it forces strict mode.
   //
-  var name, plugin;
-  var className = this.options.className || 'Primus';
+  var name, plugin, className = this.options.className || 'Primus';
     
   for (name in this.ark) {
     plugin = this.ark[name];
