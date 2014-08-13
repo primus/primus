@@ -623,7 +623,8 @@ describe('Primus', function () {
       var async = __dirname + '/primus.save.async.js'
         , sync = __dirname + '/primus.save.sync.js';
 
-      var primus = new Primus(server, { global: 'Unicron' });
+      var primus = new Primus(server, { global: 'Unicron' })
+        , Socket = primus.Socket; // Ensures that the JS is still executable;
 
       primus.save(sync);
       expect(fs.readFileSync(sync, 'utf-8')).to.equal(primus.library());
