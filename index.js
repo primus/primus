@@ -124,10 +124,7 @@ fuse(Primus, EventEmitter);
 Object.defineProperty(Primus.prototype, 'client', {
   get: function read() {
     read.primus = read.primus || fs.readFileSync(__dirname + '/primus.js', 'utf-8');
-    if (this.options.className) {
-        return read.primus.replace(new RegExp('Primus', 'g'), this.options.className);
-    }
-    return read.primus;
+    return this._clientClassNameReplace(read.primus);
   }
 });
 
@@ -140,12 +137,25 @@ Object.defineProperty(Primus.prototype, 'Socket', {
       __filename: 'primus.js',
       __dirname: process.cwd()
     }).Primus;
-    if (this.options.className) {
-        return Socket.replace(new RegExp('Primus', 'g'), this.options.className);
-    }
-    return Socket
+    return this._clientClassNameReplace(Socket)
   }
 });
+
+Primus.prototype._clientClassNameReplace = function(input) {
+    if (!this.options.className) return input;
+    // Get matches but don't repeat them
+    var matches = input.match(new RegExp('Primus[^\ ]', 'g'))
+        .filter(function (e, i, values) {
+            return values.lastIndexOf(e) === i;
+        });
+    var libraryNameLength = 'Primus'.length;
+    matches.forEach(function(match, index) {
+        // Doing a split then join prevents us needing to escape for regexp
+        input = input.split(match)
+            .join(this.options.className + match.substr(libraryNameLength, 1));
+    }, this);
+    return input;
+};
 
 //
 // Expose the current version number.
@@ -534,13 +544,7 @@ Primus.readable('library', function compile(nodejs) {
 
     if (plugin.library) {
       log('adding the library of the %s plugin to the client file', name);
-      if (this.options.className) {
-        library.push(
-          plugin.library.replace(new RegExp('Primus', 'g'), this.options.className)
-        );
-      } else {
-        library.push(plugin.library);
-      }
+      library.push(this._clientClassNameReplace(plugin.library));
     }
 
     if (!plugin.client) continue;
