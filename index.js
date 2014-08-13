@@ -124,6 +124,9 @@ fuse(Primus, EventEmitter);
 Object.defineProperty(Primus.prototype, 'client', {
   get: function read() {
     read.primus = read.primus || fs.readFileSync(__dirname + '/primus.js', 'utf-8');
+    if (this.options.className) {
+        return read.primus.replace(new RegExp('Primus', 'g'), this.options.className);
+    }
     return read.primus;
   }
 });
@@ -133,10 +136,14 @@ Object.defineProperty(Primus.prototype, 'client', {
 //
 Object.defineProperty(Primus.prototype, 'Socket', {
   get: function () {
-    return require('load').compiler(this.library(true), 'primus.js', {
+    var Socket = require('load').compiler(this.library(true), 'primus.js', {
       __filename: 'primus.js',
       __dirname: process.cwd()
     }).Primus;
+    if (this.options.className) {
+        return Socket.replace(new RegExp('Primus', 'g'), this.options.className);
+    }
+    return Socket
   }
 });
 
@@ -467,6 +474,8 @@ Primus.readable('library', function compile(nodejs) {
     , transport = this.transformer.client
     , parser = this.parser.library || '';
 
+  var className = this.options.className || 'Primus';
+
   //
   // Add a simple export wrapper so it can be used as Node.js, AMD or browser
   // client.
@@ -478,7 +487,7 @@ Primus.readable('library', function compile(nodejs) {
     + '  } else if (typeof define == "function" && define.amd) {'
     + '    define(function reference() { return context[name]; });'
     + '  }'
-    + '})("Primus", this, function PRIMUS() {'
+    + '})("' + className + '", this, function ' + className + '() {'
     + this.client;
 
   //
@@ -517,19 +526,27 @@ Primus.readable('library', function compile(nodejs) {
   // frameworks that get included in module wrapper as it forces strict mode.
   //
   var name, plugin;
+  var className = this.options.className || 'Primus';
+    
   for (name in this.ark) {
     plugin = this.ark[name];
     name = JSON.stringify(name);
 
     if (plugin.library) {
       log('adding the library of the %s plugin to the client file', name);
-      library.push(plugin.library);
+      if (this.options.className) {
+        library.push(
+          plugin.library.replace(new RegExp('Primus', 'g'), this.options.className)
+        );
+      } else {
+        library.push(plugin.library);
+      }
     }
 
     if (!plugin.client) continue;
 
     log('adding the client code of the %s plugin to the client file', name);
-    client += 'Primus.prototype.ark['+ name +'] = '+ plugin.client.toString() + '\n';
+    client += className + '.prototype.ark['+ name +'] = '+ plugin.client.toString() + '\n';
   }
 
   //
@@ -539,7 +556,7 @@ Primus.readable('library', function compile(nodejs) {
   // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client +' return Primus; });' + library
+  return client +' return ' + className + '; });' + library
     .filter(Boolean).join('\n');
 });
 
