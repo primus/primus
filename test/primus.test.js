@@ -618,6 +618,25 @@ describe('Primus', function () {
         done();
       });
     });
+      
+    it('allows setting a custom client class name', function (done) {
+      var async = __dirname + '/primus.save.async.js'
+        , sync = __dirname + '/primus.save.sync.js';
+
+      var primus = new Primus(server, { className: '3rdEden' });
+        
+      primus.save(sync);
+      expect(fs.readFileSync(sync, 'utf-8')).to.equal(primus.library());
+
+      primus.save(async, function (error) {
+        if (error) return done(error);
+
+        expect(fs.readFileSync(async, 'utf-8')).to.equal(primus.library());
+        expect(fs.readFileSync(async, 'utf-8').match(/3rdEden/, 'g')).length
+          .to.be.greaterThan(0);
+        done();
+      });
+    });
   });
 
   describe('#reserved', function () {
