@@ -142,14 +142,18 @@ Object.defineProperty(Primus.prototype, 'Socket', {
 
 Primus.prototype._clientClassNameReplace = function(input) {
     if (!this.options.className) return input;
+    //
     // Get matches but don't repeat them
+    //
     var matches = input.match(new RegExp('Primus[^\ ]', 'g'))
         .filter(function (e, i, values) {
             return values.lastIndexOf(e) === i;
         });
     var libraryNameLength = 'Primus'.length;
     matches.forEach(function(match, index) {
+        //
         // Doing a split then join prevents us needing to escape for regexp
+        //
         input = input.split(match)
             .join(this.options.className + match.substr(libraryNameLength, 1));
     }, this);
@@ -496,7 +500,7 @@ Primus.readable('library', function compile(nodejs) {
     + '  } else if (typeof define == "function" && define.amd) {'
     + '    define(function reference() { return context[name]; });'
     + '  }'
-    + '})("' + className + '", this, function ' + className + '() {'
+    + '})("'+ className +'", this, function '+ className +'() {'
     + this.client;
 
   //
@@ -559,7 +563,7 @@ Primus.readable('library', function compile(nodejs) {
   // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client +' return ' + className + '; });' + library
+  return client +' return '+ className +'; });'+ library
     .filter(Boolean).join('\n');
 });
 
