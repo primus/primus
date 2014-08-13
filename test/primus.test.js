@@ -623,16 +623,18 @@ describe('Primus', function () {
       var async = __dirname + '/primus.save.async.js'
         , sync = __dirname + '/primus.save.sync.js';
 
-      var primus = new Primus(server, { className: '3rdEden' });
+      var primus = new Primus(server, { className: 'Unicron' });
         
       primus.save(sync);
       expect(fs.readFileSync(sync, 'utf-8')).to.equal(primus.library());
+      expect(fs.readFileSync(sync, 'utf-8').match(/Unicron/, 'g')).length
+          .to.be.greaterThan(0);
 
       primus.save(async, function (error) {
         if (error) return done(error);
 
         expect(fs.readFileSync(async, 'utf-8')).to.equal(primus.library());
-        expect(fs.readFileSync(async, 'utf-8').match(/3rdEden/, 'g')).length
+        expect(fs.readFileSync(async, 'utf-8').match(/Unicron/, 'g')).length
           .to.be.greaterThan(0);
         done();
       });
