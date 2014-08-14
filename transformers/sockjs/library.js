@@ -922,12 +922,14 @@ XDRObject.prototype.close = function() {
 // 3. Nope, but postMessage is there so it should work via the Iframe.
 // 4. Nope, sorry.
 utils.isXHRCorsCapable = function() {
-    if (_window.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest()) {
-        return 1;
-    }
-    // XDomainRequest doesn't work if page is served from file://
-    if (_window.XDomainRequest && _document.domain) {
-        return 2;
+    // CORS doesn't work if page is served from file://
+    if (_document.domain) {
+      if (_window.XMLHttpRequest && 'withCredentials' in new XMLHttpRequest()) {
+          return 1;
+      }
+      if (_window.XDomainRequest) {
+          return 2;
+      }
     }
     if (IframeTransport.enabled()) {
         return 3;
