@@ -49,6 +49,15 @@ module.exports = function client() {
       forceBase64: true,
 
       //
+      // XDR has been source of pain for most real-time users. It doesn't
+      // support the full CORS spec and is invested with bugs. It cannot connect
+      // cross-scheme, does not send ANY authorization information like Cookies
+      // and Basic Authorization headers etc. Force this off by default to
+      // ensure a stable connection.
+      //
+      enablesXDR: false,
+
+      //
       // Force timestamps on every single connection. Engine.IO only does this
       // for polling by default, but WebSockets require an explicit `true`
       // boolean.
