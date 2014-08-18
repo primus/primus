@@ -49,11 +49,11 @@ module.exports = function client() {
       forceBase64: true,
 
       //
-      // XDR has been source of pain for most real-time users. It doesn't
-      // support the full CORS spec and is invested with bugs. It cannot connect
-      // cross-scheme, does not send ANY authorization information like Cookies
-      // and Basic Authorization headers etc. Force this off by default to
-      // ensure a stable connection.
+      // XDR has been the source of pain for most real-time users. It doesn't
+      // support the full CORS spec and is infested with bugs. It cannot connect
+      // cross-scheme, does not send ANY authorization information like Cookies,
+      // Basic Authorization headers etc. Force this off by default to ensure a
+      // stable connection.
       //
       enablesXDR: false,
 
