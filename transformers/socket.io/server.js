@@ -78,7 +78,7 @@ module.exports = function server() {
   this.service.on('connection', function connection(socket) {
     var spark = new Spark(
         socket.handshake.headers                  // HTTP request headers.
-      , socket.handshake.address                  // IP address location.
+      , socket.handshake                          // IP address location.
       , socket.handshake.query                    // Optional query string.
       , socket.id                                 // Unique connection id.
       , service.transports[socket.id].req         // Reference to an HTTP req.

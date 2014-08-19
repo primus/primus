@@ -51,7 +51,7 @@
     "create-server": "0.0.x",
     "diagnostics": "0.0.x",
     "eventemitter3": "0.1.x",
-    "forwarded-for": "0.0.x",
+    "forwarded-for": "0.1.x",
     "fusing": "0.3.x",
     "load": "1.0.x",
     "setheader": "0.0.x"
