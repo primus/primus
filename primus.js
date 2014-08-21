@@ -2,14 +2,27 @@
 'use strict';
 
 /**
+ * Representation of a single EventEmitter function.
+ *
+ * @param {Function} fn Event handler to be called.
+ * @param {Mixed} context Context for function execution.
+ * @param {Boolean} once Only emit once
+ * @api private
+ */
+function EE(fn, context, once) {
+  this.fn = fn;
+  this.context = context;
+  this.once = once || false;
+}
+
+/**
  * Minimal EventEmitter interface that is molded against the Node.js
  * EventEmitter interface.
  *
  * @constructor
  * @api public
  */
-function EventEmitter() {
-}
+function EventEmitter() { /* Nothing to set */ }
 
 /**
  * Holds the assigned EventEmitters by name.
@@ -27,8 +40,13 @@ EventEmitter.prototype._events = undefined;
  * @api public
  */
 EventEmitter.prototype.listeners = function listeners(event) {
-  if (!this._events) return [];
-  return Array.apply(this, this._events[event] || []);
+  if (!this._events || !this._events[event]) return [];
+
+  for (var i = 0, l = this._events[event].length, ee = []; i < l; i++) {
+    ee.push(this._events[event][i].fn);
+  }
+
+  return ee;
 };
 
 /**
@@ -44,41 +62,41 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
   var listeners = this._events[event]
     , length = listeners.length
     , len = arguments.length
-    , fn = listeners[0]
+    , ee = listeners[0]
     , args
     , i, j;
 
   if (1 === length) {
-    if (fn.__EE3_once) this.removeListener(event, fn);
+    if (ee.once) this.removeListener(event, ee.fn, true);
 
     switch (len) {
-      case 1: return fn.call(fn.__EE3_context), true;
-      case 2: return fn.call(fn.__EE3_context, a1), true;
-      case 3: return fn.call(fn.__EE3_context, a1, a2), true;
-      case 4: return fn.call(fn.__EE3_context, a1, a2, a3), true;
-      case 5: return fn.call(fn.__EE3_context, a1, a2, a3, a4), true;
-      case 6: return fn.call(fn.__EE3_context, a1, a2, a3, a4, a5), true;
+      case 1: return ee.fn.call(ee.context), true;
+      case 2: return ee.fn.call(ee.context, a1), true;
+      case 3: return ee.fn.call(ee.context, a1, a2), true;
+      case 4: return ee.fn.call(ee.context, a1, a2, a3), true;
+      case 5: return ee.fn.call(ee.context, a1, a2, a3, a4), true;
+      case 6: return ee.fn.call(ee.context, a1, a2, a3, a4, a5), true;
     }
 
     for (i = 1, args = new Array(len -1); i < len; i++) {
       args[i - 1] = arguments[i];
     }
 
-    fn.apply(fn.__EE3_context, args);
+    ee.fn.apply(ee.context, args);
   } else {
     for (i = 0; i < length; i++) {
-      if (listeners[i].__EE3_once) this.removeListener(event, listeners[i]);
+      if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
 
       switch (len) {
-        case 1: listeners[i].call(fn.__EE3_context); break;
-        case 2: listeners[i].call(fn.__EE3_context, a1); break;
-        case 3: listeners[i].call(fn.__EE3_context, a1, a2); break;
+        case 1: listeners[i].fn.call(listeners[i].context); break;
+        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
+        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
         default:
           if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
             args[j - 1] = arguments[j];
           }
 
-          listeners[i].apply(fn.__EE3_context, args);
+          listeners[i].fn.apply(listeners[i].context, args);
       }
     }
   }
@@ -97,9 +115,7 @@ EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
 EventEmitter.prototype.on = function on(event, fn, context) {
   if (!this._events) this._events = {};
   if (!this._events[event]) this._events[event] = [];
-
-  fn.__EE3_context = context || this;
-  this._events[event].push(fn);
+  this._events[event].push(new EE( fn, context || this ));
 
   return this;
 };
@@ -113,8 +129,11 @@ EventEmitter.prototype.on = function on(event, fn, context) {
  * @api public
  */
 EventEmitter.prototype.once = function once(event, fn, context) {
-  fn.__EE3_once = true;
-  return this.on(event, fn, context);
+  if (!this._events) this._events = {};
+  if (!this._events[event]) this._events[event] = [];
+  this._events[event].push(new EE(fn, context || this, true ));
+
+  return this;
 };
 
 /**
@@ -122,16 +141,17 @@ EventEmitter.prototype.once = function once(event, fn, context) {
  *
  * @param {String} event The event we want to remove.
  * @param {Function} fn The listener that we need to find.
+ * @param {Boolean} once Only remove once listeners.
  * @api public
  */
-EventEmitter.prototype.removeListener = function removeListener(event, fn) {
+EventEmitter.prototype.removeListener = function removeListener(event, fn, once) {
   if (!this._events || !this._events[event]) return this;
 
   var listeners = this._events[event]
     , events = [];
 
   if (fn) for (var i = 0, length = listeners.length; i < length; i++) {
-    if (listeners[i] !== fn) {
+    if (listeners[i].fn !== fn && listeners[i].once !== once) {
       events.push(listeners[i]);
     }
   }
