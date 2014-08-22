@@ -8,24 +8,22 @@ var PrimusError = require('./errors').PrimusError
   , fuse = require('fusing')
   , fs = require('fs');
 
-var x;
-
 //
 // - Cluster node 0.10 lets the Operating System decide to which worker a request
-//   goes. This can result in an un-even distribution when some workers only
-//   have 10% usage and others 90%. In addition to that the load balancing isn't
-//   sticky.
+//   goes. This can result in a not even distribution where some workers are
+//   used at 10% while others at 90%. In addition to that the load balancing
+//   isn't sticky.
 //
-// - Cluster node 0.12 implements a custom round robin algorithm. So this solves
-//   un-even distribution of work but it does not address our sticky session
+// - Cluster node 0.12 implements a custom round robin algorithm. This solves the
+//   not even distribution of work but it does not address our sticky session
 //   requirement.
 //
 // Projects like `sticky-session` attempt to implement sticky sessions but they
 // are using `net` server instead of a HTTP server in combination with the
-// remoteAddress of the connection to load balancing. This does not work when
-// you address your servers behind a load balancer as the IP is set to the load
+// remoteAddress of the connection to load balance. This does not work when you
+// address your servers behind a load balancer as the IP is set to the load
 // balancer, not the connecting clients. All in all, it only causes more
-// scalability pain then it gains. So we've opted-in to warn users about the
+// scalability problems. So we've opted-in to warn users about the
 // risks of using Primus in a cluster.
 //
 if (require('cluster').isWorker) [
@@ -191,7 +189,7 @@ Primus.prototype.customGlobal = function customGlobal(input) {
 
   input.match(/Primus[^\ ]/g).filter(function filter(e, i, values) {
     return values.lastIndexOf(e) === i;
-  }).forEach(function each(match, index) {
+  }).forEach(function each(match) {
     //
     // Doing a split then join prevents us needing to escape for RegExp
     //
