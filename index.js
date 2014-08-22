@@ -947,36 +947,41 @@ Primus.readable('destroy', function destroy(options, fn) {
 Primus.readable('asyncemit', function asyncemit() {
   var args = Array.prototype.slice.call(arguments, 0)
     , event = args.shift()
+    , listeners = this._events[event] || []
     , async = args.length
     , fn = args.pop()
     , primus = this;
+
+  if (listeners && !Array.isArray(listeners)) {
+    listeners = [ listeners ];
+  }
 
   (function each(stack) {
     if (!stack.length) return fn();
 
     var listener = stack.shift();
 
-    if (listener.__EE3_once) {
-      primus.removeListener(event, listener);
+    if (listener.once) {
+      primus.removeListener(event, listener.fn);
     }
 
-    if (listener.length !== async) {
-      listener.apply(listener.__EE3_context || primus, args);
+    if (listener.fn.length !== async) {
+      listener.fn.apply(listener.context, args);
       return each(stack);
     }
 
     //
     // Async operation
     //
-    listener.apply(
-      listener.__EE3_context || primus,
+    listener.fn.apply(
+      listener.context,
       args.concat(function done(err) {
         if (err) return fn(err);
 
         each(stack);
       })
     );
-  })(this.listeners(event));
+  })(listeners.slice());
 
   return this;
 });
