@@ -8,6 +8,37 @@ var PrimusError = require('./errors').PrimusError
   , fuse = require('fusing')
   , fs = require('fs');
 
+var x;
+
+//
+// - Cluster node 0.10 lets the Operating System decide to which worker a request
+//   goes. This can result in an un-even distribution when some workers only
+//   have 10% usage and others 90%. In addition to that the load balancing isn't
+//   sticky.
+//
+// - Cluster node 0.12 implements a custom round robin algorithm. So this solves
+//   un-even distribution of work but it does not address our sticky session
+//   requirement.
+//
+// Projects like `sticky-session` attempt to implement sticky sessions but they
+// are using `net` server instead of a HTTP server in combination with the
+// remoteAddress of the connection to load balancing. This does not work when
+// you address your servers behind a load balancer as the IP is set to the load
+// balancer, not the connecting clients. All in all, it only causes more
+// scalability pain then it gains. So we've opted-in to warn users about the
+// risks of using Primus in a cluster.
+//
+if (require('cluster').isWorker) [
+  '',
+  'The `cluster` module does not implement sticky sessions. Learn more about',
+  'this issue at:',
+  '',
+  'http://github.com/primus/primus#sticky-sessions',
+  '',
+].forEach(function warn(line) {
+  console.error('primus: '+ line);
+});
+
 /**
  * Primus is a universal wrapper for real-time frameworks that provides a common
  * interface for server and client interaction.
