@@ -102,8 +102,7 @@ Transformer.readable('forEach', function forEach(type, req, res, next) {
     , layers = transformer.primus.layers
     , primus = transformer.primus;
 
-  req.uri = req.uri || url(req.url, true);
-  req.query = req.query || req.uri.query || {};
+  req.query = req.uri.query || {};
 
   //
   // Add some silly HTTP properties for connect.js compatibility.
