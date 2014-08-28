@@ -88,6 +88,7 @@ repository.
    - [Community](#community)
 - [FAQ](#FAQ)
   - [Scaling](#what-is-the-best-way-to-scale-primus)
+  - [Cluster](#can-i-use-cluster)
   - [Express](#how-do-i-use-primus-with-express-3)
   - [RequireJS](#is-requirejs-supported)
   - [Custom headers](#can-i-send-custom-headers-to-the-server)
@@ -1917,7 +1918,39 @@ needs to support. This ensures that the incoming requests always go back to the
 same server. If your load balancer does not support sticky sessions, get another
 one. I highly recommend [HAProxy](http://haproxy.1wt.eu/). According to my own
 testing it the fastest and best proxy available that supports WebSockets. See
-https://github.com/observing/balancerbattle for more detailed information.
+https://github.com/observing/balancerbattle for more detailed information. 
+
+The reason that sticky-sessions are so important is that a lot of the frameworks
+that use polling transports require state in a node process in order to
+function. This state contains times, sessions ids, handshake data etc. If the
+request does not enter the same node process again it can rejected and close
+down your connection because it's `unknown`.
+
+If want more advanced scaling and messaging please take a look at the various of
+plugins we've written. Plugins like metroplex, omega-supreme and even primacron
+can be time savers. 
+
+#### Can I use cluster?
+
+The `cluster` module that is build-in Node.js is flawed, seriously flawed.
+Cluster in node < 0.12.0 lets the Operating System decide which worker process
+the request should receive. This results in un-even distribution across the
+workers. If you have 3 works, it's possible that 1 has 70% load, another 20 and
+one 10%. This is of course not what you intended when using cluster. In addition
+that the balancing that is done by the OS is not sticky.
+
+Cluster in node 0.12 implements a custom round robin algorithm in order to fix
+this un-even work distribution of the workers. But it does not address the
+sticky session requirement.
+
+And then are projects like `stick-session` which attempt to implement
+sticky-sessions in cluster. But the problem with this specific approach is that
+it's using the `remoteAddress` of the connection. For some people this isn't a
+problem but when you add this behind a load balancer the remote address will be
+set the address of load balancer that forwarded the request. So all in all it
+only causes scalability problems instead of solving them. This is why we've
+opted to warn people about the risks of `cluster` when we detect that the
+Primus library is run in a worker environment. **USE IT AT YOU OWN RISK**
 
 #### How do I use Primus with Express 3
 

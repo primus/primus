@@ -31,7 +31,7 @@ if (require('cluster').isWorker) [
   'The `cluster` module does not implement sticky sessions. Learn more about',
   'this issue at:',
   '',
-  'http://github.com/primus/primus#sticky-sessions',
+  'http://github.com/primus/primus#can-i-use-cluster',
   '',
 ].forEach(function warn(line) {
   console.error('primus: '+ line);
