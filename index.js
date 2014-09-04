@@ -692,6 +692,7 @@ Primus.readable('use', function use(name, energon) {
 
   log('adding %s as new plugin', name);
   this.ark[name] = energon;
+  this.emit('plugin', name, energon);
 
   if (!energon.server) return this;
 
@@ -718,6 +719,22 @@ Primus.readable('plugin', function plugin(name) {
   }
 
   return plugins;
+});
+
+/**
+ * Remove plugin from the ark.
+ *
+ * @param {String} name Name of the plugin we need to remove from the ark.
+ * @returns {Boolean} Successful removal of the plugin.
+ * @api public
+ */
+Primus.readable('plugout', function plugout(name) {
+  if (!(name in this.ark)) return false;
+
+  this.emit('plugout', name, this.ark[name]);
+  delete this.ark[name];
+
+  return true;
 });
 
 /**
@@ -1010,11 +1027,13 @@ Primus.readable('reserved', function reserved(evt) {
  * @api public
  */
 Primus.prototype.reserved.events = {
-  disconnection: 1,
-  initialised: 1,
-  connection: 1,
-  close: 1,
-  log: 1
+  'disconnection': 1,
+  'initialised': 1,
+  'connection': 1,
+  'plugout': 1,
+  'plugin': 1,
+  'close': 1,
+  'log': 1
 };
 
 /**
