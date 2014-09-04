@@ -115,6 +115,44 @@ describe('Plugin', function () {
     expect(primus.channel).to.be.a('function');
   });
 
+  it('emits an `plugin` event when a new plugin is added', function (next) {
+    var server = http.createServer()
+      , primus = new Primus(server)
+      , port = common.port;
+
+    primus.on('plugin', function (name, obj) {
+      expect(name).to.equal('foo');
+      expect(obj).to.be.a('object');
+
+      next();
+    });
+
+    primus.use('foo', {
+      server: function () {}
+    });
+  });
+
+  describe('#plugout', function () {
+    it('emits a `plugout` event when removing a plugin', function (next) {
+      var server = http.createServer()
+        , primus = new Primus(server)
+        , port = common.port;
+
+      primus.on('plugout', function (name, obj) {
+        expect(name).to.equal('foo');
+        expect(obj).to.be.a('object');
+
+        next();
+      });
+
+      primus.use('foo', {
+        server: function () {}
+      });
+
+      expect(primus.plugout('foo')).to.equal(true);
+    });
+  });
+
   describe('#plugin', function () {
     it('returns the plugin for the given name', function () {
       var server = http.createServer()
