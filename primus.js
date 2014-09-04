@@ -641,11 +641,15 @@ Primus.prototype.initialise = function initialise(options) {
     primus.clearTimeout('ping', 'pong').heartbeat();
 
     if (primus.buffer.length) {
-      for (var i = 0, length = primus.buffer.length; i < length; i++) {
-        primus._write(primus.buffer[i]);
-      }
+      var data = primus.buffer.slice()
+        , length = data.length
+        , i = 0;
 
-      primus.buffer = [];
+      primus.buffer.length = 0;
+
+      for (; i < length; i++) {
+        primus._write(data[i]);
+      }
     }
   });
 
