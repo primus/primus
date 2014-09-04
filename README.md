@@ -1010,6 +1010,8 @@ Event                 | Usage       | Location      | Description
 `disconnection`       | **public**  | server        | A connection closed.
 `initialised`         | **public**  | server        | The server is initialised.
 `close`               | **public**  | server        | The server has been destroyed.
+`plugin`              | **public**  | server        | A new plugin has been added.
+`plugout`             | **public**  | server        | A plugin has been removed.
 `incoming::ping`      | private     | spark         | We received a ping message.
 `outgoing::ping`      | private     | client        | We're sending a ping message.
 `incoming::pong`      | private     | client        | We received a pong message.
@@ -1441,6 +1443,13 @@ space separated list of plugin names which will be required automatically:
 
 ```js
 var primus = new Primus(server, { plugin: 'metroplex, primus-emit' })
+```
+
+To remove added plugins you can use the `plugout` method:
+
+```js
+primus.use('name', require('metroplex'));
+primus.plugout('name'); // returns true/false indicating successful removal.
 ```
 
 The server function is only executed on the server side and receives 2
