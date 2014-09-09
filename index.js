@@ -531,7 +531,7 @@ Primus.readable('library', function compile(nodejs) {
   // Add a simple export wrapper so it can be used as Node.js, AMD or browser
   // client.
   //
-  var client = '(function (name, context, definition) {'
+  var client = '(function UMDish(name, context, definition) {'
     + '  context[name] = definition.call(context);'
     + '  if (typeof module !== "undefined" && module.exports) {'
     + '    module.exports = context[name];'
@@ -600,7 +600,12 @@ Primus.readable('library', function compile(nodejs) {
   // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client +' return '+ global +'; });'+ library.filter(Boolean).join('\n');
+  return client +' return '+ global +'; });'
+  + library.filter(Boolean).map(function expose(library) {
+    return '(function '+ global +'LibraryWrap('+ global +') {'
+    + library
+    + '})(this["'+ global +'"]);';
+  }).join('\n');
 });
 
 /**
