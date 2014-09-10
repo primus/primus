@@ -1048,7 +1048,6 @@ module.exports = function base(transformer, pathname, transformer_name) {
           spark.on('data', function (msg) {
             expect(msg).to.equal(messages[i++]);
 
-            console.log(msg);
             if (i === messages.length) spark.end();
           });
 
