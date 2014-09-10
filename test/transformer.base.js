@@ -1038,6 +1038,31 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
       });
 
+      it('can send utf-8', function (done) {
+        var messages = ['pongРУССКИЙ', '€€€']
+          , socket = new Socket(server.addr);
+
+        primus.once('connection', function (spark) {
+          var i = 0;
+
+          spark.on('data', function (msg) {
+            expect(msg).to.equal(messages[i++]);
+
+            console.log(msg);
+            if (i === messages.length) spark.end();
+          });
+
+          spark.once('end', function () {
+            expect(i).to.equal(messages.length);
+            done();
+          });
+        });
+
+        messages.forEach(function forEach(msg) {
+          socket.write(msg);
+        });
+      });
+
       it('can send a 0', function (done) {
         var socket = new Socket(server.addr)
           , zeros = 0;
