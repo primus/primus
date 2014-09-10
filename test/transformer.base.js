@@ -1047,14 +1047,22 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
           spark.on('data', function (msg) {
             expect(msg).to.equal(messages[i++]);
-
-            if (i === messages.length) spark.end();
+            spark.write(msg);
           });
 
           spark.once('end', function () {
             expect(i).to.equal(messages.length);
             done();
           });
+        });
+
+        var received = 0;
+        socket.on('data', function (msg) {
+          expect(msg).to.equal(messages[received++]);
+
+          if (received === messages.length) {
+            socket.end();
+          }
         });
 
         messages.forEach(function forEach(msg) {
