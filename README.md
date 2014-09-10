@@ -180,7 +180,7 @@ In the above example we automatically create a HTTP server which will listen
 on port 8080, a primus instance with the `websockets` transformer and start
 listening for incoming connections. The supplied function in the
 `Primus.createServer` method is optional. You can just listen for incoming
-connectios your self using the returned Primus instance. If you want to listen to
+connections your self using the returned Primus instance. If you want to listen to
 a HTTPS or SPDY server, which is recommended, you can directly pass the SPDY and
 HTTPS certs/keys/pfx files in the options object:
 
