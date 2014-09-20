@@ -1,0 +1,11 @@
+diff --git a/transformers/socket.io/library.js b/transformers/socket.io/library.js
+index e1a75d9..dc058ed 100644
+--- a/transformers/socket.io/library.js
++++ b/transformers/socket.io/library.js
+@@ -1,6 +1,5 @@
+ /*! Socket.IO.js build:0.9.17, development. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */
+ 
+-var io = ('undefined' === typeof module ? {} : module.exports);
+ (function() {
+ 
+ /**
