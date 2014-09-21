@@ -949,7 +949,7 @@ Primus.prototype.transforms = function transforms(primus, connection, type, data
 Primus.prototype.id = function id(fn) {
   if (this.socket && this.socket.id) return fn(this.socket.id);
 
-  this.write('primus::id::');
+  this._write('primus::id::');
   return this.once('incoming::id', fn);
 };
 
@@ -1069,7 +1069,7 @@ Primus.prototype.heartbeat = function heartbeat() {
   function ping() {
     var value = +new Date();
 
-    primus.clearTimeout('ping').write('primus::ping::'+ value);
+    primus.clearTimeout('ping')._write('primus::ping::'+ value);
     primus.emit('outgoing::ping', value);
     primus.timers.pong = setTimeout(pong, primus.options.pong);
   }
