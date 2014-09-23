@@ -57,6 +57,7 @@ describe('Primus', function () {
   it('can customize the pathname', function () {
     expect(primus.pathname).to.equal('/primus');
     expect(new Primus(server, { pathname: '/foo' }).pathname).to.equal('/foo');
+    expect(new Primus(server, { pathname: 'foo' }).pathname).to.equal('/foo');
   });
 
   it('emits an `initialised` event when the server is fully constructed', function (done) {

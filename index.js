@@ -80,7 +80,11 @@ function Primus(server, options) {
   };
 
   this.server = server;
-  this.pathname = options.pathname || '/primus';
+  this.pathname = 'string' === typeof options.pathname
+    ? options.pathname.charAt(0) !== '/'
+      ? '/'+ options.pathname
+      : options.pathname
+    : '/primus';
 
   //
   // Create a specification file with the information that people might need to
