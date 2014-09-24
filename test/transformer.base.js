@@ -479,6 +479,8 @@ module.exports = function base(transformer, pathname, transformer_name) {
       });
 
       it('should reset the reconnect details after a succesful reconnect', function (done) {
+        this.timeout(5000);
+
         var socket = new Socket(server.addr, {
           reconnect: {
             minDelay: 100,
@@ -487,7 +489,6 @@ module.exports = function base(transformer, pathname, transformer_name) {
         }), closed = 0;
 
         expect(!socket.attempt).to.equal(true);
-        this.timeout(5000);
 
         socket.once('reconnect', function () {
           expect(!!socket.attempt).to.equal(true);
@@ -512,6 +513,8 @@ module.exports = function base(transformer, pathname, transformer_name) {
           }, 100);
 
           socket.once('open', function () {
+            expect(!socket.attempt).to.equal(true);
+
             socket.removeAllListeners('end');
             socket.end();
 
@@ -1215,7 +1218,6 @@ module.exports = function base(transformer, pathname, transformer_name) {
       });
 
       it('handles requests to non existing routes captured by primus', function (done) {
-        this.timeout(100);
         request(
           server.addr + '/primus.js',
           function (err, res, body) {

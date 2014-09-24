@@ -230,7 +230,6 @@ describe('Spark', function () {
 
   describe('#timeout', function () {
     it('disconnects if the timeout expires', function (done) {
-      this.timeout(50);
       var primus = new Primus(server, { timeout: 25 });
 
       primus.on('disconnection', function (socket) {
