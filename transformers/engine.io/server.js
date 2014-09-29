@@ -1,5 +1,18 @@
 'use strict';
 
+try { require('./patches'); }
+catch (e) {
+  [
+    '',
+    'Could not apply engine.io patches, we received error',
+    e.message,
+    'overriding the prototypes of the serverside components',
+    ''
+  ].forEach(function log(line) {
+    console.error('primus: '+ line);
+  });
+}
+
 /**
  * Minimum viable Engine.IO server for Node.js that works through the primus
  * interface.
