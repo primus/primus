@@ -741,7 +741,9 @@ Primus.prototype.initialise = function initialise(options) {
     }
 
     if (primus.timers.connect) primus.end();
-    if (readyState !== Primus.OPEN) return;
+    if (readyState !== Primus.OPEN) {
+      return primus.attempt ? primus.reconnect() : false;
+    }
 
     this.writable = false;
     this.readable = false;
