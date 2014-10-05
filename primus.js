@@ -691,8 +691,7 @@ Primus.prototype.initialise = function initialise(options) {
 
     //
     // We received an error while connecting, this most likely the result of an
-    // unauthorized access to the server. But this something that is only
-    // triggered for Node based connections. Browsers trigger the error event.
+    // unauthorized access to the server.
     //
     if (connect) {
       if (~primus.options.strategy.indexOf('timeout')) primus.reconnect();
