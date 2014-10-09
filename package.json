@@ -52,7 +52,7 @@
     "diagnostics": "0.0.x",
     "eventemitter3": "0.1.x",
     "forwarded-for": "0.1.x",
-    "fusing": "0.3.x",
+    "fusing": "0.4.x",
     "load": "1.0.x",
     "setheader": "0.0.x"
   },
@@ -69,7 +69,7 @@
     "jsonh": "0.0.x",
     "mocha": "1.21.x",
     "pre-commit": "0.0.x",
-    "request": "2.44.x",
+    "request": "2.45.x",
     "socket.io": "0.9.x",
     "socket.io-client": "0.9.x",
     "sockjs": "0.3.x",
