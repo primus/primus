@@ -1959,7 +1959,7 @@ problem but when you add this behind a load balancer the remote address will be
 set to the address of the load balancer that forwards the requests. So all in all
 it only causes more scalability problems instead of solving them. This is why
 we've opted to warn people about the risks of `cluster` when we detect that the
-Primus library is run in a worker environment. **USE IT AT YOU OWN RISK**
+Primus library is run in a worker environment. **USE IT AT YOUR OWN RISK**
 
 #### How do I use Primus with Express 3
 
