@@ -1079,7 +1079,9 @@ Primus.createServer = function createServer(fn, options) {
     fn = null;
   }
 
-  var server = require('create-server')(options, {
+  options = options || {};
+
+  var server = require('create-server')(Primus.prototype.merge.call(Primus, {
     http: function warn() {
       if (!options.iknowhttpsisbetter) [
         '',
@@ -1093,7 +1095,7 @@ Primus.createServer = function createServer(fn, options) {
         console.log('primus: '+ line);
       });
     }
-  });
+  }, options));
 
   //
   // Now that we've got a server, we can setup the Primus and start listening.
