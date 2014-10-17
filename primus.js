@@ -434,6 +434,12 @@ try {
     }
 
     //
+    // We need to make sure that the URL is properly encoded because IE doesn't
+    // do this automatically.
+    //
+    data.href = encodeURI(decodeURI(data.href));
+
+    //
     // If we don't obtain a port number (e.g. when using zombie) then try
     // and guess at a value from the 'href' value.
     //
@@ -451,10 +457,10 @@ try {
     }
 
     //
-    // IE quirk: The `protocol` is parsed as ":" when a protocol agnostic URL
-    // is used. In this case we extract the value from the `href` value.
+    // IE quirk: The `protocol` is parsed as ":" or "" when a protocol agnostic
+    // URL is used. In this case we extract the value from the `href` value.
     //
-    if (':' === data.protocol) {
+    if (!data.protocol || ':' === data.protocol) {
       data.protocol = data.href.substr(0, data.href.indexOf(':') + 1);
     }
 
