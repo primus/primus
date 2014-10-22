@@ -67,7 +67,7 @@
     "faye-websocket": "0.7.x",
     "global-wrap": "1.4.x",
     "jsonh": "0.0.x",
-    "mocha": "1.21.x",
+    "mocha": "2.0.x",
     "pre-commit": "0.0.x",
     "request": "2.45.x",
     "socket.io": "0.9.x",
