@@ -303,7 +303,7 @@ Spark.readable('__initialise', [function initialise() {
  * @api public
  */
 Spark.readable('transforms', function transforms(primus, connection, type, data, raw) {
-  var packet = { data: data }
+  var packet = { data: data, raw: raw }
     , fns = primus.transformers[type];
 
   //
@@ -340,11 +340,13 @@ Spark.readable('transforms', function transforms(primus, connection, type, data,
     //
     // We always emit 2 arguments for the data event, the first argument is the
     // parsed data and the second argument is the raw string that we received.
-    // This allows you, for exampele, to do some validation on the parsed data
+    // This allows you, for example, to do some validation on the parsed data
     // and then save the raw string in your database without the stringify
     // overhead.
     //
-    if ('incoming' === type) return connection.emit('data', packet.data, raw);
+    if ('incoming' === type) {
+      return connection.emit('data', packet.data, packet.raw);
+    }
 
     connection._write(packet.data);
   }));
