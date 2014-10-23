@@ -91,9 +91,9 @@ Spark.writable('__readyState', Spark.OPEN);
 // Lazy parse interface for IP address information. As nobody is always
 // interested in this, we're going to defer parsing until it's actually needed.
 //
-Spark.readable('address', { get: function address() {
+Spark.get('address', function address() {
   return this.request.forwarded || forwarded(this.remote, this.headers, this.primus.whitelist);
-}}, true);
+});
 
 /**
  * Set a timer to forcibly disconnect the spark if no data is received from the
