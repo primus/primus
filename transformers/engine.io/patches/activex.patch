@@ -1,0 +1,29 @@
+diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
+index 90072fd..8480aef 100644
+--- a/transformers/engine.io/library.js
++++ b/transformers/engine.io/library.js
+@@ -1041,7 +1041,7 @@ JSONPPolling.prototype.doPoll = function () {
+   this.script = script;
+ 
+   var isUAgecko = 'undefined' != typeof navigator && /gecko/i.test(navigator.userAgent);
+-  
++
+   if (isUAgecko) {
+     setTimeout(function () {
+       var iframe = document.createElement('iframe');
+@@ -2004,7 +2004,7 @@ module.exports = function(opts) {
+ 
+   if (!xdomain) {
+     try {
+-      return new ActiveXObject('Microsoft.XMLHTTP');
++      return new window[(['Active'].concat('Object').join('X'))]('Microsoft.XMLHTTP');
+     } catch(e) { }
+   }
+ }
+@@ -3527,4 +3527,4 @@ function ws(uri, protocols, opts) {
+ 
+ if (WebSocket) ws.prototype = WebSocket.prototype;
+ 
+-},{}]},{},[1])
+\ No newline at end of file
++},{}]},{},[1])

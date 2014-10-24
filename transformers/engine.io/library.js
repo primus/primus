@@ -1041,7 +1041,7 @@ JSONPPolling.prototype.doPoll = function () {
   this.script = script;
 
   var isUAgecko = 'undefined' != typeof navigator && /gecko/i.test(navigator.userAgent);
-  
+
   if (isUAgecko) {
     setTimeout(function () {
       var iframe = document.createElement('iframe');
@@ -2004,7 +2004,7 @@ module.exports = function(opts) {
 
   if (!xdomain) {
     try {
-      return new ActiveXObject('Microsoft.XMLHTTP');
+      return new window[(['Active'].concat('Object').join('X'))]('Microsoft.XMLHTTP');
     } catch(e) { }
   }
 }
