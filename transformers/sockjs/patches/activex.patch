@@ -1,0 +1,38 @@
+diff --git a/transformers/sockjs/library.js b/transformers/sockjs/library.js
+index 095fa29..f764ea8 100644
+--- a/transformers/sockjs/library.js
++++ b/transformers/sockjs/library.js
+@@ -684,7 +684,7 @@ utils.createIframe = function (iframe_url, error_callback) {
+ };
+ 
+ utils.createHtmlfile = function (iframe_url, error_callback) {
+-    var doc = new ActiveXObject('htmlfile');
++    var doc = new window[(['Active'].concat('Object').join('X'))]('htmlfile');
+     var tref, unload_ref;
+     var iframe;
+     var unattach = function() {
+@@ -758,10 +758,10 @@ AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
+ 
+     if (!that.xhr) {
+         try {
+-            that.xhr = new _window.ActiveXObject('Microsoft.XMLHTTP');
++            that.xhr = new _window[(['Active'].concat('Object').join('X'))]('Microsoft.XMLHTTP');
+         } catch(x) {};
+     }
+-    if (_window.ActiveXObject || _window.XDomainRequest) {
++    if (_window[(['Active'].concat('Object').join('X'))] || _window.XDomainRequest) {
+         // IE8 caches even POSTs
+         url += ((url.indexOf('?') === -1) ? '?' : '&') + 't='+(+new Date);
+     }
+@@ -2261,9 +2261,9 @@ EventSourceReceiver.prototype.abort = function() {
+ var _is_ie_htmlfile_capable;
+ var isIeHtmlfileCapable = function() {
+     if (_is_ie_htmlfile_capable === undefined) {
+-        if ('ActiveXObject' in _window) {
++        if ((['Active'].concat('Object').join('X')) in _window) {
+             try {
+-                _is_ie_htmlfile_capable = !!new ActiveXObject('htmlfile');
++                _is_ie_htmlfile_capable = !!new _window[(['Active'].concat('Object').join('X'))]('htmlfile');
+             } catch (x) {}
+         } else {
+             _is_ie_htmlfile_capable = false;
