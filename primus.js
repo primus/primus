@@ -807,6 +807,14 @@ Primus.prototype.initialise = function initialise(options) {
     primus.online = false;
     primus.emit('offline');
     primus.end();
+
+    //
+    // It is certainly possible that we're in a reconnection loop and that the
+    // user goes offline. In this case we want to kill the existing attempt so
+    // when the user goes online, it will attempt to reconnect freshly again.
+    //
+    primus.clearTimeout('reconnect');
+    primus.attempt = null;
   }
 
   /**
