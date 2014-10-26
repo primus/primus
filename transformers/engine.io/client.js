@@ -111,8 +111,8 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
-      socket.removeAllListeners();
       socket.close();
+      socket.removeAllListeners();
       socket = null;
     }
   });
