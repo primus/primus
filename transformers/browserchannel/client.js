@@ -82,7 +82,7 @@ module.exports = function client() {
         };
       }
 
-      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = undefined;
+      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
       socket.close();
       socket = null;
     }

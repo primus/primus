@@ -95,7 +95,7 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
-      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = null;
+      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
       socket.close();
       socket = null;
     }
