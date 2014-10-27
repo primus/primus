@@ -9,7 +9,11 @@
  * @api private
  */
 module.exports = function client() {
-  var primus = this
+  var ondisconnect = this.emits('end')
+    , onconnect = this.emits('open')
+    , onmessage = this.emits('data')
+    , onerror = this.emits('error')
+    , primus = this
     , socket;
 
   //
@@ -57,11 +61,11 @@ module.exports = function client() {
     //
     // Setup the Event handlers.
     //
-    socket.on('error', primus.emits('error'));
-    socket.on('connect', primus.emits('open'));
-    socket.on('message', primus.emits('data'));
-    socket.on('disconnect', primus.emits('end'));
-    socket.on('connect_failed', primus.emits('error'));
+    socket.on('disconnect', ondisconnect);
+    socket.on('connect_failed', onerror);
+    socket.on('connect', onconnect);
+    socket.on('message', onmessage);
+    socket.on('error', onerror);
   });
 
   //
@@ -92,7 +96,11 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
-      socket.removeAllListeners();
+      socket.removeListener('disconnect', ondisconnect);
+      socket.removeListener('connect_failed', onerror);
+      socket.removeListener('connect', onconnect);
+      socket.removeListener('message', onmessage);
+      socket.removeListener('error', onerror);
 
       //
       // This method can throw an error if it failed to connect to the server.

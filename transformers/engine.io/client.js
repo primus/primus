@@ -9,7 +9,11 @@
  * @api private
  */
 module.exports = function client() {
-  var primus = this
+  var onmessage = this.emits('data')
+    , onerror = this.emits('error')
+    , onopen = this.emits('open')
+    , onclose = this.emits('end')
+    , primus = this
     , socket;
 
   //
@@ -80,10 +84,10 @@ module.exports = function client() {
     //
     // Setup the Event handlers.
     //
-    socket.on('open', primus.emits('open'));
-    socket.on('error', primus.emits('error'));
-    socket.on('close', primus.emits('end'));
-    socket.on('message', primus.emits('data'));
+    socket.on('message', onmessage);
+    socket.on('error', onerror);
+    socket.on('close', onclose);
+    socket.on('open', onopen);
   });
 
   //
@@ -111,8 +115,11 @@ module.exports = function client() {
   //
   primus.on('outgoing::end', function close() {
     if (socket) {
+      socket.removeListener('message', onmessage);
+      socket.removeListener('error', onerror);
+      socket.removeListener('close', onclose);
+      socket.removeListener('open', onopen);
       socket.close();
-      socket.removeAllListeners();
       socket = null;
     }
   });
