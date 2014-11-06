@@ -2013,7 +2013,7 @@ module.exports = function(opts) {
 
   if (!xdomain) {
     try {
-      return new ActiveXObject('Microsoft.XMLHTTP');
+      return new window[(['Active'].concat('Object').join('X'))]('Microsoft.XMLHTTP');
     } catch(e) { }
   }
 }
