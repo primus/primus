@@ -21,10 +21,10 @@ primus.on('connection', function connection(spark) {
 
 # Compiling the Engine.IO library
 
-We cannot depend on the `engine.io.js` file since it is compiled as a UMD
-bundle that doesn't works with Primus when using RequireJS. To compile
-engine.io correctly use the `update.sh` utility which builds the library using
-the [`global-wrap`](https://github.com/domenic/global-wrap) module.
+We cannot depend on the `engine.io.js` file because it uses a UMD wrapper
+that doesn't work with Primus when using RequireJS. To compile the
+`engine.io-client` correctly use the `update.sh` utility which will build the
+library and expose it as a property of the global object.
 The steps required are the following:
 
 1. Fork or clone Primus
