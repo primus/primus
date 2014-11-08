@@ -1,7 +1,6 @@
 # Primus
 
-[![Build Status](https://travis-ci.org/primus/primus.svg?branch=master)](https://travis-ci.org/primus/primus)
-[![NPM version](https://badge.fury.io/js/primus.svg)](http://badge.fury.io/js/primus)
+[![Version npm](http://img.shields.io/npm/v/primus.svg?style=flat-square)](http://browsenpm.org/package/primus)[![Build Status](http://img.shields.io/travis/primus/primus/master.svg?style=flat-square)](https://travis-ci.org/primus/primus)[![Dependencies](https://img.shields.io/david/primus/primus.svg?style=flat-square)](https://david-dm.org/primus/primus)[![Coverage Status](http://img.shields.io/coveralls/primus/primus/master.svg?style=flat-square)](https://coveralls.io/r/primus/primus?branch=master)[![IRC channel](http://img.shields.io/badge/IRC-irc.freenode.net%23primus-00a8ff.svg?style=flat-square)](http://webchat.freenode.net/?channels=primus)
 
 Primus, the creator god of transformers but now also known as universal wrapper
 for real-time frameworks. There are a lot of real-time frameworks available for
