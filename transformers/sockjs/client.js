@@ -18,15 +18,15 @@ module.exports = function client() {
   var Factory = (function Factory() {
     if ('undefined' !== typeof SockJS) return SockJS;
 
-    try { return Primus.require('sockjs-client-node'); }
+    try { return Primus.require('sockjs-client'); }
     catch (e) {}
 
     return undefined;
   })();
 
   if (!Factory) return primus.critical(new Error(
-    'Missing required `sockjs-client-node` module. ' +
-    'Please run `npm install --save sockjs-client-node`'
+    'Missing required `sockjs-client` module. ' +
+    'Please run `npm install --save sockjs-client`'
   ));
 
   //
@@ -36,7 +36,7 @@ module.exports = function client() {
     primus.emit('outgoing::end');
 
     primus.socket = socket = new Factory(
-      primus.uri({ protocol: 'http' }),
+      primus.uri({ protocol: 'http', query: true }),
       null,
       primus.merge(primus.transport, {
       info: {

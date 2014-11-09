@@ -65,6 +65,7 @@
   },
   "devDependencies": {
     "binary-pack": "0.0.x",
+    "binary-split": "0.1.x",
     "browserchannel": "2.0.x",
     "browserify": "8.1.x",
     "chai": "1.10.x",
@@ -78,11 +79,15 @@
     "jsonh": "0.0.x",
     "mocha": "2.1.x",
     "pre-commit": "1.0.x",
+    "pumpify": "1.3.x",
     "request": "2.53.x",
+    "rocambole": "0.3.x",
+    "rocambole-node-remove": "1.0.x",
     "socket.io": "0.9.x",
     "socket.io-client": "0.9.x",
     "sockjs": "0.3.x",
-    "sockjs-client-node": "0.2.x",
+    "sockjs-client": "sockjs/sockjs-client#8deeba5",
+    "through2": "0.6.x",
     "ws": "0.7.x"
   },
   "pre-commit": "test, integration"

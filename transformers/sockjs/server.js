@@ -1,6 +1,7 @@
 'use strict';
 
-var PrimusError = require('../../errors').PrimusError;
+var PrimusError = require('../../errors').PrimusError
+  , parse = require('url').parse;
 
 /**
  * Minimum viable Sockjs server for Node.js that works through the primus
@@ -52,10 +53,10 @@ module.exports = function server() {
     socket.headers.via = null;
 
     var spark = new Spark(
-        headers                             // HTTP request headers.
-      , socket                              // IP address location.
-      , {}                                  // Query string, not allowed by SockJS.
-      , socket.id                           // Unique connection id.
+        headers                     // HTTP request headers.
+      , socket                      // IP address location.
+      , parse(socket.url).query     // Optional query string.
+      , socket.id                   // Unique connection id.
     );
 
     spark.on('outgoing::end', function end() {
