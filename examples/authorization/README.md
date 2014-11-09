@@ -12,6 +12,3 @@ npm install
 
 After this you can start the server using `node index.js`. When the server is
 running point your browser to [http://localhost:8080](http://localhost:8080).
-
-**Note:** SockJS does not support connection query strings, so this example
-will not work if you use the `sockjs` transformer.
