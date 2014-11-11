@@ -65,11 +65,11 @@
   },
   "devDependencies": {
     "binary-pack": "0.0.x",
-    "binary-split": "0.1.x",
     "browserchannel": "2.0.x",
     "browserify": "8.1.x",
     "chai": "1.10.x",
     "concat-stream": "1.4.x",
+    "condenseify": "1.0.x",
     "derequire": "1.2.x",
     "deumdify": "1.0.x",
     "ejson": "2.0.x",

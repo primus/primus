@@ -11,7 +11,7 @@ if (!dir) {
   process.exit(1);
 }
 
-var condenseify = require('./condenseify')
+var condenseify = require('condenseify')
   , browserify = require('browserify')
   , concat = require('concat-stream')
   , derequire = require('derequire')
