@@ -141,7 +141,7 @@ function Primus(server, options) {
     'http://github.com/primus/primus#can-i-use-cluster',
     '',
   ].forEach(function warn(line) {
-    console.error('primus: '+ line);
+    console.error('Primus: '+ line);
   });
 }
 
@@ -924,6 +924,16 @@ Primus.readable('destroy', function destroy(options, fn) {
     if (options.end !== false) {
       primus.forEach(function shutdown(spark) {
         spark.end();
+      });
+    } else {
+      [
+        '',
+        'We\'ve detected that you are using the `destroy` method with the',
+        '`end` option set to `false`. This is deprecated and the ability to',
+        'leave the connections open will be removed in future releases.',
+        ''
+      ].forEach(function each(line) {
+        console.error('Primus: '+ line);
       });
     }
 

@@ -970,7 +970,6 @@ accepts an Object which allows you to configure how you want the connections to
 be destroyed:
 
 - `close` Close the HTTP server that Primus received. Defaults to `true`.
-- `end` End all active connections. Defaults to `true`.
 - `timeout` Clean up the server and optionally, it's active connections after
   the specified amount of timeout. Defaults to `0`.
 
