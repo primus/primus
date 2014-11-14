@@ -198,7 +198,7 @@ describe('Spark', function () {
       }, 10);
     });
 
-    it('removes all event listeners after the `end` event is emitted', function (done) {
+    it('removes only our event listeners after the `end` event is emitted', function (done) {
       var spark = new primus.Spark()
         , data = 0;
 
@@ -209,8 +209,8 @@ describe('Spark', function () {
 
       spark.on('end', function () {
         process.nextTick(function () {
-          spark.emit('data', 'aaaa');
-          expect(data).to.equal(1);
+          spark.emit('data', 'foo');
+          expect(data).to.equal(2);
           done();
         });
       });

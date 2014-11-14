@@ -4,6 +4,7 @@ var ParserError = require('./errors').ParserError
   , log = require('diagnostics')('primus:spark')
   , parse = require('querystring').parse
   , forwarded = require('forwarded-for')
+  , Ultron = require('ultron')
   , fuse = require('fusing')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
@@ -34,15 +35,16 @@ function Spark(primus, headers, address, query, id, request) {
   address = address || {};
   request = request || headers['primus::req::backup'];
 
-  writable('id', id);                 // Unique id for socket.
-  writable('primus', primus);         // References to Primus.
-  writable('remote', address);        // The remote address location.
-  writable('headers', headers);       // The request headers.
-  writable('request', request);       // Reference to an HTTP request.
-  writable('writable', true);         // Silly stream compatibility.
-  writable('readable', true);         // Silly stream compatibility.
-  writable('query', query);           // The query string.
-  writable('timeout', null);          // Heartbeat timeout.
+  writable('id', id);                   // Unique id for socket.
+  writable('primus', primus);           // References to Primus.
+  writable('remote', address);          // The remote address location.
+  writable('headers', headers);         // The request headers.
+  writable('request', request);         // Reference to an HTTP request.
+  writable('writable', true);           // Silly stream compatibility.
+  writable('readable', true);           // Silly stream compatibility.
+  writable('query', query);             // The query string.
+  writable('timeout', null);            // Heartbeat timeout.
+  writable('ultron', new Ultron(this)); // Our event listening cleanup.
 
   //
   // Parse our query string.
@@ -172,6 +174,7 @@ Spark.readable('initialise', {
  */
 Spark.readable('__initialise', [function initialise() {
   var primus = this.primus
+    , ultron = this.ultron
     , spark = this;
 
   //
@@ -185,7 +188,7 @@ Spark.readable('__initialise', [function initialise() {
   //
   // We've received new data from our client, decode and emit it.
   //
-  spark.on('incoming::data', function message(raw) {
+  ultron.on('incoming::data', function message(raw) {
     //
     // New data has arrived so we're certain that the connection is still alive,
     // so it's save to restart the heartbeat sequence.
@@ -213,7 +216,7 @@ Spark.readable('__initialise', [function initialise() {
   //
   // We've received a ping message.
   //
-  spark.on('incoming::ping', function ping(time) {
+  ultron.on('incoming::ping', function ping(time) {
     spark.emit('outgoing::pong', time);
     spark._write('primus::pong::'+ time);
   });
@@ -221,7 +224,7 @@ Spark.readable('__initialise', [function initialise() {
   //
   // The client has disconnected.
   //
-  spark.on('incoming::end', function disconnect() {
+  ultron.on('incoming::end', function disconnect() {
     //
     // The socket is closed, sending data over it will throw an error.
     //
@@ -229,7 +232,7 @@ Spark.readable('__initialise', [function initialise() {
     spark.end(undefined, { reconnect: true });
   });
 
-  spark.on('incoming::error', function error(err) {
+  ultron.on('incoming::error', function error(err) {
     //
     // Ensure that the error we emit is always an Error instance. There are
     // transformers that used to emit only strings. A string is not an Error.
@@ -248,7 +251,7 @@ Spark.readable('__initialise', [function initialise() {
   //
   // End is triggered by both incoming and outgoing events.
   //
-  spark.on('end', function end() {
+  ultron.on('end', function end() {
     clearTimeout(spark.timeout);
     primus.emit('disconnection', spark);
 
@@ -523,7 +526,9 @@ Spark.readable('end', function end(data, options) {
   this.readyState = Spark.CLOSED;
   this.emit('outgoing::end');
   this.emit('end');
-  return this.removeAllListeners();
+  this.ultron.destroy();
+
+  return this;
 });
 
 //

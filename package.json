@@ -54,7 +54,8 @@
     "forwarded-for": "0.1.x",
     "fusing": "0.4.x",
     "load": "1.0.x",
-    "setheader": "0.0.x"
+    "setheader": "0.0.x",
+    "ultron": "1.0.x"
   },
   "devDependencies": {
     "binary-pack": "0.0.x",
