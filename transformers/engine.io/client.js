@@ -2,8 +2,8 @@
 /*globals eio*/
 
 /**
- * Minimum viable WebSocket client. This function is stringified and written in
- * to our client side library.
+ * Minimum viable Engine.IO client. This function is stringified and added in
+ * our client-side library.
  *
  * @runat client
  * @api private
@@ -17,7 +17,7 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available Engine.IO factory.
+  // Select an available Engine.IO factory.
   //
   var factory = (function factory() {
     if ('undefined' !== typeof eio) return eio;
@@ -28,7 +28,11 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!factory) return primus.critical(new Error('Missing required `engine.io-client` module. Please run `npm install --save engine.io-client`'));
+  if (!factory) {
+    var message = 'Missing required `engine.io-client` module. ' +
+      'Please run `npm install --save engine.io-client`';
+    return primus.critical(new Error(message));
+  }
 
   //
   // Connect to the given URL.
@@ -98,16 +102,10 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It assumes that the `close` event is
-  // called if it failed to disconnect.
+  // Attempt to reconnect the socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
-    if (socket) {
-      socket.close();
-      socket.open();
-    } else {
-      primus.emit('outgoing::open');
-    }
+    primus.emit('outgoing::open');
   });
 
   //
