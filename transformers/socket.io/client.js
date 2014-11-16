@@ -76,18 +76,10 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It assumes that the `close` event is
-  // called if it failed to disconnect. Bypass the namespaces and use
-  // socket.socket.
+  // Attempt to reconnect the socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
-    try {
-      socket.socket.disconnect();
-      socket.connected = socket.socket.connecting = socket.socket.reconnecting = false;
-      socket.socket.connect();
-    } catch (e) {
-      primus.emit('outgoing::open');
-    }
+    primus.emit('outgoing::open');
   });
 
   //
@@ -95,20 +87,20 @@ module.exports = function client() {
   // socket.socket.
   //
   primus.on('outgoing::end', function close() {
-    if (socket) {
-      socket.removeListener('disconnect', ondisconnect);
-      socket.removeListener('connect_failed', onerror);
-      socket.removeListener('connect', onconnect);
-      socket.removeListener('message', onmessage);
-      socket.removeListener('error', onerror);
+    if (!socket) return;
 
-      //
-      // This method can throw an error if it failed to connect to the server.
-      //
-      try { socket.socket.disconnect(); }
-      catch (e) {}
+    socket.removeListener('disconnect', ondisconnect);
+    socket.removeListener('connect_failed', onerror);
+    socket.removeListener('connect', onconnect);
+    socket.removeListener('message', onmessage);
+    socket.removeListener('error', onerror);
 
-      socket = null;
-    }
+    //
+    // This method can throw an error if it failed to connect to the server.
+    //
+    try { socket.socket.disconnect(); }
+    catch (e) {}
+
+    socket = null;
   });
 };

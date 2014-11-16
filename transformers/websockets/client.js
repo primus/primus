@@ -86,7 +86,6 @@ module.exports = function client() {
   // called if it failed to disconnect.
   //
   primus.on('outgoing::reconnect', function reconnect() {
-    primus.emit('outgoing::end');
     primus.emit('outgoing::open');
   });
 
@@ -94,10 +93,10 @@ module.exports = function client() {
   // We need to close the socket.
   //
   primus.on('outgoing::end', function close() {
-    if (socket) {
-      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
-      socket.close();
-      socket = null;
-    }
+    if (!socket) return;
+
+    socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
+    socket.close();
+    socket = null;
   });
 };
