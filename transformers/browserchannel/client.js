@@ -30,13 +30,13 @@ module.exports = function client() {
   // Connect to the given URL.
   //
   primus.on('outgoing::open', function connect() {
-    if (socket) socket.close();
+    primus.emit('outgoing::end');
 
     var url = primus.uri({ protocol: 'http' });
 
     primus.socket = socket = new Factory(url, primus.merge(primus.transport, {
       extraParams: primus.querystring(primus.uri({ protocol: 'http', query: true }).replace(url, '')),
-      reconnect: false,
+      reconnect: false
     }));
 
     //
@@ -62,7 +62,6 @@ module.exports = function client() {
   // called if it failed to disconnect.
   //
   primus.on('outgoing::reconnect', function reconnect() {
-    if (socket) socket.close();
     primus.emit('outgoing::open');
   });
 
@@ -70,21 +69,22 @@ module.exports = function client() {
   // We need to close the socket.
   //
   primus.on('outgoing::end', function close() {
-    if (socket) {
-      //
-      // Bug: BrowserChannel cannot close the connection if it's already
-      // connecting. By passing behaviour by checking the readyState and defer
-      // the close call.
-      //
-      if (socket.readyState === socket.CONNECTING) {
-        return socket.onopen = function onopen() {
-          primus.emit('outgoing::end');
-        };
-      }
+    if (!socket) return;
 
-      socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
+    socket.onerror = socket.onopen = socket.onclose = socket.onmessage = function () {};
+
+    //
+    // Bug: BrowserChannel cannot close the connection if it's already
+    // connecting. Bypass this behaviour by checking the readyState and
+    // defer the close call.
+    //
+    if (socket.readyState === socket.CONNECTING) {
+      socket.onopen = function onopen() {
+        this.close();
+      };
+    } else {
       socket.close();
-      socket = null;
     }
+    socket = null;
   });
 };
