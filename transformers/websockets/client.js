@@ -2,8 +2,8 @@
 /*globals MozWebSocket */
 
 /**
- * Minimum viable WebSocket client. This function is stringified and written in
- * to our client side library.
+ * Minimum viable WebSocket client. This function is stringified and added
+ * in our client-side library.
  *
  * @runat client
  * @api private
@@ -13,7 +13,7 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available WebSocket constructor.
+  // Select an available WebSocket factory.
   //
   var Factory = (function factory() {
     if ('undefined' !== typeof WebSocket) return WebSocket;
@@ -25,7 +25,9 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Factory) return primus.critical(new Error('Missing required `ws` module. Please run `npm install --save ws`'));
+  if (!Factory) return primus.critical(new Error(
+    'Missing required `ws` module. Please run `npm install --save ws`'
+  ));
 
 
   //
@@ -55,7 +57,10 @@ module.exports = function client() {
           primus.transport                              // options.
         );
       } else {
-        primus.socket = socket = new Factory(primus.uri({ protocol: prot, query: qsa }));
+        primus.socket = socket = new Factory(primus.uri({
+          protocol: prot,
+          query: qsa
+        }));
       }
     } catch (e) { return primus.emit('error', e); }
 
@@ -82,8 +87,7 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It assumes that the `outgoing::end` event is
-  // called if it failed to disconnect.
+  // Attempt to reconnect the socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
     primus.emit('outgoing::open');

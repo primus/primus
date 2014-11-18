@@ -2,8 +2,8 @@
 /*globals MozWebSocket */
 
 /**
- * Minimum viable WebSocket client. This function is stringified and written in
- * to our client side library.
+ * Minimum viable Faye-WebSocket client. This function is stringified and
+ * added in our client-side library.
  *
  * @runat client
  * @api private
@@ -13,7 +13,7 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available WebSocket constructor.
+  // Select an available Faye-WebSocket factory.
   //
   var Factory = (function factory() {
     if ('undefined' !== typeof WebSocket) return WebSocket;
@@ -25,7 +25,10 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Factory) return primus.critical(new Error('Missing required `faye-websocket` module. Please run `npm install --save faye-websocket`'));
+  if (!Factory) return primus.critical(new Error(
+    'Missing required `faye-websocket` module. ' +
+    'Please run `npm install --save faye-websocket`'
+  ));
 
 
   //
@@ -52,7 +55,10 @@ module.exports = function client() {
           primus.transport                              // options.
         );
       } else {
-        primus.socket = socket = new Factory(primus.uri({ protocol: 'ws', query: true }));
+        primus.socket = socket = new Factory(primus.uri({
+          protocol: 'ws',
+          query: true
+        }));
       }
     } catch (e) { return primus.emit('error', e); }
 
@@ -79,8 +85,7 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It assumes that the `outgoing::end` event is
-  // called if it failed to disconnect.
+  // Attempt to reconnect the socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
     primus.emit('outgoing::open');

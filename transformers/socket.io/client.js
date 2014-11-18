@@ -2,8 +2,8 @@
 /*globals io*/
 
 /**
- * Minimum viable Socket.IO client. This function is stringified and written in
- * to our client side library.
+ * Minimum viable Socket.IO client. This function is stringified and added
+ * in our client-side library.
  *
  * @runat client
  * @api private
@@ -17,7 +17,7 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available Socket.IO constructor.
+  // Select an available Socket.IO factory.
   //
   var factory = (function factory() {
     if ('undefined' !== typeof io && io.Socket) return io;
@@ -28,7 +28,10 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!factory) return primus.critical(new Error('Missing required `socket.io-client` module. Please run `npm install --save socket.io-client`'));
+  if (!factory) return primus.critical(new Error(
+    'Missing required `socket.io-client` module. ' +
+    'Please run `npm install --save socket.io-client`'
+  ));
 
   //
   // Connect to the given URL.

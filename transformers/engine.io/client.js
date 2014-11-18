@@ -28,11 +28,10 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!factory) {
-    var message = 'Missing required `engine.io-client` module. ' +
-      'Please run `npm install --save engine.io-client`';
-    return primus.critical(new Error(message));
-  }
+  if (!factory) return primus.critical(new Error(
+    'Missing required `engine.io-client` module. ' +
+    'Please run `npm install --save engine.io-client`'
+  ));
 
   //
   // Connect to the given URL.
@@ -112,13 +111,13 @@ module.exports = function client() {
   // We need to close the socket.
   //
   primus.on('outgoing::end', function close() {
-    if (socket) {
-      socket.removeListener('message', onmessage);
-      socket.removeListener('error', onerror);
-      socket.removeListener('close', onclose);
-      socket.removeListener('open', onopen);
-      socket.close();
-      socket = null;
-    }
+    if (!socket) return;
+
+    socket.removeListener('message', onmessage);
+    socket.removeListener('error', onerror);
+    socket.removeListener('close', onclose);
+    socket.removeListener('open', onopen);
+    socket.close();
+    socket = null;
   });
 };

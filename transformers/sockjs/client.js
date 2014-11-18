@@ -2,8 +2,8 @@
 /*globals SockJS*/
 
 /**
- * Minimum viable SockJS client. This function is stringified and written in
- * to our client side library.
+ * Minimum viable SockJS client. This function is stringified and added
+ * in our client-side library.
  *
  * @runat client
  * @api private
@@ -13,7 +13,7 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available Engine.IO factory.
+  // Select an available SockJS factory.
   //
   var Factory = (function Factory() {
     if ('undefined' !== typeof SockJS) return SockJS;
@@ -24,7 +24,10 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Factory) return primus.critical(new Error('Missing required `sockjs-client-node` module. Please run `npm install --save sockjs-client-node`'));
+  if (!Factory) return primus.critical(new Error(
+    'Missing required `sockjs-client-node` module. ' +
+    'Please run `npm install --save sockjs-client-node`'
+  ));
 
   //
   // Connect to the given URL.
@@ -70,8 +73,7 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It assumes that the `outgoing::end` event is
-  // called if it failed to disconnect.
+  // Attempt to reconnect the socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
     primus.emit('outgoing::open');

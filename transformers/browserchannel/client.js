@@ -2,8 +2,8 @@
 /*globals BCSocket*/
 
 /**
- * Minimum viable BrowserChannel client. This function is stringified and written in
- * to our client side library.
+ * Minimum viable BrowserChannel client. This function is stringified and added
+ * in our client-side library.
  *
  * @runat client
  * @api private
@@ -13,7 +13,7 @@ module.exports = function client() {
     , socket;
 
   //
-  // Selects an available BrowserChannel factory.
+  // Select an available BrowserChannel factory.
   //
   var Factory = (function factory() {
     if ('undefined' !== typeof BCSocket) return BCSocket;
@@ -24,7 +24,10 @@ module.exports = function client() {
     return undefined;
   })();
 
-  if (!Factory) return primus.critical(new Error('Missing required `browserchannel` module. Please run `npm install --save browserchannel`'));
+  if (!Factory) return primus.critical(new Error(
+    'Missing required `browserchannel` module. ' +
+    'Please run `npm install --save browserchannel`'
+  ));
 
   //
   // Connect to the given URL.
@@ -35,7 +38,10 @@ module.exports = function client() {
     var url = primus.uri({ protocol: 'http' });
 
     primus.socket = socket = new Factory(url, primus.merge(primus.transport, {
-      extraParams: primus.querystring(primus.uri({ protocol: 'http', query: true }).replace(url, '')),
+      extraParams: primus.querystring(primus.uri({
+        protocol: 'http',
+        query: true
+      }).replace(url, '')),
       reconnect: false
     }));
 
@@ -58,8 +64,7 @@ module.exports = function client() {
   });
 
   //
-  // Attempt to reconnect the socket. It assumes that the `close` event is
-  // called if it failed to disconnect.
+  // Attempt to reconnect the socket.
   //
   primus.on('outgoing::reconnect', function reconnect() {
     primus.emit('outgoing::open');
