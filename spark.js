@@ -511,8 +511,6 @@ Spark.readable('_write', function _write(data) {
 Spark.readable('end', function end(data, options) {
   if (Spark.CLOSED === this.readyState) return this;
 
-  log('end initiated by developer for %s', this.id);
-
   options = options || {};
   if (data !== undefined) this.write(data);
 
@@ -522,6 +520,19 @@ Spark.readable('end', function end(data, options) {
   // as this message should not be transformed.
   //
   if (!options.reconnect) this._write('primus::server::close');
+
+  //
+  // This seems redundant but there are cases where the above writes
+  // can trigger another `end` call. An example is with Engine.IO
+  // when calling `end` on the client and `end` on the spark right
+  // after. The `end` call on the spark comes before the `incoming::end`
+  // event and the result is an attempt of writing to a closed socket.
+  // When this happens Engine.IO closes the connection and without
+  // this check the following instructions could be executed twice.
+  //
+  if (Spark.CLOSED === this.readyState) return this;
+
+  log('emitting final events for spark %s', this.id);
 
   this.readyState = Spark.CLOSED;
   this.emit('outgoing::end');
