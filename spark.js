@@ -527,6 +527,7 @@ Spark.readable('end', function end(data, options) {
   this.emit('outgoing::end');
   this.emit('end');
   this.ultron.destroy();
+  delete this.ultron;
 
   return this;
 });
