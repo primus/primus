@@ -17,7 +17,7 @@ exports.login = function login(req, res) {
   //
   var user = db.getUser(req.body.username);
 
-  if (!user) return res.send(401, { message: 'Bad credentials' });
+  if (!user) return res.status(401).send({ message: 'Bad credentials' });
 
   //
   // Check user's password and if it is correct return an authorization token.
@@ -28,7 +28,7 @@ exports.login = function login(req, res) {
       return res.send(500, { message: 'Internal error' });
     }
 
-    if (user.key !== key) return res.send(401, { message: 'Bad credentials' });
+    if (user.key !== key) return res.status(401).send({ message: 'Bad credentials' });
 
     var timestamp = Date.now();
 
