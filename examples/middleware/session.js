@@ -9,10 +9,10 @@ module.exports = function configure(options) {
   var key = options.key || 'connect.sid'
     , store = options.store
     , primus = this;
-  
+
   if (!store) {
     //
-    // Throw an error when the session store is not passed. 
+    // Throw an error when the session store is not passed.
     //
     var message = 'Session middleware configuration failed due to missing '
       + '`store` option';

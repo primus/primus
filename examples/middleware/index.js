@@ -19,7 +19,8 @@ var app = express();
 // Configure and save a reference to the `cookie-parser` middleware so we can
 // reuse it in Primus.
 //
-var cookies = cookieParser('shhhh, very secret');
+var secret = 'shhhh, very secret'
+  , cookies = cookieParser(secret);
 
 //
 // Since this is only an example, we will use the `MemoryStore` to store the
@@ -31,7 +32,12 @@ var store = new expressSession.MemoryStore();
 // Add the middleware needed for session support.
 //
 app.use(cookies);
-app.use(expressSession({ store: store }));
+app.use(expressSession({
+  saveUninitialized: true,
+  secret: secret,
+  resave: true,
+  store: store
+}));
 
 app.get('/', function index(req, res) {
   //
@@ -39,7 +45,7 @@ app.get('/', function index(req, res) {
   // timestamp.
   //
   req.session.timestamp = Date.now();
-  res.sendfile(__dirname + '/index.html');
+  res.sendFile(__dirname + '/index.html');
 });
 
 //
@@ -49,7 +55,7 @@ var server = http.createServer(app)
   , primus = new Primus(server);
 
 //
-// Here we add the `cookie-parser` middleware and our session middleware. The 
+// Here we add the `cookie-parser` middleware and our session middleware. The
 // first will populate `req.signedCookies` and the second `req.session` for the
 // requests captured by Primus.
 //
