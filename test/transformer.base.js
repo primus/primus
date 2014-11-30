@@ -37,6 +37,9 @@ module.exports = function base(transformer, pathname, transformer_name) {
       , server
       , primus;
 
+    transformer_name = transformer_name.toLowerCase();
+    transformer = transformer.toLowerCase();
+
     beforeEach(function beforeEach(done) {
       var services = create(transformer, 'json', done, pathname);
 
@@ -976,7 +979,11 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.write('balls');
       });
 
-      if (transformer.toLowerCase() === 'websockets')
+      if (
+          'faye' === transformer
+        || 'sockjs' === transformer
+        || 'websockets' === transformer
+      )
       it('should connect using basic auth', function (done) {
         primus.on('connection', function (spark) {
           expect(spark.headers.authorization).to.equal('Basic dXNyOnBhc3M=');
@@ -1152,8 +1159,8 @@ module.exports = function base(transformer, pathname, transformer_name) {
           expect(spark.query).to.be.a('object');
 
           if (
-            (transformer.toLowerCase() !== 'sockjs') &&
-            (transformer_name.toLowerCase() !== 'unixdomainwebsockets')
+              'unixdomainwebsockets' !== transformer_name
+            && 'sockjs' !== transformer
           ) {
             expect(spark.query.foo).to.equal('bar');
           }
@@ -1190,7 +1197,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
       });
 
-      if (transformer_name.toLowerCase() !== 'unixdomainwebsockets') {
+      if ('unixdomainwebsockets' !== transformer_name) {
       it('should still allow requests to the original listener', function (done) {
         request(
           server.addr +'/nothrow',
@@ -1278,7 +1285,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         var socket = new Socket(server.addr);
       });
 
-      if (transformer_name.toLowerCase() !== 'unixdomainwebsockets') {
+      if ('unixdomainwebsockets' !== transformer_name)
       it('exposes a spec file with the correct transformer', function (done) {
         request(
           server.addr +'/primus/spec',
@@ -1286,7 +1293,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
             if (err) return done(err);
             body = JSON.parse(body);
 
-            expect(body.transformer).to.equal(transformer.toLowerCase());
+            expect(body.transformer).to.equal(transformer);
             expect(body.version).to.equal(primus.version);
             expect(body.pathname).to.equal('/primus');
             expect(body.parser).to.equal('json');
@@ -1295,7 +1302,6 @@ module.exports = function base(transformer, pathname, transformer_name) {
           }
         );
       });
-      } // !unixdomainwebsockets
 
       it('doesnt crash when we write to a closed connection', function (done) {
         primus.on('connection', function (spark) {
