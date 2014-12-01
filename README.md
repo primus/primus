@@ -535,7 +535,7 @@ normalized to `disconnect`.
 **If you are using authentication you should disable the `timeout` strategy as
 there is no way of detecting the difference between a failed authorization and a
 failed connect. If you leave this enabled with authorization every unauthorized
-access will try to reconect again**.
+access will try to reconnect again**.
 
 We automatically disable this for you when you've set the authorization before
 you save the library.
