@@ -364,7 +364,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
             expect(Object.keys(socket.timers).length).to.be.above(0);
             return;
           }
-          expect(Object.keys(socket.timers).length).to.be.equal(0);
+          expect(Object.keys(socket.timers).length).to.be.equal(1);
         });
 
         socket.on('close', function () {

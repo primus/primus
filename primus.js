@@ -664,10 +664,6 @@ Primus.prototype.initialise = function initialise(options) {
     }
 
     primus.latency = +new Date() - start;
-
-    primus.emit('open');
-    if (reconnect) primus.emit('reconnected');
-
     primus.clearTimeout('ping', 'pong').heartbeat();
 
     if (primus.buffer.length) {
@@ -681,6 +677,9 @@ Primus.prototype.initialise = function initialise(options) {
         primus._write(data[i]);
       }
     }
+
+    primus.emit('open');
+    if (reconnect) primus.emit('reconnected');
   });
 
   primus.on('incoming::pong', function pong(time) {
