@@ -16,6 +16,7 @@ module.exports = function server() {
     , Spark = this.Spark;
 
   var service = this.service = new WebSocketServer({
+    perMessageDeflate: false,
     clientTracking: false,
     noServer: true
   });
@@ -63,7 +64,7 @@ module.exports = function server() {
 
   //
   // Listen to non-upgrade requests.
-  // 
+  //
   this.on('request', function request(req, res) {
     res.writeHead(426, { 'content-type': 'text/plain' });
     res.end(http.STATUS_CODES[426]);
