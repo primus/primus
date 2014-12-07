@@ -4,10 +4,10 @@ We welcome and encourage community contributions to our projects. This document
 specifies the guidelines for contributing to the projects that are created under
 the **primus** organization. We've split this document in smaller sections:
 
-- [Feature Requests](#features)
+- [Feature Requests](#feature-requests)
 - [Issues](#issues)
-  - [Outline of a bug report](#outline-of-a-bug-good-report)
-  - [Labels](#lables)
+  - [Outline of a good bug report](#outline-of-a-good-bug-report)
+  - [Labels](#labels)
 - [Code](#code)
   - [The Boy Scout Rule](#the-boy-scout-rule)
   - [Developer's Certificate of Origin](#developers-certificate-of-origin)
@@ -63,7 +63,7 @@ template so you know what kind of data you need to supply so we can resolve it
 as quickly as possible. If some of these fields do not apply to your issue feel
 free to leave them empty or remove them completely:
 
-```md
+```
 **Version:**
 
 **Environment:**
@@ -123,6 +123,10 @@ Steps to reproduce:
 4. Press enter to execute the code.
 ```
 
+When adding code to your example please use [code fencing][fencing] to ensure
+that your snippet is highlighted correctly. This greatly improves the
+readability of the issue.
+
 ### Labels
 
 We try to label all created issues to make it easy to spot the scope of the
@@ -162,7 +166,7 @@ not trigger the code path.
 
 When working with the code try to the following rule that The Boy Scouts have:
 
-> "Always leave the campground cleaner than you found it."
+> Always leave the campground cleaner than you found it.
 
 If you find a mess on the ground, you clean it up regardless of who might have
 made the mess. You intentionally improve the environment for the next group of
@@ -258,4 +262,5 @@ this is an issue please contact us directly through [IRC][irc].
 
 [dco]: http://elinux.org/Developer_Certificate_Of_Origin
 [irc]: http://webchat.freenode.net/?channels=primus
+[fencing]: https://help.github.com/articles/github-flavored-markdown/#fenced-code-blocks
 [security]: SECURITY.md
