@@ -14,7 +14,7 @@ benefit of the doubt as it's possible that we haven't seen it yet. Please send
 us a message **without details** at one of the following:
 
 - Give our channel operators a heads up in our IRC room.
-- Contact the lead developer of this project on his personal e-mail by
+- Contact the lead developer of this project on their personal e-mail by
   extracting from the git logs using:
   `git --no-pager show -s --format='%an <%ae>' <gitsha>` where `<gitsha>` is the
   SHA1 of their latest commit in the project.
