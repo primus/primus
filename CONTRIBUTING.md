@@ -14,7 +14,7 @@ the **primus** organization. We've split this document in smaller sections:
 - [Code of Conduct](#code-of-conduct)
 
 There are always many ways you can help out this project besides contributing
-code:
+to the code:
 
 - Writing and improving our documentation.
 - Helping people out in our [IRC][irc] room.
@@ -24,16 +24,16 @@ code:
   [SECURITY.md](security) for the Security Guidelines.
 - Filing bugs.
 
-And that list goes on and on. No matter what choose we are thankful for your
-interest and that you're looking to contribute to our projects. They are build
-and maintained with love and we hope to share some of that love with you.
+And that list goes on and on. No matter what you choose we are thankful for your
+interest and for the fact that you want to contribute to our projects. They are
+build and maintained with love and we hope to share some of that love with you.
 
 ## Feature Requests
 
-Yes! Make them! We would love to hear your idea's and what we can do to continue
-to move this project forward. Changes big or small, we welcome them all. If the
+Yes! Make them! We would love to hear your idea(s) and what we can do to continue
+to move this project forward. Changes, big or small, are always welcomed. If the
 feature requested is not in line with our roadmap we will work with you to
-ensure you can build it your self on top of our project.
+ensure that you can build it yourself on top of our project.
 
 ## Issues
 
@@ -41,9 +41,9 @@ ensure you can build it your self on top of our project.
 Guidelines][security] first.**
 
 Before creating an issue make sure that you are using the latest version of the
-module as the issue you might to report could be resolved already. If you are
-using the latest version please use the Github search feature to check if there
-isn't already an open issue. If you've found an issue that is:
+module as the issue you report could be already resolved. If you are using the
+latest version please use the Github search feature to check if the issue is
+already known. If you've found an issue that is:
 
 - **closed:** Check if the issue provides a solution for your issue. If it's
   already fixed using a commit it could be that there have been a regression in
@@ -51,15 +51,15 @@ isn't already an open issue. If you've found an issue that is:
   might make more sense to just add comment to the closed issue explaining that
   you're still affected by this.
 - **open:** Try to provide more details to the issue. If you can reproduce the
-  issue in a different way then the original author stated please add this.
-  There more ways we have to reproduce the bug it will be more likely to get
-  fixed faster.
+  issue in a different way then the one used by the original author, please add
+  this. The more ways we have to reproduce the bug, the more are the chances to
+  get it fixed fast.
 - **missing:** Please open a new issue, we would love to hear more about it.
 
 ### Outline of a good bug report
 
 When reporting new issues for the project please use the following issue
-template so you know what kind of data you need to supply so we can resolve it
+template so you know what kind of data you need to supply and we can resolve it
 as quickly as possible. If some of these fields do not apply to your issue feel
 free to leave them empty or remove them completely:
 
@@ -89,17 +89,17 @@ present in them.
 - **Version:** The version number of the module that you're currently using. If
   you don't know the current version number you can check it by running `npm ls`
   in your terminal.
-- **Environment:** This allows us to narrow down the issue to potential platform
+- **Environment:** This allows us to narrow down the issue to a potential platform
   or version if we cannot reproduce it on our own machines. If you don't know
   your npm and node.js version you can run `npm version` in your terminal and it
-  will output all the information you need. If you are reporting a Node.js
+  will output all the information you need. If you are reporting a node.js
   specific bug you can omit the browser field unless it requires a browser to
-  reproduce.
-- **Expected result:** What you did you expect that would happen instead.
-- **Actual result:** What happened when you executed the code.
-- **Steps to reproduce:** Every step, no matter how small is described here to
-  fully reproduce the mentioned issue. You cannot be specific enough here. It's
-  better to much details then to few here.
+  reproduce it.
+- **Expected result:** What did you expect would happen.
+- **Actual result:** What actually happened when you executed the code.
+- **Steps to reproduce:** Every step to fully reproduce the issue is described
+  here, no matter how small. You cannot be specific enough. It's better to have
+  too much details than too few here.
 
 A complete example of this would be:
 
@@ -117,9 +117,9 @@ Actual result: An empty console without any log messages.
 
 Steps to reproduce:
 
-1. Open Chrome
+1. Open Chrome.
 2. Open the Developer tools panel.
-3. Type `console.log('message')`
+3. Type `console.log('message')`.
 4. Press enter to execute the code.
 ```
 
@@ -129,42 +129,42 @@ readability of the issue.
 
 ### Labels
 
-We try to label all created issues to make it easy to spot the scope of the
-created issue. We also label all issues with a `★`. The more stars an issue has
+We try to label all created issues to facilitate the identification of the
+issue scope. We also label all issues with a `★`. The more stars an issue has
 the more important it is. We currently have three different levels of
 importance:
 
 - **`★★★`**: High priority issue, should be addressed as soon as possible. We
   will do our best to include this in the next release. This however does not
-  mean that no issue is closed or fixed before these high
-  priority issues.
-- **`★★`**: Medium priority, this should be fix but it might not make the next
+  mean that no issue is closed or fixed before these high priority issues.
+- **`★★`**: Medium priority, this should be fixed but it might not make the next
   release.
-- **`★`**: Low priority issue, don't expect this to be resolved soon by the
-  contributors. Great bugs to fix on a rainy day. But these bugs are also great
-  for first time contributors who are looking to fix some bugs.
+- **`★`**: Low priority issue, don't expect this to be resolved soon. These bugs
+  are generaly fixed on a rainy or boring day. These bugs are also great
+  for first time contributors who are looking for something to fix.
 
 ## Code
 
-Unless you are fixing a known bug we **strongly** encourage discussing this with
-the core team via a GitHub issue or [IRC][irc] before getting started ensure you
-work is not rejected.
+Unless you are fixing a known bug we **strongly** encourage to discuss your
+feature with the core team via a GitHub issue or [IRC][irc]. Before getting
+started ensure that you work will not rejected.
 
 All contributions must be made via pull requests. After a pull request is made
 other contributors will either provide feedback or merge it directly depending
 on:
 
-- Addition and passing of the test suite and coverage reports.
+- Addition of new tests and passing of the test suite.
+- Code coverage.
 - The severity of the bug that the code is addressing.
 - The overall quality of patch.
 
-We expect that every bug fix comes with new test for our test suite. This is
+We expect that every bug fix comes with new tests for our test suite. This is
 important to prevent regression in the future as our current set of tests did
 not trigger the code path.
 
 ### The Boy Scout Rule
 
-When working with the code try to the following rule that The Boy Scouts have:
+When working with the code try to follow the rule that The Boy Scouts have:
 
 > Always leave the campground cleaner than you found it.
 
@@ -223,7 +223,8 @@ and email address:
 Signed-off-by: Joe Longpolland <joe@example.com>
 ```
 
-You can automate this process by simply committing your code using:
+You can automate this process by simply committing your code using the `-s`
+option:
 
 ```
 git commit -s
