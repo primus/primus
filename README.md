@@ -130,13 +130,14 @@ parser              | Message encoder for all communication     | `JSON`
 transformer         | The transformer we should use internally  | `websockets`
 plugin              | The plugins that should be applied        | `{}`
 timeout             | The heartbeat timeout                     | `35000`
+global              | Set a custom client class/global name     | `Primus`
+perMessageDeflate   | Use `permessage-deflate` extension        | `false`
 origins             | **cors** List of origins                  | `*`
 methods             | **cors** List of accepted HTTP methods    | `GET,HEAD,PUT,POST,DELETE,OPTIONS`
 credentials         | **cors** Allow sending of credentials     | `true`
 maxAge              | **cors** Cache duration of CORS preflight | `30 days`
 headers             | **cors** Allowed headers                  | `false`
 exposed             | **cors** Headers exposed to the client    | `false`
-global              | Set a custom client class/global name     | `Primus`
 
 The options that are prefixed with **cors** are supplied to our
 [access-control](http://github.com/primus/access-control) module which handles
