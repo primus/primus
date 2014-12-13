@@ -98,11 +98,12 @@ function Primus(server, options) {
   this.initialise(options.transformer || options.transport, options);
 
   //
-  // If the plugins are supplied through the options, also initialise them. This
-  // allows us to do `primus.createSocket({})` to also use plugins.
+  // If the plugins are supplied through the options, also initialise them.
+  // This also allows us to use plugins when creating a client constructor
+  // with the `Primus.createSocket({})` method.
   //
   if ('string' === typeof options.plugin) {
-    options.plugin.split(/[\s|,]+/).forEach(function register(name) {
+    options.plugin.split(/[, ]+/).forEach(function register(name) {
       primus.use(name, name);
     });
 
