@@ -1,6 +1,4 @@
 !function(e){var f;'undefined'!=typeof window?f=window:'undefined'!=typeof self&&(f=self),f.SockJS=e()}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-
-},{}],2:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -14,7 +12,7 @@ if ('_sockjs_onload' in global) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./main":15,"./transport-list":17}],3:[function(_dereq_,module,exports){
+},{"./main":14,"./transport-list":16}],2:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -33,7 +31,7 @@ inherits(CloseEvent, Event);
 
 module.exports = CloseEvent;
 
-},{"./event":5,"inherits":54}],4:[function(_dereq_,module,exports){
+},{"./event":4,"inherits":53}],3:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -86,7 +84,7 @@ EventEmitter.prototype.removeListener = EventTarget.prototype.removeEventListene
 
 module.exports.EventEmitter = EventEmitter;
 
-},{"./eventtarget":6,"inherits":54}],5:[function(_dereq_,module,exports){
+},{"./eventtarget":5,"inherits":53}],4:[function(_dereq_,module,exports){
 'use strict';
 
 function Event(eventType) {
@@ -110,7 +108,7 @@ Event.BUBBLING_PHASE  = 3;
 
 module.exports = Event;
 
-},{}],6:[function(_dereq_,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 'use strict';
 
 /* Simplified implementation of DOM2 EventTarget.
@@ -172,7 +170,7 @@ EventTarget.prototype.dispatchEvent = function(event) {
 
 module.exports = EventTarget;
 
-},{}],7:[function(_dereq_,module,exports){
+},{}],6:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -189,7 +187,7 @@ inherits(TransportMessageEvent, Event);
 
 module.exports = TransportMessageEvent;
 
-},{"./event":5,"inherits":54}],8:[function(_dereq_,module,exports){
+},{"./event":4,"inherits":53}],7:[function(_dereq_,module,exports){
 'use strict';
 
 var JSON3 = _dereq_('json3')
@@ -218,7 +216,7 @@ FacadeJS.prototype._close = function() {
 
 module.exports = FacadeJS;
 
-},{"./utils/iframe":48,"json3":55}],9:[function(_dereq_,module,exports){
+},{"./utils/iframe":47,"json3":54}],8:[function(_dereq_,module,exports){
 'use strict';
 
 var urlUtils = _dereq_('./utils/url')
@@ -314,7 +312,7 @@ module.exports = function(SockJS, availableTransports) {
   };
 };
 
-},{"./facade":8,"./info-iframe-receiver":11,"./location":14,"./utils/event":47,"./utils/iframe":48,"./utils/url":52,"json3":55}],10:[function(_dereq_,module,exports){
+},{"./facade":7,"./info-iframe-receiver":10,"./location":13,"./utils/event":46,"./utils/iframe":47,"./utils/url":51,"json3":54}],9:[function(_dereq_,module,exports){
 'use strict';
 
 var EventEmitter = _dereq_('events').EventEmitter
@@ -359,7 +357,7 @@ InfoAjax.prototype.close = function() {
 
 module.exports = InfoAjax;
 
-},{"./utils/object":49,"events":4,"inherits":54,"json3":55}],11:[function(_dereq_,module,exports){
+},{"./utils/object":48,"events":3,"inherits":53,"json3":54}],10:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -394,7 +392,7 @@ InfoReceiverIframe.prototype.close = function() {
 
 module.exports = InfoReceiverIframe;
 
-},{"./info-ajax":10,"./transport/sender/xhr-local":38,"events":4,"inherits":54,"json3":55}],12:[function(_dereq_,module,exports){
+},{"./info-ajax":9,"./transport/sender/xhr-local":37,"events":3,"inherits":53,"json3":54}],11:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -461,7 +459,7 @@ InfoIframe.prototype.close = function() {
 module.exports = InfoIframe;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./info-iframe-receiver":11,"./transport/iframe":23,"./utils/event":47,"events":4,"inherits":54,"json3":55}],13:[function(_dereq_,module,exports){
+},{"./info-iframe-receiver":10,"./transport/iframe":22,"./utils/event":46,"events":3,"inherits":53,"json3":54}],12:[function(_dereq_,module,exports){
 'use strict';
 
 var EventEmitter = _dereq_('events').EventEmitter
@@ -541,7 +539,7 @@ InfoReceiver.timeout = 8000;
 
 module.exports = InfoReceiver;
 
-},{"./info-ajax":10,"./info-iframe":12,"./transport/sender/xdr":35,"./transport/sender/xhr-cors":36,"./transport/sender/xhr-fake":37,"./transport/sender/xhr-local":38,"./utils/url":52,"events":4,"inherits":54}],14:[function(_dereq_,module,exports){
+},{"./info-ajax":9,"./info-iframe":11,"./transport/sender/xdr":34,"./transport/sender/xhr-cors":35,"./transport/sender/xhr-fake":36,"./transport/sender/xhr-local":37,"./utils/url":51,"events":3,"inherits":53}],13:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -555,13 +553,13 @@ module.exports = global.location || {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],15:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
 _dereq_('./shims');
 
-var parse = _dereq_('url-parse')
+var URL = _dereq_('url-parse')
   , inherits = _dereq_('inherits')
   , JSON3 = _dereq_('json3')
   , random = _dereq_('./utils/random')
@@ -601,8 +599,8 @@ function SockJS(url, protocols, options) {
   this._server = options.server || random.numberString(1000);
 
   // Step 1 of WS spec - parse and validate the url. Issue #8
-  var parsedUrl = parse(url);
-  if (!parsedUrl.host || !parsedUrl.pathname || !parsedUrl.protocol) {
+  var parsedUrl = new URL(url);
+  if (!parsedUrl.host || !parsedUrl.protocol) {
     throw new SyntaxError("The URL '" + url + "' is invalid");
   } else if (parsedUrl.hash) {
     throw new SyntaxError('The URL must not contain a fragment');
@@ -639,19 +637,17 @@ function SockJS(url, protocols, options) {
   var o = urlUtils.getOrigin(loc.href);
   this._origin = o ? o.toLowerCase() : null;
 
-  // strip port numbers for 80 and 443 cases
-  // Issue #74
-  if (!secure && parsedUrl.port === '80') {
-    parsedUrl.host = parsedUrl.port = null;
-  } else if (secure && parsedUrl.port === '443') {
-    parsedUrl.host = parsedUrl.port = null;
-  }
-
   // remove the trailing slash
-  parsedUrl.path = parsedUrl.pathname.replace(/[/]+$/, '') + (parsedUrl.search || '');
+  parsedUrl.path = parsedUrl.pathname.replace(/[/]+$/, '') + (parsedUrl.query || '');
+
+  // basic authentication
+  parsedUrl.auth = parsedUrl.username
+    ? parsedUrl.username + ':' + parsedUrl.password + '@'
+    : '';
 
   // store the sanitized url
-  this.url = parsedUrl.protocol + '//' + parsedUrl.hostname + (parsedUrl.port ? (':' + parsedUrl.port) : '') + parsedUrl.path;
+  this.url = parsedUrl.protocol + '//' + parsedUrl.auth + parsedUrl.hostname +
+    (parsedUrl.port ? ':' + parsedUrl.port : '') + parsedUrl.path;
 
   // Step 7 - start connection in background
   // obtain server info
@@ -905,7 +901,7 @@ module.exports = function(availableTransports) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./event/close":3,"./event/event":5,"./event/eventtarget":6,"./event/trans-message":7,"./iframe-bootstrap":9,"./info-receiver":13,"./location":14,"./shims":16,"./utils/browser":45,"./utils/escape":46,"./utils/event":47,"./utils/object":49,"./utils/random":50,"./utils/transport":51,"./utils/url":52,"./version":53,"inherits":54,"json3":55,"url-parse":56}],16:[function(_dereq_,module,exports){
+},{"./event/close":2,"./event/event":4,"./event/eventtarget":5,"./event/trans-message":6,"./iframe-bootstrap":8,"./info-receiver":12,"./location":13,"./shims":15,"./utils/browser":44,"./utils/escape":45,"./utils/event":46,"./utils/object":48,"./utils/random":49,"./utils/transport":50,"./utils/url":51,"./version":52,"inherits":53,"json3":54,"url-parse":55}],15:[function(_dereq_,module,exports){
 /* eslint-disable */
 /* jscs: disable */
 'use strict';
@@ -1379,7 +1375,7 @@ defineProperties(StringPrototype, {
     }
 }, hasNegativeSubstrBug);
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = [
@@ -1399,7 +1395,7 @@ module.exports = [
 , _dereq_('./transport/jsonp-polling')
 ];
 
-},{"./transport/eventsource":21,"./transport/htmlfile":22,"./transport/jsonp-polling":24,"./transport/lib/iframe-wrap":27,"./transport/websocket":39,"./transport/xdr-polling":40,"./transport/xdr-streaming":41,"./transport/xhr-polling":42,"./transport/xhr-streaming":43}],18:[function(_dereq_,module,exports){
+},{"./transport/eventsource":20,"./transport/htmlfile":21,"./transport/jsonp-polling":23,"./transport/lib/iframe-wrap":26,"./transport/websocket":38,"./transport/xdr-polling":39,"./transport/xdr-streaming":40,"./transport/xhr-polling":41,"./transport/xhr-streaming":42}],17:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -1569,17 +1565,17 @@ AbstractXHRObject.supportsCORS = cors;
 module.exports = AbstractXHRObject;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/event":47,"../../utils/url":52,"events":4,"inherits":54}],19:[function(_dereq_,module,exports){
+},{"../../utils/event":46,"../../utils/url":51,"events":3,"inherits":53}],18:[function(_dereq_,module,exports){
 (function (global){
 module.exports = global.EventSource;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 (function (global){
 module.exports = global.WebSocket || global.MozWebSocket;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],21:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1608,7 +1604,7 @@ EventSourceTransport.roundTrips = 2;
 
 module.exports = EventSourceTransport;
 
-},{"./lib/ajax-based":25,"./receiver/eventsource":30,"./sender/xhr-cors":36,"eventsource":19,"inherits":54}],22:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":24,"./receiver/eventsource":29,"./sender/xhr-cors":35,"eventsource":18,"inherits":53}],21:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1635,7 +1631,7 @@ HtmlFileTransport.roundTrips = 2;
 
 module.exports = HtmlFileTransport;
 
-},{"./lib/ajax-based":25,"./receiver/htmlfile":31,"./sender/xhr-local":38,"inherits":54}],23:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":24,"./receiver/htmlfile":30,"./sender/xhr-local":37,"inherits":53}],22:[function(_dereq_,module,exports){
 'use strict';
 
 // Few cool transports do work only for same-origin. In order to make
@@ -1761,7 +1757,7 @@ IframeTransport.roundTrips = 2;
 
 module.exports = IframeTransport;
 
-},{"../utils/event":47,"../utils/iframe":48,"../utils/random":50,"../utils/url":52,"../version":53,"events":4,"inherits":54,"json3":55}],24:[function(_dereq_,module,exports){
+},{"../utils/event":46,"../utils/iframe":47,"../utils/random":49,"../utils/url":51,"../version":52,"events":3,"inherits":53,"json3":54}],23:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -1799,7 +1795,7 @@ JsonPTransport.needBody = true;
 module.exports = JsonPTransport;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/sender-receiver":29,"./receiver/jsonp":32,"./sender/jsonp":34,"inherits":54}],25:[function(_dereq_,module,exports){
+},{"./lib/sender-receiver":28,"./receiver/jsonp":31,"./sender/jsonp":33,"inherits":53}],24:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1842,7 +1838,7 @@ inherits(AjaxBasedTransport, SenderReceiver);
 
 module.exports = AjaxBasedTransport;
 
-},{"../../utils/url":52,"./sender-receiver":29,"inherits":54}],26:[function(_dereq_,module,exports){
+},{"../../utils/url":51,"./sender-receiver":28,"inherits":53}],25:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1917,7 +1913,7 @@ BufferedSender.prototype.stop = function() {
 
 module.exports = BufferedSender;
 
-},{"events":4,"inherits":54}],27:[function(_dereq_,module,exports){
+},{"events":3,"inherits":53}],26:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -1954,7 +1950,7 @@ module.exports = function(transport) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/object":49,"../iframe":23,"inherits":54}],28:[function(_dereq_,module,exports){
+},{"../../utils/object":48,"../iframe":22,"inherits":53}],27:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2003,7 +1999,7 @@ Polling.prototype.abort = function() {
 
 module.exports = Polling;
 
-},{"events":4,"inherits":54}],29:[function(_dereq_,module,exports){
+},{"events":3,"inherits":53}],28:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2041,7 +2037,7 @@ SenderReceiver.prototype.close = function() {
 
 module.exports = SenderReceiver;
 
-},{"../../utils/url":52,"./buffered-sender":26,"./polling":28,"inherits":54}],30:[function(_dereq_,module,exports){
+},{"../../utils/url":51,"./buffered-sender":25,"./polling":27,"inherits":53}],29:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2095,7 +2091,7 @@ EventSourceReceiver.prototype._close = function(reason) {
 
 module.exports = EventSourceReceiver;
 
-},{"events":4,"eventsource":19,"inherits":54}],31:[function(_dereq_,module,exports){
+},{"events":3,"eventsource":18,"inherits":53}],30:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2170,7 +2166,7 @@ HtmlfileReceiver.enabled = HtmlfileReceiver.htmlfileEnabled || iframeUtils.ifram
 module.exports = HtmlfileReceiver;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/iframe":48,"../../utils/random":50,"../../utils/url":52,"events":4,"inherits":54}],32:[function(_dereq_,module,exports){
+},{"../../utils/iframe":47,"../../utils/random":49,"../../utils/url":51,"events":3,"inherits":53}],31:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2337,7 +2333,7 @@ JsonpReceiver.prototype._createScript = function(url) {
 module.exports = JsonpReceiver;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/browser":45,"../../utils/iframe":48,"../../utils/random":50,"../../utils/url":52,"events":4,"inherits":54}],33:[function(_dereq_,module,exports){
+},{"../../utils/browser":44,"../../utils/iframe":47,"../../utils/random":49,"../../utils/url":51,"events":3,"inherits":53}],32:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2396,7 +2392,7 @@ XhrReceiver.prototype.abort = function() {
 
 module.exports = XhrReceiver;
 
-},{"events":4,"inherits":54}],34:[function(_dereq_,module,exports){
+},{"events":3,"inherits":53}],33:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2485,7 +2481,7 @@ module.exports = function(url, payload, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/random":50,"../../utils/url":52}],35:[function(_dereq_,module,exports){
+},{"../../utils/random":49,"../../utils/url":51}],34:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2577,7 +2573,7 @@ XDRObject.enabled = !!(global.XDomainRequest && browser.hasDomain());
 module.exports = XDRObject;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/browser":45,"../../utils/event":47,"../../utils/url":52,"events":4,"inherits":54}],36:[function(_dereq_,module,exports){
+},{"../../utils/browser":44,"../../utils/event":46,"../../utils/url":51,"events":3,"inherits":53}],35:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2594,7 +2590,7 @@ XHRCorsObject.enabled = XhrDriver.enabled && XhrDriver.supportsCORS;
 
 module.exports = XHRCorsObject;
 
-},{"../driver/xhr":18,"inherits":54}],37:[function(_dereq_,module,exports){
+},{"../driver/xhr":17,"inherits":53}],36:[function(_dereq_,module,exports){
 'use strict';
 
 var EventEmitter = _dereq_('events').EventEmitter
@@ -2620,7 +2616,7 @@ XHRFake.timeout = 2000;
 
 module.exports = XHRFake;
 
-},{"events":4,"inherits":54}],38:[function(_dereq_,module,exports){
+},{"events":3,"inherits":53}],37:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2639,7 +2635,7 @@ XHRLocalObject.enabled = XhrDriver.enabled;
 
 module.exports = XHRLocalObject;
 
-},{"../driver/xhr":18,"inherits":54}],39:[function(_dereq_,module,exports){
+},{"../driver/xhr":17,"inherits":53}],38:[function(_dereq_,module,exports){
 'use strict';
 
 var utils = _dereq_('../utils/event')
@@ -2725,7 +2721,7 @@ WebSocketTransport.roundTrips = 2;
 
 module.exports = WebSocketTransport;
 
-},{"../utils/event":47,"../utils/url":52,"./driver/websocket":20,"events":4,"inherits":54}],40:[function(_dereq_,module,exports){
+},{"../utils/event":46,"../utils/url":51,"./driver/websocket":19,"events":3,"inherits":53}],39:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2750,7 +2746,7 @@ XdrPollingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XdrPollingTransport;
 
-},{"./lib/ajax-based":25,"./receiver/xhr":33,"./sender/xdr":35,"./xdr-streaming":41,"inherits":54}],41:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":24,"./receiver/xhr":32,"./sender/xdr":34,"./xdr-streaming":40,"inherits":53}],40:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2784,7 +2780,7 @@ XdrStreamingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XdrStreamingTransport;
 
-},{"./lib/ajax-based":25,"./receiver/xhr":33,"./sender/xdr":35,"inherits":54}],42:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":24,"./receiver/xhr":32,"./sender/xdr":34,"inherits":53}],41:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2819,7 +2815,7 @@ XhrPollingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XhrPollingTransport;
 
-},{"./lib/ajax-based":25,"./receiver/xhr":33,"./sender/xhr-cors":36,"./sender/xhr-local":38,"inherits":54}],43:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":24,"./receiver/xhr":32,"./sender/xhr-cors":35,"./sender/xhr-local":37,"inherits":53}],42:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2864,7 +2860,7 @@ XhrStreamingTransport.needBody = !!global.document;
 module.exports = XhrStreamingTransport;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils/browser":45,"./lib/ajax-based":25,"./receiver/xhr":33,"./sender/xhr-cors":36,"./sender/xhr-local":38,"inherits":54}],44:[function(_dereq_,module,exports){
+},{"../utils/browser":44,"./lib/ajax-based":24,"./receiver/xhr":32,"./sender/xhr-cors":35,"./sender/xhr-local":37,"inherits":53}],43:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2885,7 +2881,7 @@ if (global.crypto && global.crypto.getRandomValues) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],45:[function(_dereq_,module,exports){
+},{}],44:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2916,7 +2912,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],46:[function(_dereq_,module,exports){
+},{}],45:[function(_dereq_,module,exports){
 'use strict';
 
 var JSON3 = _dereq_('json3');
@@ -2967,7 +2963,7 @@ module.exports = {
   }
 };
 
-},{"json3":55}],47:[function(_dereq_,module,exports){
+},{"json3":54}],46:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -3036,7 +3032,7 @@ var unloadTriggered = function() {
 module.exports.attachEvent('unload', unloadTriggered);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./random":50}],48:[function(_dereq_,module,exports){
+},{"./random":49}],47:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -3209,7 +3205,7 @@ if (global.document) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./browser":45,"./event":47,"json3":55}],49:[function(_dereq_,module,exports){
+},{"./browser":44,"./event":46,"json3":54}],48:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = {
@@ -3235,7 +3231,7 @@ module.exports = {
   }
 };
 
-},{}],50:[function(_dereq_,module,exports){
+},{}],49:[function(_dereq_,module,exports){
 'use strict';
 
 /* global crypto:true */
@@ -3266,7 +3262,7 @@ module.exports = {
   }
 };
 
-},{"crypto":44}],51:[function(_dereq_,module,exports){
+},{"crypto":43}],50:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(availableTransports) {
@@ -3309,10 +3305,10 @@ module.exports = function(availableTransports) {
   };
 };
 
-},{}],52:[function(_dereq_,module,exports){
+},{}],51:[function(_dereq_,module,exports){
 'use strict';
 
-var parse = _dereq_('url-parse');
+var URL = _dereq_('url-parse');
 
 module.exports = {
   getOrigin: function(url) {
@@ -3320,7 +3316,7 @@ module.exports = {
       return null;
     }
 
-    var p = parse(url);
+    var p = new URL(url);
     if (p.protocol === 'file:') {
       return null;
     }
@@ -3352,10 +3348,10 @@ module.exports = {
   }
 };
 
-},{"url-parse":56}],53:[function(_dereq_,module,exports){
-module.exports = '1.0.0-beta.3';
+},{"url-parse":55}],52:[function(_dereq_,module,exports){
+module.exports = '1.0.0-beta.7';
 
-},{}],54:[function(_dereq_,module,exports){
+},{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -3380,7 +3376,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],55:[function(_dereq_,module,exports){
+},{}],54:[function(_dereq_,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -4286,105 +4282,195 @@ if (typeof Object.create === 'function') {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],56:[function(_dereq_,module,exports){
+},{}],55:[function(_dereq_,module,exports){
+'use strict';
+
+var required = _dereq_('requires-port')
+  , lolcation = _dereq_('./lolcation')
+  , qs = _dereq_('querystringify');
+
+var keys = ',,protocol,username,password,host,hostname,port,pathname,query,hash'.split(',')
+  , parts = keys.length;
+
+/**
+ * The actual URL instance. Instead of returning an object we've opted-in to
+ * create an actual constructor as it's much more memory efficient and
+ * faster and it pleases my CDO.
+ *
+ * @constructor
+ * @param {String} address URL we want to parse.
+ * @param {Boolean|function} parser Parser for the query string.
+ * @param {Object} location Location defaults for relative paths.
+ * @api public
+ */
+function URL(address, location, parser) {
+  if (!(this instanceof URL)) {
+    return new URL(address, location, parser);
+  }
+
+  //
+  // Inline the massive regular expression because it causes issues in FireFox
+  // because our `exec` usage in this function. Normally there should be no side
+  // affects because we're not doing global matching so the lastIndex of regular
+  // expression should stay the same but it's causing `too much recursion`
+  // errors in FireFox when calling the parse method for a second time. Now,
+  // with great pleasure I introduce to you:
+  //
+  // MOARE: Mother Of All Regular Expressions.
+  //
+  var regexp = /^(?:(?:(([^:\/#\?]+:)?(?:(?:\/\/)(?:(?:(?:([^:@\/#\?]+)(?:\:([^:@\/#\?]*))?)@)?(([^:\/#\?\]\[]+|\[[^\/\]@#?]+\])(?:\:([0-9]+))?))?)?)?((?:\/?(?:[^\/\?#]+\/+)*)(?:[^\?#]*)))?(\?[^#]+)?)(#.*)?/;
+
+  //
+  // The following if statements allows this module two have compatibility with
+  // 2 different API:
+  //
+  // 1. Node.js's `url.parse` api which accepts a URL, boolean as arguments
+  //    where the boolean indicates that the query string should also be parsed.
+  //
+  // 2. The `URL` interface of the browser which accepts a URL, object as
+  //    arguments. The supplied object will be used as default values / fall-back
+  //    for relative paths.
+  //
+  var type = typeof location;
+
+  if ('object' !== type && 'string' !== type) {
+    parser = location;
+    location = null;
+  }
+
+  if (parser && 'function' !== typeof parser) {
+    parser = qs.parse;
+  }
+
+  location = lolcation(location);
+
+  for (var i = 0, bits = regexp.exec(address), key; i < parts; key = keys[++i]) {
+    if (key) {
+      this[key] = bits[i] || location[key] || '';
+
+      //
+      // The protocol, host, host name should always be lower cased even if they
+      // are supplied in uppercase. This way, when people generate an `origin`
+      // it be correct.
+      //
+      if (i === 2 || i === 5 || i === 6) this[key] = this[key].toLowerCase();
+    }
+  }
+
+  //
+  // Also parse the supplied query string in to an object. If we're supplied
+  // with a custom parser as function use that instead of the default build-in
+  // parser.
+  //
+  if (parser) this.query = parser(this.query);
+
+  //
+  // We should not add port numbers if they are already the default port number
+  // for a given protocol. As the host also contains the port number we're going
+  // override it with the hostname which contains no port number.
+  //
+  if (!required(this.port, this.protocol)) {
+    this.host = this.hostname;
+    this.port = '';
+  }
+
+  //
+  // The href is just the compiled result.
+  //
+  this.href = this.toString();
+}
+
+/**
+ * Transform the properties back in to a valid and full URL string.
+ *
+ * @param {Function} stringify Optional query stringify function.
+ * @returns {String}
+ * @api public
+ */
+URL.prototype.toString = function toString(stringify) {
+  if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
+
+  var result = this.protocol +'//'
+    , query;
+
+  if (this.username) result += this.username +':'+ this.password +'@';
+
+  result += this.hostname;
+  if (this.port) result += ':'+ this.port;
+
+  result += this.pathname;
+
+  if (this.query) {
+    if ('object' === typeof this.query) query = stringify(this.query);
+    else query = this.query;
+
+    result += (query.charAt(0) === '?' ? '' : '?') + query;
+  }
+
+  if (this.hash) result += this.hash;
+
+  return result;
+};
+
+//
+// Expose the URL parser and some additional properties that might be useful for
+// others.
+//
+URL.qs = qs;
+URL.location = lolcation;
+module.exports = URL;
+
+},{"./lolcation":56,"querystringify":57,"requires-port":58}],56:[function(_dereq_,module,exports){
+(function (global){
 'use strict';
 
 /**
- * A DOM and Node.js compatible URL parser which leverages the DOM to do the
- * actual parsing of our URLs.
+ * These properties should not be copied or inherited from. This is only needed
+ * for all non blob URL's as the a blob URL does not include a hash, only the
+ * origin.
  *
- * @type {Function}
- * @param {String} url URL that needs to be parsed.
- * @param {Boolean} qs Also parse the query string.
- * @returns {Object} A parsed URL.
+ * @type {Object}
+ * @private
+ */
+var ignore = { hash: 1, query: 1 }
+  , URL;
+
+/**
+ * The location object differs when your code is loaded through a normal page,
+ * Worker or through a worker using a blob. And with the blobble begins the
+ * trouble as the location object will contain the URL of the blob, not the
+ * location of the page where our code is loaded in. The actual origin is
+ * encoded in the `pathname` so we can thankfully generate a good "default"
+ * location from it so we can generate proper relative URL's again.
+ *
+ * @param {Object} loc Optional default location object.
+ * @returns {Object} lolcation object.
  * @api public
  */
-var parse = 'undefined' !== typeof document ? function parse(url, qs) {
-  var div = document.createElement('div')
-    , data = {}
-    , key
-    , a;
+module.exports = function lolcation(loc) {
+  loc = loc || global.location || {};
+  URL = URL || _dereq_('./');
 
-  //
-  // Uses an innerHTML property to obtain an absolute URL for older browser
-  // support like IE6.
-  //
-  // @see http://grack.com/blog/2009/11/17/absolutizing-url-in-javascript/
-  //
-  div.innerHTML = '<a href="' + url + '"/>';
-  a = div.firstChild;
+  var finaldestination = {}
+    , type = typeof loc
+    , key;
 
-  //
-  // Transform it from a readOnly object to a read/writable object so we can
-  // change some parsed values. This is required if we ever want to override
-  // a port number etc. (as browsers remove port 443 and 80 from the URL's).
-  //
-  for (key in a) {
-    if ('string' === typeof a[key] || 'number' === typeof a[key]) {
-      data[key] = a[key];
-    }
+  if ('blob:' === loc.protocol) {
+    finaldestination = new URL(unescape(loc.pathname), {});
+  } else if ('string' === type) {
+    finaldestination = new URL(loc, {});
+    for (key in ignore) delete finaldestination[key];
+  } else if ('object' === type) for (key in loc) {
+    if (key in ignore) continue;
+    finaldestination[key] = loc[key];
   }
 
-  //
-  // encodeURI and decodeURI are needed to normalize URL between IE and non-IE,
-  // since IE doesn't encode the href property value and return it
-  //
-  // @see http://jsfiddle.net/Yq9M8/1/
-  //
-  data.href = encodeURI(decodeURI(data.href));
+  return finaldestination;
+};
 
-  //
-  // If we don't obtain a port number (e.g. when using zombie) then try
-  // and guess at a value from the 'href' value.
-  //
-  if (!data.port) {
-    var splits = (data.href || '').split('/');
-    if (splits.length > 2) {
-      var host = splits[2]
-        , atSignIndex = host.lastIndexOf('@');
-
-      if (~atSignIndex) host = host.slice(atSignIndex + 1);
-
-      splits = host.split(':');
-      if (splits.length === 2) data.port = splits[1];
-    }
-  }
-
-  //
-  // IE quirk: The `protocol` is parsed as ":" when a protocol agnostic URL
-  // is used. In this case we extract the value from the `href` value. In
-  // addition to that, it's possible in IE11 that the protocol is an string for
-  // relative URL's.
-  //
-  // @see https://github.com/primus/primus/issues/242
-  //
-  if (!data.protocol || ':' === data.protocol) {
-    data.protocol = data.href.substr(0, data.href.indexOf(':') + 1);
-  }
-
-  //
-  // Safari 5.1.7 (windows) quirk: When parsing a URL without a port number
-  // the `port` in the data object will default to "0" instead of the expected
-  // "". We're going to do an explicit check on "0" and force it to "".
-  //
-  if ('0' === data.port) data.port = '';
-
-  //
-  // Browsers do not parse authorization information, so we need to extract
-  // that from the URL.
-  //
-  if (~data.href.indexOf('@') && !data.auth) {
-    var start = data.protocol.length + 2;
-    data.auth = data.href.slice(start, data.href.indexOf(data.pathname, start)).split('@')[0];
-  }
-
-  if (qs && 'string' === typeof data.query) {
-    data.query = querystring(data.query || data.search);
-  }
-
-  data.query = data.query || data.search;
-  return data;
-} : _dereq_('url').parse;
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./":55}],57:[function(_dereq_,module,exports){
+'use strict';
 
 /**
  * Simple query string parser.
@@ -4415,6 +4501,7 @@ function querystring(query) {
  * Transform a query string to an object.
  *
  * @param {Object} obj Object that should be transformed.
+ * @param {String} prefix Optional prefix.
  * @returns {String}
  * @api public
  */
@@ -4440,9 +4527,48 @@ function querystringify(obj, prefix) {
 //
 // Expose the module.
 //
-parse.querystringify = querystringify;
-parse.querystring = querystring;
-module.exports = parse;
+exports.stringify = querystringify;
+exports.parse = querystring;
 
-},{"url":1}]},{},[2])(2)
+},{}],58:[function(_dereq_,module,exports){
+'use strict';
+
+/**
+ * Check if we're required to add a port number.
+ *
+ * @see https://url.spec.whatwg.org/#default-port
+ * @param {Number|String} port Port number we need to check
+ * @param {String} protocol Protocol we need to check against.
+ * @returns {Boolean} Is it a default port for the given protocol
+ * @api private
+ */
+module.exports = function required(port, protocol) {
+  protocol = protocol.split(':')[0];
+  port = +port;
+
+  if (!port) return false;
+
+  switch (protocol) {
+    case 'http':
+    case 'ws':
+    return port !== 80;
+
+    case 'https':
+    case 'wss':
+    return port !== 443;
+
+    case 'ftp':
+    return port !== 22;
+
+    case 'gopher':
+    return port !== 70;
+
+    case 'file':
+    return false;
+  }
+
+  return port !== 0;
+};
+
+},{}]},{},[1])(1)
 });
