@@ -1,18 +1,41 @@
 'use strict';
 
-var http = require('http')
-  , parse = require('url').parse;
+var PrimusError = require('../../errors').PrimusError
+  , parse = require('url').parse
+  , http = require('http');
 
 /**
- * Minimum viable WebSocket server for Node.js that works through the Primus
- * interface.
+ * Minimum viable WebSocket server that works through the Primus interface.
  *
  * @runat server
  * @api private
  */
 module.exports = function server() {
   var Faye = require('faye-websocket')
-    , Spark = this.Spark;
+    , primus = this.primus
+    , Spark = this.Spark
+    , options = {};
+
+  if (primus.options.perMessageDeflate) {
+    try {
+      options.extensions = [ require('permessage-deflate') ];
+    } catch (e) {
+      [
+        '',
+        'Missing required npm dependency for faye',
+        'To use the permessage-deflate extension with the faye transformer, ',
+        'you have to install an additional dependency.',
+        'Please run the following command and try again:',
+        '',
+        '  npm install --save permessage-deflate',
+        ''
+      ].forEach(function each(line) {
+        console.error('Primus: '+ line);
+      });
+
+      throw new PrimusError('Missing dependencies for transformer: "faye"', primus);
+    }
+  }
 
   //
   // Listen to upgrade requests.
@@ -20,7 +43,7 @@ module.exports = function server() {
   this.on('upgrade', function upgrade(req, socket, head) {
     if (!Faye.isWebSocket(req)) return socket.destroy();
 
-    var websocket = new Faye(req, socket, head);
+    var websocket = new Faye(req, socket, head, null, options);
 
     //
     // The WebSocket handshake is complete only when the `open` event is fired.
