@@ -3,10 +3,11 @@
 var log = require('diagnostics')('primus:transformer')
   , middlewareError = require('./middleware/error')
   , url = require('url').parse
+  , Ultron = require('ultron')
   , fuse = require('fusing');
 
 /**
- * Transformer skeletons
+ * Transformer skeleton
  *
  * @constructor
  * @param {Primus} primus Reference to the Primus instance.
@@ -15,9 +16,10 @@ var log = require('diagnostics')('primus:transformer')
 function Transformer(primus) {
   this.fuse();
 
-  this.Spark = primus.Spark;    // Used by the Server to create a new connection.
-  this.primus = primus;         // Reference to the Primus instance.
-  this.service = null;          // Stores the real-time service.
+  this.ultron = new Ultron(primus.server);  // Handles listeners with ease.
+  this.Spark = primus.Spark;                // Reference to the Spark constructor.
+  this.primus = primus;                     // Reference to the Primus instance.
+  this.service = null;                      // Stores the real-time service.
 
   this.initialise();
 }
@@ -71,7 +73,7 @@ Transformer.readable('initialise', function initialise() {
   //
   // Emit a close event.
   //
-  server.on('close', function close() {
+  this.ultron.on('close', function close() {
     log('the HTTP server is closing');
     transformer.emit('close');
   });

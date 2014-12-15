@@ -18,7 +18,13 @@ describe('Primus', function () {
   });
 
   afterEach(function afterEach(done) {
-    server.close(done);
+    try {
+      server.close(function () {
+        done();
+      });
+    } catch (e) {
+      done();
+    }
   });
 
   it('exposes the Spark constructor', function () {
@@ -201,7 +207,7 @@ describe('Primus', function () {
     throw new Error('Should have thrown');
   });
 
-  describe('.use', function () {
+  describe('#use', function () {
     it('throws an error if no valid name is provided', function () {
       try { primus.use({}); }
       catch (e) {
@@ -275,7 +281,7 @@ describe('Primus', function () {
       B.prototype.server = function (p) { p.bar = 'foo'; };
       B.prototype.client = function () {};
 
-      var a = new A;
+      var a = new A();
       var b = Object.create(B.prototype);
 
       primus
@@ -389,8 +395,8 @@ describe('Primus', function () {
 
   describe('#forEach', function () {
     it('iterates over all active connections', function (done) {
-      var spark = new primus.Spark()
-        , sparks = new primus.Spark();
+      new primus.Spark();
+      new primus.Spark();
 
       (global.setImmediate || process.nextTick)(function () {
         expect(primus.connected).to.equal(2);
@@ -411,8 +417,8 @@ describe('Primus', function () {
     });
 
     it('can bailout by returning false', function (done) {
-      var spark = new primus.Spark()
-        , sparks = new primus.Spark();
+      new primus.Spark();
+      new primus.Spark();
 
       (global.setImmediate || process.nextTick)(function () {
         expect(primus.connected).to.equal(2);
@@ -474,8 +480,6 @@ describe('Primus', function () {
 
       (global.setImmediate || process.nextTick)(function () {
         expect(primus.connected).to.equal(4);
-
-        var first = true;
 
         primus.forEach(function (spark, next) {
           iterations++;
@@ -663,7 +667,7 @@ describe('Primus', function () {
     });
   });
 
-  describe('.createServer', function () {
+  describe('#createServer', function () {
     it('returns a new primus instance', function (done) {
       var port = common.port
         , primus = Primus.createServer({ port: port });
@@ -685,6 +689,69 @@ describe('Primus', function () {
       primus.server.once('listening', function () {
         primus.end(done);
       });
+    });
+  });
+
+  describe('#destroy', function () {
+    it('emits a final close event on the primus instance', function (done) {
+      primus.on('close', function (options) {
+        expect(options).to.eql({});
+        done();
+      });
+
+      primus.destroy();
+    });
+
+    it('emits a final close event on the transformer instance', function (done) {
+      primus.transformer.on('close', function (options) {
+        expect(options).to.eql({});
+        done();
+      });
+
+      primus.destroy();
+    });
+
+    it('does not throw errors when called multiple times', function (done) {
+      var count = 0;
+
+      function next() {
+        if (++count === 4) done();
+      }
+
+      primus.destroy(next);
+      primus.destroy(next);
+      primus.destroy(next);
+      primus.destroy(next);
+    });
+
+    it('reattaches the original listeners back to the server', function (done) {
+      var requestHandler = function () {}
+        , upgradeHandler = function () {}
+        , close = true
+        , primus
+        , server;
+
+      server = http.createServer();
+      server.on('request', requestHandler);
+      server.on('upgrade', upgradeHandler);
+      primus = new Primus(server);
+
+      server.on('listening', function () {
+        expect(server.listeners('request')[0]).to.not.equal(requestHandler);
+        expect(server.listeners('upgrade')[0]).to.not.equal(upgradeHandler);
+        primus.destroy({ close: close }, function () {
+          expect(server.listeners('request')[0]).to.equal(requestHandler);
+          expect(server.listeners('upgrade')[0]).to.equal(upgradeHandler);
+
+          if (!close) return server.close(done);
+
+          close = false;
+          primus = new Primus(server);
+          server.listen(common.port);
+        });
+      });
+
+      server.listen(common.port);
     });
   });
 });

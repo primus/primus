@@ -889,7 +889,6 @@ Primus.readable('indexOfLayer', function indexOfLayer(name) {
  *
  * Options:
  * - close (boolean)  Close the given server.
- * - end (boolean)    Shut down all active connections.
  * - timeout (number) Forcefully close all connections after a given x MS.
  *
  * @param {Object} options Destruction instructions.
@@ -907,68 +906,100 @@ Primus.readable('destroy', function destroy(options, fn) {
 
   var primus = this;
 
-  setTimeout(function cleanup() {
+  setTimeout(function close() {
+    var transformer = primus.transformer;
+
     //
-    // Optionally close the server.
+    // Ensure that the transformer receives the `close` event only once.
     //
-    if (options.close !== false && primus.server) {
+    if (transformer) transformer.ultron.destroy();
+
+    //
+    // Close the connections that are left open.
+    //
+    primus.forEach(function shutdown(spark) {
+      spark.end();
+    });
+
+    if (options.close !== false) {
       //
       // Closing a server that isn't started yet would throw an error.
       //
-      try { primus.server.close(); }
+      try {
+        primus.server.close(function closed() {
+          primus.close(options, fn);
+        });
+        return;
+      }
       catch (e) {}
     }
 
-    //
-    // Optionally close connections that are left open.
-    //
-    if (options.end !== false) {
-      primus.forEach(function shutdown(spark) {
-        spark.end();
-      });
-    } else {
-      [
-        '',
-        'We\'ve detected that you are using the `destroy` method with the',
-        '`end` option set to `false`. This is deprecated and the ability to',
-        'leave the connections open will be removed in future releases.',
-        ''
-      ].forEach(function each(line) {
-        console.error('Primus: '+ line);
-      });
+    primus.close(options, fn);
+  }, +options.timeout || 0);
+
+  return this;
+});
+
+/**
+ * Free resources after emitting a final `close` event.
+ *
+ * @param {Object} options Destruction instructions.
+ * @param {Function} fn Callback.
+ * @returns {Primus}
+ * @api private
+ */
+
+Primus.readable('close', function close(options, fn) {
+  var primus = this;
+  //
+  // Emit a final `close` event before removing all the listeners
+  // from all the event emitters.
+  //
+  primus.asyncemit('close', options, function done(err) {
+    if (err) {
+      if (fn) return fn(err);
+      throw err;
     }
 
+    var transformer = primus.transformer
+      , server = primus.server;
+
     //
-    // Emit some final closing events right before we remove all listener
-    // references from all the event emitters.
+    // If we don't have a server we are most likely destroying an already
+    // destroyed Primus instance.
     //
-    primus.asyncemit('close', options, function done(err) {
-      if (err) {
-        if (fn) return fn(err);
-        throw err;
-      }
+    if (!server) return fn && fn();
 
-      if (primus.transformer) {
-        primus.transformer.emit('close', options);
-        primus.transformer.removeAllListeners();
-      }
+    server.removeAllListeners('request');
+    server.removeAllListeners('upgrade');
 
-      if (primus.server) primus.server.removeAllListeners();
-      primus.removeAllListeners();
-
-      //
-      // Null some potentially heavy objects to free some more memory instantly.
-      //
-      primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
-      primus.transformer = primus.encoder = primus.decoder = primus.server = null;
-      primus.sparks = primus.connected = 0;
-
-      primus.connections = Object.create(null);
-      primus.ark = Object.create(null);
-
-      if (fn) fn();
+    //
+    // Re-add the original listeners so that the server can be used again.
+    //
+    transformer.listeners('previous::request').forEach(function add(listener) {
+      server.on('request', listener);
     });
-  }, +options.timeout || 0);
+    transformer.listeners('previous::upgrade').forEach(function add(listener) {
+      server.on('upgrade', listener);
+    });
+
+    transformer.emit('close', options);
+    transformer.removeAllListeners();
+
+    primus.removeAllListeners();
+
+    //
+    // Null some potentially heavy objects to free some more memory instantly.
+    //
+    primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
+    primus.transformer = primus.encoder = primus.decoder = primus.server = null;
+    primus.sparks = primus.connected = 0;
+
+    primus.connections = Object.create(null);
+    primus.ark = Object.create(null);
+
+    if (fn) fn();
+  });
 
   return this;
 });
