@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "integration": "mocha $(find test -name '*.integration.js')",
+    "prepublish": "mkdir -p dist && browserify primus.js --standalone Primus -o dist/primus.js -p deumdify",
     "test": "mocha $(find test -name '*.test.js')",
     "update": "find transformers -name update.sh -exec bash {} \\;"
   },
