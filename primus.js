@@ -111,7 +111,7 @@ function Primus(url, options) {
   primus.attempt = null;                        // Current back off attempt.
   primus.socket = null;                         // Reference to the internal connection.
   primus.latency = 0;                           // Latency between messages.
-  primus.stamps = 0;                            // Counter to make timestamps unqiue.
+  primus.stamps = 0;                            // Counter to make timestamps unique.
   primus.disconnect = false;                    // Did we receive a disconnect packet?
   primus.transport = options.transport;         // Transport options.
   primus.transformers = {                       // Message transformers.
@@ -437,7 +437,7 @@ Primus.prototype.initialise = function initialise(options) {
     if (primus.attempt) primus.attempt = null;
 
     //
-    // The connection has been openend so we should set our state to
+    // The connection has been opened so we should set our state to
     // (writ|read)able so our stream compatibility works as intended.
     //
     primus.writable = true;
