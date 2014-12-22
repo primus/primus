@@ -1689,7 +1689,7 @@ The following plugins are part of the Primus project.
 <dl>
   <dt><a href="https://github.com/primus/mirage">mirage</a></dt>
   <dd>
-    Mirage generates and validates a persistent session id.
+    Mirage generates and validates persistent session IDs.
   </dd>
   <dd>
     <a href="https://www.npmjs.com/package/mirage"><img
