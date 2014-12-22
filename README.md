@@ -1658,8 +1658,8 @@ The following plugins are part of the Primus project.
 <dl>
   <dt><a href="https://github.com/primus/metroplex">metroplex</a></dt>
   <dd>
-    Metroplex a Redis based spark/connection registry for Primus. It stores the
-    sparks and their server address. So you can cluster multiple primus's
+    Metroplex is a Redis based spark/connection registry for Primus. It stores
+    the sparks and their server address. So you can cluster multiple primus's
     together with Metroplex and Omega Supreme
   </dd>
   <dd>
@@ -1682,6 +1682,20 @@ The following plugins are part of the Primus project.
       src="https://img.shields.io/npm/v/fortress-maximus.svg?style=flat-square"
       alt="NPM version" /></a><a href="https://travis-ci.org/primus/fortress-maximus"><img
       src="https://img.shields.io/travis/primus/fortress-maximus/master.svg?style=flat-square"
+      alt="Build Status" /></a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="https://github.com/primus/mirage">mirage</a></dt>
+  <dd>
+    Mirage generates and validates a persistent session id.
+  </dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/mirage"><img
+      src="https://img.shields.io/npm/v/mirage.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/primus/mirage"><img
+      src="https://img.shields.io/travis/primus/mirage/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
