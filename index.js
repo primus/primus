@@ -158,7 +158,7 @@ fuse(Primus, EventEmitter);
 Object.defineProperty(Primus.prototype, 'client', {
   get: function read() {
     if (!read.primus) {
-      read.primus = fs.readFileSync(__dirname + '/primus.js', 'utf-8');
+      read.primus = fs.readFileSync(__dirname + '/dist/primus.js', 'utf-8');
     }
 
     return this.customGlobal(read.primus);
@@ -543,7 +543,7 @@ Primus.readable('library', function compile(nodejs) {
     + '  } else if (typeof define == "function" && define.amd) {'
     + '    define(function reference() { return context[name]; });'
     + '  }'
-    + '})("'+ global +'", this, function '+ global +'() {'
+    + '})("'+ global +'", this, function wrapper() { var self = {}; '
     + this.client;
 
   //
@@ -605,7 +605,7 @@ Primus.readable('library', function compile(nodejs) {
   // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client +' return '+ global +'; });'
+  return client +'; return self["'+ global +'"]; });'
   + library.filter(Boolean).map(function expose(library) {
     return '(function '+ global +'LibraryWrap('+ global +') {'
     + library
