@@ -1650,3 +1650,8 @@ if (
     Primus.prototype.AVOID_WEBSOCKETS = true;
   }
 }
+
+//
+// Expose the library.
+//
+module.exports = Primus;
