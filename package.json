@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "integration": "mocha $(find test -name '*.integration.js')",
-    "prepublish": "mkdir -p dist && browserify primus.js --standalone Primus -o dist/primus.js -p deumdify",
+    "build": "mkdir -p dist && browserify primus.js --standalone Primus -o dist/primus.js -p deumdify",
     "test": "mocha $(find test -name '*.test.js')",
     "update": "find transformers -name update.sh -exec bash {} \\;"
   },
@@ -79,5 +79,6 @@
     "sockjs": "0.3.x",
     "sockjs-client-node": "0.1.x",
     "ws": "0.6.x"
-  }
+  },
+  "pre-commit": ["build", "test", "integration"]
 }
