@@ -147,13 +147,6 @@ function Primus(url, options) {
   options.strategy = options.strategy.join(',').toLowerCase();
 
   //
-  // Only initialise the EventEmitter interface if we're running in a plain
-  // browser environment. The Stream interface is inherited differently when it
-  // runs on browserify and on Node.js.
-  //
-  if (!Stream) EventEmitter.call(primus);
-
-  //
   // Force the use of WebSockets, even when we've detected some potential
   // broken WebSocket implementation.
   //
