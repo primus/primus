@@ -595,7 +595,7 @@ Primus.readable('library', function compile(nodejs) {
     if (!plugin.client) continue;
 
     log('adding the client code of the %s plugin to the client file', name);
-    client += global +'.prototype.ark['+ name +'] = '+ plugin.client.toString() +';\n';
+    client += 'self["'+ global +'"].prototype.ark['+ name +'] = '+ plugin.client.toString() +';\n';
   }
 
   //
