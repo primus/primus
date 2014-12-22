@@ -457,7 +457,7 @@ Primus.prototype.initialise = function initialise(options) {
     }
 
     primus.latency = +new Date() - start;
-    primus.timers.clear('ping', 'pong');
+    primus.timers.clear('ping, pong');
     primus.heartbeat();
 
     if (primus.buffer.length) {
