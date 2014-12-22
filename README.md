@@ -1610,84 +1610,79 @@ primus.transforms('outgoing', function (packet, next) {
 The following plugins are part of the Primus project.
 
 <dl>
-  <dt><a href="http://github.com/primus/substream">substream</a></dt>
+  <dt><a href="https://github.com/primus/substream">substream</a></dt>
   <dd>
     Substream is an opinionated but stream compatible connection multiplexer on
     top of the Primus connections. These streams can be created without
     pre-defining them on the server or client.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/primus/substream">
-      <img src="https://travis-ci.org/primus/substream.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/substream">
-      <img src="https://badge.fury.io/js/substream.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/primus/substream"><img
+      src="https://img.shields.io/travis/primus/substream/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/substream"><img
+      src="https://img.shields.io/npm/v/substream.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/primus/emit">primus-emit</a></dt>
+  <dt><a href="https://github.com/primus/emit">primus-emit</a></dt>
   <dd>
     The emit module adds client -> server and server -> client event emitting to Primus.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/primus/emit">
-      <img src="https://travis-ci.org/primus/emit.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-emit">
-      <img src="https://badge.fury.io/js/primus-emit.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/primus/emit"><img
+      src="https://img.shields.io/travis/primus/emit/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-emit"><img
+      src="https://img.shields.io/npm/v/primus-emit.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/primus/omega-supreme">omega-supreme</a></dt>
+  <dt><a href="https://github.com/primus/omega-supreme">omega-supreme</a></dt>
   <dd>
     Omega Supreme allows you to broadcast messages to Primus using a regular
     HTTP request. These messages can be broacasted to every spark, single spark
     or a collection of sparks.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/primus/omega-supreme">
-      <img src="https://travis-ci.org/primus/omega-supreme.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/omega-supreme">
-      <img src="https://badge.fury.io/js/omega-supreme.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/primus/omega-supreme"><img
+      src="https://img.shields.io/travis/primus/omega-supreme/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/omega-supreme"><img
+      src="https://img.shields.io/npm/v/omega-supreme.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/primus/metroplex">metroplex</a></dt>
+  <dt><a href="https://github.com/primus/metroplex">metroplex</a></dt>
   <dd>
     Metroplex a Redis based spark/connection registry for Primus. It stores the
     sparks and their server address. So you can cluster multiple primus's
     together with Metroplex and Omega Supreme
   </dd>
   <dd>
-    <a href="https://travis-ci.org/primus/metroplex">
-      <img src="https://travis-ci.org/primus/metroplex.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/metroplex">
-      <img src="https://badge.fury.io/js/metroplex.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/primus/metroplex"><img
+      src="https://img.shields.io/travis/primus/metroplex/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/metroplex"><img
+      src="https://img.shields.io/npm/v/metroplex.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/primus/fortress-maximus">fortess-maximus</a></dt>
+  <dt><a href="https://github.com/primus/fortress-maximus">fortess-maximus</a></dt>
   <dd>
     Fortress Maximus validates every incoming message on your Primus server as all
     user input should be seen as a potential security risk.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/primus/fortress-maximus">
-      <img src="https://travis-ci.org/primus/fortress-maximus.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/fortress-maximus">
-      <img src="https://badge.fury.io/js/fortress-maximus.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/primus/fortress-maximus"><img
+      src="https://img.shields.io/travis/primus/fortress-maximus/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/fortress-maximus"><img
+      src="https://img.shields.io/npm/v/fortress-maximus.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
@@ -1699,124 +1694,108 @@ that you want to have listed here? Make sure it has test suite and runs on
 README.md and see it be merged automatically.
 
 <dl>
-  <dt><a href="http://github.com/cayasso/primus-rooms">primus-rooms</a></dt>
+  <dt><a href="https://github.com/cayasso/primus-rooms">primus-rooms</a></dt>
   <dd>
     A module that adds rooms capabilities to Primus. It's based on the rooms
     implementation of Socket.IO.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/cayasso/primus-rooms">
-      <img src="https://travis-ci.org/cayasso/primus-rooms.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-rooms">
-      <img src="https://badge.fury.io/js/primus-rooms.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/cayasso/primus-rooms"><img
+      src="https://img.shields.io/travis/cayasso/primus-rooms/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-rooms"><img
+      src="https://img.shields.io/npm/v/primus-rooms.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/cayasso/primus-multiplex">primus-multiplex</a></dt>
+  <dt><a href="https://github.com/cayasso/primus-multiplex">primus-multiplex</a></dt>
+  <dd>A module that adds multiplexing capabilities to Primus.</dd>
   <dd>
-    A module that adds multiplexing capabilities to Primus.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/cayasso/primus-multiplex">
-      <img src="https://travis-ci.org/cayasso/primus-multiplex.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-multiplex">
-      <img src="https://badge.fury.io/js/primus-multiplex.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/cayasso/primus-multiplex"><img
+      src="https://img.shields.io/travis/cayasso/primus-multiplex/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-multiplex"><img
+      src="https://img.shields.io/npm/v/primus-multiplex.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/cayasso/primus-emitter">primus-emitter</a></dt>
+  <dt><a href="https://github.com/cayasso/primus-emitter">primus-emitter</a></dt>
+  <dd>A module that adds emitter capabilities to Primus.</dd>
   <dd>
-    A module that adds emitter capabilities to Primus.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/cayasso/primus-emitter">
-      <img src="https://travis-ci.org/cayasso/primus-emitter.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-emitter">
-      <img src="https://badge.fury.io/js/primus-emitter.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/cayasso/primus-emitter"><img
+      src="https://img.shields.io/travis/cayasso/primus-emitter/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-emitter"><img
+      src="https://img.shields.io/npm/v/primus-emitter.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/neoziro/primus-cluster">primus-cluster</a></dt>
+  <dt><a href="https://github.com/neoziro/primus-cluster">primus-cluster</a></dt>
+  <dd>Scale Primus across multiple servers or with node cluster.</dd>
   <dd>
-    Scale Primus across multiple servers or with node cluster.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/neoziro/primus-cluster">
-      <img src="https://travis-ci.org/neoziro/primus-cluster.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-cluster">
-      <img src="https://badge.fury.io/js/primus-cluster.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/neoziro/primus-cluster"><img
+      src="https://img.shields.io/travis/neoziro/primus-cluster/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-cluster"><img
+      src="https://img.shields.io/npm/v/primus-cluster.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/swissmanu/primus-responder">primus-responder</a></dt>
+  <dt><a href="https://github.com/swissmanu/primus-responder">primus-responder</a></dt>
+  <dd>Client and server plugin that adds a request/response cycle to Primus.</dd>
   <dd>
-    Client and server plugin that adds a request/response cycle to Primus.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/swissmanu/primus-responder">
-      <img src="https://travis-ci.org/swissmanu/primus-responder.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-responder">
-      <img src="https://badge.fury.io/js/primus-responder.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/swissmanu/primus-responder"><img
+      src="https://img.shields.io/travis/swissmanu/primus-responder/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-responder"><img
+      src="https://img.shields.io/npm/v/primus-responder.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/mmalecki/primus-redis">primus-redis</a></dt>
+  <dt><a href="https://github.com/mmalecki/primus-redis">primus-redis</a></dt>
   <dd>
-    primus-redis is a Redis store for Primus. It takes care of distributing 
+    primus-redis is a Redis store for Primus. It takes care of distributing
     messages to other instances using Redis Pub/Sub.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/mmalecki/primus-redis">
-      <img src="https://travis-ci.org/mmalecki/primus-redis.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-redis">
-      <img src="https://badge.fury.io/js/primus-redis.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/mmalecki/primus-redis"><img
+      src="https://img.shields.io/travis/mmalecki/primus-redis/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-redis"><img
+      src="https://img.shields.io/npm/v/primus-redis.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/mmalecki/primus-redis-rooms">primus-redis-rooms</a></dt>
+  <dt><a href="https://github.com/mmalecki/primus-redis-rooms">primus-redis-rooms</a></dt>
   <dd>
     primus-redis-rooms is a Redis store for Primus and primus-rooms.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/mmalecki/primus-redis-rooms">
-      <img src="https://travis-ci.org/mmalecki/primus-redis-rooms.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-redis-rooms">
-      <img src="https://badge.fury.io/js/primus-redis-rooms.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/mmalecki/primus-redis-rooms"><img
+      src="https://img.shields.io/travis/mmalecki/primus-redis-rooms/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-redis-rooms"><img
+      src="https://img.shields.io/npm/v/primus-redis-rooms.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="http://github.com/cayasso/primus-resource">primus-resource</a></dt>
+  <dt><a href="https://github.com/cayasso/primus-resource">primus-resource</a></dt>
   <dd>
     Define resources with auto-bound methods that can be called remotely on top of Primus.
   </dd>
   <dd>
-    <a href="https://travis-ci.org/cayasso/primus-resource">
-      <img src="https://travis-ci.org/cayasso/primus-resource.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-resource">
-      <img src="https://badge.fury.io/js/primus-resource.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/cayasso/primus-resource"><img
+      src="https://img.shields.io/travis/cayasso/primus-resource/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-resource"><img
+      src="https://img.shields.io/npm/v/primus-resource.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
@@ -1831,51 +1810,43 @@ README.md and see it be merged automatically.
     method which returns the current hapi session object.
   </dd>
   <dd>
-    <a href="http://badge.fury.io/js/hapi_primus_sessions">
-      <img src="https://badge.fury.io/js/hapi_primus_sessions.svg" alt="NPM version" />
-    </a>
+    <a href="https://www.npmjs.com/package/hapi_primus_sessions"><img
+      src="https://img.shields.io/npm/v/hapi_primus_sessions.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
   <dt><a href="https://github.com/zeMirco/primus-express-session">primus-express-session</a></dt>
+  <dd>Share a user session between Express and Primus.</dd>
   <dd>
-    Share a user session between Express and Primus.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/zemirco/primus-express-session">
-      <img src="https://travis-ci.org/zemirco/primus-express-session.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-express-session">
-      <img src="https://badge.fury.io/js/primus-express-session.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/zeMirco/primus-express-session"><img
+      src="https://img.shields.io/travis/zeMirco/primus-express-session/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-express-session"><img
+      src="https://img.shields.io/npm/v/primus-express-session.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/Shopetti/backbone.primus/">backbone.primus</a></dt>
+  <dt><a href="https://github.com/Shopetti/backbone.primus">backbone.primus</a></dt>
+  <dd>Bind primus.io events to backbone models and collections.</dd>
   <dd>
-    Bind primus.io events to backbone models and collections.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/Shopetti/backbone.primus">
-      <img src="https://travis-ci.org/Shopetti/backbone.primus.svg?branch=master" alt="Build Status" />
-    </a>
+    <a href="https://travis-ci.org/Shopetti/backbone.primus"><img
+      src="https://img.shields.io/travis/Shopetti/backbone.primus/master.svg?style=flat-square"
+      alt="Build Status" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/fishrock123/primus-spark-latency/">primus-spark-latency</a></dt>
+  <dt><a href="https://github.com/fishrock123/primus-spark-latency">primus-spark-latency</a></dt>
+  <dd>Adds a latency property to primus sparks server-side.</dd>
   <dd>
-    Adds a latency property to primus sparks server-side.
-  </dd>
-  <dd>
-    <a href="https://travis-ci.org/Fishrock123/primus-spark-latency">
-      <img src="https://travis-ci.org/Fishrock123/primus-spark-latency.svg?branch=master" alt="Build Status" />
-    </a>
-    <a href="http://badge.fury.io/js/primus-spark-latency">
-      <img src="https://badge.fury.io/js/primus-spark-latency.svg" alt="NPM version" />
-    </a>
+    <a href="https://travis-ci.org/fishrock123/primus-spark-latency"><img
+      src="https://img.shields.io/travis/fishrock123/primus-spark-latency/master.svg?style=flat-square"
+      alt="Build Status" /></a><a href="https://www.npmjs.com/package/primus-spark-latency"><img
+      src="https://img.shields.io/npm/v/primus-spark-latency.svg?style=flat-square"
+      alt="NPM version" /></a>
   </dd>
 </dl>
 
@@ -2067,15 +2038,15 @@ primus in a different language than JavaScript:
 <dl>
   <dt><a href="https://github.com/seegno/primus-objc">primus-objc</a></dt>
   <dd>
-    <a href="https://travis-ci.org/seegno/primus-objc">
-      <img src="https://travis-ci.org/seegno/primus-objc.svg" alt="Build Status" />
-    </a>
-  </dd>
-  <dd>
     A client written in Objective-C for the Primus real-time framework with
     initial support for web sockets (via SocketRocket) and socket.io (via
     socket.IO-objc). Easily switch between different real-time Objective-C
     frameworks without any code changes.
+  </dd>
+  <dd>
+    <a href="https://travis-ci.org/seegno/primus-objc"><img
+      src="https://img.shields.io/travis/seegno/primus-objc/master.svg?style=flat-square"
+      alt="Build Status" /></a>
   </dd>
 </dl>
 
