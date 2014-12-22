@@ -361,15 +361,15 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
         socket.on('open', function () {
           if (++opened === 1) {
-            expect(Object.keys(socket.timers).length).to.be.above(0);
+            expect(Object.keys(socket.timers.timers).length).to.be.above(0);
             return;
           }
-          expect(Object.keys(socket.timers).length).to.be.equal(1);
+          expect(Object.keys(socket.timers.timers).length).to.be.equal(1);
         });
 
         socket.on('close', function () {
           closed++;
-          expect(Object.keys(socket.timers).length).to.equal(0);
+          expect(Object.keys(socket.timers.timers).length).to.equal(0);
         });
 
         socket.on('end', function () {

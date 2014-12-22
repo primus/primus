@@ -1,7 +1,8 @@
 /*globals require, define */
 'use strict';
 
-var EventEmitter = require('eventemitter3');
+var EventEmitter = require('eventemitter3')
+  , TickTock = require('tick-tock');
 
 /**
  * Context assertion, ensure that some of our public Primus methods are called
@@ -105,7 +106,7 @@ function Primus(url, options) {
   primus.url = primus.parse(url || defaultUrl); // Parse the URL to a readable format.
   primus.readyState = Primus.CLOSED;            // The readyState of the connection.
   primus.options = options;                     // Reference to the supplied options.
-  primus.timers = {};                           // Contains all our timers.
+  primus.timers = new TickTock(this);           // Contains all our timers.
   primus.attempt = null;                        // Current back off attempt.
   primus.socket = null;                         // Reference to the internal connection.
   primus.latency = 0;                           // Latency between messages.
@@ -167,8 +168,9 @@ function Primus(url, options) {
   // we want to do it after a really small timeout so we give the users enough
   // time to listen for `error` events etc.
   //
-  if (!options.manual) primus.timers.open = setTimeout(function open() {
-    primus.clearTimeout('open').open();
+  if (!options.manual) primus.timers.setTimeout('open', function open() {
+    primus.timers.clear('open');
+    primus.open();
   }, 0);
 
   primus.initialise(options);
@@ -455,7 +457,8 @@ Primus.prototype.initialise = function initialise(options) {
     }
 
     primus.latency = +new Date() - start;
-    primus.clearTimeout('ping', 'pong').heartbeat();
+    primus.timers.clear('ping', 'pong');
+    primus.heartbeat();
 
     if (primus.buffer.length) {
       var data = primus.buffer.slice()
@@ -475,13 +478,14 @@ Primus.prototype.initialise = function initialise(options) {
 
   primus.on('incoming::pong', function pong(time) {
     primus.online = true;
-    primus.clearTimeout('pong').heartbeat();
+    primus.timers.clear('pong');
+    primus.heartbeat();
 
     primus.latency = (+new Date()) - time;
   });
 
   primus.on('incoming::error', function error(e) {
-    var connect = primus.timers.connect
+    var connect = primus.timers.active('connect')
       , err = e;
 
     //
@@ -507,6 +511,7 @@ Primus.prototype.initialise = function initialise(options) {
         if (e.hasOwnProperty(key)) err[key] = e[key];
       }
     }
+
     if (primus.listeners('error').length) primus.emit('error', err);
 
     //
@@ -559,7 +564,7 @@ Primus.prototype.initialise = function initialise(options) {
       primus.emit('readyStateChange', 'end');
     }
 
-    if (primus.timers.connect) primus.end();
+    if (primus.timers.active('connect')) primus.end();
     if (readyState !== Primus.OPEN) {
       return primus.attempt ? primus.reconnect() : false;
     }
@@ -570,9 +575,7 @@ Primus.prototype.initialise = function initialise(options) {
     //
     // Clear all timers in case we're not going to reconnect.
     //
-    for (var timeout in this.timers) {
-      this.clearTimeout(timeout);
-    }
+    this.timers.clear();
 
     //
     // Fire the `close` event as an indication of connection disruption.
@@ -627,7 +630,7 @@ Primus.prototype.initialise = function initialise(options) {
     // user goes offline. In this case we want to kill the existing attempt so
     // when the user goes online, it will attempt to reconnect freshly again.
     //
-    primus.clearTimeout('reconnect');
+    primus.timers.clear('reconnect');
     primus.attempt = null;
   }
 
@@ -878,7 +881,7 @@ Primus.prototype.heartbeat = function heartbeat() {
    * @api private
    */
   function pong() {
-    primus.clearTimeout('pong');
+    primus.timers.clear('pong');
 
     //
     // The network events already captured the offline event.
@@ -898,12 +901,13 @@ Primus.prototype.heartbeat = function heartbeat() {
   function ping() {
     var value = +new Date();
 
-    primus.clearTimeout('ping')._write('primus::ping::'+ value);
+    primus.timers.clear('ping');
+    primus._write('primus::ping::'+ value);
     primus.emit('outgoing::ping', value);
-    primus.timers.pong = setTimeout(pong, primus.options.pong);
+    primus.timers.setTimeout('pong', pong, primus.options.pong);
   }
 
-  primus.timers.ping = setTimeout(ping, primus.options.ping);
+  primus.timers.setTimeout('ping', ping, primus.options.ping);
   return this;
 };
 
@@ -926,10 +930,10 @@ Primus.prototype.timeout = function timeout() {
     primus.removeListener('error', remove)
           .removeListener('open', remove)
           .removeListener('end', remove)
-          .clearTimeout('connect');
+          .timers.clear('connect');
   }
 
-  primus.timers.connect = setTimeout(function expired() {
+  primus.timers.setTimeout('connect', function expired() {
     remove(); // Clean up old references.
 
     if (primus.readyState === Primus.OPEN || primus.attempt) return;
@@ -946,22 +950,6 @@ Primus.prototype.timeout = function timeout() {
   return primus.on('error', remove)
     .on('open', remove)
     .on('end', remove);
-};
-
-/**
- * Properly clean up all `setTimeout` references.
- *
- * @param {String} ..args.. The names of the timeout's we need clear.
- * @returns {Primus}
- * @api private
- */
-Primus.prototype.clearTimeout = function clear() {
-  for (var args = arguments, i = 0, l = args.length; i < l; i++) {
-    if (this.timers[args[i]]) clearTimeout(this.timers[args[i]]);
-    delete this.timers[args[i]];
-  }
-
-  return this;
 };
 
 /**
@@ -1018,9 +1006,9 @@ Primus.prototype.backoff = function backoff(callback, opts) {
       ), opts.maxDelay)
     : opts.minDelay;
 
-  primus.timers.reconnect = setTimeout(function delay() {
+  primus.timers.setTimeout('reconnect', function delay() {
     opts.backoff = false;
-    primus.clearTimeout('reconnect');
+    primus.timers.clear('reconnect');
 
     callback(undefined, opts);
   }, opts.timeout);
@@ -1074,12 +1062,12 @@ Primus.prototype.reconnect = function reconnect() {
 Primus.prototype.end = function end(data) {
   context(this, 'end');
 
-  if (this.readyState === Primus.CLOSED && !this.timers.connect) {
+  if (this.readyState === Primus.CLOSED && !this.timers.active('connect')) {
     //
     // If we are reconnecting stop the reconnection procedure.
     //
-    if (this.timers.reconnect) {
-      this.clearTimeout('reconnect');
+    if (this.timers.active('reconnect')) {
+      this.timers.clear('reconnect');
       this.attempt = null;
       this.emit('end');
     }
@@ -1099,15 +1087,36 @@ Primus.prototype.end = function end(data) {
     this.emit('readyStateChange', 'end');
   }
 
-  for (var timeout in this.timers) {
-    this.clearTimeout(timeout);
-  }
-
+  this.timers.clear();
   this.emit('outgoing::end');
   this.emit('close');
   this.emit('end');
 
   return this;
+};
+
+/**
+ * Completely demolish the Primus instance and forcefully nuke all references.
+ *
+ * @returns {Boolean}
+ * @api public
+ */
+Primus.prototype.destroy = function destroy() {
+  if (!this.timers) return false;
+
+  this.end();
+  this.removeAllListeners();
+
+  var nuke = 'url timers options attempt socket transport transformers'.split(' ')
+    , length = nuke.length
+    , i = 0;
+
+  for (; i < length; i++) {
+    if (this[nuke[i]].destroy) this[nuke[i]].destroy();
+    this[nuke[i]] = null;
+  }
+
+  return true;
 };
 
 /**

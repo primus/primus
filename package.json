@@ -57,6 +57,7 @@
     "fusing": "0.4.x",
     "load": "1.0.x",
     "setheader": "0.0.x",
+    "tick-tock": "0.1.x",
     "ultron": "1.0.x"
   },
   "devDependencies": {
