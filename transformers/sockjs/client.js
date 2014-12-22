@@ -48,8 +48,8 @@ module.exports = function client() {
     //
     // Setup the Event handlers.
     //
-    socket.onopen = primus.emits('open');
-    socket.onerror = primus.emits('error');
+    socket.onopen = primus.emits('incoming::open');
+    socket.onerror = primus.emits('incoming::error');
     socket.onclose = function (e) {
       //
       // The timeout replicates the behaviour of primus.emits so we're not
@@ -60,7 +60,7 @@ module.exports = function client() {
         primus.emit('incoming::end');
       }, 0);
     };
-    socket.onmessage = primus.emits('data', function parse(evt) {
+    socket.onmessage = primus.emits('incoming::data', function parse(evt) {
       return evt.data;
     });
   });

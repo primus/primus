@@ -340,6 +340,18 @@ try {
 Primus.prototype.ark = {};
 
 /**
+ * Simple emit wrapper that returns a function that emits an event once it's
+ * called. This makes it easier for transports to emit specific events. The
+ * scope of this function is limited as it will only emit one single argument.
+ *
+ * @param {String} event Name of the event that we should emit.
+ * @param {Function} parser Argument parser.
+ * @returns {Function} The wrapped function that will emit events when called.
+ * @public
+ */
+Primus.prototype.emits = require('emits');
+
+/**
  * Return the given plugin.
  *
  * @param {String} name The name of the plugin.
@@ -1256,33 +1268,6 @@ Primus.prototype.uri = function uri(options) {
 
   if (options.object) return options;
   return server.join('/');
-};
-
-/**
- * Simple emit wrapper that returns a function that emits an event once it's
- * called. This makes it easier for transports to emit specific events. The
- * scope of this function is limited as it will only emit one single argument.
- *
- * @param {String} event Name of the event that we should emit.
- * @param {Function} parser Argument parser.
- * @returns {Function} The wrapped function that will emit events when called.
- * @api public
- */
-Primus.prototype.emits = function emits(event, parser) {
-  var primus = this;
-
-  return function emit(arg) {
-    var data = parser ? parser.apply(primus, arguments) : arg;
-
-    //
-    // Timeout is required to prevent crashes on WebSockets connections on
-    // mobile devices. We need to handle these edge cases in our own library
-    // as we cannot be certain that all frameworks fix these issues.
-    //
-    setTimeout(function timeout() {
-      primus.emit('incoming::'+ event, data);
-    }, 0);
-  };
 };
 
 /**

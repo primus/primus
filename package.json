@@ -51,6 +51,7 @@
     "access-control": "0.0.x",
     "create-server": "0.0.x",
     "diagnostics": "0.0.x",
+    "emits": "1.0.x",
     "eventemitter3": "0.1.x",
     "forwarded-for": "0.1.x",
     "fusing": "0.4.x",
@@ -80,5 +81,9 @@
     "sockjs-client-node": "0.1.x",
     "ws": "0.6.x"
   },
-  "pre-commit": ["build", "test", "integration"]
+  "pre-commit": [
+    "build",
+    "test",
+    "integration"
+  ]
 }

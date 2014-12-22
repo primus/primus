@@ -48,10 +48,10 @@ module.exports = function client() {
     //
     // Setup the Event handlers.
     //
-    socket.onopen = primus.emits('open');
-    socket.onerror = primus.emits('error');
-    socket.onclose = primus.emits('end');
-    socket.onmessage = primus.emits('data', function parse(evt) {
+    socket.onopen = primus.emits('incoming::open');
+    socket.onerror = primus.emits('incoming::error');
+    socket.onclose = primus.emits('incoming::end');
+    socket.onmessage = primus.emits('incoming::data', function parse(evt) {
       return evt.data;
     });
   });
