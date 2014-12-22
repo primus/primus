@@ -2,7 +2,8 @@
 'use strict';
 
 var EventEmitter = require('eventemitter3')
-  , TickTock = require('tick-tock');
+  , TickTock = require('tick-tock')
+  , qs = require('querystringify');
 
 /**
  * Context assertion, ensure that some of our public Primus methods are called
@@ -1168,24 +1169,7 @@ Primus.prototype.parse = parse;
  * @returns {Object} Parsed query string.
  * @api private
  */
-Primus.prototype.querystring = function querystring(query) {
-  var parser = /([^=?&]+)=([^&]*)/g
-    , result = {}
-    , part;
-
-  //
-  // Little nifty parsing hack, leverage the fact that RegExp.exec increments
-  // the lastIndex property so we can continue executing this loop until we've
-  // parsed all results.
-  //
-  for (;
-    part = parser.exec(query);
-    result[decodeURIComponent(part[1])] = decodeURIComponent(part[2])
-  );
-
-  return result;
-};
-
+Primus.prototype.querystring = qs.parse;
 /**
  * Transform a query string object back in to string equiv.
  *
@@ -1193,17 +1177,7 @@ Primus.prototype.querystring = function querystring(query) {
  * @returns {String}
  * @api private
  */
-Primus.prototype.querystringify = function querystringify(obj) {
-  var pairs = [];
-
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      pairs.push(encodeURIComponent(key) +'='+ encodeURIComponent(obj[key]));
-    }
-  }
-
-  return pairs.join('&');
-};
+Primus.prototype.querystringify = qs.stringify;
 
 /**
  * Generates a connection URI.
