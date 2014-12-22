@@ -6,7 +6,7 @@ before_install:
   - '[ "${TRAVIS_NODE_VERSION}" != "0.8" ] || npm install -g npm@1.4.28'
   - "npm install -g npm@2.1.9"
 script:
-  - "npm run build && npm run test && npm run integration"
+  - "npm run test && npm run integration"
 notifications:
   irc:
     channels:
