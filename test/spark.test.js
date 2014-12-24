@@ -90,52 +90,6 @@ describe('Spark', function () {
     expect(spark.query.string).to.equal('foo');
   });
 
-  describe('#emits', function () {
-    it('returns a function that emits the given event', function (done) {
-      var spark = new primus.Spark();
-
-      spark.on('incoming::spark', function (data) {
-        expect(data).to.equal('meh');
-        done();
-      });
-
-      var emit = spark.emits('spark');
-      emit('meh');
-    });
-
-    it('passes all arguments to the parser', function (done) {
-      var spark = new primus.Spark();
-
-      spark.on('incoming::spark', function (data) {
-        expect(data).to.equal('foo');
-        done();
-      });
-
-      var emit = spark.emits('spark', function parser(meh, balls) {
-        expect(meh).to.equal('meh');
-        expect(balls).to.equal('balls');
-
-        return 'foo';
-      });
-
-      emit('meh', 'balls');
-    });
-
-    it('only sends the first argument', function (done) {
-      var spark = new primus.Spark();
-
-      spark.on('incoming::spark', function (data, extra) {
-        expect(data).to.equal('meh');
-        expect(extra).to.equal(undefined);
-
-        done();
-      });
-
-      var emit = spark.emits('spark');
-      emit('meh', 'balls');
-    });
-  });
-
   describe('#reserved', function () {
     it('sees all incoming:: and outgoing:: as reserved', function () {
       var spark = new primus.Spark();
