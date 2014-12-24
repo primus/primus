@@ -90,9 +90,9 @@ module.exports = function server() {
       socket.send(data);
     });
 
-    socket.on('message', spark.emits('data'));
-    socket.on('error', spark.emits('error'));
-    socket.on('disconnect', spark.emits('end', function parser() {
+    socket.on('message', spark.emits('incoming::data'));
+    socket.on('error', spark.emits('incoming::error'));
+    socket.on('disconnect', spark.emits('incoming::end', function parser() {
       socket.removeAllListeners();
       socket = null;
     }));
