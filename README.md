@@ -365,18 +365,20 @@ spark.end(undefined, { reconnect: true }); // trigger a client-side reconnection
 
 #### spark.emits(event, parser)
 
-This method is mostly used internally. It returns a function that emits assigned
-`event` every time it's called. It only emits the first received argument or the
-result of the optional `parser` call. The `parser` function receives all
-arguments and can parse it down to a single value or just extracts the useful
-information from the data. Please note that the data that is received here isn't
-decoded yet.
+This method is mostly used internally. It works similarly to the native `bind`
+function, returning a function that emits the assigned `event` every time it's
+called. The optional `parser` function receives all the arguments that are
+passed to the returned function and can parse them down to a single value or
+remove them completely. See [emits](https://github.com/primus/emits) for
+detailed usage instructions.
 
 ```js
 spark.emits('event', function parser(structure) {
   return structure.data;
 });
 ```
+
+Please note that the data that is received here isn't decoded yet.
 
 #### spark.on('data')
 
