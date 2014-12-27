@@ -428,14 +428,13 @@ Primus.prototype.initialise = function initialise(options) {
 
   primus.recovery
   .on('reconnected', primus.emits('reconnected'))
-  .on('reconnect failed', primus.emits('reconnect failed'), function failed(data) {
+  .on('reconnect failed', primus.emits('reconnect failed', function failed(data) {
     primus.emit('end');
     return data;
-  })
+  }))
   .on('reconnect timeout', primus.emits('reconnect timeout'))
   .on('reconnect scheduled', primus.emits('reconnect scheduled'))
   .on('reconnect', primus.emits('reconnect', function reconnect(data) {
-    console.log('reconnect::fosho');
     primus.emit('outgoing::reconnect');
     return data;
   }));
@@ -592,8 +591,8 @@ Primus.prototype.initialise = function initialise(options) {
     if (primus.timers.active('connect')) primus.end();
     if (readyState !== Primus.OPEN) {
       return primus.recovery.reconnecting()
-      ? primus.reconnect()
-      : false;
+        ? primus.recovery.reconnect()
+        : false;
     }
 
     this.writable = false;
