@@ -4,7 +4,8 @@
 var EventEmitter = require('eventemitter3')
   , TickTock = require('tick-tock')
   , Recovery = require('recovery')
-  , qs = require('querystringify');
+  , qs = require('querystringify')
+  , destroy = require('demolish');
 
 /**
  * Context assertion, ensure that some of our public Primus methods are called
@@ -1032,23 +1033,10 @@ Primus.prototype.end = function end(data) {
  * @returns {Boolean}
  * @api public
  */
-Primus.prototype.destroy = function destroy() {
-  if (!this.timers) return false;
-
-  this.end();
-  this.removeAllListeners();
-
-  var nuke = 'url timers options recovery socket transport transformers'.split(' ')
-    , length = nuke.length
-    , i = 0;
-
-  for (; i < length; i++) {
-    if (this[nuke[i]].destroy) this[nuke[i]].destroy();
-    this[nuke[i]] = null;
-  }
-
-  return true;
-};
+Primus.prototype.destroy = destroy('url timers options recovery socket transport transformers', {
+  before: 'end',
+  after: 'removeAllListeners'
+});
 
 /**
  * Create a shallow clone of a given object.

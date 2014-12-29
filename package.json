@@ -50,6 +50,7 @@
   "dependencies": {
     "access-control": "0.0.x",
     "create-server": "0.0.x",
+    "demolish": "1.0.x",
     "diagnostics": "0.0.x",
     "emits": "1.0.x",
     "eventemitter3": "0.1.x",
