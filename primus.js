@@ -120,7 +120,7 @@ function Primus(url, options) {
   };
 
   //
-  //
+  // Create our reconnection instance.
   //
   primus.recovery = new Recovery(options.reconnect);
 
