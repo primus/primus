@@ -532,7 +532,7 @@ Primus.prototype.initialise = function initialise(options) {
     // always emit an `error` event instead of a `open` event.
     //
     //
-    if (primus.recovery.reconnecting()) return primus.recovery.reconnected(e);
+    if (primus.recovery.reconnecting()) return primus.recovery.reconnected(err);
     if (primus.listeners('error').length) primus.emit('error', err);
 
     //
