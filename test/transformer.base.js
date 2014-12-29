@@ -432,7 +432,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
         var socket = new Socket(server.addr);
 
-        socket.on('reconnecting', socket.end);
+        socket.on('reconnect scheduled', socket.end);
 
         socket.on('reconnect', function (message) {
           throw new Error('bad');
@@ -461,45 +461,48 @@ module.exports = function base(transformer, pathname, transformer_name) {
       });
 
       it('should not increment the attempt if a backoff is running', function (done) {
-        var socket = new Socket(server.addr);
+        var socket = new Socket(server.addr)
+          , recovery = socket.recovery
+          , backoff = {}
+          , result;
 
-        var backoff = {}
-          , result = socket.backoff(function () {
-              socket.end();
-            }, backoff);
+        result = recovery.backoff(function () {
+          socket.end();
+        }, backoff);
 
         expect(backoff.attempt).to.equal(1);
-        expect(result).to.equal(socket);
+        expect(result).to.equal(recovery);
 
-        result = socket.backoff(function () {
+        result = recovery.backoff(function () {
           throw new Error('I should not be called yo');
         }, backoff);
 
         expect(backoff.attempt).to.equal(1);
-        expect(result).to.equal(socket);
+        expect(result).to.equal(recovery);
 
         socket.on('end', done);
       });
 
       it('should reset the reconnect details after a succesful reconnect', function (done) {
-        this.timeout(5000);
-
         var socket = new Socket(server.addr, {
-          reconnect: {
-            minDelay: 100,
-            maxDelay: 2000
-          }
-        }), closed = 0;
+          reconnect: { min: 100, max: 1000 }
+        });
 
-        expect(!socket.attempt).to.equal(true);
+        var recovery = socket.recovery
+          , reconnect = 0
+          , closed = 0;
 
-        socket.once('reconnect', function () {
-          expect(!!socket.attempt).to.equal(true);
-          expect(socket.attempt.attempt).to.be.above(0);
-          expect(socket.attempt.minDelay).to.equal(100);
-          expect(socket.attempt.maxDelay).to.equal(2000);
-          expect(socket.attempt.timeout).to.be.below(2000);
-          expect(socket.attempt.timeout).to.be.above(99);
+        expect(recovery.attempt).to.equal(null);
+
+        socket.on('reconnect', function (attempt) {
+          expect(recovery.attempt).to.be.an('object');
+          expect(recovery.attempt).to.equal(attempt);
+          expect(attempt.attempt).to.be.above(0);
+          expect(attempt.min).to.equal(100);
+          expect(attempt.max).to.equal(1000);
+          expect(attempt.scheduled).to.be.below(1000);
+          expect(attempt.scheduled).to.be.above(99);
+          reconnect++;
         });
 
         socket.once('open', function () {
@@ -513,17 +516,11 @@ module.exports = function base(transformer, pathname, transformer_name) {
             Socket = services.Socket;
             server = services.server;
             primus = services.primus;
-          }, 100);
+          }, 200);
 
           socket.once('open', function () {
-            expect(!socket.attempt).to.equal(true);
-
-            socket.removeAllListeners('end');
+            expect(recovery.attempt).to.equal(null);
             socket.end();
-
-            // once from the reconnect, and once from the .end above
-            expect(closed).to.equal(2);
-            done();
           });
         });
 
@@ -532,7 +529,9 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
 
         socket.on('end', function () {
-          done(new Error('I shouldnt end'));
+          expect(reconnect).to.be.above(1);
+          expect(closed).to.equal(2);
+          done();
         });
       });
 
@@ -1018,13 +1017,13 @@ module.exports = function base(transformer, pathname, transformer_name) {
           pattern.push('timeout');
         });
 
-        socket.once('reconnecting', function () {
-          pattern.push('reconnecting');
+        socket.once('reconnect scheduled', function () {
+          pattern.push('reconnect scheduled');
         });
 
         socket.once('reconnect', function () {
           pattern.push('reconnect');
-          expect(pattern.join(',')).to.equal('timeout,reconnecting,reconnect');
+          expect(pattern.join(',')).to.equal('timeout,reconnect scheduled,reconnect');
 
           socket.end();
           // outgoing::reconnect is emitted after reconnect whatever we do

@@ -3,6 +3,7 @@
 
 var EventEmitter = require('eventemitter3')
   , TickTock = require('tick-tock')
+  , Recovery = require('recovery')
   , qs = require('querystringify');
 
 /**
@@ -108,7 +109,6 @@ function Primus(url, options) {
   primus.readyState = Primus.CLOSED;            // The readyState of the connection.
   primus.options = options;                     // Reference to the supplied options.
   primus.timers = new TickTock(this);           // Contains all our timers.
-  primus.attempt = null;                        // Current back off attempt.
   primus.socket = null;                         // Reference to the internal connection.
   primus.latency = 0;                           // Latency between messages.
   primus.stamps = 0;                            // Counter to make timestamps unique.
@@ -118,6 +118,11 @@ function Primus(url, options) {
     outgoing: [],
     incoming: []
   };
+
+  //
+  // Create our reconnection instance.
+  //
+  primus.recovery = new Recovery(options.reconnect);
 
   //
   // Parse the reconnection strategy. It can have the following strategies:
@@ -394,18 +399,20 @@ Primus.prototype.reserved = function reserved(evt) {
  * @public
  */
 Primus.prototype.reserved.events = {
-  readyStateChange: 1,
-  reconnecting: 1,
-  reconnected: 1,
-  reconnect: 1,
-  offline: 1,
-  timeout: 1,
-  online: 1,
-  error: 1,
-  close: 1,
-  open: 1,
-  data: 1,
-  end: 1
+  'reconnect scheduled': 1,
+  'reconnect timeout': 1,
+  'readyStateChange': 1,
+  'reconnect failed': 1,
+  'reconnected': 1,
+  'reconnect': 1,
+  'offline': 1,
+  'timeout': 1,
+  'online': 1,
+  'error': 1,
+  'close': 1,
+  'open': 1,
+  'data': 1,
+  'end': 1
 };
 
 /**
@@ -419,6 +426,19 @@ Primus.prototype.initialise = function initialise(options) {
   var primus = this
     , start;
 
+  primus.recovery
+  .on('reconnected', primus.emits('reconnected'))
+  .on('reconnect failed', primus.emits('reconnect failed', function failed(data) {
+    primus.emit('end');
+    return data;
+  }))
+  .on('reconnect timeout', primus.emits('reconnect timeout'))
+  .on('reconnect scheduled', primus.emits('reconnect scheduled'))
+  .on('reconnect', primus.emits('reconnect', function reconnect(data) {
+    primus.emit('outgoing::reconnect');
+    return data;
+  }));
+
   primus.on('outgoing::open', function opening() {
     var readyState = primus.readyState;
 
@@ -431,10 +451,11 @@ Primus.prototype.initialise = function initialise(options) {
   });
 
   primus.on('incoming::open', function opened() {
-    var readyState = primus.readyState
-      , reconnect = primus.attempt;
+    var readyState = primus.readyState;
 
-    if (primus.attempt) primus.attempt = null;
+    if (primus.recovery.reconnecting()) {
+      primus.recovery.reconnected();
+    }
 
     //
     // The connection has been opened so we should set our state to
@@ -474,7 +495,6 @@ Primus.prototype.initialise = function initialise(options) {
     }
 
     primus.emit('open');
-    if (reconnect) primus.emit('reconnected');
   });
 
   primus.on('incoming::pong', function pong(time) {
@@ -488,13 +508,6 @@ Primus.prototype.initialise = function initialise(options) {
   primus.on('incoming::error', function error(e) {
     var connect = primus.timers.active('connect')
       , err = e;
-
-    //
-    // We're still doing a reconnect attempt, it could be that we failed to
-    // connect because the server was down. Failing connect attempts should
-    // always emit an `error` event instead of a `open` event.
-    //
-    if (primus.attempt) return primus.reconnect();
 
     //
     // When the error is not an Error instance we try to normalize it.
@@ -512,7 +525,13 @@ Primus.prototype.initialise = function initialise(options) {
         if (e.hasOwnProperty(key)) err[key] = e[key];
       }
     }
-
+    //
+    // We're still doing a reconnect attempt, it could be that we failed to
+    // connect because the server was down. Failing connect attempts should
+    // always emit an `error` event instead of a `open` event.
+    //
+    //
+    if (primus.recovery.reconnecting()) return primus.recovery.reconnected(e);
     if (primus.listeners('error').length) primus.emit('error', err);
 
     //
@@ -520,8 +539,11 @@ Primus.prototype.initialise = function initialise(options) {
     // unauthorized access to the server.
     //
     if (connect) {
-      if (~primus.options.strategy.indexOf('timeout')) primus.reconnect();
-      else primus.end();
+      if (~primus.options.strategy.indexOf('timeout')) {
+        primus.recovery.reconnect();
+      } else {
+        primus.end();
+      }
     }
   });
 
@@ -552,6 +574,7 @@ Primus.prototype.initialise = function initialise(options) {
     //
     if (primus.disconnect) {
       primus.disconnect = false;
+
       return primus.end();
     }
 
@@ -567,7 +590,9 @@ Primus.prototype.initialise = function initialise(options) {
 
     if (primus.timers.active('connect')) primus.end();
     if (readyState !== Primus.OPEN) {
-      return primus.attempt ? primus.reconnect() : false;
+      return primus.recovery.reconnecting()
+        ? primus.recovery.reconnect()
+        : false;
     }
 
     this.writable = false;
@@ -589,7 +614,7 @@ Primus.prototype.initialise = function initialise(options) {
     // shutdown, so if the reconnection is enabled start a reconnect procedure.
     //
     if (~primus.options.strategy.indexOf('disconnect')) {
-      return primus.reconnect();
+      return primus.recovery.reconnect();
     }
 
     primus.emit('outgoing::end');
@@ -631,8 +656,7 @@ Primus.prototype.initialise = function initialise(options) {
     // user goes offline. In this case we want to kill the existing attempt so
     // when the user goes online, it will attempt to reconnect freshly again.
     //
-    primus.timers.clear('reconnect');
-    primus.attempt = null;
+    primus.recovery.reset();
   }
 
   /**
@@ -641,12 +665,14 @@ Primus.prototype.initialise = function initialise(options) {
    * @api private
    */
   function online() {
-    if (primus.online) return; // Already or still online, bailout
+    if (primus.online) return; // Already or still online, bailout.
 
     primus.online = true;
     primus.emit('online');
 
-    if (~primus.options.strategy.indexOf('online')) primus.reconnect();
+    if (~primus.options.strategy.indexOf('online')) {
+      primus.recovery.reconnect();
+    }
   }
 
   if (window.addEventListener) {
@@ -803,7 +829,7 @@ Primus.prototype.open = function open() {
   // before the connection is opened to capture failing connections and kill the
   // timeout.
   //
-  if (!this.attempt && this.options.timeout) this.timeout();
+  if (!this.recovery.reconnecting() && this.options.timeout) this.timeout();
 
   this.emit('outgoing::open');
   return this;
@@ -937,120 +963,25 @@ Primus.prototype.timeout = function timeout() {
   primus.timers.setTimeout('connect', function expired() {
     remove(); // Clean up old references.
 
-    if (primus.readyState === Primus.OPEN || primus.attempt) return;
+    if (primus.readyState === Primus.OPEN || primus.recovery.reconnecting()) {
+      return;
+    }
 
     primus.emit('timeout');
 
     //
     // We failed to connect to the server.
     //
-    if (~primus.options.strategy.indexOf('timeout')) primus.reconnect();
-    else primus.end();
+    if (~primus.options.strategy.indexOf('timeout')) {
+      primus.recovery.reconnect();
+    } else {
+      primus.end();
+    }
   }, primus.options.timeout);
 
   return primus.on('error', remove)
     .on('open', remove)
     .on('end', remove);
-};
-
-/**
- * Exponential back off algorithm for retry operations. It uses an randomized
- * retry so we don't DDOS our server when it goes down under pressure.
- *
- * @param {Function} callback Callback to be called after the timeout.
- * @param {Object} opts Options for configuring the timeout.
- * @returns {Primus}
- * @api private
- */
-Primus.prototype.backoff = function backoff(callback, opts) {
-  opts = opts || {};
-
-  var primus = this;
-
-  //
-  // Bailout when we already have a backoff process running. We shouldn't call
-  // the callback then as it might cause an unexpected `end` event as another
-  // reconnect process is already running.
-  //
-  if (opts.backoff) return primus;
-
-  opts.maxDelay = 'maxDelay' in opts ? opts.maxDelay : Infinity;  // Maximum delay.
-  opts.minDelay = 'minDelay' in opts ? opts.minDelay : 500;       // Minimum delay.
-  opts.retries = 'retries' in opts ? opts.retries : 10;           // Allowed retries.
-  opts.attempt = (+opts.attempt || 0) + 1;                        // Current attempt.
-  opts.factor = 'factor' in opts ? opts.factor : 2;               // Back off factor.
-
-  //
-  // Bailout if we are about to make to much attempts. Please note that we use
-  // `>` because we already incremented the value above.
-  //
-  if (opts.attempt > opts.retries) {
-    callback(new Error('Unable to retry'), opts);
-    return primus;
-  }
-
-  //
-  // Prevent duplicate back off attempts using the same options object.
-  //
-  opts.backoff = true;
-
-  //
-  // Calculate the timeout, but make it randomly so we don't retry connections
-  // at the same interval and defeat the purpose. This exponential back off is
-  // based on the work of:
-  //
-  // http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
-  //
-  opts.timeout = opts.attempt !== 1
-    ? Math.min(Math.round(
-        (Math.random() + 1) * opts.minDelay * Math.pow(opts.factor, opts.attempt)
-      ), opts.maxDelay)
-    : opts.minDelay;
-
-  primus.timers.setTimeout('reconnect', function delay() {
-    opts.backoff = false;
-    primus.timers.clear('reconnect');
-
-    callback(undefined, opts);
-  }, opts.timeout);
-
-  //
-  // Emit a `reconnecting` event with current reconnect options. This allows
-  // them to update the UI and provide their users with feedback.
-  //
-  primus.emit('reconnecting', opts);
-
-  return primus;
-};
-
-/**
- * Start a new reconnect procedure.
- *
- * @returns {Primus}
- * @api private
- */
-Primus.prototype.reconnect = function reconnect() {
-  var primus = this;
-
-  //
-  // Try to re-use the existing attempt.
-  //
-  primus.attempt = primus.attempt || primus.clone(primus.options.reconnect);
-
-  primus.backoff(function attempt(fail, backoff) {
-    if (fail) {
-      primus.attempt = null;
-      return primus.emit('end');
-    }
-
-    //
-    // Try to re-open the connection again.
-    //
-    primus.emit('reconnect', backoff);
-    primus.emit('outgoing::reconnect');
-  }, primus.attempt);
-
-  return primus;
 };
 
 /**
@@ -1067,9 +998,8 @@ Primus.prototype.end = function end(data) {
     //
     // If we are reconnecting stop the reconnection procedure.
     //
-    if (this.timers.active('reconnect')) {
-      this.timers.clear('reconnect');
-      this.attempt = null;
+    if (this.recovery.reconnecting()) {
+      this.recovery.reset();
       this.emit('end');
     }
 
@@ -1108,7 +1038,7 @@ Primus.prototype.destroy = function destroy() {
   this.end();
   this.removeAllListeners();
 
-  var nuke = 'url timers options attempt socket transport transformers'.split(' ')
+  var nuke = 'url timers options recovery socket transport transformers'.split(' ')
     , length = nuke.length
     , i = 0;
 
