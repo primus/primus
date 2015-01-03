@@ -67,7 +67,13 @@ module.exports = function server() {
     // Use our own custom logger instance so we can emit `log` events instead of
     // writing/spamming terminals.
     //
-    'logger': this.logger
+    'logger': this.logger,
+
+    //
+    // Set client store expiration to 0 for consistency with other
+    // transformers.
+    //
+    'client store expiration': 0
   });
 
   //
@@ -90,9 +96,9 @@ module.exports = function server() {
       socket.send(data);
     });
 
-    socket.on('message', spark.emits('data'));
-    socket.on('error', spark.emits('error'));
-    socket.on('disconnect', spark.emits('end', function parser(next) {
+    socket.on('message', spark.emits('incoming::data'));
+    socket.on('error', spark.emits('incoming::error'));
+    socket.on('disconnect', spark.emits('incoming::end', function parser(next) {
       socket.removeAllListeners();
       socket = null;
       next();

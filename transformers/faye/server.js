@@ -65,11 +65,11 @@ module.exports = function server() {
         websocket.send(data, { binary: true });
       });
 
-      websocket.on('error', spark.emits('error'));
-      websocket.on('message', spark.emits('data', function parse(next, evt) {
+      websocket.on('error', spark.emits('incoming::error'));
+      websocket.on('message', spark.emits('incoming::data', function parse(next, evt) {
         next(undefined, evt.data);
       }));
-      websocket.on('close', spark.emits('end', function close(next) {
+      websocket.on('close', spark.emits('incoming::end', function close(next) {
         websocket.removeAllListeners();
         websocket = null;
         next();

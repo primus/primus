@@ -55,9 +55,9 @@ module.exports = function server() {
 
       // 'ws' supports protocol-level ping. Reset the heartbeat.
       socket.on('ping', spark.heartbeat.bind(spark));
-      socket.on('message', spark.emits('data'));
-      socket.on('error', spark.emits('error'));
-      socket.on('close', spark.emits('end', function parser(next) {
+      socket.on('message', spark.emits('incoming::data'));
+      socket.on('error', spark.emits('incoming::error'));
+      socket.on('close', spark.emits('incoming::end', function parser(next) {
         socket.removeAllListeners();
         socket = null;
         next();

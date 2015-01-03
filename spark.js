@@ -58,9 +58,7 @@ function Spark(primus, headers, address, query, id, request) {
   });
 }
 
-fuse(Spark, require('stream'), {
-  defaults: false
-});
+fuse(Spark, require('stream'), { merge: false, mixin: false });
 
 //
 // Internal readyState's to prevent writes against close sockets.
@@ -406,25 +404,6 @@ Spark.readable('protocol', function protocol(msg) {
 
   log('processed a primus protocol message `%s`', msg);
   return true;
-});
-
-/**
- * Simple emit wrapper that returns a function that emits an event once it's
- * called. This makes it easier for transports to emit specific events. The
- * scope of this function is limited as it will only emit one single argument.
- *
- * @param {String} event Name of the event that we should emit.
- * @param {Function} parser Argument parser.
- * @api public
- */
-Spark.readable('emits', function emits(event, parser) {
-  var spark = this;
-
-  return function emit(arg) {
-    var data = parser ? parser.apply(spark, arguments) : arg;
-
-    spark.emit('incoming::'+ event, data);
-  };
 });
 
 /**
