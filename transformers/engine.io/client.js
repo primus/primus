@@ -9,7 +9,11 @@
  * @api private
  */
 module.exports = function client() {
-  var onmessage = this.emits('incoming::data')
+  var onmessage = this.emits('incoming::data', function parse(next) {
+      setTimeout(function defer() {
+        next();
+      }, 0);
+    })
     , onerror = this.emits('incoming::error')
     , onopen = this.emits('incoming::open')
     , onclose = this.emits('incoming::end')

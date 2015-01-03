@@ -60,8 +60,10 @@ module.exports = function client() {
         primus.emit('incoming::end');
       }, 0);
     };
-    socket.onmessage = primus.emits('incoming::data', function parse(evt) {
-      return evt.data;
+    socket.onmessage = primus.emits('incoming::data', function parse(next, evt) {
+      setTimeout(function defer() {
+        next(undefined, evt.data);
+      }, 0);
     });
   });
 
