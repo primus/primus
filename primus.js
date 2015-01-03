@@ -435,9 +435,9 @@ Primus.prototype.initialise = function initialise(options) {
   }))
   .on('reconnect timeout', primus.emits('reconnect timeout'))
   .on('reconnect scheduled', primus.emits('reconnect scheduled'))
-  .on('reconnect', primus.emits('reconnect', function reconnect(data) {
+  .on('reconnect', primus.emits('reconnect', function reconnect(next) {
     primus.emit('outgoing::reconnect');
-    return data;
+    next();
   }));
 
   primus.on('outgoing::open', function opening() {
