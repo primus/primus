@@ -35,9 +35,10 @@ module.exports = function server() {
 
     socket.on('error', spark.emits('error'));
     socket.on('data', spark.emits('data'));
-    socket.on('close', spark.emits('end', function parser() {
+    socket.on('close', spark.emits('end', function parser(next) {
       socket.removeAllListeners();
       socket = null;
+      next();
     }));
   });
 
