@@ -67,7 +67,13 @@ module.exports = function server() {
     // Use our own custom logger instance so we can emit `log` events instead of
     // writing/spamming terminals.
     //
-    'logger': this.logger
+    'logger': this.logger,
+
+    //
+    // Set client store expiration to 0 for consistency with other
+    // transformers.
+    //
+    'client store expiration': 0
   });
 
   //
