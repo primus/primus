@@ -9,14 +9,10 @@
  * @api private
  */
 module.exports = function client() {
-  var onmessage = this.emits('incoming::data', function parse(next) {
-      setTimeout(function defer() {
-        next();
-      }, 0);
-    })
-    , onerror = this.emits('incoming::error')
-    , onopen = this.emits('incoming::open')
-    , onclose = this.emits('incoming::end')
+  var onmessage = this.trigger('incoming::data')
+    , onerror = this.trigger('incoming::error')
+    , onopen = this.trigger('incoming::open')
+    , onclose = this.trigger('incoming::end')
     , primus = this
     , socket;
 
