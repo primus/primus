@@ -350,15 +350,32 @@ Primus.prototype.ark = {};
 
 /**
  * Simple emit wrapper that returns a function that emits an event once it's
- * called. This makes it easier for transports to emit specific events. The
- * scope of this function is limited as it will only emit one single argument.
+ * called. This makes it easier for transports to emit specific events.
  *
- * @param {String} event Name of the event that we should emit.
- * @param {Function} parser Argument parser.
- * @returns {Function} The wrapped function that will emit events when called.
- * @public
+ * @returns {Function} A function that will emit the event when called.
+ * @api public
  */
 Primus.prototype.emits = require('emits');
+
+/**
+ * A small wrapper around `emits` to add a default parser when one is not
+ * supplied. The default parser will defer the emission of the event to make
+ * sure that the event is emitted at the correct time.
+ *
+ * @returns {Function} A function that will emit the event when called.
+ * @api private
+ */
+Primus.prototype.trigger = function trigger() {
+  for (var i = 0, l = arguments.length, args = new Array(l); i < l; i++) {
+    args[i] = arguments[i];
+  }
+
+  if ('function' !== typeof args[l - 1]) args.push(function defer(next) {
+    setTimeout(next, 0);
+  });
+
+  return this.emits.apply(this, args);
+};
 
 /**
  * Return the given plugin.

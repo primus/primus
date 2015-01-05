@@ -66,10 +66,10 @@ module.exports = function client() {
     // Setup the Event handlers.
     //
     socket.binaryType = 'arraybuffer';
-    socket.onopen = primus.emits('incoming::open');
-    socket.onerror = primus.emits('incoming::error');
-    socket.onclose = primus.emits('incoming::end');
-    socket.onmessage = primus.emits('incoming::data', function parse(next, evt) {
+    socket.onopen = primus.trigger('incoming::open');
+    socket.onerror = primus.trigger('incoming::error');
+    socket.onclose = primus.trigger('incoming::end');
+    socket.onmessage = primus.trigger('incoming::data', function parse(next, evt) {
       setTimeout(function defer() {
         next(undefined, evt.data);
       }, 0);
