@@ -12,13 +12,13 @@ var PrimusError = require('../../errors').PrimusError;
 module.exports = function server() {
   var sockjs = require('sockjs')
     , primus = this.primus
-    , Spark = this.Spark
     , prefix = primus.pathname
-    , options = null;
+    , Spark = this.Spark
+    , fayeOptions = null;
 
   if (primus.options.perMessageDeflate) {
     try {
-      options = { extensions: [ require('permessage-deflate') ] };
+      fayeOptions = { extensions: [ require('permessage-deflate') ] };
     } catch (e) {
       [
         '',
@@ -76,7 +76,7 @@ module.exports = function server() {
   // Listen to requests.
   //
   var handle = this.service.listener({
-    faye_server_options: options,
+    faye_server_options: fayeOptions,
     log: this.logger.plain,
     prefix: prefix
   }).getHandler();
