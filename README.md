@@ -709,6 +709,18 @@ to talk with the server again.
 primus.end();
 ```
 
+#### primus.emits(event, parser)
+
+This method is analogous to the [`spark.emits`](#sparkemitsevent-parser) method.
+It returs a function that emits the given event every time it's called. See
+[emits](https://github.com/primus/emits) for detailed usage instructions.
+
+```js
+primus.emits('event', function parser(next, structure) {
+  next(undefined, structure.data);
+});
+```
+
 ### Connecting from the server
 
 The client-side library has been made compatible with Node.js so the same code
