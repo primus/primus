@@ -367,14 +367,17 @@ spark.end(undefined, { reconnect: true }); // trigger a client-side reconnection
 
 This method is mostly used internally. It works similarly to the native `bind`
 function, returning a function that emits the assigned `event` every time it's
-called. The optional `parser` function receives all the arguments that are
-passed to the returned function and can parse them down to a single value or
-remove them completely. See [emits](https://github.com/primus/emits) for
+called. If the last argument is a function, it will be used to parse the
+arguments of the returned function. The `parser` is optional and always async,
+its **first** argument is a callback that follows the usual error first pattern,
+all successive arguments are the ones to parse. Using the `parser` you can
+reduce the arguments down to a single value, remove them completely or prevent
+the event from being emitted. See [emits](https://github.com/primus/emits) for
 detailed usage instructions.
 
 ```js
-spark.emits('event', function parser(structure) {
-  return structure.data;
+spark.emits('event', function parser(next, structure) {
+  next(undefined, structure.data);
 });
 ```
 
