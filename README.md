@@ -747,6 +747,23 @@ to talk with the server again.
 primus.end();
 ```
 
+#### primus.destroy()
+
+This method literraly destroys the `primus` instance. Internally it calls the
+`primus.end()` method but it also frees some potentially heavy objects like
+the underlying socket, the timers, the message transformers, etc. It also
+removes all the event listeners but before doing that it emits a final `destroy`
+event. Keep in mind that once this method is executed, you can no longer use
+`primus.open()` on the same `primus` instance.
+
+```js
+primus.on('destroy', function () {
+  console.log('Feel the power of my lasers!');
+});
+
+primus.destroy();
+```
+
 #### primus.emits(event, parser)
 
 This method is analogous to the [`spark.emits`](#sparkemitsevent-parser) method.
@@ -1053,7 +1070,8 @@ Event                 | Usage       | Location      | Description
 `outgoing::open`      | private     | client/spark  | Transformer should connect.
 `incoming::open`      | private     | client/spark  | Transformer has connected.
 `open`                | **public**  | client        | Connection is open.
-`incoming::error`     | private     | client        | Transformer received error.
+`destroy`             | **public**  | client        | The instance has been destroyed.
+`incoming::error`     | private     | client        | Transformer received an error.
 `error`               | **public**  | client/spark  | An error happened.
 `incoming::data`      | private     | client/server | Transformer received data.
 `outgoing::data`      | private     | client/spark  | Transformer should write data.
@@ -1061,11 +1079,10 @@ Event                 | Usage       | Location      | Description
 `incoming::end`       | private     | client/spark  | Transformer closed the connection.
 `outgoing::end`       | private     | client/spark  | Transformer should close connection.
 `end`                 | **public**  | client/spark  | The connection has ended.
-`close`               | **public**  | client/server | The connection is closed by transformer, we might retry. And the server has shutdown.
+`close`               | **public**  | client/server | The connection has closed, we might reconnect. / The server has been destroyed.
 `connection`          | **public**  | server        | We received a new connection.
-`disconnection`       | **public**  | server        | A connection closed.
+`disconnection`       | **public**  | server        | We received a disconnection.
 `initialised`         | **public**  | server        | The server is initialised.
-`close`               | **public**  | server        | The server has been destroyed.
 `plugin`              | **public**  | server        | A new plugin has been added.
 `plugout`             | **public**  | server        | A plugin has been removed.
 `incoming::ping`      | private     | spark         | We received a ping message.
