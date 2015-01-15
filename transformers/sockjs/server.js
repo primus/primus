@@ -1,5 +1,7 @@
 'use strict';
 
+var PrimusError = require('../../errors').PrimusError;
+
 /**
  * Minimum viable Sockjs server for Node.js that works through the primus
  * interface.
@@ -9,9 +11,31 @@
  */
 module.exports = function server() {
   var sockjs = require('sockjs')
-    , Spark = this.Spark
     , primus = this.primus
-    , prefix = primus.pathname;
+    , prefix = primus.pathname
+    , Spark = this.Spark
+    , fayeOptions = null;
+
+  if (primus.options.perMessageDeflate) {
+    try {
+      fayeOptions = { extensions: [ require('permessage-deflate') ] };
+    } catch (e) {
+      [
+        '',
+        'Missing required npm dependency for sockjs',
+        'To use the permessage-deflate extension with the sockjs transformer, ',
+        'you have to install an additional dependency.',
+        'Please run the following command and try again:',
+        '',
+        '  npm install --save permessage-deflate',
+        ''
+      ].forEach(function each(line) {
+        console.error('Primus: '+ line);
+      });
+
+      throw new PrimusError('Missing dependencies for transformer: "sockjs"', primus);
+    }
+  }
 
   if (prefix.charAt(prefix.length - 1) !== '/') prefix += '(?:[^/]+)?';
 
@@ -50,11 +74,12 @@ module.exports = function server() {
   });
 
   //
-  // Listen to upgrade requests.
+  // Listen to requests.
   //
   var handle = this.service.listener({
-    prefix: prefix,
-    log: this.logger.plain
+    faye_server_options: fayeOptions,
+    log: this.logger.plain,
+    prefix: prefix
   }).getHandler();
 
   //

@@ -1,4 +1,8 @@
-examples
-issues
-node_modules
-test
+node_modules/
+examples/
+issues/
+test/
+transformers/*/*
+!transformers/*/*.js
+*.md
+.*

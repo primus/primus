@@ -17,7 +17,8 @@ us the benefit of the doubt as it's possible that we haven't seen it yet. In
 this case please send us a message **without details** using one of the
 following methods:
 
-- Give our channel operators a heads up in our IRC room.
+- Give our channel operators a heads up in our IRC room
+  ([irc.freenode.net#primus](https://webchat.freenode.net/?channels=primus)).
 - Contact the lead developers of this project on their personal e-mails. You
   can find the e-mails in the git logs, for example using the following command:
   `git --no-pager show -s --format='%an <%ae>' <gitsha>` where `<gitsha>` is the
