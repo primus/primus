@@ -242,6 +242,45 @@ module.exports = function base(transformer, pathname, transformer_name) {
         }).on('end', done);
       });
 
+      it('does not emit a `data` event after an `end` event', function (done) {
+        var socket = new Socket(server.addr),
+            orig_emits = socket.emits,
+            ended = false;
+
+        socket.emits = function (event, parser) {
+          var f = orig_emits.apply(this, arguments);
+
+          if (event !== 'data') {
+            return f;
+          }
+
+          return function (arg) {
+            // call through to original emits method
+            f.apply(this, arguments);
+            // check if it's the data we sent
+            var data = parser ? parser.apply(socket, arguments) : arg;
+            if (data === '"pong"') {
+              // end the client
+              socket.end();
+            }
+          };
+        };
+
+        socket.on('data', function (message) {
+          // if we get data it should be before we ended
+          expect(ended).to.be.false;
+        });
+
+        socket.on('open', function () {
+          socket.write({ echo: 'pong' });
+        });
+
+        socket.on('end', function () {
+          ended = true;
+          done();
+        });
+      });
+
       it('emits an `close` event when its closed', function (done) {
         var socket = new Socket(server.addr);
 

@@ -808,7 +808,13 @@ Primus.prototype.transforms = function transforms(primus, connection, type, data
     // and then save the raw string in your database without the stringify
     // overhead.
     //
-    if ('incoming' === type) return connection.emit('data', packet.data, raw);
+    if ('incoming' === type) {
+      if (primus.readyState !== Primus.CLOSED) {
+        connection.emit('data', packet.data, raw);
+      }
+
+      return;
+    } 
 
     connection._write(packet.data);
   }));
