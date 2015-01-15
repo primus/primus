@@ -481,7 +481,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.on('end', done);
       });
 
-      it('should reset the reconnect details after a succesful reconnect', function (done) {
+      it('should reset the reconnect details after a successful reconnect', function (done) {
         this.timeout(5000);
 
         var socket = new Socket(server.addr, {
@@ -1138,7 +1138,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
       it('should emit an `error` when it fails to encode the data', function (done) {
         primus.on('connection', function (spark) {
           var data = { foo: 'bar' };
-          data.recusrive = data;
+          data.recursive = data;
 
           spark.on('error', function (err) {
             expect(err).to.not.be.a('string');
