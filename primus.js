@@ -1,221 +1,11 @@
 /*globals require, define */
 'use strict';
 
-/**
- * Representation of a single EventEmitter function.
- *
- * @param {Function} fn Event handler to be called.
- * @param {Mixed} context Context for function execution.
- * @param {Boolean} once Only emit once
- * @api private
- */
-function EE(fn, context, once) {
-  this.fn = fn;
-  this.context = context;
-  this.once = once || false;
-}
-
-/**
- * Minimal EventEmitter interface that is molded against the Node.js
- * EventEmitter interface.
- *
- * @constructor
- * @api public
- */
-function EventEmitter() { /* Nothing to set */ }
-
-/**
- * Holds the assigned EventEmitters by name.
- *
- * @type {Object}
- * @private
- */
-EventEmitter.prototype._events = undefined;
-
-/**
- * Return a list of assigned event listeners.
- *
- * @param {String} event The events that should be listed.
- * @returns {Array}
- * @api public
- */
-EventEmitter.prototype.listeners = function listeners(event) {
-  if (!this._events || !this._events[event]) return [];
-  if (this._events[event].fn) return [this._events[event].fn];
-
-  for (var i = 0, l = this._events[event].length, ee = new Array(l); i < l; i++) {
-    ee[i] = this._events[event][i].fn;
-  }
-
-  return ee;
-};
-
-/**
- * Emit an event to all registered event listeners.
- *
- * @param {String} event The name of the event.
- * @returns {Boolean} Indication if we've emitted an event.
- * @api public
- */
-EventEmitter.prototype.emit = function emit(event, a1, a2, a3, a4, a5) {
-  if (!this._events || !this._events[event]) return false;
-
-  var listeners = this._events[event]
-    , len = arguments.length
-    , args
-    , i;
-
-  if ('function' === typeof listeners.fn) {
-    if (listeners.once) this.removeListener(event, listeners.fn, true);
-
-    switch (len) {
-      case 1: return listeners.fn.call(listeners.context), true;
-      case 2: return listeners.fn.call(listeners.context, a1), true;
-      case 3: return listeners.fn.call(listeners.context, a1, a2), true;
-      case 4: return listeners.fn.call(listeners.context, a1, a2, a3), true;
-      case 5: return listeners.fn.call(listeners.context, a1, a2, a3, a4), true;
-      case 6: return listeners.fn.call(listeners.context, a1, a2, a3, a4, a5), true;
-    }
-
-    for (i = 1, args = new Array(len -1); i < len; i++) {
-      args[i - 1] = arguments[i];
-    }
-
-    listeners.fn.apply(listeners.context, args);
-  } else {
-    var length = listeners.length
-      , j;
-
-    for (i = 0; i < length; i++) {
-      if (listeners[i].once) this.removeListener(event, listeners[i].fn, true);
-
-      switch (len) {
-        case 1: listeners[i].fn.call(listeners[i].context); break;
-        case 2: listeners[i].fn.call(listeners[i].context, a1); break;
-        case 3: listeners[i].fn.call(listeners[i].context, a1, a2); break;
-        default:
-          if (!args) for (j = 1, args = new Array(len -1); j < len; j++) {
-            args[j - 1] = arguments[j];
-          }
-
-          listeners[i].fn.apply(listeners[i].context, args);
-      }
-    }
-  }
-
-  return true;
-};
-
-/**
- * Register a new EventListener for the given event.
- *
- * @param {String} event Name of the event.
- * @param {Functon} fn Callback function.
- * @param {Mixed} context The context of the function.
- * @api public
- */
-EventEmitter.prototype.on = function on(event, fn, context) {
-  var listener = new EE(fn, context || this);
-
-  if (!this._events) this._events = {};
-  if (!this._events[event]) this._events[event] = listener;
-  else {
-    if (!this._events[event].fn) this._events[event].push(listener);
-    else this._events[event] = [
-      this._events[event], listener
-    ];
-  }
-
-  return this;
-};
-
-/**
- * Add an EventListener that's only called once.
- *
- * @param {String} event Name of the event.
- * @param {Function} fn Callback function.
- * @param {Mixed} context The context of the function.
- * @api public
- */
-EventEmitter.prototype.once = function once(event, fn, context) {
-  var listener = new EE(fn, context || this, true);
-
-  if (!this._events) this._events = {};
-  if (!this._events[event]) this._events[event] = listener;
-  else {
-    if (!this._events[event].fn) this._events[event].push(listener);
-    else this._events[event] = [
-      this._events[event], listener
-    ];
-  }
-
-  return this;
-};
-
-/**
- * Remove event listeners.
- *
- * @param {String} event The event we want to remove.
- * @param {Function} fn The listener that we need to find.
- * @param {Boolean} once Only remove once listeners.
- * @api public
- */
-EventEmitter.prototype.removeListener = function removeListener(event, fn, once) {
-  if (!this._events || !this._events[event]) return this;
-
-  var listeners = this._events[event]
-    , events = [];
-
-  if (fn) {
-    if (listeners.fn && (listeners.fn !== fn || (once && !listeners.once))) {
-      events.push(listeners);
-    }
-    if (!listeners.fn) for (var i = 0, length = listeners.length; i < length; i++) {
-      if (listeners[i].fn !== fn || (once && !listeners[i].once)) {
-        events.push(listeners[i]);
-      }
-    }
-  }
-
-  //
-  // Reset the array, or remove it completely if we have no more listeners.
-  //
-  if (events.length) {
-    this._events[event] = events.length === 1 ? events[0] : events;
-  } else {
-    delete this._events[event];
-  }
-
-  return this;
-};
-
-/**
- * Remove all listeners or only the listeners for the specified event.
- *
- * @param {String} event The event want to remove all listeners for.
- * @api public
- */
-EventEmitter.prototype.removeAllListeners = function removeAllListeners(event) {
-  if (!this._events) return this;
-
-  if (event) delete this._events[event];
-  else this._events = {};
-
-  return this;
-};
-
-//
-// Alias methods names because people roll like that.
-//
-EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
-EventEmitter.prototype.addListener = EventEmitter.prototype.on;
-
-//
-// This function doesn't apply anymore.
-//
-EventEmitter.prototype.setMaxListeners = function setMaxListeners() {
-  return this;
-};
+var EventEmitter = require('eventemitter3')
+  , TickTock = require('tick-tock')
+  , Recovery = require('recovery')
+  , qs = require('querystringify')
+  , destroy = require('demolish');
 
 /**
  * Context assertion, ensure that some of our public Primus methods are called
@@ -319,17 +109,21 @@ function Primus(url, options) {
   primus.url = primus.parse(url || defaultUrl); // Parse the URL to a readable format.
   primus.readyState = Primus.CLOSED;            // The readyState of the connection.
   primus.options = options;                     // Reference to the supplied options.
-  primus.timers = {};                           // Contains all our timers.
-  primus.attempt = null;                        // Current back off attempt.
+  primus.timers = new TickTock(this);           // Contains all our timers.
   primus.socket = null;                         // Reference to the internal connection.
   primus.latency = 0;                           // Latency between messages.
-  primus.stamps = 0;                            // Counter to make timestamps unqiue.
+  primus.stamps = 0;                            // Counter to make timestamps unique.
   primus.disconnect = false;                    // Did we receive a disconnect packet?
   primus.transport = options.transport;         // Transport options.
   primus.transformers = {                       // Message transformers.
     outgoing: [],
     incoming: []
   };
+
+  //
+  // Create our reconnection instance.
+  //
+  primus.recovery = new Recovery(options.reconnect);
 
   //
   // Parse the reconnection strategy. It can have the following strategies:
@@ -361,13 +155,6 @@ function Primus(url, options) {
   options.strategy = options.strategy.join(',').toLowerCase();
 
   //
-  // Only initialise the EventEmitter interface if we're running in a plain
-  // browser environment. The Stream interface is inherited differently when it
-  // runs on browserify and on Node.js.
-  //
-  if (!Stream) EventEmitter.call(primus);
-
-  //
   // Force the use of WebSockets, even when we've detected some potential
   // broken WebSocket implementation.
   //
@@ -388,8 +175,9 @@ function Primus(url, options) {
   // we want to do it after a really small timeout so we give the users enough
   // time to listen for `error` events etc.
   //
-  if (!options.manual) primus.timers.open = setTimeout(function open() {
-    primus.clearTimeout('open').open();
+  if (!options.manual) primus.timers.setTimeout('open', function open() {
+    primus.timers.clear('open');
+    primus.open();
   }, 0);
 
   primus.initialise(options);
@@ -561,6 +349,35 @@ try {
 Primus.prototype.ark = {};
 
 /**
+ * Simple emit wrapper that returns a function that emits an event once it's
+ * called. This makes it easier for transports to emit specific events.
+ *
+ * @returns {Function} A function that will emit the event when called.
+ * @api public
+ */
+Primus.prototype.emits = require('emits');
+
+/**
+ * A small wrapper around `emits` to add a default parser when one is not
+ * supplied. The default parser will defer the emission of the event to make
+ * sure that the event is emitted at the correct time.
+ *
+ * @returns {Function} A function that will emit the event when called.
+ * @api private
+ */
+Primus.prototype.trigger = function trigger() {
+  for (var i = 0, l = arguments.length, args = new Array(l); i < l; i++) {
+    args[i] = arguments[i];
+  }
+
+  if ('function' !== typeof args[l - 1]) args.push(function defer(next) {
+    setTimeout(next, 0);
+  });
+
+  return this.emits.apply(this, args);
+};
+
+/**
  * Return the given plugin.
  *
  * @param {String} name The name of the plugin.
@@ -600,18 +417,20 @@ Primus.prototype.reserved = function reserved(evt) {
  * @public
  */
 Primus.prototype.reserved.events = {
-  readyStateChange: 1,
-  reconnecting: 1,
-  reconnected: 1,
-  reconnect: 1,
-  offline: 1,
-  timeout: 1,
-  online: 1,
-  error: 1,
-  close: 1,
-  open: 1,
-  data: 1,
-  end: 1
+  'reconnect scheduled': 1,
+  'reconnect timeout': 1,
+  'readyStateChange': 1,
+  'reconnect failed': 1,
+  'reconnected': 1,
+  'reconnect': 1,
+  'offline': 1,
+  'timeout': 1,
+  'online': 1,
+  'error': 1,
+  'close': 1,
+  'open': 1,
+  'data': 1,
+  'end': 1
 };
 
 /**
@@ -625,6 +444,19 @@ Primus.prototype.initialise = function initialise(options) {
   var primus = this
     , start;
 
+  primus.recovery
+  .on('reconnected', primus.emits('reconnected'))
+  .on('reconnect failed', primus.emits('reconnect failed', function failed(data) {
+    primus.emit('end');
+    return data;
+  }))
+  .on('reconnect timeout', primus.emits('reconnect timeout'))
+  .on('reconnect scheduled', primus.emits('reconnect scheduled'))
+  .on('reconnect', primus.emits('reconnect', function reconnect(next) {
+    primus.emit('outgoing::reconnect');
+    next();
+  }));
+
   primus.on('outgoing::open', function opening() {
     var readyState = primus.readyState;
 
@@ -637,13 +469,14 @@ Primus.prototype.initialise = function initialise(options) {
   });
 
   primus.on('incoming::open', function opened() {
-    var readyState = primus.readyState
-      , reconnect = primus.attempt;
+    var readyState = primus.readyState;
 
-    if (primus.attempt) primus.attempt = null;
+    if (primus.recovery.reconnecting()) {
+      primus.recovery.reconnected();
+    }
 
     //
-    // The connection has been openend so we should set our state to
+    // The connection has been opened so we should set our state to
     // (writ|read)able so our stream compatibility works as intended.
     //
     primus.writable = true;
@@ -664,7 +497,8 @@ Primus.prototype.initialise = function initialise(options) {
     }
 
     primus.latency = +new Date() - start;
-    primus.clearTimeout('ping', 'pong').heartbeat();
+    primus.timers.clear('ping', 'pong');
+    primus.heartbeat();
 
     if (primus.buffer.length) {
       var data = primus.buffer.slice()
@@ -679,26 +513,19 @@ Primus.prototype.initialise = function initialise(options) {
     }
 
     primus.emit('open');
-    if (reconnect) primus.emit('reconnected');
   });
 
   primus.on('incoming::pong', function pong(time) {
     primus.online = true;
-    primus.clearTimeout('pong').heartbeat();
+    primus.timers.clear('pong');
+    primus.heartbeat();
 
     primus.latency = (+new Date()) - time;
   });
 
   primus.on('incoming::error', function error(e) {
-    var connect = primus.timers.connect
+    var connect = primus.timers.active('connect')
       , err = e;
-
-    //
-    // We're still doing a reconnect attempt, it could be that we failed to
-    // connect because the server was down. Failing connect attempts should
-    // always emit an `error` event instead of a `open` event.
-    //
-    if (primus.attempt) return primus.reconnect();
 
     //
     // When the error is not an Error instance we try to normalize it.
@@ -716,6 +543,13 @@ Primus.prototype.initialise = function initialise(options) {
         if (e.hasOwnProperty(key)) err[key] = e[key];
       }
     }
+    //
+    // We're still doing a reconnect attempt, it could be that we failed to
+    // connect because the server was down. Failing connect attempts should
+    // always emit an `error` event instead of a `open` event.
+    //
+    //
+    if (primus.recovery.reconnecting()) return primus.recovery.reconnected(err);
     if (primus.listeners('error').length) primus.emit('error', err);
 
     //
@@ -723,8 +557,11 @@ Primus.prototype.initialise = function initialise(options) {
     // unauthorized access to the server.
     //
     if (connect) {
-      if (~primus.options.strategy.indexOf('timeout')) primus.reconnect();
-      else primus.end();
+      if (~primus.options.strategy.indexOf('timeout')) {
+        primus.recovery.reconnect();
+      } else {
+        primus.end();
+      }
     }
   });
 
@@ -755,6 +592,7 @@ Primus.prototype.initialise = function initialise(options) {
     //
     if (primus.disconnect) {
       primus.disconnect = false;
+
       return primus.end();
     }
 
@@ -768,9 +606,11 @@ Primus.prototype.initialise = function initialise(options) {
       primus.emit('readyStateChange', 'end');
     }
 
-    if (primus.timers.connect) primus.end();
+    if (primus.timers.active('connect')) primus.end();
     if (readyState !== Primus.OPEN) {
-      return primus.attempt ? primus.reconnect() : false;
+      return primus.recovery.reconnecting()
+        ? primus.recovery.reconnect()
+        : false;
     }
 
     this.writable = false;
@@ -779,9 +619,7 @@ Primus.prototype.initialise = function initialise(options) {
     //
     // Clear all timers in case we're not going to reconnect.
     //
-    for (var timeout in this.timers) {
-      this.clearTimeout(timeout);
-    }
+    this.timers.clear();
 
     //
     // Fire the `close` event as an indication of connection disruption.
@@ -794,7 +632,7 @@ Primus.prototype.initialise = function initialise(options) {
     // shutdown, so if the reconnection is enabled start a reconnect procedure.
     //
     if (~primus.options.strategy.indexOf('disconnect')) {
-      return primus.reconnect();
+      return primus.recovery.reconnect();
     }
 
     primus.emit('outgoing::end');
@@ -836,8 +674,7 @@ Primus.prototype.initialise = function initialise(options) {
     // user goes offline. In this case we want to kill the existing attempt so
     // when the user goes online, it will attempt to reconnect freshly again.
     //
-    primus.clearTimeout('reconnect');
-    primus.attempt = null;
+    primus.recovery.reset();
   }
 
   /**
@@ -846,12 +683,14 @@ Primus.prototype.initialise = function initialise(options) {
    * @api private
    */
   function online() {
-    if (primus.online) return; // Already or still online, bailout
+    if (primus.online) return; // Already or still online, bailout.
 
     primus.online = true;
     primus.emit('online');
 
-    if (~primus.options.strategy.indexOf('online')) primus.reconnect();
+    if (~primus.options.strategy.indexOf('online')) {
+      primus.recovery.reconnect();
+    }
   }
 
   if (window.addEventListener) {
@@ -1008,7 +847,7 @@ Primus.prototype.open = function open() {
   // before the connection is opened to capture failing connections and kill the
   // timeout.
   //
-  if (!this.attempt && this.options.timeout) this.timeout();
+  if (!this.recovery.reconnecting() && this.options.timeout) this.timeout();
 
   this.emit('outgoing::open');
   return this;
@@ -1087,7 +926,7 @@ Primus.prototype.heartbeat = function heartbeat() {
    * @api private
    */
   function pong() {
-    primus.clearTimeout('pong');
+    primus.timers.clear('pong');
 
     //
     // The network events already captured the offline event.
@@ -1107,12 +946,13 @@ Primus.prototype.heartbeat = function heartbeat() {
   function ping() {
     var value = +new Date();
 
-    primus.clearTimeout('ping')._write('primus::ping::'+ value);
+    primus.timers.clear('ping');
+    primus._write('primus::ping::'+ value);
     primus.emit('outgoing::ping', value);
-    primus.timers.pong = setTimeout(pong, primus.options.pong);
+    primus.timers.setTimeout('pong', pong, primus.options.pong);
   }
 
-  primus.timers.ping = setTimeout(ping, primus.options.ping);
+  primus.timers.setTimeout('ping', ping, primus.options.ping);
   return this;
 };
 
@@ -1135,142 +975,31 @@ Primus.prototype.timeout = function timeout() {
     primus.removeListener('error', remove)
           .removeListener('open', remove)
           .removeListener('end', remove)
-          .clearTimeout('connect');
+          .timers.clear('connect');
   }
 
-  primus.timers.connect = setTimeout(function expired() {
+  primus.timers.setTimeout('connect', function expired() {
     remove(); // Clean up old references.
 
-    if (primus.readyState === Primus.OPEN || primus.attempt) return;
+    if (primus.readyState === Primus.OPEN || primus.recovery.reconnecting()) {
+      return;
+    }
 
     primus.emit('timeout');
 
     //
     // We failed to connect to the server.
     //
-    if (~primus.options.strategy.indexOf('timeout')) primus.reconnect();
-    else primus.end();
+    if (~primus.options.strategy.indexOf('timeout')) {
+      primus.recovery.reconnect();
+    } else {
+      primus.end();
+    }
   }, primus.options.timeout);
 
   return primus.on('error', remove)
     .on('open', remove)
     .on('end', remove);
-};
-
-/**
- * Properly clean up all `setTimeout` references.
- *
- * @param {String} ..args.. The names of the timeout's we need clear.
- * @returns {Primus}
- * @api private
- */
-Primus.prototype.clearTimeout = function clear() {
-  for (var args = arguments, i = 0, l = args.length; i < l; i++) {
-    if (this.timers[args[i]]) clearTimeout(this.timers[args[i]]);
-    delete this.timers[args[i]];
-  }
-
-  return this;
-};
-
-/**
- * Exponential back off algorithm for retry operations. It uses an randomized
- * retry so we don't DDOS our server when it goes down under pressure.
- *
- * @param {Function} callback Callback to be called after the timeout.
- * @param {Object} opts Options for configuring the timeout.
- * @returns {Primus}
- * @api private
- */
-Primus.prototype.backoff = function backoff(callback, opts) {
-  opts = opts || {};
-
-  var primus = this;
-
-  //
-  // Bailout when we already have a backoff process running. We shouldn't call
-  // the callback then as it might cause an unexpected `end` event as another
-  // reconnect process is already running.
-  //
-  if (opts.backoff) return primus;
-
-  opts.maxDelay = 'maxDelay' in opts ? opts.maxDelay : Infinity;  // Maximum delay.
-  opts.minDelay = 'minDelay' in opts ? opts.minDelay : 500;       // Minimum delay.
-  opts.retries = 'retries' in opts ? opts.retries : 10;           // Allowed retries.
-  opts.attempt = (+opts.attempt || 0) + 1;                        // Current attempt.
-  opts.factor = 'factor' in opts ? opts.factor : 2;               // Back off factor.
-
-  //
-  // Bailout if we are about to make to much attempts. Please note that we use
-  // `>` because we already incremented the value above.
-  //
-  if (opts.attempt > opts.retries) {
-    callback(new Error('Unable to retry'), opts);
-    return primus;
-  }
-
-  //
-  // Prevent duplicate back off attempts using the same options object.
-  //
-  opts.backoff = true;
-
-  //
-  // Calculate the timeout, but make it randomly so we don't retry connections
-  // at the same interval and defeat the purpose. This exponential back off is
-  // based on the work of:
-  //
-  // http://dthain.blogspot.nl/2009/02/exponential-backoff-in-distributed.html
-  //
-  opts.timeout = opts.attempt !== 1
-    ? Math.min(Math.round(
-        (Math.random() + 1) * opts.minDelay * Math.pow(opts.factor, opts.attempt)
-      ), opts.maxDelay)
-    : opts.minDelay;
-
-  primus.timers.reconnect = setTimeout(function delay() {
-    opts.backoff = false;
-    primus.clearTimeout('reconnect');
-
-    callback(undefined, opts);
-  }, opts.timeout);
-
-  //
-  // Emit a `reconnecting` event with current reconnect options. This allows
-  // them to update the UI and provide their users with feedback.
-  //
-  primus.emit('reconnecting', opts);
-
-  return primus;
-};
-
-/**
- * Start a new reconnect procedure.
- *
- * @returns {Primus}
- * @api private
- */
-Primus.prototype.reconnect = function reconnect() {
-  var primus = this;
-
-  //
-  // Try to re-use the existing attempt.
-  //
-  primus.attempt = primus.attempt || primus.clone(primus.options.reconnect);
-
-  primus.backoff(function attempt(fail, backoff) {
-    if (fail) {
-      primus.attempt = null;
-      return primus.emit('end');
-    }
-
-    //
-    // Try to re-open the connection again.
-    //
-    primus.emit('reconnect', backoff);
-    primus.emit('outgoing::reconnect');
-  }, primus.attempt);
-
-  return primus;
 };
 
 /**
@@ -1283,13 +1012,12 @@ Primus.prototype.reconnect = function reconnect() {
 Primus.prototype.end = function end(data) {
   context(this, 'end');
 
-  if (this.readyState === Primus.CLOSED && !this.timers.connect) {
+  if (this.readyState === Primus.CLOSED && !this.timers.active('connect')) {
     //
     // If we are reconnecting stop the reconnection procedure.
     //
-    if (this.timers.reconnect) {
-      this.clearTimeout('reconnect');
-      this.attempt = null;
+    if (this.recovery.reconnecting()) {
+      this.recovery.reset();
       this.emit('end');
     }
 
@@ -1308,16 +1036,24 @@ Primus.prototype.end = function end(data) {
     this.emit('readyStateChange', 'end');
   }
 
-  for (var timeout in this.timers) {
-    this.clearTimeout(timeout);
-  }
-
+  this.timers.clear();
   this.emit('outgoing::end');
   this.emit('close');
   this.emit('end');
 
   return this;
 };
+
+/**
+ * Completely demolish the Primus instance and forcefully nuke all references.
+ *
+ * @returns {Boolean}
+ * @api public
+ */
+Primus.prototype.destroy = destroy('url timers options recovery socket transport transformers', {
+  before: 'end',
+  after: 'removeAllListeners'
+});
 
 /**
  * Create a shallow clone of a given object.
@@ -1368,24 +1104,7 @@ Primus.prototype.parse = parse;
  * @returns {Object} Parsed query string.
  * @api private
  */
-Primus.prototype.querystring = function querystring(query) {
-  var parser = /([^=?&]+)=([^&]*)/g
-    , result = {}
-    , part;
-
-  //
-  // Little nifty parsing hack, leverage the fact that RegExp.exec increments
-  // the lastIndex property so we can continue executing this loop until we've
-  // parsed all results.
-  //
-  for (;
-    part = parser.exec(query);
-    result[decodeURIComponent(part[1])] = decodeURIComponent(part[2])
-  );
-
-  return result;
-};
-
+Primus.prototype.querystring = qs.parse;
 /**
  * Transform a query string object back in to string equiv.
  *
@@ -1393,17 +1112,7 @@ Primus.prototype.querystring = function querystring(query) {
  * @returns {String}
  * @api private
  */
-Primus.prototype.querystringify = function querystringify(obj) {
-  var pairs = [];
-
-  for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
-      pairs.push(encodeURIComponent(key) +'='+ encodeURIComponent(obj[key]));
-    }
-  }
-
-  return pairs.join('&');
-};
+Primus.prototype.querystringify = qs.stringify;
 
 /**
  * Generates a connection URI.
@@ -1477,33 +1186,6 @@ Primus.prototype.uri = function uri(options) {
 
   if (options.object) return options;
   return server.join('/');
-};
-
-/**
- * Simple emit wrapper that returns a function that emits an event once it's
- * called. This makes it easier for transports to emit specific events. The
- * scope of this function is limited as it will only emit one single argument.
- *
- * @param {String} event Name of the event that we should emit.
- * @param {Function} parser Argument parser.
- * @returns {Function} The wrapped function that will emit events when called.
- * @api public
- */
-Primus.prototype.emits = function emits(event, parser) {
-  var primus = this;
-
-  return function emit(arg) {
-    var data = parser ? parser.apply(primus, arguments) : arg;
-
-    //
-    // Timeout is required to prevent crashes on WebSockets connections on
-    // mobile devices. We need to handle these edge cases in our own library
-    // as we cannot be certain that all frameworks fix these issues.
-    //
-    setTimeout(function timeout() {
-      primus.emit('incoming::'+ event, data);
-    }, 0);
-  };
 };
 
 /**
@@ -1650,3 +1332,8 @@ if (
     Primus.prototype.AVOID_WEBSOCKETS = true;
   }
 }
+
+//
+// Expose the library.
+//
+module.exports = Primus;

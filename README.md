@@ -367,14 +367,17 @@ spark.end(undefined, { reconnect: true }); // trigger a client-side reconnection
 
 This method is mostly used internally. It works similarly to the native `bind`
 function, returning a function that emits the assigned `event` every time it's
-called. The optional `parser` function receives all the arguments that are
-passed to the returned function and can parse them down to a single value or
-remove them completely. See [emits](https://github.com/primus/emits) for
+called. If the last argument is a function, it will be used to parse the
+arguments of the returned function. The `parser` is optional and always async,
+its **first** argument is a callback that follows the usual error first pattern,
+all successive arguments are the ones to parse. Using the `parser` you can
+reduce the arguments down to a single value, remove them completely or prevent
+the event from being emitted. See [emits](https://github.com/primus/emits) for
 detailed usage instructions.
 
 ```js
-spark.emits('event', function parser(structure) {
-  return structure.data;
+spark.emits('event', function parser(next, structure) {
+  next(undefined, structure.data);
 });
 ```
 
@@ -464,30 +467,32 @@ There are 2 important options that we're going to look a bit closer at.
 ##### Reconnect
 
 When the connection goes down unexpectedly an automatic reconnect process is
-started. It uses a randomised exponential back-off algorithm to prevent
-clients from DDoSing your server when you reboot as they will all be re-connecting at
+started. It uses a randomised exponential back-off algorithm to prevent clients
+from DDoSing your server when you reboot as they will all be re-connecting at
 different times. The reconnection can be configured using the `options` argument
 in `Primus` and you should add these options to the `reconnect` property:
 
-Name                | Description                             | Default
---------------------|-----------------------------------------|---------------
-maxDelay            | The maximum delay of a reconnect        | `Infinity`
-minDelay            | The minium delay of the reconnect       | `500`
-retries             | Amount of allowed reconnects.           | 10
+Name                | Description                              | Default
+--------------------|------------------------------------------|---------------
+max                 | Maximum delay for a reconnection attempt | `Infinity`
+min                 | Minium delay for a reconnection attempt  | `500` ms
+retries             | Maximum amount of attempts               | `10`
+reconnect timeout   | Maximum time for an attempt to complete  | `30000` ms
+factor              | Exponential back off factor              | `2`
 
 ```js
 primus = Primus.connect(url, {
   reconnect: {
-      maxDelay: Infinity // Number: The max delay for a reconnect retry.
-    , minDelay: 500 // Number: The minimum delay before we reconnect.
-    , retries: 10 // Number: How many times should we attempt to reconnect.
+      max: Infinity // Number: The max delay before we try to reconnect.
+    , min: 500 // Number: The minimum delay before we try reconnect.
+    , retries: 10 // Number: How many times we shoult try to reconnect.
   }
 });
 ```
 
-When you're going to customize `minDelay` please note that it will grow
+When you're going to customize `min` please note that it will grow
 exponentially e.g. `500 -> 1000 -> 2000 -> 4000 -> 8000` and is randomized
-so expect to have the slightly higher or lower values.
+so expect to have slightly higher or lower values.
 
 Please note that when we reconnect, we will receive a new `connection` event on
 the server and a new `open` event on the client, as the previous connection was
@@ -664,12 +669,12 @@ server. This all happens transparently and it's just a way for you to know when
 these reconnects are actually happening.
 
 ```js
-primus.on('reconnect', function () {
-  console.log('Reconnect attempt started');
+primus.on('reconnect', function (opts) {
+  console.log('Reconnection attempt started');
 });
 ```
 
-#### primus.on('reconnecting')
+#### primus.on('reconnect scheduled')
 
 Looks a lot like the `reconnect` event mentioned above, but it's emitted when
 we've detected that connection went/is down and we're going to start a reconnect
@@ -677,9 +682,45 @@ operation. This event would be ideal to update your application's UI when the
 connection is down and you are trying to reconnect in x seconds.
 
 ```js
-primus.on('reconnecting', function (opts) {
-  console.log('Reconnecting in %d ms', opts.timeout);
+primus.on('reconnect scheduled', function (opts) {
+  console.log('Reconnecting in %d ms', opts.scheduled);
   console.log('This is attempt %d out of %d', opts.attempt, opts.retries);
+});
+```
+
+#### primus.on('reconnected')
+
+The client successfully reconnected with the server.
+
+```js
+primus.on('reconnected', function (opts) {
+  console.log('It took %d ms to reconnect', opts.duration);
+});
+```
+
+#### primus.on('reconnect timeout')
+
+The `reconnect timeout` event is emitted when a reconnection attempt takes too
+much time. This can happen for example when the server does not answer a request
+in a timely manner.
+
+```js
+primus.on('reconnect timeout', function (err, opts) {
+  console.log('Timeout expired: %s', err.message);
+});
+```
+
+After this event a whole new reconnection procedure is automatically started, so
+you don't have to worry about it.
+
+#### primus.on('reconnect failed')
+
+This event is emitted when the reconnection failed, for example when all
+attempts to reconnect have been unsuccessful.
+
+```js
+primus.on('reconnect failed', function (err, opts) {
+  console.log('The reconnection failed: %s', err.message);
 });
 ```
 
@@ -704,6 +745,35 @@ to talk with the server again.
 
 ```js
 primus.end();
+```
+
+#### primus.destroy()
+
+This method literraly destroys the `primus` instance. Internally it calls the
+`primus.end()` method but it also frees some potentially heavy objects like
+the underlying socket, the timers, the message transformers, etc. It also
+removes all the event listeners but before doing that it emits a final `destroy`
+event. Keep in mind that once this method is executed, you can no longer use
+`primus.open()` on the same `primus` instance.
+
+```js
+primus.on('destroy', function () {
+  console.log('Feel the power of my lasers!');
+});
+
+primus.destroy();
+```
+
+#### primus.emits(event, parser)
+
+This method is analogous to the [`spark.emits`](#sparkemitsevent-parser) method.
+It returs a function that emits the given event every time it's called. See
+[emits](https://github.com/primus/emits) for detailed usage instructions.
+
+```js
+primus.emits('event', function parser(next, structure) {
+  next(undefined, structure.data);
+});
 ```
 
 ### Connecting from the server
@@ -991,14 +1061,17 @@ of the events emitted by Primus.
 Event                 | Usage       | Location      | Description
 ----------------------|-------------|---------------|----------------------------------------
 `outgoing::reconnect` | private     | client        | Transformer should reconnect.
-`reconnecting`        | **public**  | client        | We're scheduling a reconnect.
+`reconnect scheduled` | **public**  | client        | We're scheduling a reconnect.
 `reconnect`           | **public**  | client        | Reconnect attempt is about to be made.
 `reconnected`         | **public**  | client        | Successfully reconnected.
+`reconnect timeout`   | **public**  | client        | Reconnect attempt took too much time.
+`reconnect failed`    | **public**  | client        | Failed to reconnect.
 `timeout`             | **public**  | client        | Failed to connect to server.
 `outgoing::open`      | private     | client/spark  | Transformer should connect.
 `incoming::open`      | private     | client/spark  | Transformer has connected.
 `open`                | **public**  | client        | Connection is open.
-`incoming::error`     | private     | client        | Transformer received error.
+`destroy`             | **public**  | client        | The instance has been destroyed.
+`incoming::error`     | private     | client        | Transformer received an error.
 `error`               | **public**  | client/spark  | An error happened.
 `incoming::data`      | private     | client/server | Transformer received data.
 `outgoing::data`      | private     | client/spark  | Transformer should write data.
@@ -1006,11 +1079,10 @@ Event                 | Usage       | Location      | Description
 `incoming::end`       | private     | client/spark  | Transformer closed the connection.
 `outgoing::end`       | private     | client/spark  | Transformer should close connection.
 `end`                 | **public**  | client/spark  | The connection has ended.
-`close`               | **public**  | client/server | The connection is closed by transformer, we might retry. And the server has shutdown.
+`close`               | **public**  | client/server | The connection has closed, we might reconnect. / The server has been destroyed.
 `connection`          | **public**  | server        | We received a new connection.
-`disconnection`       | **public**  | server        | A connection closed.
+`disconnection`       | **public**  | server        | We received a disconnection.
 `initialised`         | **public**  | server        | The server is initialised.
-`close`               | **public**  | server        | The server has been destroyed.
 `plugin`              | **public**  | server        | A new plugin has been added.
 `plugout`             | **public**  | server        | A plugin has been removed.
 `incoming::ping`      | private     | spark         | We received a ping message.

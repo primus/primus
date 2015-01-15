@@ -4,8 +4,9 @@
   "description": "Primus is a simple abstraction around real-time frameworks. It allows you to easily switch between different frameworks without any code changes.",
   "main": "index.js",
   "scripts": {
-    "integration": "mocha $(find test -name '*.integration.js')",
-    "test": "mocha $(find test -name '*.test.js')",
+    "integration": "npm run build && mocha $(find test -name '*.integration.js')",
+    "build": "mkdir -p dist && browserify primus.js --standalone Primus -o dist/primus.js -p deumdify",
+    "test": "npm run build && mocha $(find test -name '*.test.js')",
     "update": "find transformers -name update.sh -exec bash {} \\;"
   },
   "homepage": "http://primus.io",
@@ -49,28 +50,33 @@
   "dependencies": {
     "access-control": "0.0.x",
     "create-server": "0.0.x",
+    "demolish": "1.0.x",
     "diagnostics": "0.0.x",
+    "emits": "3.0.x",
     "eventemitter3": "0.1.x",
     "forwarded-for": "0.1.x",
-    "fusing": "0.4.x",
+    "fusing": "1.0.x",
     "load": "1.0.x",
+    "querystringify": "0.0.x",
+    "recovery": "0.2.x",
     "setheader": "0.0.x",
+    "tick-tock": "0.1.x",
     "ultron": "1.0.x"
   },
   "devDependencies": {
     "binary-pack": "0.0.x",
     "browserchannel": "2.0.x",
-    "browserify": "7.0.x",
+    "browserify": "8.0.x",
     "chai": "1.10.x",
     "concat-stream": "1.4.x",
     "derequire": "1.2.x",
     "deumdify": "1.0.x",
-    "ejson": "1.0.x",
+    "ejson": "2.0.x",
     "engine.io": "1.4.x",
     "engine.io-client": "1.4.x",
     "faye-websocket": "0.9.x",
     "jsonh": "0.0.x",
-    "mocha": "2.0.x",
+    "mocha": "2.1.x",
     "pre-commit": "0.0.x",
     "request": "2.51.x",
     "socket.io": "0.9.x",
@@ -78,5 +84,9 @@
     "sockjs": "0.3.x",
     "sockjs-client-node": "0.1.x",
     "ws": "0.6.x"
-  }
+  },
+  "pre-commit": [
+    "test",
+    "integration"
+  ]
 }
