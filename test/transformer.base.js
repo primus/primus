@@ -242,7 +242,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         }).on('end', done);
       });
 
-      it('emits an `close` event when its closed', function (done) {
+      it('emits a `close` event when its closed', function (done) {
         var socket = new Socket(server.addr);
 
         socket.on('open', function () {
@@ -483,7 +483,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.on('end', done);
       });
 
-      it('should reset the reconnect details after a succesful reconnect', function (done) {
+      it('should reset the reconnect details after a successful reconnect', function (done) {
         var socket = new Socket(server.addr, {
           reconnect: { min: 100, max: 1000 }
         });
@@ -498,25 +498,26 @@ module.exports = function base(transformer, pathname, transformer_name) {
           expect(recovery.attempt).to.be.an('object');
           expect(recovery.attempt).to.equal(attempt);
           expect(attempt.attempt).to.be.above(0);
-          expect(attempt.min).to.equal(100);
           expect(attempt.max).to.equal(1000);
-          expect(attempt.scheduled).to.be.below(1000);
-          expect(attempt.scheduled).to.be.above(99);
+          expect(attempt.min).to.equal(100);
+          expect(attempt.scheduled).to.be.within(100, 1000);
           reconnect++;
+        });
+
+        socket.on('reconnect scheduled', function () {
+          if (reconnect !== 1) return;
+
+          var services = create(transformer, 'json', function () {}, server.portnumber);
+
+          destroy = services.destroy;
+          Socket = services.Socket;
+          server = services.server;
+          primus = services.primus;
         });
 
         socket.once('open', function () {
           try { server.close(); destroy(); }
           catch (e) { return done(e); }
-
-          setTimeout(function () {
-            var services = create(transformer, 'json', function () {}, server.portnumber);
-
-            destroy = services.destroy;
-            Socket = services.Socket;
-            server = services.server;
-            primus = services.primus;
-          }, 200);
 
           socket.once('open', function () {
             expect(recovery.attempt).to.equal(null);
