@@ -74,7 +74,7 @@
     "ejson": "2.0.x",
     "engine.io": "1.5.x",
     "engine.io-client": "1.5.x",
-    "faye-websocket": "0.9.x",
+    "faye-websocket": "0.9.1",
     "jsonh": "0.0.x",
     "mocha": "2.1.x",
     "pre-commit": "0.0.x",
