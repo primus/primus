@@ -5,6 +5,7 @@ specifies the guidelines for contributing to the projects that are created under
 the **primus** organization. We've split this document in smaller sections:
 
 - [Feature Requests](#feature-requests)
+- [Questions](#questions)
 - [Issues](#issues)
   - [Outline of a good bug report](#outline-of-a-good-bug-report)
   - [Labels](#labels)
@@ -34,6 +35,23 @@ Yes! Make them! We would love to hear your idea(s) and what we can do to continu
 to move this project forward. Changes, big or small, are always welcomed. If the
 feature requested is not in line with our roadmap we will work with you to
 ensure that you can build it yourself on top of our project.
+
+## Questions
+
+When you're first starting you're bound to have questions about this project. We
+hope that our documentation in the [README.md][readme] provides answers to all
+your questions. In rare cases when the documentation does not answer your
+question you could:
+
+1. Join our [IRC][irc] room and ask the question there. The authors,
+   contributors and users of this project usually hang around there.
+2. By creating an issue on GitHub. Throughly explain your issue, the more
+   information you provide us with the better we can help you.
+
+We will do our best to answer your questions in a timely manner. Please note
+that if you create an new issue by stuffing the question in the title and no
+explanation in the body it will be closed and locked immediately and referred
+to this contribution file.
 
 ## Issues
 
@@ -140,7 +158,7 @@ importance:
 - **`★★`**: Medium priority, this should be fixed but it might not make the next
   release.
 - **`★`**: Low priority issue, don't expect this to be resolved soon. These bugs
-  are generaly fixed on a rainy or boring day. These bugs are also great
+  are generally fixed on a rainy or boring day. These bugs are also great
   for first time contributors who are looking for something to fix.
 
 ## Code
@@ -265,3 +283,4 @@ this is an issue please contact us directly through [IRC][irc].
 [irc]: http://webchat.freenode.net/?channels=primus
 [fencing]: https://help.github.com/articles/github-flavored-markdown/#fenced-code-blocks
 [security]: SECURITY.md
+[readme]: README.md
