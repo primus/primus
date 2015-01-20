@@ -888,8 +888,9 @@ Primus.readable('indexOfLayer', function indexOfLayer(name) {
  * Destroy the created Primus instance.
  *
  * Options:
- * - close (boolean)  Close the given server.
- * - timeout (number) Forcefully close all connections after a given x MS.
+ * - close (boolean) Close the given server.
+ * - reconnect (boolean) Trigger a client-side reconnect.
+ * - timeout (number) Close all active connections after x milliseconds.
  *
  * @param {Object} options Destruction instructions.
  * @param {Function} fn Callback.
@@ -903,6 +904,7 @@ Primus.readable('destroy', function destroy(options, fn) {
   }
 
   options = options || {};
+  if (options.reconnect) options.close = true;
 
   var primus = this;
 
@@ -918,7 +920,7 @@ Primus.readable('destroy', function destroy(options, fn) {
     // Close the connections that are left open.
     //
     primus.forEach(function shutdown(spark) {
-      spark.end();
+      spark.end(undefined, { reconnect: options.reconnect });
     });
 
     if (options.close !== false) {
