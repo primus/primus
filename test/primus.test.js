@@ -753,5 +753,18 @@ describe('Primus', function () {
 
       server.listen(common.port);
     });
+
+    it('can trigger a client-side reconnect', function (done) {
+      var socket = new primus.Socket('http://localhost:'+ server.portnumber);
+
+      socket.on('reconnect scheduled', function () {
+        socket.end();
+        done();
+      });
+
+      socket.on('open', function () {
+        primus.destroy({ reconnect: true });
+      });
+    });
   });
 });

@@ -1039,11 +1039,11 @@ of the active `Spark` ids on the server.
 
 In rare cases you might need to destroy the Primus instance you've created. You
 can use the `primus.destroy()` or `primus.end()` method for this. This method
-accepts an Object which allows you to configure how you want the connections to
-be destroyed:
+accepts an Object which allows you to configure the destruction process:
 
 - `close` Close the HTTP server that Primus received. Defaults to `true`.
-- `timeout` Clean up the server and optionally, it's active connections after
+- `reconnect` Automatically reconnect the clients. Defaults to `false`.
+- `timeout` Close all active connections and clean up the Primus instance after
   the specified amount of timeout. Defaults to `0`.
 
 The timeout is especially useful if you want gracefully shutdown your server but
