@@ -16,7 +16,7 @@ module.exports = function server() {
     , Spark = this.Spark
     , fayeOptions = null;
 
-  if (primus.options.perMessageDeflate) {
+  if (primus.options.compression) {
     try {
       fayeOptions = { extensions: [ require('permessage-deflate') ] };
     } catch (e) {

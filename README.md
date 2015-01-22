@@ -131,8 +131,8 @@ parser              | Message encoder for all communication     | `JSON`
 transformer         | The transformer we should use internally  | `websockets`
 plugin              | The plugins that should be applied        | `{}`
 timeout             | The heartbeat timeout                     | `35000`
-global              | Set a custom client class/global name     | `Primus`
-perMessageDeflate   | Use `permessage-deflate` extension        | `false`
+global              | Set a custom client class / global name   | `Primus`
+compression         | Use permessage-deflate / HTTP compression | `false`
 origins             | **cors** List of origins                  | `*`
 methods             | **cors** List of accepted HTTP methods    | `GET,HEAD,PUT,POST,DELETE,OPTIONS`
 credentials         | **cors** Allow sending of credentials     | `true`

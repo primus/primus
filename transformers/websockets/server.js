@@ -16,7 +16,7 @@ module.exports = function server() {
     , Spark = this.Spark;
 
   var service = this.service = new WebSocketServer({
-    perMessageDeflate: !!this.primus.options.perMessageDeflate,
+    perMessageDeflate: !!this.primus.options.compression,
     clientTracking: false,
     noServer: true
   });
