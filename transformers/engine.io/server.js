@@ -11,7 +11,10 @@ module.exports = function server() {
   var Engine = require('engine.io').Server
     , Spark = this.Spark;
 
-  var service = this.service = new Engine();
+  var service = this.service = new Engine({
+    perMessageDeflate: !!this.primus.options.compression,
+    httpCompression: !!this.primus.options.compression
+  });
 
   //
   // We've received a new connection, create a new Spark. The Spark will
