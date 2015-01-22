@@ -96,6 +96,7 @@ repository.
   - [Convention](#convention)
   - [Release cycle](#release-cycle)
 - [Other languages](#other-languages)
+  - [Protocol](#protocol)
 - [License](#license)
 
 ### Getting started
@@ -2121,7 +2122,7 @@ when:
 ### Other languages
 
 These projects are maintained by our valuable community and allow you to use
-primus in a different language than JavaScript:
+Primus in a different language than JavaScript:
 
 <dl>
   <dt><a href="https://github.com/seegno/primus-objc">primus-objc</a></dt>
@@ -2139,6 +2140,33 @@ primus in a different language than JavaScript:
 </dl>
 
 Want to have your project listed here? Add it using a pull-request!
+
+#### Protocol
+
+Primus uses some internal protocol messages in order to keep the connection open
+and stable between a client and server. If you are planning on implementing
+Primus in another language you must able to handle the following `primus::*`
+prefixed messages:
+
+- `primus::ping::<ping>` **client - > server**, The ping type contains the time
+  in EPOCH. Ping messages are needed to keep the connection open as certain load
+  balancers, proxies and browsers will close connections automatically when
+  there is inactivity.
+- `primus::pong::<ping>` **client < - server**, The pong is the response to the
+  `ping` packet. It echo's back the exact value that it received so the client
+  can calculate how long it took for the message to be received/replied by the
+  server so we have the latency of the connection.
+- `primus::server::close` **client <- server**, Indication that the server
+  intentionally closed the connection and that no reconnection/connection should
+  be made.
+- `primus::id::` **client - > **server**, Request of the internal `spark.id`
+  that's assigned to the connection.
+- `primus::id::<spark.id>` **client < - server**, The internal `id` that we used
+  on the server to identify the connection as we do not sync this information by
+  default and requires a `primus.id()` call on the client.
+
+Any other message that is prefixed with `primus::` should be ignored and not be
+emitted to the user.
 
 ### License
 
