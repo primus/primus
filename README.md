@@ -2159,7 +2159,7 @@ prefixed messages:
 - `primus::server::close` **client <- server**, Indication that the server
   intentionally closed the connection and that no reconnection/connection should
   be made.
-- `primus::id::` **client - > **server**, Request of the internal `spark.id`
+- `primus::id::` **client - > server**, Request of the internal `spark.id`
   that's assigned to the connection.
 - `primus::id::<spark.id>` **client < - server**, The internal `id` that we used
   on the server to identify the connection as we do not sync this information by
