@@ -54,7 +54,7 @@
     "diagnostics": "0.0.x",
     "emits": "3.0.x",
     "eventemitter3": "0.1.x",
-    "forwarded-for": "0.1.x",
+    "forwarded-for": "1.0.x",
     "fusing": "1.0.x",
     "load": "1.0.x",
     "querystringify": "0.0.x",
