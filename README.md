@@ -1701,15 +1701,15 @@ The following plugins are part of the Primus project.
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/primus/emit">primus-emit</a></dt>
+  <dt><a href="https://github.com/primus/primus-emit">primus-emit</a></dt>
   <dd>
     The emit module adds client -> server and server -> client event emitting to Primus.
   </dd>
   <dd>
     <a href="https://www.npmjs.com/package/primus-emit"><img
       src="https://img.shields.io/npm/v/primus-emit.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/emit"><img
-      src="https://img.shields.io/travis/primus/emit/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/primus/primus-emit"><img
+      src="https://img.shields.io/travis/primus/primus-emit/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
