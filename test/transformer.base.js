@@ -507,17 +507,16 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.on('reconnect scheduled', function () {
           if (reconnect !== 1) return;
 
-          var services = create(transformer, 'json', function () {}, server.portnumber);
+          primus = new Primus(server, {
+            pathname: server.pathname,
+            transformer: transformer,
+          });
 
-          destroy = services.destroy;
-          Socket = services.Socket;
-          server = services.server;
-          primus = services.primus;
+          server.listen(server.portnumber);
         });
 
         socket.once('open', function () {
-          try { server.close(); destroy(); }
-          catch (e) { return done(e); }
+          primus.destroy({ reconnect: true });
 
           socket.once('open', function () {
             expect(recovery.attempt).to.equal(null);
