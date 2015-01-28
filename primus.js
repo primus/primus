@@ -540,7 +540,8 @@ Primus.prototype.initialise = function initialise(options) {
       //
       err = new Error(e.message || e.reason);
       for (var key in e) {
-        if (e.hasOwnProperty(key)) err[key] = e[key];
+        if (Object.prototype.hasOwnProperty.call(e, key))
+          err[key] = e[key];
       }
     }
     //
