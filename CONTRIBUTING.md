@@ -38,20 +38,20 @@ ensure that you can build it yourself on top of our project.
 
 ## Questions
 
-When you're first starting you're bound to have questions about this project. We
-hope that our documentation in the [README.md][readme] provides answers to all
-your questions. In rare cases when the documentation does not answer your
-question you could:
+When you're first starting out, you're bound to have questions about this
+project. We hope that our documentation in the [README.md][readme] provides
+answers to all your questions. In rare cases when the documentation does not
+answer your question you could:
 
 1. Join our [IRC][irc] room and ask the question there. The authors,
    contributors and users of this project usually hang around there.
-2. By creating an issue on GitHub. Throughly explain your issue, the more
-   information you provide us with the better we can help you.
+2. Create an issue on GitHub thoroughly explaining your issue. The more
+   information you provide us with, the better we can help you.
 
 We will do our best to answer your questions in a timely manner. Please note
-that if you create an new issue by stuffing the question in the title and no
-explanation in the body it will be closed and locked immediately and referred
-to this contribution file.
+that if you create a new issue and put everything in the title with no
+explanation in the body, it will be closed and locked immediately and you'll
+be prompted to follow the instructions contained in this file.
 
 ## Issues
 
