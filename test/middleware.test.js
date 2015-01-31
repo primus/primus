@@ -17,7 +17,7 @@ describe('Middleware', function () {
   });
 
   afterEach(function afterEach(done) {
-    server.close(done);
+    primus.destroy(done);
   });
 
   describe('#before', function () {

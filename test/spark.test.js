@@ -18,8 +18,7 @@ describe('Spark', function () {
   });
 
   afterEach(function afterEach(done) {
-    try { server.close(done); }
-    catch (e) { done(); }
+    primus.destroy(done);
   });
 
   it('creates an id if none is supplied', function () {
@@ -188,7 +187,7 @@ describe('Spark', function () {
 
       primus.on('disconnection', function (socket) {
         expect(socket).to.equal(spark);
-        done();
+        primus.destroy(done);
       });
 
       primus.on('connection', function (socket) {
@@ -205,7 +204,7 @@ describe('Spark', function () {
       spark.on('data', function (msg) {
         expect(msg).to.equal('foo');
         expect(spark.timeout).to.equal(null);
-        done();
+        primus.destroy(done);
       });
 
       expect(spark.timeout).to.equal(null);
@@ -218,7 +217,7 @@ describe('Spark', function () {
       var spark = new primus.Spark()
         , data = { foo: 'bar' };
 
-      spark.on('outgoing::data', function (msg) {
+      spark.once('outgoing::data', function (msg) {
         expect(msg).to.be.a('string');
         expect(msg).to.equal(JSON.stringify(data));
 
@@ -234,7 +233,7 @@ describe('Spark', function () {
       var spark = new primus.Spark()
         , data = ['\u2028\u2029'];
 
-      spark.on('outgoing::data', function (msg) {
+      spark.once('outgoing::data', function (msg) {
         expect(msg).to.be.a('string');
         expect(msg).to.not.equal(JSON.stringify(data));
         expect(msg).to.equal('["\\u2028\\u2029"]');
