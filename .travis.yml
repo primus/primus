@@ -7,7 +7,7 @@ node_js:
   - "iojs-v1.1"
   - "iojs-v1.0"
 before_install:
-  - "npm install -g npm@2.1.18"
+  - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ] ; then npm install -g npm@2.5.0; fi'
 script:
   - "npm run test && npm run integration"
 matrix:
