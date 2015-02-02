@@ -3349,7 +3349,7 @@ module.exports = {
 };
 
 },{"url-parse":55}],52:[function(_dereq_,module,exports){
-module.exports = '1.0.0-beta.7';
+module.exports = '1.0.0-beta.12';
 
 },{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
@@ -4287,10 +4287,31 @@ if (typeof Object.create === 'function') {
 
 var required = _dereq_('requires-port')
   , lolcation = _dereq_('./lolcation')
-  , qs = _dereq_('querystringify');
+  , qs = _dereq_('querystringify')
+  , relativere = /^\/(?!\/)/;
 
-var keys = ',,protocol,username,password,host,hostname,port,pathname,query,hash'.split(',')
-  , parts = keys.length;
+/**
+ * These are the parse instructions for the URL parsers, it informs the parser
+ * about:
+ *
+ * 0. The char it Needs to parse, if it's a string it should be done using
+ *    indexOf, RegExp using exec and NaN means set as current value.
+ * 1. The property we should set when parsing this value.
+ * 2. Indication if it's backwards or forward parsing, when set as number it's
+ *    the value of extra chars that should be split off.
+ * 3. Inherit from location if non existing in the parser.
+ * 4. `toLowerCase` the resulting value.
+ */
+var instructions = [
+  ['#', 'hash'],                        // Extract from the back.
+  ['?', 'query'],                       // Extract from the back.
+  ['//', 'protocol', 2, 1, 1],          // Extract from the front.
+  ['/', 'pathname'],                    // Extract from the back.
+  ['@', 'auth', 1],                     // Extract from the front.
+  [NaN, 'host', undefined, 1, 1],       // Set left over value.
+  [/\:(\d+)$/, 'port'],                 // RegExp the back.
+  [NaN, 'hostname', undefined, 1, 1]    // Set left over.
+];
 
 /**
  * The actual URL instance. Instead of returning an object we've opted-in to
@@ -4308,17 +4329,11 @@ function URL(address, location, parser) {
     return new URL(address, location, parser);
   }
 
-  //
-  // Inline the massive regular expression because it causes issues in FireFox
-  // because our `exec` usage in this function. Normally there should be no side
-  // affects because we're not doing global matching so the lastIndex of regular
-  // expression should stay the same but it's causing `too much recursion`
-  // errors in FireFox when calling the parse method for a second time. Now,
-  // with great pleasure I introduce to you:
-  //
-  // MOARE: Mother Of All Regular Expressions.
-  //
-  var regexp = /^(?:(?:(([^:\/#\?]+:)?(?:(?:\/\/)(?:(?:(?:([^:@\/#\?]+)(?:\:([^:@\/#\?]*))?)@)?(([^:\/#\?\]\[]+|\[[^\/\]@#?]+\])(?:\:([0-9]+))?))?)?)?((?:\/?(?:[^\/\?#]+\/+)*)(?:[^\?#]*)))?(\?[^#]+)?)(#.*)?/;
+  var relative = relativere.test(address)
+    , parse, instruction, index, key
+    , type = typeof location
+    , url = this
+    , i = 0;
 
   //
   // The following if statements allows this module two have compatibility with
@@ -4331,8 +4346,6 @@ function URL(address, location, parser) {
   //    arguments. The supplied object will be used as default values / fall-back
   //    for relative paths.
   //
-  var type = typeof location;
-
   if ('object' !== type && 'string' !== type) {
     parser = location;
     location = null;
@@ -4344,16 +4357,36 @@ function URL(address, location, parser) {
 
   location = lolcation(location);
 
-  for (var i = 0, bits = regexp.exec(address), key; i < parts; key = keys[++i]) {
-    if (key) {
-      this[key] = bits[i] || location[key] || '';
+  for (; i < instructions.length; i++) {
+    instruction = instructions[i];
+    parse = instruction[0];
+    key = instruction[1];
 
-      //
-      // The protocol, host, host name should always be lower cased even if they
-      // are supplied in uppercase. This way, when people generate an `origin`
-      // it be correct.
-      //
-      if (i === 2 || i === 5 || i === 6) this[key] = this[key].toLowerCase();
+    if (parse !== parse) {
+      url[key] = address;
+    } else if ('string' === typeof parse) {
+      if (~(index = address.indexOf(parse))) {
+        if ('number' === typeof instruction[2]) {
+          url[key] = address.slice(0, index);
+          address = address.slice(index + instruction[2]);
+        } else {
+          url[key] = address.slice(index);
+          address = address.slice(0, index);
+        }
+      }
+    } else if (index = parse.exec(address)) {
+      url[key] = index[1];
+      address = address.slice(0, address.length - index[0].length);
+    }
+
+    url[key] = url[key] || (instruction[3] || ('port' === key && relative) ? location[key] || '' : '');
+
+    //
+    // Hostname, host and protocol should be lowercased so they can be used to
+    // create a proper `origin`.
+    //
+    if (instruction[4]) {
+      url[key] = url[key].toLowerCase();
     }
   }
 
@@ -4362,23 +4395,78 @@ function URL(address, location, parser) {
   // with a custom parser as function use that instead of the default build-in
   // parser.
   //
-  if (parser) this.query = parser(this.query);
+  if (parser) url.query = parser(url.query);
 
   //
   // We should not add port numbers if they are already the default port number
   // for a given protocol. As the host also contains the port number we're going
   // override it with the hostname which contains no port number.
   //
-  if (!required(this.port, this.protocol)) {
-    this.host = this.hostname;
-    this.port = '';
+  if (!required(url.port, url.protocol)) {
+    url.host = url.hostname;
+    url.port = '';
+  }
+
+  //
+  // Parse down the `auth` for the username and password.
+  //
+  url.username = url.password = '';
+  if (url.auth) {
+    instruction = url.auth.split(':');
+    url.username = instruction[0] || '';
+    url.password = instruction[1] || '';
   }
 
   //
   // The href is just the compiled result.
   //
-  this.href = this.toString();
+  url.href = url.toString();
 }
+
+/**
+ * This is convenience method for changing properties in the URL instance to
+ * insure that they all propagate correctly.
+ *
+ * @param {String} prop Property we need to adjust.
+ * @param {Mixed} value The newly assigned value.
+ * @returns {URL}
+ * @api public
+ */
+URL.prototype.set = function set(part, value, fn) {
+  var url = this;
+
+  if ('query' === part) {
+    if ('string' === typeof value) value = (fn || qs.parse)(value);
+    url[part] = value;
+  } else if ('port' === part) {
+    url[part] = value;
+
+    if (!required(value, url.protocol)) {
+      url.host = url.hostname;
+      url[part] = '';
+    } else if (value) {
+      url.host = url.hostname +':'+ value;
+    }
+  } else if ('hostname' === part) {
+    url[part] = value;
+
+    if (url.port) value += ':'+ url.port;
+    url.host = value;
+  } else if ('host' === part) {
+    url[part] = value;
+
+    if (/\:\d+/.test(value)) {
+      value = value.split(':');
+      url.hostname = value[0];
+      url.port = value[1];
+    }
+  } else {
+    url[part] = value;
+  }
+
+  url.href = url.toString();
+  return url;
+};
 
 /**
  * Transform the properties back in to a valid and full URL string.
@@ -4390,24 +4478,25 @@ function URL(address, location, parser) {
 URL.prototype.toString = function toString(stringify) {
   if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
 
-  var result = this.protocol +'//'
-    , query;
+  var query
+    , url = this
+    , result = url.protocol +'//';
 
-  if (this.username) result += this.username +':'+ this.password +'@';
+  if (url.username) result += url.username +':'+ url.password +'@';
 
-  result += this.hostname;
-  if (this.port) result += ':'+ this.port;
+  result += url.hostname;
+  if (url.port) result += ':'+ url.port;
 
-  result += this.pathname;
+  result += url.pathname;
 
-  if (this.query) {
-    if ('object' === typeof this.query) query = stringify(this.query);
-    else query = this.query;
+  if (url.query) {
+    if ('object' === typeof url.query) query = stringify(url.query);
+    else query = url.query;
 
     result += (query.charAt(0) === '?' ? '' : '?') + query;
   }
 
-  if (this.hash) result += this.hash;
+  if (url.hash) result += url.hash;
 
   return result;
 };
@@ -4472,6 +4561,8 @@ module.exports = function lolcation(loc) {
 },{"./":55}],57:[function(_dereq_,module,exports){
 'use strict';
 
+var has = Object.prototype.hasOwnProperty;
+
 /**
  * Simple query string parser.
  *
@@ -4516,7 +4607,7 @@ function querystringify(obj, prefix) {
   if ('string' !== typeof prefix) prefix = '?';
 
   for (var key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (has.call(obj, key)) {
       pairs.push(encodeURIComponent(key) +'='+ encodeURIComponent(obj[key]));
     }
   }
