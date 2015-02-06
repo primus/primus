@@ -85,8 +85,5 @@
     "sockjs-client-node": "0.1.x",
     "ws": "0.7.x"
   },
-  "pre-commit": [
-    "test",
-    "integration"
-  ]
+  "pre-commit": "test, integration"
 }
