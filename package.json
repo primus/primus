@@ -67,7 +67,7 @@
     "binary-pack": "0.0.x",
     "browserchannel": "2.0.x",
     "browserify": "8.1.x",
-    "chai": "1.10.x",
+    "chai": "2.0.x",
     "concat-stream": "1.4.x",
     "derequire": "1.2.x",
     "deumdify": "1.0.x",
