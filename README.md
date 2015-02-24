@@ -2137,6 +2137,12 @@ Primus in a different language than JavaScript:
       src="https://img.shields.io/travis/seegno/primus-objc/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
+
+  <dt><a href="https://github.com/cine-io/primus-android">primus-android</a></dt>
+  <dd>
+    A Primus client written in Java for Android with
+    initial support for web sockets via <a href="https://github.com/koush/AndroidAsync">AndroidAsync</a>.
+  </dd>
 </dl>
 
 Want to have your project listed here? Add it using a pull-request!
