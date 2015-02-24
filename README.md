@@ -314,9 +314,8 @@ active at the time you access this property.*
 #### spark.query
 
 The `spark.query` contains the query string you used to connect to the server. It's
-parsed to an object. Please note that this is not available for all supported
-transformers, but it's proven to be to useful to not implement it because one
-silly transformer refuses to support it. Yes, I'm looking at you SockJS.
+parsed as an object. Please note that this may not be available for all supported
+transformers.
 
 #### spark.id
 
@@ -1342,9 +1341,6 @@ of the transformer, we just `toLowerCase()` everything.
 - BrowserChannel does not give you access to the `remotePort` of the incoming
   connection. So when you access `spark.address` the `port` property will be set
   to `1337` by default.
-- SockJS does not support connections with query strings. You can still supply a
-  query string in the `new Primus('http://localhost:80?q=s')` but it will not be
-  accessible in the `spark.query` property as it will be an empty object.
 - BrowserChannel is the only transformer that does not support cross domain
   connections.
 - SockJS and BrowserChannel are originally written in CoffeeScript which can
@@ -2064,9 +2060,7 @@ It is not possible to send custom headers from the client to the server. This is
 because these headers need to be set by the actual transports that the
 transformers are using. The only transport that would support this would be AJAX
 polling. To send custom data to the server use a query string in your connection
-URL, as this is something that all transports support. The only noticeable
-exception for this case is SockJS as it doesn't allow query strings in the
-connection URL.
+URL, as this is something that all transports support.
 
 ```js
 var primus = new Primus('http://localhost:8080/?token=1&name=foo');

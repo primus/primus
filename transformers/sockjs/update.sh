@@ -16,8 +16,7 @@ trap cleanup INT TERM EXIT
 git clone https://github.com/sockjs/sockjs-client.git $TEMPDIR
 cd $TEMPDIR
 git checkout $(git describe --tags --abbrev=0)
-NODE_ENV=development npm install
-make sockjs.js
-mv sockjs.js $DESTDIR/library.js
+NODE_ENV=production npm install
+$DESTDIR/update_tools/globalify.sh $TEMPDIR
 cd $DESTDIR
 find patches -name *.patch -exec patch -i {} \;
