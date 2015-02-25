@@ -1107,7 +1107,7 @@ Primus.prototype.parse = parse;
  */
 Primus.prototype.querystring = qs.parse;
 /**
- * Transform a query string object back in to string equiv.
+ * Transform a query string object back into string equiv.
  *
  * @param {Object} obj The query string object.
  * @returns {String}
@@ -1156,8 +1156,8 @@ Primus.prototype.uri = function uri(options) {
 
   //
   // We need to make sure that we create a unique connection URL every time to
-  // prevent bfcache back forward cache of becoming an issue. We're doing this
-  // by forcing an cache busting query string in to the URL.
+  // prevent back forward cache from becoming an issue. We're doing this by
+  // forcing an cache busting query string in to the URL.
   //
   var querystring = this.querystring(options.query || '');
   querystring._primuscb = +new Date() +'-'+ this.stamps++;
@@ -1179,8 +1179,7 @@ Primus.prototype.uri = function uri(options) {
   if (options.pathname) server.push(options.pathname);
 
   //
-  // Optionally add a search query, again, not supported by all Transformers.
-  // SockJS is known to throw errors when a query string is included.
+  // Optionally add a search query.
   //
   if (qsa) server.push('?'+ options.query);
   else delete options.query;
