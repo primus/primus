@@ -536,15 +536,18 @@ Primus.readable('library', function compile(nodejs) {
   // Add a simple export wrapper so it can be used as Node.js, AMD or browser
   // client.
   //
-  var client = '(function UMDish(name, context, definition) {'
-    + '  context[name] = definition.call(context);'
-    + '  if (typeof module !== "undefined" && module.exports) {'
-    + '    module.exports = context[name];'
-    + '  } else if (typeof define == "function" && define.amd) {'
-    + '    define(function reference() { return context[name]; });'
-    + '  }'
-    + '})("'+ global +'", this, function wrapper() { var self = {}; '
-    + this.client;
+  var client = this.client.replace(/^.+?(\(function\(\)\{)/, [
+    '(function UMDish(name, context, definition) {',
+    '  context[name] = definition.call(context);',
+    '  if (typeof module !== "undefined" && module.exports) {',
+    '    module.exports = context[name];',
+    '  } else if (typeof define === "function" && define.amd) {',
+    '    define(function reference() { return context[name]; });',
+    '  }',
+    '})("'+ global +'", this, function wrapper() {',
+    '  var sandbox = {};',
+    '  sandbox["'+ global +'"] = (function (f) { return f(); })$1'
+  ].join('\n'));
 
   //
   // Replace some basic content.
@@ -595,7 +598,7 @@ Primus.readable('library', function compile(nodejs) {
     if (!plugin.client) continue;
 
     log('adding the client code of the %s plugin to the client file', name);
-    client += 'self["'+ global +'"].prototype.ark['+ name +'] = '+ plugin.client.toString() +';\n';
+    client += 'sandbox["'+ global +'"].prototype.ark['+ name +'] = '+ plugin.client.toString() +';\n';
   }
 
   //
@@ -605,7 +608,7 @@ Primus.readable('library', function compile(nodejs) {
   // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client +'; return self["'+ global +'"]; });'
+  return client +'return sandbox["'+ global +'"]; });\n'
   + library.filter(Boolean).map(function expose(library) {
     return '(function '+ global +'LibraryWrap('+ global +') {'
     + library
