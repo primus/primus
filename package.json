@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "integration": "npm run build && mocha $(find test -name '*.integration.js')",
-    "build": "mkdir -p dist && browserify primus.js --standalone Primus -o dist/primus.js -p deumdify",
+    "build": "mkdir -p dist && browserify primus.js -s Primus -p deumdify | derequire > dist/primus.js",
     "test": "npm run build && mocha $(find test -name '*.test.js')",
     "update": "find transformers -name update.sh -exec bash {} \\;"
   },
