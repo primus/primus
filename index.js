@@ -530,13 +530,14 @@ Primus.readable('library', function compile(nodejs) {
     , library = [ !nodejs ? this.transformer.library : null ]
     , global = this.options.global || 'Primus'
     , transport = this.transformer.client
-    , parser = this.parser.library || '';
+    , parser = this.parser.library || ''
+    , client = this.client;
 
   //
   // Add a simple export wrapper so it can be used as Node.js, AMD or browser
   // client.
   //
-  var client = this.client.replace(/^.+?(\(function\(\)\{)/, [
+  client = [
     '(function UMDish(name, context, definition) {',
     '  context[name] = definition.call(context);',
     '  if (typeof module !== "undefined" && module.exports) {',
@@ -545,9 +546,11 @@ Primus.readable('library', function compile(nodejs) {
     '    define(function reference() { return context[name]; });',
     '  }',
     '})("'+ global +'", this, function wrapper() {',
-    '  var sandbox = {};',
-    '  sandbox["'+ global +'"] = (function (f) { return f(); })$1'
-  ].join('\n'));
+    '  var define, module, exports',
+    '    , ns = {};',
+    '  ns["'+ global +'"] = '+ client.slice(client.indexOf('return ') + 7, -4) +';',
+    ''
+  ].join('\n');
 
   //
   // Replace some basic content.
@@ -598,7 +601,7 @@ Primus.readable('library', function compile(nodejs) {
     if (!plugin.client) continue;
 
     log('adding the client code of the %s plugin to the client file', name);
-    client += 'sandbox["'+ global +'"].prototype.ark['+ name +'] = '+ plugin.client.toString() +';\n';
+    client += 'ns["'+ global +'"].prototype.ark['+ name +'] = '+ plugin.client.toString() +';\n';
   }
 
   //
@@ -608,7 +611,7 @@ Primus.readable('library', function compile(nodejs) {
   // closure so I'll rather expose a global variable instead of having to monkey
   // patch to much code.
   //
-  return client +'return sandbox["'+ global +'"]; });\n'
+  return client +'return ns["'+ global +'"]; });\n'
   + library.filter(Boolean).map(function expose(library) {
     return '(function '+ global +'LibraryWrap('+ global +') {'
     + library
