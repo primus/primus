@@ -548,7 +548,7 @@ Primus.readable('library', function compile(nodejs) {
     '})("'+ global +'", this, function wrapper() {',
     '  var define, module, exports',
     '    , ns = {};',
-    '  ns["'+ global +'"] = '+ client.slice(client.indexOf('return ') + 7, -4) +';',
+    '  ns["'+ global +'"] = '+ client.slice(client.indexOf('return ') + 7, -5) +';',
     ''
   ].join('\n');
 
@@ -601,7 +601,12 @@ Primus.readable('library', function compile(nodejs) {
     if (!plugin.client) continue;
 
     log('adding the client code of the %s plugin to the client file', name);
-    client += 'ns["'+ global +'"].prototype.ark['+ name +'] = '+ plugin.client.toString() +';\n';
+    client += [
+      'ns["'+ global +'"].prototype.ark['+ name +'] = (function clientWrap('+ global +') {',
+      '  return '+ plugin.client.toString() +';',
+      '})(ns["'+ global +'"]);',
+      ''
+    ].join('\n');
   }
 
   //
@@ -609,14 +614,20 @@ Primus.readable('library', function compile(nodejs) {
   // a library, we should add them after we've created our closure and module
   // exports. Some libraries seem to fail hard once they are wrapped in our
   // closure so I'll rather expose a global variable instead of having to monkey
-  // patch to much code.
+  // patch too much code.
   //
-  return client +'return ns["'+ global +'"]; });\n'
-  + library.filter(Boolean).map(function expose(library) {
-    return '(function '+ global +'LibraryWrap('+ global +') {'
-    + library
-    + '})(this["'+ global +'"]);';
-  }).join('\n');
+  return client + [
+    '  return ns["'+ global +'"];',
+    '});',
+    ''
+  ].concat(library.filter(Boolean).map(function expose(library) {
+    return [
+      '(function libraryWrap('+ global +') {',
+      library,
+      '})(this["'+ global +'"]);',
+      ''
+    ].join('\n');
+  })).join('\n');
 });
 
 /**
