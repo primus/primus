@@ -1315,10 +1315,10 @@ var primus = new Primus(server, { transformer: 'socket.io' });
 ```
 
 If you want to use the client interface inside of Node.js you also need to
-install the `socket.io-client`:
+install the `primus-socket.io-client`:
 
 ```
-npm install socket.io-client --save
+npm install primus-socket.io-client --save
 ```
 
 And then you can access it from your server instance:

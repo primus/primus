@@ -1,14 +1,16 @@
-/*! Socket.IO.js build:0.9.17, development. Copyright(c) 2011 LearnBoost <dev@learnboost.com> MIT Licensed */
-
-(function() {
-
-/**
- * socket.io
+/*!
+ * primus-socket.io.js build: 1.0.0, development.
  * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
+ * Copyright (c) 2013 Automattic <dev@cloudup.com>
+ * Copyright (c) 2015 Luigi Pinca
  * MIT Licensed
  */
 
-(function (exports, global) {
+(function (f) {
+  var g = 'undefined' !== typeof window ? window : self;
+  g.io = {};
+  f.call(g, g.io);
+})(function (io) {(function (exports, global) {
 
   /**
    * IO namespace.
@@ -24,7 +26,7 @@
    * @api public
    */
 
-  io.version = '0.9.17';
+  io.version = '1.0.0';
 
   /**
    * Protocol implemented.
@@ -103,13 +105,7 @@
     return socket.of(uri.path.length > 1 ? uri.path : '');
   };
 
-})('object' === typeof module ? module.exports : (this.io = {}), this);
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
+})('undefined' !== typeof io ? io : module.exports, this);
 (function (exports, global) {
 
   /**
@@ -465,12 +461,6 @@
       && /iPad|iPhone|iPod/i.test(navigator.userAgent);
 
 })('undefined' != typeof io ? io : module.exports, this);
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io) {
 
   /**
@@ -647,13 +637,6 @@
     'undefined' != typeof io ? io : module.exports
   , 'undefined' != typeof io ? io : module.parent.exports
 );
-
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 /**
  * Based on JSON2 (http://www.JSON.org/js.html).
  */
@@ -969,13 +952,6 @@
     'undefined' != typeof io ? io : module.exports
   , typeof JSON !== 'undefined' ? JSON : undefined
 );
-
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io) {
 
   /**
@@ -1231,12 +1207,6 @@
     'undefined' != typeof io ? io : module.exports
   , 'undefined' != typeof io ? io : module.parent.exports
 );
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io) {
 
   /**
@@ -1487,12 +1457,6 @@
     'undefined' != typeof io ? io : module.exports
   , 'undefined' != typeof io ? io : module.parent.exports
 );
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io, global) {
 
   /**
@@ -1609,11 +1573,12 @@
     function complete (data) {
       if (data instanceof Error) {
         self.connecting = false;
-        self.onError(data.message);
-      } else {
-        fn.apply(null, data.split(':'));
+        return self.onError(data.message);
       }
-    };
+      if (!self.connecting) return;
+
+      fn.apply(null, data.split(':'));
+    }
 
     var url = [
           'http' + (options.secure ? 's' : '') + ':/'
@@ -1650,7 +1615,7 @@
           } else if (xhr.status == 403) {
             self.onError(xhr.responseText);
           } else {
-            self.connecting = false;            
+            self.connecting = false;
             !self.reconnecting && self.onError(xhr.responseText);
           }
         }
@@ -1694,7 +1659,7 @@
 
     var self = this;
     self.connecting = true;
-    
+
     this.handshake(function (sid, heartbeat, close, transports) {
       self.sessionid = sid;
       self.closeTimeout = close * 1000;
@@ -1816,7 +1781,6 @@
     this.transport.payload(this.buffer);
     this.buffer = [];
   };
-  
 
   /**
    * Disconnect the established connect.
@@ -1876,7 +1840,7 @@
     var port = global.location.port ||
       ('https:' == global.location.protocol ? 443 : 80);
 
-    return this.options.host !== global.location.hostname 
+    return this.options.host !== global.location.hostname
       || this.options.port != port;
   };
 
@@ -2063,12 +2027,6 @@
   , 'undefined' != typeof io ? io : module.parent.exports
   , this
 );
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io) {
 
   /**
@@ -2305,13 +2263,6 @@
     'undefined' != typeof io ? io : module.exports
   , 'undefined' != typeof io ? io : module.parent.exports
 );
-
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io, global) {
 
   /**
@@ -2496,13 +2447,6 @@
   , 'undefined' != typeof io ? io : module.parent.exports
   , this
 );
-
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io) {
 
   /**
@@ -3042,13 +2986,6 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
   }
   
 })();
-
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io, global) {
 
   /**
@@ -3259,12 +3196,6 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
   , 'undefined' != typeof io ? io : module.parent.exports
   , this
 );
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io) {
 
   /**
@@ -3432,13 +3363,6 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
     'undefined' != typeof io ? io.Transport : module.exports
   , 'undefined' != typeof io ? io : module.parent.exports
 );
-
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io, global) {
 
   /**
@@ -3609,13 +3533,6 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
   , 'undefined' != typeof io ? io : module.parent.exports
   , this
 );
-
-/**
- * socket.io
- * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
- * MIT Licensed
- */
-
 (function (exports, io, global) {
   /**
    * There is a way to hide the loading indicator in Firefox. If you create and
@@ -3865,8 +3782,4 @@ var swfobject=function(){var D="undefined",r="object",S="Shockwave Flash",W="Sho
   , 'undefined' != typeof io ? io : module.parent.exports
   , this
 );
-
-if (typeof define === "function" && define.amd) {
-  define([], function () { return io; });
-}
-})();
+});

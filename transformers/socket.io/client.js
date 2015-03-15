@@ -22,15 +22,15 @@ module.exports = function client() {
   var factory = (function factory() {
     if ('undefined' !== typeof io && io.Socket) return io;
 
-    try { return Primus.require('socket.io-client'); }
+    try { return Primus.require('primus-socket.io-client'); }
     catch (e) {}
 
     return undefined;
   })();
 
   if (!factory) return primus.critical(new Error(
-    'Missing required `socket.io-client` module. ' +
-    'Please run `npm install --save socket.io-client`'
+    'Missing required `primus-socket.io-client` module. ' +
+    'Please run `npm install --save primus-socket.io-client`'
   ));
 
   //

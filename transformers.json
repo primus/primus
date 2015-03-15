@@ -9,7 +9,7 @@
   },
   "socket.io": {
     "server": "socket.io",
-    "client": "socket.io-client"
+    "client": "primus-socket.io-client"
   },
   "browserchannel": {
     "server": "browserchannel",
