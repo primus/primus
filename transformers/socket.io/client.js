@@ -23,14 +23,18 @@ module.exports = function client() {
     if ('undefined' !== typeof io && io.Socket) return io;
 
     try { return Primus.require('primus-socket.io-client'); }
-    catch (e) {}
+    catch (e) {
+      try { return Primus.require('socket.io-client'); }
+      catch (e) {}
+    }
 
     return undefined;
   })();
 
   if (!factory) return primus.critical(new Error(
-    'Missing required `primus-socket.io-client` module. ' +
-    'Please run `npm install --save primus-socket.io-client`'
+    'Missing required `primus-socket.io-client` or `socket.io-client` module. ' +
+    'Please run `npm i primus-socket.io-client --save` or ' +
+    '`npm i socket.io-client@0.9.x --save`'
   ));
 
   //
