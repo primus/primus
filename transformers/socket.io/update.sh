@@ -13,10 +13,10 @@ cleanup () {
 
 trap cleanup INT TERM EXIT
 
-git clone https://github.com/Automattic/socket.io-client.git $TEMPDIR
+git clone https://github.com/primus/primus-socket.io-client.git $TEMPDIR
 cd $TEMPDIR
-git checkout $(git tag | grep "0\.9" | sort -n -t "." -k 3 | tail -n 1)
-NODE_ENV=production npm install && make build
-mv dist/socket.io.js $DESTDIR/library.js
+git checkout $(git describe --tags --abbrev=0)
+NODE_ENV=production npm install && npm run build
+mv dist/primus-socket.io.js $DESTDIR/library.js
 cd $DESTDIR
 find patches -name *.patch -exec patch -i {} \;

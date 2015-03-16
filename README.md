@@ -1305,7 +1305,7 @@ in Node.js. It uses multiple transports to connect the server. To use Socket.IO
 you need to install the `socket.io` module:
 
 ```
-npm install socket.io --save
+npm install socket.io@0.9.x --save
 ```
 
 And tell `Primus` that you want to use `socket.io` as transformer:
@@ -1315,10 +1315,19 @@ var primus = new Primus(server, { transformer: 'socket.io' });
 ```
 
 If you want to use the client interface inside of Node.js you also need to
-install the `socket.io-client`:
+install the `primus-socket.io-client` module. This a fork of `socket.io-client`
+maintained by us to fix the bugs found on the 0.9 branch which is no longer
+supported upstream:
 
 ```
-npm install socket.io-client --save
+npm install primus-socket.io-client --save
+```
+
+If you want, you can opt out of our fixes and use the original `socket.io-client`.
+To do that just install `socket.io-client` instead of `primus-socket.io-client`:
+
+```
+npm install socket.io-client@0.9.x --save
 ```
 
 And then you can access it from your server instance:
@@ -1327,6 +1336,8 @@ And then you can access it from your server instance:
 var Socket = primus.Socket
   , socket = new Socket('url');
 ```
+
+**Please keep in mind that the browser client will always use our fixes.**
 
 **Note: Primus will never support Socket.IO 1.0. As it's just an abstraction build
 upon Engine.IO so it makes more sense to use Engine.IO in Primus directly.
