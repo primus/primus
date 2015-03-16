@@ -18,5 +18,3 @@ cd $TEMPDIR
 git checkout $(git describe --tags --abbrev=0)
 NODE_ENV=production npm install && npm run build
 mv dist/primus-socket.io.js $DESTDIR/library.js
-cd $DESTDIR
-find patches -name *.patch -exec patch -i {} \;
