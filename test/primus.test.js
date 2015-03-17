@@ -633,14 +633,14 @@ describe('Primus', function () {
 
       primus.save(sync);
       expect(fs.readFileSync(sync, 'utf-8')).to.equal(primus.library());
-      expect(fs.readFileSync(sync, 'utf-8').match(/[^"]?Unicron[^"]?/, 'g')).length
+      expect(fs.readFileSync(sync, 'utf-8').match(/(?:^|[^"])Unicron(?!")/g)).length
           .to.be.greaterThan(0);
 
       primus.save(async, function (error) {
         if (error) return done(error);
 
         expect(fs.readFileSync(async, 'utf-8')).to.equal(primus.library());
-        expect(fs.readFileSync(async, 'utf-8').match(/[^"]?Unicron[^"]?/, 'g')).length
+        expect(fs.readFileSync(async, 'utf-8').match(/(?:^|[^"])Unicron(?!")/g)).length
           .to.be.greaterThan(0);
         done();
       });
