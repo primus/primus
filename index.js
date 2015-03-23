@@ -161,7 +161,7 @@ Object.defineProperty(Primus.prototype, 'client', {
       read.primus = fs.readFileSync(__dirname + '/dist/primus.js', 'utf-8');
     }
 
-    return this.customGlobal(read.primus);
+    return read.primus;
   }
 });
 
@@ -176,33 +176,6 @@ Object.defineProperty(Primus.prototype, 'Socket', {
     }).Primus;
   }
 });
-
-/**
- * Change the default Primus global which we use in client code to something
- * custom. This makes it easier for people to integrate libraries in to their
- * own custom code bases.
- *
- * @param {String} input The library code.
- * @returns {String} The updated library code with the global replacements.
- * @api private
- */
-Primus.prototype.customGlobal = function customGlobal(input) {
-  var libraryNameLength = 'Primus'.length
-    , global = this.options.global;
-
-  if (!global) return input;
-
-  input.match(/Primus[^\ ]/g).filter(function filter(e, i, values) {
-    return values.lastIndexOf(e) === i;
-  }).forEach(function each(match) {
-    //
-    // Doing a split then join prevents us needing to escape for RegExp
-    //
-    input = input.split(match).join(global + match.substr(libraryNameLength, 1));
-  });
-
-  return input;
-};
 
 //
 // Expose the current version number.
@@ -547,8 +520,7 @@ Primus.readable('library', function compile(nodejs) {
     '  }',
     '})("'+ global +'", this, function wrapper() {',
     '  var define, module, exports',
-    '    , ns = {};',
-    '  ns["'+ global +'"] = '+ client.slice(client.indexOf('return ') + 7, -5) +';',
+    '    , Primus = '+ client.slice(client.indexOf('return ') + 7, -5) +';',
     ''
   ].join('\n');
 
@@ -595,18 +567,13 @@ Primus.readable('library', function compile(nodejs) {
 
     if (plugin.library) {
       log('adding the library of the %s plugin to the client file', name);
-      library.push(this.customGlobal(plugin.library));
+      library.push(plugin.library);
     }
 
     if (!plugin.client) continue;
 
     log('adding the client code of the %s plugin to the client file', name);
-    client += [
-      'ns["'+ global +'"].prototype.ark['+ name +'] = (function clientWrap('+ global +') {',
-      '  return '+ plugin.client.toString() +';',
-      '})(ns["'+ global +'"]);',
-      ''
-    ].join('\n');
+    client += 'Primus.prototype.ark['+ name +'] = '+ plugin.client.toString() +';\n';
   }
 
   //
@@ -617,12 +584,12 @@ Primus.readable('library', function compile(nodejs) {
   // patch too much code.
   //
   return client + [
-    '  return ns["'+ global +'"];',
+    '  return Primus;',
     '});',
     ''
   ].concat(library.filter(Boolean).map(function expose(library) {
     return [
-      '(function libraryWrap('+ global +') {',
+      '(function libraryWrap(Primus) {',
       library,
       '})(this["'+ global +'"]);',
       ''
