@@ -93,7 +93,7 @@
       primus = new Primus();
 
       primus.on('reconnect', function reconnect(opts) {
-        log('reconnect', 'Reconnecting', 'We are <strong>scheduling</strong> a new reconnect attempt. This is attempt <strong>'+ opts.attempt +'</strong> and will trigger a reconnect operation in <strong>'+ opts.timeout +'</strong> ms.');
+        log('reconnect', 'Reconnecting', 'We are <strong>scheduling</strong> a new reconnect attempt. This is attempt <strong>'+ opts.attempt +'</strong> and will trigger a reconnect operation in <strong>'+ opts.scheduled +'</strong> ms.');
         document.getElementById('connect').innerHTML = 'reconnecting';
       });
 
