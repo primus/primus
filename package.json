@@ -1,11 +1,12 @@
 {
   "name": "primus",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Primus is a simple abstraction around real-time frameworks. It allows you to easily switch between different frameworks without any code changes.",
   "main": "index.js",
   "scripts": {
     "integration": "npm run build && mocha $(find test -name '*.integration.js')",
     "build": "mkdir -p dist && browserify primus.js -s Primus -p deumdify | derequire > dist/primus.js",
+    "prepublish": "npm run build",
     "test": "npm run build && mocha $(find test -name '*.test.js')",
     "update": "find transformers -name update.sh -exec bash {} \\;"
   },
