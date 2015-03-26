@@ -118,6 +118,9 @@ Spark.readable('heartbeat', function heartbeat() {
     spark.end(undefined, { reconnect: true });
   }, spark.primus.timeout);
 
+  // Emit an event so the application can know the timer has been reset.
+  spark.emit('heartbeat');
+
   return this;
 });
 

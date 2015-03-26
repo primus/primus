@@ -1089,6 +1089,7 @@ Event                 | Usage       | Location      | Description
 `outgoing::ping`      | private     | client        | We're sending a ping message.
 `incoming::pong`      | private     | client        | We received a pong message.
 `outgoing::pong`      | private     | spark         | We're sending a pong message.
+`heartbeat`           | **public**  | spark         | We've received a heartbeat and have reset the timer.
 `online`              | **public**  | client        | We've regained a network connection.
 `offline`             | **public**  | client        | We've lost our internet connection.
 `log`                 | **public**  | server        | Log messages.

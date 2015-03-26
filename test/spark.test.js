@@ -283,4 +283,40 @@ describe('Spark', function () {
       Spark.prototype.__initialise.length = 1;
     });
   });
+
+  describe('ping/pong', function () {
+    it('writes primus::pong on a ping event', function (done) {
+      var spark = new primus.Spark(),
+        d = Date.now();
+
+      spark.on('outgoing::data', function onData(data) {
+        expect(data).to.equal('"primus::pong::' + d + '"');
+        spark.removeListener('outgoing::data', onData);
+        done();
+      });
+
+      spark.emit('incoming::ping', d);
+    });
+
+    it('emits outgoing::pong on a ping event', function (done) {
+      var spark = new primus.Spark();
+
+      spark.on('outgoing::pong', done);
+      spark.emit('incoming::ping');
+    });
+
+    it('emits "heartbeat" when heartbeat is called directly', function (done) {
+      var spark = new primus.Spark();
+
+      spark.on('heartbeat', done);
+      spark.heartbeat();
+    });
+
+    it('emits "heartbeat" when data is received', function (done) {
+      var spark = new primus.Spark();
+
+      spark.on('heartbeat', done);
+      spark.emit('incoming::data', 'data');
+    });
+  });
 });
