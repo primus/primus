@@ -8,7 +8,7 @@ node_js:
   - "0.12"
   - "iojs"
 before_install:
-  - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ] || [ "${TRAVIS_NODE_VERSION}" == "0.9" ] ; then npm install -g npm@2.6.0; fi'
+  - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ] || [ "${TRAVIS_NODE_VERSION}" == "0.9" ] ; then npm install -g npm@2.7.4; fi'
 script:
   - "npm run test && npm run integration"
 matrix:
@@ -16,7 +16,6 @@ matrix:
   allow_failures:
     - node_js: "0.9"
     - node_js: "0.11"
-    - node_js: "iojs"
 notifications:
   irc:
     channels:
