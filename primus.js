@@ -45,7 +45,7 @@ try {
 }
 
 /**
- * Primus in a real-time library agnostic framework for establishing real-time
+ * Primus is a real-time library agnostic framework for establishing real-time
  * connections with servers.
  *
  * Options:
