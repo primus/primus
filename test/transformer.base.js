@@ -193,7 +193,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
       });
 
-      it('can be open and closed', function (done) {
+      it('can be opened and closed', function (done) {
         primus.on('connection', function (spark) {
           setTimeout(function () {
             spark.end();
@@ -211,6 +211,20 @@ module.exports = function base(transformer, pathname, transformer_name) {
             });
           });
         });
+      });
+
+      it('can be closed immediately', function (done) {
+        var socket = new Socket(server.addr)
+          , calls = 0;
+
+        socket.on('end', function () {
+          if (++calls === 2) return done();
+
+          socket.open();
+          socket.end();
+        });
+
+        socket.end();
       });
 
       it('emits a readyStateChange event', function (done) {

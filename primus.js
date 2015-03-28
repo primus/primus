@@ -1013,7 +1013,11 @@ Primus.prototype.timeout = function timeout() {
 Primus.prototype.end = function end(data) {
   context(this, 'end');
 
-  if (this.readyState === Primus.CLOSED && !this.timers.active('connect')) {
+  if (
+      this.readyState === Primus.CLOSED
+    && !this.timers.active('connect')
+    && !this.timers.active('open')
+  ) {
     //
     // If we are reconnecting stop the reconnection procedure.
     //
