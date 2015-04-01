@@ -50,6 +50,7 @@
   "license": "MIT",
   "dependencies": {
     "access-control": "0.0.x",
+    "asyncemit": "1.0.x",
     "create-server": "0.0.x",
     "demolish": "1.0.x",
     "diagnostics": "0.0.x",

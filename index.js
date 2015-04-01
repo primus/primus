@@ -998,47 +998,7 @@ Primus.readable('close', function close(options, fn) {
  * @returns {Primus}
  * @api private
  */
-Primus.readable('asyncemit', function asyncemit() {
-  var args = Array.prototype.slice.call(arguments, 0)
-    , event = args.shift()
-    , listeners = this._events[event] || []
-    , async = args.length
-    , fn = args.pop()
-    , primus = this;
-
-  if (listeners && !Array.isArray(listeners)) {
-    listeners = [ listeners ];
-  }
-
-  (function each(stack) {
-    if (!stack.length) return fn();
-
-    var listener = stack.shift();
-
-    if (listener.once) {
-      primus.removeListener(event, listener.fn);
-    }
-
-    if (listener.fn.length !== async) {
-      listener.fn.apply(listener.context, args);
-      return each(stack);
-    }
-
-    //
-    // Async operation
-    //
-    listener.fn.apply(
-      listener.context,
-      args.concat(function done(err) {
-        if (err) return fn(err);
-
-        each(stack);
-      })
-    );
-  })(listeners.slice());
-
-  return this;
-});
+Primus.readable('asyncemit', require('asyncemit'));
 
 //
 // Alias for destroy.
