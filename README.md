@@ -1368,7 +1368,7 @@ Primus has two ways of extending the functionality. We have [plugins](#plugins)
 but also support middleware. And there is an important difference between these.
 The middleware layers allows you to modify the incoming requests **before** they
 are passed in to the transformers. Plugins allow you to modify and interact with
-the sparks. The middleware layer is only ran for the requests that are handled
+the sparks. The middleware layer is only run for the requests that are handled
 by Primus.
 
 We support 2 kind of middleware, **async** and **sync** middleware. The main
