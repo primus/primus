@@ -1,6 +1,7 @@
 'use strict';
 
-var BinaryPack = require('binary-pack');
+var BinaryPack = require('binary-pack')
+  , library = BinaryPack.BrowserSource;
 
 /**
  * Message encoder.
@@ -41,10 +42,7 @@ exports.library = [
   'var BinaryPack = (function () {',
   '  try { return require("binary-pack"); }',
   '  catch (e) {}',
-  '  var exports = {};',
-  '  (function () { ',
-      BinaryPack.BrowserSource,
-  '  }).call(exports);',
-  '  return exports.BinaryPack;',
-  '})();'
+  '  return '+ library.slice(library.indexOf('return ') + 7, -4) +';',
+  '})();',
+  ''
 ].join('\n');
