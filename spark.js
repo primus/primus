@@ -463,11 +463,11 @@ Spark.readable('_write', function _write(data) {
     if (!packet) return log('nothing to write, bailing out for %s', spark.id);
 
     //
-    // Hack 1: \u2028 and \u2029 are allowed inside string in JSON. But JavaScript
-    // defines them as newline separators. Because no literal newlines are allowed
-    // in a string this causes a ParseError. We work around this issue by replacing
-    // these characters with a properly escaped version for those chars. This can
-    // cause errors with JSONP requests or if the string is just evaluated.
+    // Hack 1: \u2028 and \u2029 are allowed inside a JSON string, but JavaScript
+    // defines them as newline separators. Unescaped control characters are not
+    // allowed inside JSON strings, so this causes an error at parse time. We
+    // work around this issue by escaping these characters. This can cause
+    // errors with JSONP requests or if the string is just evaluated.
     //
     if ('string' === typeof packet) {
       if (~packet.indexOf('\u2028')) packet = packet.replace(u2028, '\\u2028');

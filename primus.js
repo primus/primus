@@ -5,7 +5,9 @@ var EventEmitter = require('eventemitter3')
   , TickTock = require('tick-tock')
   , Recovery = require('recovery')
   , qs = require('querystringify')
-  , destroy = require('demolish');
+  , destroy = require('demolish')
+  , u2028 = /\u2028/g
+  , u2029 = /\u2029/g;
 
 /**
  * Context assertion, ensure that some of our public Primus methods are called
@@ -898,10 +900,23 @@ Primus.prototype._write = function write(data) {
 
   primus.encoder(data, function encoded(err, packet) {
     //
-    // Do a "save" emit('error') when we fail to parse a message. We don't
+    // Do a "safe" emit('error') when we fail to parse a message. We don't
     // want to throw here as listening to errors should be optional.
     //
     if (err) return primus.listeners('error').length && primus.emit('error', err);
+
+    //
+    // Hack 1: \u2028 and \u2029 are allowed inside a JSON string, but JavaScript
+    // defines them as newline separators. Unescaped control characters are not
+    // allowed inside JSON strings, so this causes an error at parse time. We
+    // work around this issue by escaping these characters. This can cause
+    // errors with JSONP requests or if the string is just evaluated.
+    //
+    if ('string' === typeof packet) {
+      if (~packet.indexOf('\u2028')) packet = packet.replace(u2028, '\\u2028');
+      if (~packet.indexOf('\u2029')) packet = packet.replace(u2029, '\\u2029');
+    }
+
     primus.emit('outgoing::data', packet);
   });
 
@@ -1258,42 +1273,6 @@ Primus.prototype.pathname = null; // @import {primus::pathname};
 Primus.prototype.encoder = null; // @import {primus::encoder};
 Primus.prototype.decoder = null; // @import {primus::decoder};
 Primus.prototype.version = null; // @import {primus::version};
-
-//
-// Hack 1: \u2028 and \u2029 are allowed inside string in JSON. But JavaScript
-// defines them as newline separators. Because no literal newlines are allowed
-// in a string this causes a ParseError. We work around this issue by replacing
-// these characters with a properly escaped version for those chars. This can
-// cause errors with JSONP requests or if the string is just evaluated.
-//
-// This could have been solved by replacing the data during the "outgoing::data"
-// event. But as it affects the JSON encoding in general I've opted for a global
-// patch instead so all JSON.stringify operations are save.
-//
-if (
-    'object' === typeof JSON
- && 'function' === typeof JSON.stringify
- && JSON.stringify(['\u2028\u2029']) === '["\u2028\u2029"]'
-) {
-  JSON.stringify = function replace(stringify) {
-    var u2028 = /\u2028/g
-      , u2029 = /\u2029/g;
-
-    return function patched(value, replacer, spaces) {
-      var result = stringify.call(this, value, replacer, spaces);
-
-      //
-      // Replace the bad chars.
-      //
-      if (result) {
-        if (~result.indexOf('\u2028')) result = result.replace(u2028, '\\u2028');
-        if (~result.indexOf('\u2029')) result = result.replace(u2029, '\\u2029');
-      }
-
-      return result;
-    };
-  }(JSON.stringify);
-}
 
 if (
      'undefined' !== typeof document
