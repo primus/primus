@@ -285,38 +285,49 @@ describe('Spark', function () {
   });
 
   describe('ping/pong', function () {
-    it('writes primus::pong on a ping event', function (done) {
-      var spark = new primus.Spark(),
-        d = Date.now();
+    it('emits `outgoing::pong` on a ping event', function (done) {
+      var spark = new primus.Spark()
+        , now = Date.now();
 
-      spark.on('outgoing::data', function onData(data) {
-        expect(data).to.equal('"primus::pong::' + d + '"');
-        spark.removeListener('outgoing::data', onData);
+      spark.on('outgoing::pong', function (time) {
+        expect(time).to.equal(now);
         done();
       });
 
-      spark.emit('incoming::ping', d);
+      spark.emit('incoming::data', JSON.stringify('primus::ping::'+ now));
     });
 
-    it('emits outgoing::pong on a ping event', function (done) {
-      var spark = new primus.Spark();
+    it('writes `primus::pong::<timestamp>` on a ping event', function (done) {
+      var spark = new primus.Spark()
+        , now = Date.now();
 
-      spark.on('outgoing::pong', done);
-      spark.emit('incoming::ping');
+      spark.once('outgoing::data', function (data) {
+        expect(data).to.equal(JSON.stringify('primus::pong::'+ now));
+        done();
+      });
+
+      spark.emit('incoming::data', JSON.stringify('primus::ping::'+ now));
     });
 
-    it('emits "heartbeat" when heartbeat is called directly', function (done) {
+    it('emits `heartbeat` when heartbeat is called directly', function (done) {
       var spark = new primus.Spark();
 
       spark.on('heartbeat', done);
       spark.heartbeat();
     });
 
-    it('emits "heartbeat" when data is received', function (done) {
+    it('emits `heartbeat` when data is received', function (done) {
       var spark = new primus.Spark();
 
       spark.on('heartbeat', done);
-      spark.emit('incoming::data', 'data');
+      spark.emit('incoming::data', JSON.stringify('data'));
+    });
+
+    it('calls heartbeat on a ping event without a timestamp', function (done) {
+      var spark = new primus.Spark();
+
+      spark.on('heartbeat', done);
+      spark.emit('incoming::ping');
     });
   });
 });
