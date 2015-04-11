@@ -727,7 +727,7 @@ Primus.prototype.protocol = function protocol(msg) {
 
   switch (msg.slice(8,  last)) {
     case 'pong':
-      this.emit('incoming::pong', value);
+      this.emit('incoming::pong', +value);
     break;
 
     case 'server':

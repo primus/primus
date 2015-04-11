@@ -389,7 +389,7 @@ Spark.readable('protocol', function protocol(msg) {
 
   switch (msg.slice(8,  last)) {
     case 'ping':
-      this.emit('incoming::ping', value);
+      this.emit('incoming::ping', +value);
     break;
 
     case 'id':
