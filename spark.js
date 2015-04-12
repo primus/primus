@@ -215,9 +215,14 @@ Spark.readable('__initialise', [function initialise() {
   });
 
   //
-  // We've received a ping message.
+  // We've received a ping event. This is fired upon receipt of a WebSocket
+  // Ping frame or a `pimus::ping::<timestamp>` message. In the former case
+  // the listener is called without arguments and we should only reset the
+  // heartbeat.
   //
   ultron.on('incoming::ping', function ping(time) {
+    if (time === undefined) return spark.heartbeat();
+
     spark.emit('outgoing::pong', time);
     spark._write('primus::pong::'+ time);
   });
