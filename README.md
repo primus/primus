@@ -2182,4 +2182,4 @@ emitted to the user.
 
 ### License
 
-MIT
+[MIT](LICENSE)
