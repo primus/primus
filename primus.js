@@ -202,14 +202,12 @@ Primus.require = function requires(name) {
 
 //
 // It's possible that we're running in Node.js or in a Node.js compatible
-// environment such as browserify. In these cases we want to use some build in
-// libraries to minimize our dependence on the DOM.
+// environment. In this cases we inherit from the Stream base class.
 //
-var Stream, parse;
+var Stream;
 
 try {
   Primus.Stream = Stream = Primus.require('stream');
-  parse = Primus.require('url').parse;
 
   //
   // Normally inheritance is done in the same way as we do in our catch
@@ -223,79 +221,6 @@ try {
 } catch (e) {
   Primus.Stream = EventEmitter;
   Primus.prototype = new EventEmitter();
-
-  //
-  // In the browsers we can leverage the DOM to parse the URL for us. It will
-  // automatically default to host of the current server when we supply it path
-  // etc.
-  //
-  parse = function parse(url) {
-    var a = document.createElement('a')
-      , data = {}
-      , key;
-
-    a.href = url;
-
-    //
-    // Transform it from a readOnly object to a read/writable object so we can
-    // change some parsed values. This is required if we ever want to override
-    // a port number etc. (as browsers remove port 443 and 80 from the URL's).
-    //
-    for (key in a) {
-      if ('string' === typeof a[key] || 'number' === typeof a[key]) {
-        data[key] = a[key];
-      }
-    }
-
-    //
-    // We need to make sure that the URL is properly encoded because IE doesn't
-    // do this automatically.
-    //
-    data.href = encodeURI(decodeURI(data.href));
-
-    //
-    // If we don't obtain a port number (e.g. when using zombie) then try
-    // and guess at a value from the 'href' value.
-    //
-    if (!data.port) {
-      var splits = (data.href || '').split('/');
-      if (splits.length > 2) {
-        var host = splits[2]
-          , atSignIndex = host.lastIndexOf('@');
-
-        if (~atSignIndex) host = host.slice(atSignIndex + 1);
-
-        splits = host.split(':');
-        if (splits.length === 2) data.port = splits[1];
-      }
-    }
-
-    //
-    // IE quirk: The `protocol` is parsed as ":" or "" when a protocol agnostic
-    // URL is used. In this case we extract the value from the `href` value.
-    //
-    if (!data.protocol || ':' === data.protocol) {
-      data.protocol = data.href.substr(0, data.href.indexOf(':') + 1);
-    }
-
-    //
-    // Safari 5.1.7 (windows) quirk: When parsing a URL without a port number
-    // the `port` in the data object will default to "0" instead of the expected
-    // "". We're going to do an explicit check on "0" and force it to "".
-    //
-    if ('0' === data.port) data.port = '';
-
-    //
-    // Browsers do not parse authorization information, so we need to extract
-    // that from the URL.
-    //
-    if (~data.href.indexOf('@') && !data.auth) {
-      var start = data.protocol.length + 2;
-      data.auth = data.href.slice(start, data.href.indexOf(data.pathname, start)).split('@')[0];
-    }
-
-    return data;
-  };
 }
 
 /**
@@ -1115,7 +1040,7 @@ Primus.prototype.merge = function merge(target) {
  * @returns {Object} Parsed connection.
  * @api private
  */
-Primus.prototype.parse = parse;
+Primus.prototype.parse = require('url-parse');
 
 /**
  * Parse a query string.
@@ -1152,13 +1077,31 @@ Primus.prototype.uri = function uri(options) {
   if (options.query) qsa = true;
 
   options = options || {};
-  options.protocol = 'protocol' in options ? options.protocol : 'http';
-  options.query = url.search && 'query' in options ? (url.search.charAt(0) === '?' ? url.search.slice(1) : url.search) : false;
-  options.secure = 'secure' in options ? options.secure : (url.protocol === 'https:' || url.protocol === 'wss:');
-  options.auth = 'auth' in options ? options.auth : url.auth;
-  options.pathname = 'pathname' in options ? options.pathname : this.pathname.slice(1);
-  options.port = 'port' in options ? +options.port : +url.port || (options.secure ? 443 : 80);
-  options.host = 'host' in options ? options.host : url.hostname || url.host.replace(':'+ url.port, '');
+  options.protocol = 'protocol' in options
+    ? options.protocol
+    : 'http';
+  options.query = url.query && qsa
+    ? url.query.slice(1)
+    : false;
+  options.secure = 'secure' in options
+    ? options.secure
+    : url.protocol === 'https:' || url.protocol === 'wss:';
+  options.auth = 'auth' in options
+    ? options.auth
+    : url.username
+      ? url.password
+        ? url.username +':'+ url.password
+        : url.username
+      : false;
+  options.pathname = 'pathname' in options
+    ? options.pathname
+    : this.pathname.slice(1);
+  options.port = 'port' in options
+    ? +options.port
+    : +url.port || (options.secure ? 443 : 80);
+  options.host = 'host' in options
+    ? options.host
+    : url.hostname || url.host.replace(':'+ url.port, '');
 
   //
   // Allow transformation of the options before we construct a full URL from it.
