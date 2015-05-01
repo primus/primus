@@ -36,7 +36,7 @@ module.exports = function client() {
     primus.emit('outgoing::end');
 
     primus.socket = socket = new Factory(
-      primus.uri({ protocol: 'http', query: true }),
+      primus.uri({ protocol: 'http:', query: true }),
       null,
       primus.merge(primus.transport, {
       info: {

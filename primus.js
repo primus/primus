@@ -1079,7 +1079,7 @@ Primus.prototype.uri = function uri(options) {
   options = options || {};
   options.protocol = 'protocol' in options
     ? options.protocol
-    : 'http';
+    : 'http:';
   options.query = url.query && qsa
     ? url.query.slice(1)
     : false;
@@ -1095,26 +1095,15 @@ Primus.prototype.uri = function uri(options) {
       : false;
   options.pathname = 'pathname' in options
     ? options.pathname
-    : this.pathname.slice(1);
+    : this.pathname;
   options.port = 'port' in options
     ? +options.port
     : +url.port || (options.secure ? 443 : 80);
-  options.host = 'host' in options
-    ? options.host
-    : url.hostname || url.host.replace(':'+ url.port, '');
 
   //
   // Allow transformation of the options before we construct a full URL from it.
   //
   this.emit('outgoing::url', options);
-
-  //
-  // `url.host` might be undefined (e.g. when using zombie) so we use the
-  // hostname and port defined above.
-  //
-  var host = (443 !== options.port && 80 !== options.port)
-    ? options.host +':'+ options.port
-    : options.host;
 
   //
   // We need to make sure that we create a unique connection URL every time to
@@ -1126,19 +1115,18 @@ Primus.prototype.uri = function uri(options) {
   options.query = this.querystringify(querystring);
 
   //
-  // Automatically suffix the protocol so we can supply `ws` and `http` and it gets
-  // transformed correctly.
+  // Automatically suffix the protocol so we can supply `ws:` and `http:` and
+  // it gets transformed correctly.
   //
-  server.push(options.secure ? options.protocol +'s:' : options.protocol +':', '');
+  server.push(options.secure ? options.protocol.replace(':', 's:') : options.protocol, '');
 
-  if (options.auth) server.push(options.auth +'@'+ host);
-  else server.push(host);
+  server.push(options.auth ? options.auth +'@'+ url.host : url.host);
 
   //
   // Pathnames are optional as some Transformers would just use the pathname
   // directly.
   //
-  if (options.pathname) server.push(options.pathname);
+  if (options.pathname) server.push(options.pathname.slice(1));
 
   //
   // Optionally add a search query.

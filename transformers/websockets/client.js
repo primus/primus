@@ -43,8 +43,8 @@ module.exports = function client() {
     // Primus when we connect.
     //
     try {
-      var prot = primus.url.protocol === 'ws+unix:' ? 'ws+unix' : 'ws'
-        , qsa = prot === 'ws';
+      var prot = primus.url.protocol === 'ws+unix:' ? 'ws+unix:' : 'ws:'
+        , qsa = prot === 'ws:';
 
       //
       // Only allow primus.transport object in Node.js, it will throw in
