@@ -50,13 +50,13 @@ module.exports = function client() {
       //
       if (Factory.length === 3) {
         primus.socket = socket = new Factory(
-          primus.uri({ protocol: 'ws', query: true }),  // URL
+          primus.uri({ protocol: 'ws:', query: true }),  // URL
           [],                                           // Sub protocols
           primus.transport                              // options.
         );
       } else {
         primus.socket = socket = new Factory(primus.uri({
-          protocol: 'ws',
+          protocol: 'ws:',
           query: true
         }));
       }
