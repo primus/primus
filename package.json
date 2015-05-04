@@ -58,7 +58,6 @@
     "eventemitter3": "0.1.x",
     "forwarded-for": "1.0.x",
     "fusing": "1.0.x",
-    "load": "1.0.x",
     "querystringify": "0.0.x",
     "recovery": "0.2.x",
     "setheader": "0.0.x",
