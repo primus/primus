@@ -1088,11 +1088,7 @@ Primus.prototype.uri = function uri(options) {
     : url.protocol === 'https:' || url.protocol === 'wss:';
   options.auth = 'auth' in options
     ? options.auth
-    : url.username
-      ? url.password
-        ? url.username +':'+ url.password
-        : url.username
-      : false;
+    : url.auth;
   options.pathname = 'pathname' in options
     ? options.pathname
     : this.pathname;
