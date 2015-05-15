@@ -642,11 +642,10 @@ function SockJS(url, protocols, options) {
   this._origin = o ? o.toLowerCase() : null;
 
   // remove the trailing slash
-  parsedUrl.path = parsedUrl.pathname.replace(/[/]+$/, '') + (parsedUrl.query || '');
+  parsedUrl.set('pathname', parsedUrl.pathname.replace(/\/+$/, ''));
 
   // store the sanitized url
-  this.url = parsedUrl.protocol + '//' + (parsedUrl.auth ? parsedUrl.auth + '@' : '') +
-    parsedUrl.hostname + (parsedUrl.port ? ':' + parsedUrl.port : '') + parsedUrl.path;
+  this.url = parsedUrl.href;
 
   // Step 7 - start connection in background
   // obtain server info
@@ -3363,7 +3362,7 @@ module.exports = {
 };
 
 },{"url-parse":56}],53:[function(_dereq_,module,exports){
-module.exports = '1.0.0-beta.13';
+module.exports = '1.0.0';
 
 },{}],54:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
