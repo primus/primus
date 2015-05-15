@@ -50,12 +50,12 @@
   "license": "MIT",
   "dependencies": {
     "access-control": "0.0.x",
-    "asyncemit": "2.0.x",
+    "asyncemit": "3.0.x",
     "create-server": "0.0.x",
     "demolish": "1.0.x",
     "diagnostics": "0.0.x",
     "emits": "3.0.x",
-    "eventemitter3": "1.0.x",
+    "eventemitter3": "1.1.x",
     "forwarded-for": "1.0.x",
     "fusing": "1.0.x",
     "querystringify": "0.0.x",
@@ -68,7 +68,7 @@
   "devDependencies": {
     "binary-pack": "1.0.x",
     "browserchannel": "2.0.x",
-    "browserify": "10.1.x",
+    "browserify": "10.2.x",
     "chai": "2.3.x",
     "concat-stream": "1.4.x",
     "condenseify": "1.0.x",
@@ -88,7 +88,7 @@
     "rocambole-node-remove": "1.0.x",
     "socket.io": "0.9.x",
     "sockjs": "0.3.x",
-    "sockjs-client": "1.0.0-beta.13",
+    "sockjs-client": "1.0.x",
     "through2": "0.6.x",
     "ws": "0.7.x"
   },
