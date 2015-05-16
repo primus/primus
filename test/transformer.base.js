@@ -915,7 +915,8 @@ module.exports = function base(transformer, pathname, transformer_name) {
               expect(res.statusCode).to.equal(401);
               expect(res.headers['www-authenticate']).to.equal('Basic realm="primus"');
 
-              var data = '';
+              var onerror = socket.socket.onerror
+                , data = '';
 
               res.on('data', function (v) {
                 data += v;
@@ -924,7 +925,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
               res.on('end', function () {
                 var obj = JSON.parse(data);
                 expect(obj).to.eql({error: 'I failed'});
-                socket.socket.emit('error', new Error(obj.error));
+                onerror(new Error(obj.error));
               });
             });
           }
