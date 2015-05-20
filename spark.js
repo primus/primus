@@ -106,7 +106,7 @@ Spark.readable('heartbeat', function heartbeat() {
 
   clearTimeout(spark.timeout);
 
-  if ('number' !== typeof spark.primus.timeout) return spark;
+  if (!spark.primus.timeout) return spark;
 
   log('setting new heartbeat timeout for %s', spark.id);
 

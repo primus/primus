@@ -543,10 +543,15 @@ Primus.readable('library', function compile(nodejs) {
   // `ping` interval of the client to ensure that we've sent the server
   // a message before the timeout gets triggered and we get disconnected.
   //
-  if ('number' === typeof this.timeout) {
-    var timeout = this.timeout - 10000;
-    log('adding a custom timeout to the client');
-    client = client.replace('options.ping : 25e3;', 'options.ping : '+ timeout +';');
+  if (this.timeout) {
+    log('updating the default value of the client `ping` option');
+    client = client.replace(
+      'options.ping : 25e3;',
+      'options.ping : '+ (this.timeout - 10000) +';'
+    );
+  } else {
+    log('setting the default value of the client `ping` option to `false`');
+    client = client.replace('options.ping : 25e3;', 'options.ping : false;');
   }
 
   //

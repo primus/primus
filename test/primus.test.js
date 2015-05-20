@@ -551,17 +551,21 @@ describe('Primus', function () {
       expect(library).to.include('i am a client plugin');
     });
 
-    it('updates the default timeout', function (done) {
+    it('updates the default value of the `ping` option', function (done) {
       var primus = new Primus(server, { timeout: 60000 })
-        , Socket = primus.Socket;
-
-      var socket = new Socket('http://localhost:'+ server.portnumber);
+        , socket = new primus.Socket('http://localhost:'+ server.portnumber);
 
       expect(socket.options.ping).to.equal(50000);
-      socket.on('open', socket.end).on('end', done);
+      socket.on('open', socket.end).on('end', function () {
+        primus = new Primus(server, { timeout: false });
+        socket = primus.Socket('http://localhost:'+ server.portnumber);
+
+        expect(socket.options.ping).to.equal(false);
+        socket.on('open', socket.end).on('end', done);
+      });
     });
 
-    it('still allows overriding the default timeout', function (done) {
+    it('still allows overriding the value of the `ping` option', function (done) {
       var primus = new Primus(server, { timeout: 60000 })
         , Socket = primus.Socket;
 
