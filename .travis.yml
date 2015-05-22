@@ -2,20 +2,15 @@ sudo: false
 language: node_js
 node_js:
   - "0.8"
-  - "0.9"
   - "0.10"
-  - "0.11"
   - "0.12"
   - "iojs"
 before_install:
-  - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ] || [ "${TRAVIS_NODE_VERSION}" == "0.9" ] ; then npm install -g npm@2.7.3; fi'
+  - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ]; then npm install -g npm@2.10.1; fi'
 script:
   - "npm run test && npm run integration"
 matrix:
   fast_finish: true
-  allow_failures:
-    - node_js: "0.9"
-    - node_js: "0.11"
 notifications:
   irc:
     channels:
