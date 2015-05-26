@@ -776,6 +776,18 @@ primus.emits('event', function parser(next, structure) {
 });
 ```
 
+#### primus.id(callback)
+
+There are cases where it is necessary to retrieve the [`spark.id`](#sparkid)
+from the client. To make this easier, we added a `primus.id()` method that
+takes a callback function to which the id will be passed.
+
+```js
+primus.id(function (id) {
+  console.log(id);
+});
+```
+
 ### Connecting from the server
 
 The client-side library has been made compatible with Node.js so the same code
