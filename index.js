@@ -170,13 +170,10 @@ Object.defineProperty(Primus.prototype, 'client', {
 //
 Object.defineProperty(Primus.prototype, 'Socket', {
   get: function () {
-    var Module = require('module')
-      , compiler = new Module();
-
-    compiler.paths = module.paths;
-    compiler._compile(this.library(true), 'primus.js');
-
-    return compiler.exports;
+    return require('load').compiler(this.library(true), 'primus.js', {
+      __filename: 'primus.js',
+      __dirname: process.cwd()
+    }).Primus;
   }
 });
 
