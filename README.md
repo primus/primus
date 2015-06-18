@@ -2006,7 +2006,7 @@ versions of your application. This is a vital feature that your load balancer
 needs to support. This ensures that the incoming requests always go back to the
 same server. If your load balancer does not support sticky sessions, get another
 one. I highly recommend [HAProxy](http://haproxy.1wt.eu/). According to my own
-testing it the fastest and best proxy available that supports WebSockets. See
+testing it is the fastest and best proxy available that supports WebSockets. See
 https://github.com/observing/balancerbattle for more detailed information.
 
 The reason for which sticky-sessions are so important is that a lot of frameworks
