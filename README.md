@@ -160,10 +160,11 @@ you can supply a `parser` configuration option:
 var primus = new Primus(server, { parser: 'JSON' });
 ```
 
-All parsers have an `async` interface for error handling. If you don't have a
-pre-existing server where you want or can attach your Primus server to you can
-also use the `Primus.createServer` convenience method. The `createServer method
-will automatically:
+All parsers have an `async` interface for error handling.
+
+If you don't have a pre-existing server where you want or can attach your Primus
+server to you can also use the `Primus.createServer` convenience method. The
+`createServer method will automatically:
 
 - Setup a HTTP, HTTPS or SPDY server for you on the given port number.
 - Setup your Primus server with the given configuration.
