@@ -823,7 +823,7 @@ a server side client.
 
 When you are using plugins with Primus make sure you add them **before** you
 reference the `primus.Socket` or it will compile a client without your plugins.
-If you're using the `primus.createSocket` api you can directly supply the
+If you're using the `Primus.createSocket` api you can directly supply the
 plugins as part of the options as it supports `plugin` object:
 
 ```js
@@ -835,6 +835,16 @@ var Socket = Primus.createSocket({
     'substream': require('substream')
   }
 });
+```
+
+The constructor returned by `primus.Socket` or `Primus.createSocket` has the
+same signature of the constructor used to connect from the browser. This
+means that you can use all the options mentioned in the previous
+[section](#connecting-from-the-browser):
+
+```js
+var Socket = Primus.createSocket()
+  , client = new Socket('http://localhost:8080', { options });
 ```
 
 If you do not know which transformer and parser are used on the server, we
