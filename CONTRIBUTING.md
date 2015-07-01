@@ -22,7 +22,7 @@ to the code:
 - Searching for potential memory leaks, event loops blocks and de-optimized
   code.
 - Preforming security audits on the code base. Please check our
-  [SECURITY.md](security) for the Security Guidelines.
+  [SECURITY.md][security] for the Security Guidelines.
 - Filing bugs.
 
 And that list goes on and on. No matter what you choose we are thankful for your
@@ -69,7 +69,7 @@ already known. If you've found an issue that is:
   might make more sense to just add comment to the closed issue explaining that
   you're still affected by this.
 - **open:** Try to provide more details to the issue. If you can reproduce the
-  issue in a different way then the one used by the original author, please add
+  issue in a different way than the one used by the original author, please add
   this. The more ways we have to reproduce the bug, the more are the chances to
   get it fixed fast.
 - **missing:** Please open a new issue, we would love to hear more about it.
@@ -165,7 +165,7 @@ importance:
 
 Unless you are fixing a known bug we **strongly** encourage to discuss your
 feature with the core team via a GitHub issue or [IRC][irc]. Before getting
-started ensure that you work will not rejected.
+started ensure that your work will not rejected.
 
 All contributions must be made via pull requests. After a pull request is made
 other contributors will either provide feedback or merge it directly depending
@@ -280,7 +280,7 @@ this is an issue please contact us directly through [IRC][irc].
   behaviour is not welcome.
 
 [dco]: http://elinux.org/Developer_Certificate_Of_Origin
-[irc]: http://webchat.freenode.net/?channels=primus
+[irc]: https://webchat.freenode.net/?channels=primus
 [fencing]: https://help.github.com/articles/github-flavored-markdown/#fenced-code-blocks
 [security]: SECURITY.md
 [readme]: README.md
