@@ -11,7 +11,7 @@ describe('Parsers', function () {
     var primus = new Primus(server, { parser: parser })
       , Socket = primus.Socket;
 
-    var socket = new Socket('http://localhost:' + server.portnumber);
+    var socket = new Socket('http://localhost:'+ server.portnumber);
 
     socket.on('open', function () {
       primus.destroy(done);
@@ -25,7 +25,7 @@ describe('Parsers', function () {
       , primus = services.primus
       , server = services.server;
 
-    var socket = new Socket('http://localhost:' + server.portnumber);
+    var socket = new Socket('http://localhost:'+ server.portnumber);
 
     socket.on('data', function (data) {
       expect(data).to.equal('hello');
@@ -42,7 +42,6 @@ describe('Parsers', function () {
   });
 
   describe('binary', function () {
-
     it('connects with the parser', function (done) {
       connectsTest('binary', done);
     });
@@ -50,11 +49,9 @@ describe('Parsers', function () {
     it('sends and receives data using the parser', function (done) {
       sendsAndReceivesTest('binary', done);
     });
-
   });
 
   describe('ejson', function () {
-
     it('connects with the parser', function (done) {
       connectsTest('ejson', done);
     });
@@ -62,6 +59,36 @@ describe('Parsers', function () {
     it('sends and receives data using the parser', function (done) {
       sendsAndReceivesTest('ejson', done);
     });
+  });
 
+  describe('jsonh', function () {
+    it('connects with the parser', function (done) {
+      connectsTest('jsonh', done);
+    });
+
+    it('sends and receives data using the parser', function (done) {
+      var collection = [
+        { 'a': 'A', 'b': 'B'},
+        { 'a': 'C', 'b': 'D'},
+        { 'a': 'E', 'b': 'F'}
+      ];
+
+      var primus = new Primus(server, { parser: 'jsonh' })
+        , socket;
+
+      primus.on('connection', function (spark) {
+        spark.on('data', function (data) {
+          expect(data).to.eql(collection);
+          spark.write(data);
+        });
+      });
+
+      socket = new primus.Socket('http://localhost:'+ server.portnumber);
+      socket.on('data', function (data) {
+        expect(data).to.eql(collection);
+        primus.destroy(done);
+      });
+      socket.write(collection);
+    });
   });
 });
