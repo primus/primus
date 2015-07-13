@@ -498,9 +498,7 @@ Primus.prototype.spark = function spark(id) {
  * @api public
  */
 Primus.readable('library', function compile(nodejs) {
-  var encoder = this.encoder.client || this.encoder
-    , decoder = this.decoder.client || this.decoder
-    , library = [ !nodejs ? this.transformer.library : null ]
+  var library = [ !nodejs ? this.transformer.library : null ]
     , global = this.options.global || 'Primus'
     , transport = this.transformer.client
     , parser = this.parser.library || ''
@@ -532,8 +530,8 @@ Primus.readable('library', function compile(nodejs) {
     .replace('null; // @import {primus::version}', '"'+ this.version +'"')
     .replace('null; // @import {primus::transport}', transport.toString())
     .replace('null; // @import {primus::auth}', (!!this.auth).toString())
-    .replace('null; // @import {primus::encoder}', encoder.toString())
-    .replace('null; // @import {primus::decoder}', decoder.toString());
+    .replace('null; // @import {primus::encoder}', this.encoder.toString())
+    .replace('null; // @import {primus::decoder}', this.decoder.toString());
 
   //
   // As we're given a timeout value on the server side, we need to update the
