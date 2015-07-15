@@ -78,10 +78,10 @@ describe('Primus', function () {
   });
 
   it('accepts custom message parsers', function () {
-    var primus = new Primus(server, { parser: 'jsonh' });
+    var primus = new Primus(server, { parser: 'ejson' });
 
     expect(primus.parser.library).to.be.a('string');
-    expect(primus.parser.library).to.include('JSONH');
+    expect(primus.parser.library).to.include('EJSON');
   });
 
   it('accepts a third-party parser', function () {
@@ -524,7 +524,7 @@ describe('Primus', function () {
     });
 
     it('includes the library of the parsers', function () {
-      var primus = new Primus(server, { parser: 'jsonh' })
+      var primus = new Primus(server, { parser: 'ejson' })
         , library = primus.library();
 
       expect(library).to.be.a('string');

@@ -152,7 +152,7 @@ to completely disable the heartbeat timeout by setting the value of the
 
 In addition to support different frameworks we've also made it possible to use
 custom encoding and decoding libraries. We're using `JSON` by default but you
-could also use `msgpack` or `JSONH` for example (but these parsers need to be
+could also use `msgpack` or `EJSON` for example (but these parsers need to be
 supported by Primus, so check out the parser folder for examples). To set parser
 you can supply a `parser` configuration option:
 

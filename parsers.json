@@ -1,8 +1,5 @@
 {
   "json": {},
-  "jsonh": {
-    "server": "jsonh"
-  },
   "ejson": {
     "server": "ejson"
   },
