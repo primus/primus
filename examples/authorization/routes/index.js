@@ -25,7 +25,7 @@ exports.login = function login(req, res) {
   pass.hash(req.body.password, user.salt, function hash(err, key) {
     if (err) {
       console.error(err);
-      return res.send(500, { message: 'Internal error' });
+      return res.status(500).send({ message: 'Internal error' });
     }
 
     if (user.key !== key) return res.status(401).send({ message: 'Bad credentials' });
