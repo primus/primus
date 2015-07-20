@@ -1,18 +1,4 @@
 (function(f){var g;if(typeof window!=='undefined'){g=window}else if(typeof self!=='undefined'){g=self}g.SockJS=f()})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-(function (global){
-'use strict';
-
-var transportList = _dereq_('./transport-list');
-
-module.exports = _dereq_('./main')(transportList);
-
-// TODO can't get rid of this until all servers do
-if ('_sockjs_onload' in global) {
-  setTimeout(global._sockjs_onload, 1);
-}
-
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./main":14,"./transport-list":16}],2:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -31,7 +17,7 @@ inherits(CloseEvent, Event);
 
 module.exports = CloseEvent;
 
-},{"./event":4,"inherits":54}],3:[function(_dereq_,module,exports){
+},{"./event":3,"inherits":53}],2:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -84,7 +70,7 @@ EventEmitter.prototype.removeListener = EventTarget.prototype.removeEventListene
 
 module.exports.EventEmitter = EventEmitter;
 
-},{"./eventtarget":5,"inherits":54}],4:[function(_dereq_,module,exports){
+},{"./eventtarget":4,"inherits":53}],3:[function(_dereq_,module,exports){
 'use strict';
 
 function Event(eventType) {
@@ -108,7 +94,7 @@ Event.BUBBLING_PHASE  = 3;
 
 module.exports = Event;
 
-},{}],5:[function(_dereq_,module,exports){
+},{}],4:[function(_dereq_,module,exports){
 'use strict';
 
 /* Simplified implementation of DOM2 EventTarget.
@@ -170,7 +156,7 @@ EventTarget.prototype.dispatchEvent = function(event) {
 
 module.exports = EventTarget;
 
-},{}],6:[function(_dereq_,module,exports){
+},{}],5:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -187,7 +173,7 @@ inherits(TransportMessageEvent, Event);
 
 module.exports = TransportMessageEvent;
 
-},{"./event":4,"inherits":54}],7:[function(_dereq_,module,exports){
+},{"./event":3,"inherits":53}],6:[function(_dereq_,module,exports){
 'use strict';
 
 var JSON3 = _dereq_('json3')
@@ -216,7 +202,7 @@ FacadeJS.prototype._close = function() {
 
 module.exports = FacadeJS;
 
-},{"./utils/iframe":47,"json3":55}],8:[function(_dereq_,module,exports){
+},{"./utils/iframe":46,"json3":54}],7:[function(_dereq_,module,exports){
 'use strict';
 
 var urlUtils = _dereq_('./utils/url')
@@ -312,7 +298,7 @@ module.exports = function(SockJS, availableTransports) {
   };
 };
 
-},{"./facade":7,"./info-iframe-receiver":10,"./location":13,"./utils/event":46,"./utils/iframe":47,"./utils/url":52,"json3":55}],9:[function(_dereq_,module,exports){
+},{"./facade":6,"./info-iframe-receiver":9,"./location":12,"./utils/event":45,"./utils/iframe":46,"./utils/url":51,"json3":54}],8:[function(_dereq_,module,exports){
 'use strict';
 
 var EventEmitter = _dereq_('events').EventEmitter
@@ -357,7 +343,7 @@ InfoAjax.prototype.close = function() {
 
 module.exports = InfoAjax;
 
-},{"./utils/object":49,"events":3,"inherits":54,"json3":55}],10:[function(_dereq_,module,exports){
+},{"./utils/object":48,"events":2,"inherits":53,"json3":54}],9:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -392,7 +378,7 @@ InfoReceiverIframe.prototype.close = function() {
 
 module.exports = InfoReceiverIframe;
 
-},{"./info-ajax":9,"./transport/sender/xhr-local":37,"events":3,"inherits":54,"json3":55}],11:[function(_dereq_,module,exports){
+},{"./info-ajax":8,"./transport/sender/xhr-local":36,"events":2,"inherits":53,"json3":54}],10:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -404,12 +390,12 @@ var EventEmitter = _dereq_('events').EventEmitter
   , InfoReceiverIframe = _dereq_('./info-iframe-receiver')
   ;
 
-function InfoIframe(url) {
+function InfoIframe(baseUrl, url) {
   var self = this;
   EventEmitter.call(this);
 
   var go = function() {
-    var ifr = self.ifr = new IframeTransport(InfoReceiverIframe.transportName, url, url);
+    var ifr = self.ifr = new IframeTransport(InfoReceiverIframe.transportName, url, baseUrl);
 
     ifr.once('message', function(msg) {
       if (msg) {
@@ -459,7 +445,7 @@ InfoIframe.prototype.close = function() {
 module.exports = InfoIframe;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./info-iframe-receiver":10,"./transport/iframe":22,"./utils/event":46,"events":3,"inherits":54,"json3":55}],12:[function(_dereq_,module,exports){
+},{"./info-iframe-receiver":9,"./transport/iframe":21,"./utils/event":45,"events":2,"inherits":53,"json3":54}],11:[function(_dereq_,module,exports){
 'use strict';
 
 var EventEmitter = _dereq_('events').EventEmitter
@@ -486,7 +472,7 @@ inherits(InfoReceiver, EventEmitter);
 
 // TODO this is currently ignoring the list of available transports and the whitelist
 
-InfoReceiver._getReceiver = function(url, urlInfo) {
+InfoReceiver._getReceiver = function(baseUrl, url, urlInfo) {
   // determine method of CORS support (if needed)
   if (urlInfo.sameOrigin) {
     return new InfoAjax(url, XHRLocal);
@@ -498,7 +484,7 @@ InfoReceiver._getReceiver = function(url, urlInfo) {
     return new InfoAjax(url, XDR);
   }
   if (InfoIframe.enabled()) {
-    return new InfoIframe(url);
+    return new InfoIframe(baseUrl, url);
   }
   return new InfoAjax(url, XHRFake);
 };
@@ -508,7 +494,7 @@ InfoReceiver.prototype.doXhr = function(baseUrl, urlInfo) {
     , url = urlUtils.addPath(baseUrl, '/info')
     ;
 
-  this.xo = InfoReceiver._getReceiver(url, urlInfo);
+  this.xo = InfoReceiver._getReceiver(baseUrl, url, urlInfo);
 
   this.timeoutRef = setTimeout(function() {
     self._cleanup(false);
@@ -539,7 +525,7 @@ InfoReceiver.timeout = 8000;
 
 module.exports = InfoReceiver;
 
-},{"./info-ajax":9,"./info-iframe":11,"./transport/sender/xdr":34,"./transport/sender/xhr-cors":35,"./transport/sender/xhr-fake":36,"./transport/sender/xhr-local":37,"./utils/url":52,"events":3,"inherits":54}],13:[function(_dereq_,module,exports){
+},{"./info-ajax":8,"./info-iframe":10,"./transport/sender/xdr":33,"./transport/sender/xhr-cors":34,"./transport/sender/xhr-fake":35,"./transport/sender/xhr-local":36,"./utils/url":51,"events":2,"inherits":53}],12:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -553,7 +539,7 @@ module.exports = global.location || {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],14:[function(_dereq_,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -600,6 +586,18 @@ function SockJS(url, protocols, options) {
     log.warn("'protocols_whitelist' is DEPRECATED. Use 'transports' instead.");
   }
   this._transportsWhitelist = options.transports;
+
+  var sessionId = options.sessionId || 8;
+  if (typeof sessionId === 'function') {
+    this._generateSessionId = sessionId;
+  } else if (typeof sessionId === 'number') {
+    this._generateSessionId = function() {
+      return random.string(sessionId);
+    };
+  } else {
+    throw new TypeError("If sessionId is used in the options, it needs to be a number or a function.");
+  }
+
   this._server = options.server || random.numberString(1000);
 
   // Step 1 of WS spec - parse and validate the url. Issue #8
@@ -745,7 +743,7 @@ SockJS.prototype._connect = function() {
     var timeoutMs = (this._rto * Transport.roundTrips) || 5000;
     this._transportTimeoutId = setTimeout(this._transportTimeout.bind(this), timeoutMs);
 
-    var transportUrl = urlUtils.addPath(this._transUrl, '/' + this._server + '/' + random.string(8));
+    var transportUrl = urlUtils.addPath(this._transUrl, '/' + this._server + '/' + this._generateSessionId());
     var transportObj = new Transport(transportUrl, this._transUrl);
     transportObj.on('message', this._transportMessage.bind(this));
     transportObj.once('close', this._transportClose.bind(this));
@@ -899,7 +897,7 @@ module.exports = function(availableTransports) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./event/close":2,"./event/event":4,"./event/eventtarget":5,"./event/trans-message":6,"./iframe-bootstrap":8,"./info-receiver":12,"./location":13,"./shims":15,"./utils/browser":44,"./utils/escape":45,"./utils/event":46,"./utils/log":48,"./utils/object":49,"./utils/random":50,"./utils/transport":51,"./utils/url":52,"./version":53,"inherits":54,"json3":55,"url-parse":56}],15:[function(_dereq_,module,exports){
+},{"./event/close":1,"./event/event":3,"./event/eventtarget":4,"./event/trans-message":5,"./iframe-bootstrap":7,"./info-receiver":11,"./location":12,"./shims":14,"./utils/browser":43,"./utils/escape":44,"./utils/event":45,"./utils/log":47,"./utils/object":48,"./utils/random":49,"./utils/transport":50,"./utils/url":51,"./version":52,"inherits":53,"json3":54,"url-parse":55}],14:[function(_dereq_,module,exports){
 /* eslint-disable */
 /* jscs: disable */
 'use strict';
@@ -1373,7 +1371,7 @@ defineProperties(StringPrototype, {
     }
 }, hasNegativeSubstrBug);
 
-},{}],16:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = [
@@ -1393,7 +1391,7 @@ module.exports = [
 , _dereq_('./transport/jsonp-polling')
 ];
 
-},{"./transport/eventsource":20,"./transport/htmlfile":21,"./transport/jsonp-polling":23,"./transport/lib/iframe-wrap":26,"./transport/websocket":38,"./transport/xdr-polling":39,"./transport/xdr-streaming":40,"./transport/xhr-polling":41,"./transport/xhr-streaming":42}],17:[function(_dereq_,module,exports){
+},{"./transport/eventsource":19,"./transport/htmlfile":20,"./transport/jsonp-polling":22,"./transport/lib/iframe-wrap":25,"./transport/websocket":37,"./transport/xdr-polling":38,"./transport/xdr-streaming":39,"./transport/xhr-polling":40,"./transport/xhr-streaming":41}],16:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -1563,17 +1561,17 @@ AbstractXHRObject.supportsCORS = cors;
 module.exports = AbstractXHRObject;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/event":46,"../../utils/url":52,"events":3,"inherits":54}],18:[function(_dereq_,module,exports){
+},{"../../utils/event":45,"../../utils/url":51,"events":2,"inherits":53}],17:[function(_dereq_,module,exports){
 (function (global){
 module.exports = global.EventSource;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],19:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 (function (global){
 module.exports = global.WebSocket || global.MozWebSocket;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1602,7 +1600,7 @@ EventSourceTransport.roundTrips = 2;
 
 module.exports = EventSourceTransport;
 
-},{"./lib/ajax-based":24,"./receiver/eventsource":29,"./sender/xhr-cors":35,"eventsource":18,"inherits":54}],21:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":23,"./receiver/eventsource":28,"./sender/xhr-cors":34,"eventsource":17,"inherits":53}],20:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1629,7 +1627,7 @@ HtmlFileTransport.roundTrips = 2;
 
 module.exports = HtmlFileTransport;
 
-},{"./lib/ajax-based":24,"./receiver/htmlfile":30,"./sender/xhr-local":37,"inherits":54}],22:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":23,"./receiver/htmlfile":29,"./sender/xhr-local":36,"inherits":53}],21:[function(_dereq_,module,exports){
 'use strict';
 
 // Few cool transports do work only for same-origin. In order to make
@@ -1755,7 +1753,7 @@ IframeTransport.roundTrips = 2;
 
 module.exports = IframeTransport;
 
-},{"../utils/event":46,"../utils/iframe":47,"../utils/random":50,"../utils/url":52,"../version":53,"events":3,"inherits":54,"json3":55}],23:[function(_dereq_,module,exports){
+},{"../utils/event":45,"../utils/iframe":46,"../utils/random":49,"../utils/url":51,"../version":52,"events":2,"inherits":53,"json3":54}],22:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -1793,7 +1791,7 @@ JsonPTransport.needBody = true;
 module.exports = JsonPTransport;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./lib/sender-receiver":28,"./receiver/jsonp":31,"./sender/jsonp":33,"inherits":54}],24:[function(_dereq_,module,exports){
+},{"./lib/sender-receiver":27,"./receiver/jsonp":30,"./sender/jsonp":32,"inherits":53}],23:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1836,7 +1834,7 @@ inherits(AjaxBasedTransport, SenderReceiver);
 
 module.exports = AjaxBasedTransport;
 
-},{"../../utils/url":52,"./sender-receiver":28,"inherits":54}],25:[function(_dereq_,module,exports){
+},{"../../utils/url":51,"./sender-receiver":27,"inherits":53}],24:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1911,7 +1909,7 @@ BufferedSender.prototype.stop = function() {
 
 module.exports = BufferedSender;
 
-},{"events":3,"inherits":54}],26:[function(_dereq_,module,exports){
+},{"events":2,"inherits":53}],25:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -1948,7 +1946,7 @@ module.exports = function(transport) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/object":49,"../iframe":22,"inherits":54}],27:[function(_dereq_,module,exports){
+},{"../../utils/object":48,"../iframe":21,"inherits":53}],26:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -1997,7 +1995,7 @@ Polling.prototype.abort = function() {
 
 module.exports = Polling;
 
-},{"events":3,"inherits":54}],28:[function(_dereq_,module,exports){
+},{"events":2,"inherits":53}],27:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2035,7 +2033,7 @@ SenderReceiver.prototype.close = function() {
 
 module.exports = SenderReceiver;
 
-},{"../../utils/url":52,"./buffered-sender":25,"./polling":27,"inherits":54}],29:[function(_dereq_,module,exports){
+},{"../../utils/url":51,"./buffered-sender":24,"./polling":26,"inherits":53}],28:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2089,7 +2087,7 @@ EventSourceReceiver.prototype._close = function(reason) {
 
 module.exports = EventSourceReceiver;
 
-},{"events":3,"eventsource":18,"inherits":54}],30:[function(_dereq_,module,exports){
+},{"events":2,"eventsource":17,"inherits":53}],29:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2164,7 +2162,7 @@ HtmlfileReceiver.enabled = HtmlfileReceiver.htmlfileEnabled || iframeUtils.ifram
 module.exports = HtmlfileReceiver;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/iframe":47,"../../utils/random":50,"../../utils/url":52,"events":3,"inherits":54}],31:[function(_dereq_,module,exports){
+},{"../../utils/iframe":46,"../../utils/random":49,"../../utils/url":51,"events":2,"inherits":53}],30:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2331,7 +2329,7 @@ JsonpReceiver.prototype._createScript = function(url) {
 module.exports = JsonpReceiver;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/browser":44,"../../utils/iframe":47,"../../utils/random":50,"../../utils/url":52,"events":3,"inherits":54}],32:[function(_dereq_,module,exports){
+},{"../../utils/browser":43,"../../utils/iframe":46,"../../utils/random":49,"../../utils/url":51,"events":2,"inherits":53}],31:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2390,7 +2388,7 @@ XhrReceiver.prototype.abort = function() {
 
 module.exports = XhrReceiver;
 
-},{"events":3,"inherits":54}],33:[function(_dereq_,module,exports){
+},{"events":2,"inherits":53}],32:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2479,7 +2477,7 @@ module.exports = function(url, payload, callback) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/random":50,"../../utils/url":52}],34:[function(_dereq_,module,exports){
+},{"../../utils/random":49,"../../utils/url":51}],33:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2571,7 +2569,7 @@ XDRObject.enabled = !!(global.XDomainRequest && browser.hasDomain());
 module.exports = XDRObject;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../../utils/browser":44,"../../utils/event":46,"../../utils/url":52,"events":3,"inherits":54}],35:[function(_dereq_,module,exports){
+},{"../../utils/browser":43,"../../utils/event":45,"../../utils/url":51,"events":2,"inherits":53}],34:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2588,7 +2586,7 @@ XHRCorsObject.enabled = XhrDriver.enabled && XhrDriver.supportsCORS;
 
 module.exports = XHRCorsObject;
 
-},{"../driver/xhr":17,"inherits":54}],36:[function(_dereq_,module,exports){
+},{"../driver/xhr":16,"inherits":53}],35:[function(_dereq_,module,exports){
 'use strict';
 
 var EventEmitter = _dereq_('events').EventEmitter
@@ -2614,7 +2612,7 @@ XHRFake.timeout = 2000;
 
 module.exports = XHRFake;
 
-},{"events":3,"inherits":54}],37:[function(_dereq_,module,exports){
+},{"events":2,"inherits":53}],36:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2633,7 +2631,7 @@ XHRLocalObject.enabled = XhrDriver.enabled;
 
 module.exports = XHRLocalObject;
 
-},{"../driver/xhr":17,"inherits":54}],38:[function(_dereq_,module,exports){
+},{"../driver/xhr":16,"inherits":53}],37:[function(_dereq_,module,exports){
 'use strict';
 
 var utils = _dereq_('../utils/event')
@@ -2719,7 +2717,7 @@ WebSocketTransport.roundTrips = 2;
 
 module.exports = WebSocketTransport;
 
-},{"../utils/event":46,"../utils/url":52,"./driver/websocket":19,"events":3,"inherits":54}],39:[function(_dereq_,module,exports){
+},{"../utils/event":45,"../utils/url":51,"./driver/websocket":18,"events":2,"inherits":53}],38:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2744,7 +2742,7 @@ XdrPollingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XdrPollingTransport;
 
-},{"./lib/ajax-based":24,"./receiver/xhr":32,"./sender/xdr":34,"./xdr-streaming":40,"inherits":54}],40:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":23,"./receiver/xhr":31,"./sender/xdr":33,"./xdr-streaming":39,"inherits":53}],39:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2778,7 +2776,7 @@ XdrStreamingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XdrStreamingTransport;
 
-},{"./lib/ajax-based":24,"./receiver/xhr":32,"./sender/xdr":34,"inherits":54}],41:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":23,"./receiver/xhr":31,"./sender/xdr":33,"inherits":53}],40:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -2813,7 +2811,7 @@ XhrPollingTransport.roundTrips = 2; // preflight, ajax
 
 module.exports = XhrPollingTransport;
 
-},{"./lib/ajax-based":24,"./receiver/xhr":32,"./sender/xhr-cors":35,"./sender/xhr-local":37,"inherits":54}],42:[function(_dereq_,module,exports){
+},{"./lib/ajax-based":23,"./receiver/xhr":31,"./sender/xhr-cors":34,"./sender/xhr-local":36,"inherits":53}],41:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2858,7 +2856,7 @@ XhrStreamingTransport.needBody = !!global.document;
 module.exports = XhrStreamingTransport;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../utils/browser":44,"./lib/ajax-based":24,"./receiver/xhr":32,"./sender/xhr-cors":35,"./sender/xhr-local":37,"inherits":54}],43:[function(_dereq_,module,exports){
+},{"../utils/browser":43,"./lib/ajax-based":23,"./receiver/xhr":31,"./sender/xhr-cors":34,"./sender/xhr-local":36,"inherits":53}],42:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2879,7 +2877,7 @@ if (global.crypto && global.crypto.getRandomValues) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],44:[function(_dereq_,module,exports){
+},{}],43:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2910,7 +2908,7 @@ module.exports = {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],45:[function(_dereq_,module,exports){
+},{}],44:[function(_dereq_,module,exports){
 'use strict';
 
 var JSON3 = _dereq_('json3');
@@ -2961,7 +2959,7 @@ module.exports = {
   }
 };
 
-},{"json3":55}],46:[function(_dereq_,module,exports){
+},{"json3":54}],45:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -2969,6 +2967,8 @@ var random = _dereq_('./random');
 
 var onUnload = {}
   , afterUnload = false
+    // detect google chrome packaged apps because they don't allow the 'unload' event
+  , isChromePackagedApp = global.chrome && global.chrome.app && global.chrome.app.runtime
   ;
 
 module.exports = {
@@ -2995,6 +2995,10 @@ module.exports = {
   }
 
 , unloadAdd: function(listener) {
+    if (isChromePackagedApp) {
+      return null;
+    }
+
     var ref = random.string(8);
     onUnload[ref] = listener;
     if (afterUnload) {
@@ -3027,10 +3031,12 @@ var unloadTriggered = function() {
 
 // 'unload' alone is not reliable in opera within an iframe, but we
 // can't use `beforeunload` as IE fires it on javascript: links.
-module.exports.attachEvent('unload', unloadTriggered);
+if (!isChromePackagedApp) {
+  module.exports.attachEvent('unload', unloadTriggered);
+}
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./random":50}],47:[function(_dereq_,module,exports){
+},{"./random":49}],46:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -3203,7 +3209,7 @@ if (global.document) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./browser":44,"./event":46,"json3":55}],48:[function(_dereq_,module,exports){
+},{"./browser":43,"./event":45,"json3":54}],47:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -3218,7 +3224,7 @@ var logObject = {};
 module.exports = logObject;
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],49:[function(_dereq_,module,exports){
+},{}],48:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = {
@@ -3244,7 +3250,7 @@ module.exports = {
   }
 };
 
-},{}],50:[function(_dereq_,module,exports){
+},{}],49:[function(_dereq_,module,exports){
 'use strict';
 
 /* global crypto:true */
@@ -3275,7 +3281,7 @@ module.exports = {
   }
 };
 
-},{"crypto":43}],51:[function(_dereq_,module,exports){
+},{"crypto":42}],50:[function(_dereq_,module,exports){
 'use strict';
 
 module.exports = function(availableTransports) {
@@ -3318,7 +3324,7 @@ module.exports = function(availableTransports) {
   };
 };
 
-},{}],52:[function(_dereq_,module,exports){
+},{}],51:[function(_dereq_,module,exports){
 'use strict';
 
 var URL = _dereq_('url-parse');
@@ -3361,10 +3367,10 @@ module.exports = {
   }
 };
 
-},{"url-parse":56}],53:[function(_dereq_,module,exports){
-module.exports = '1.0.0';
+},{"url-parse":55}],52:[function(_dereq_,module,exports){
+module.exports = '1.0.1';
 
-},{}],54:[function(_dereq_,module,exports){
+},{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -3389,7 +3395,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],55:[function(_dereq_,module,exports){
+},{}],54:[function(_dereq_,module,exports){
 (function (global){
 /*! JSON v3.3.2 | http://bestiejs.github.io/json3 | Copyright 2012-2014, Kit Cambridge | http://kit.mit-license.org */
 ;(function () {
@@ -4295,7 +4301,7 @@ if (typeof Object.create === 'function') {
 }).call(this);
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],56:[function(_dereq_,module,exports){
+},{}],55:[function(_dereq_,module,exports){
 'use strict';
 
 var required = _dereq_('requires-port')
@@ -4449,7 +4455,10 @@ URL.prototype.set = function set(part, value, fn) {
   var url = this;
 
   if ('query' === part) {
-    if ('string' === typeof value) value = (fn || qs.parse)(value);
+    if ('string' === typeof value && value.length) {
+      value = (fn || qs.parse)(value);
+    }
+
     url[part] = value;
   } else if ('port' === part) {
     url[part] = value;
@@ -4526,7 +4535,7 @@ URL.qs = qs;
 URL.location = lolcation;
 module.exports = URL;
 
-},{"./lolcation":57,"querystringify":58,"requires-port":59}],57:[function(_dereq_,module,exports){
+},{"./lolcation":56,"querystringify":57,"requires-port":58}],56:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -4575,7 +4584,7 @@ module.exports = function lolcation(loc) {
 };
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./":56}],58:[function(_dereq_,module,exports){
+},{"./":55}],57:[function(_dereq_,module,exports){
 'use strict';
 
 var has = Object.prototype.hasOwnProperty;
@@ -4638,7 +4647,7 @@ function querystringify(obj, prefix) {
 exports.stringify = querystringify;
 exports.parse = querystring;
 
-},{}],59:[function(_dereq_,module,exports){
+},{}],58:[function(_dereq_,module,exports){
 'use strict';
 
 /**
@@ -4678,5 +4687,19 @@ module.exports = function required(port, protocol) {
   return port !== 0;
 };
 
-},{}]},{},[1])(1)
+},{}],59:[function(_dereq_,module,exports){
+(function (global){
+'use strict';
+
+var transportList = _dereq_('./transport-list');
+
+module.exports = _dereq_('./main')(transportList);
+
+// TODO can't get rid of this until all servers do
+if ('_sockjs_onload' in global) {
+  setTimeout(global._sockjs_onload, 1);
+}
+
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{"./main":13,"./transport-list":15}]},{},[59])(59)
 });
