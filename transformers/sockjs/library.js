@@ -353,11 +353,11 @@ var inherits = _dereq_('inherits')
   , InfoAjax = _dereq_('./info-ajax')
   ;
 
-function InfoReceiverIframe(transUrl, baseUrl) {
+function InfoReceiverIframe(transUrl) {
   var self = this;
   EventEmitter.call(this);
 
-  this.ir = new InfoAjax(baseUrl, XHRLocalObject);
+  this.ir = new InfoAjax(transUrl, XHRLocalObject);
   this.ir.once('finish', function(info, rtt) {
     self.ir = null;
     self.emit('message', JSON3.stringify([info, rtt]));
@@ -3102,11 +3102,11 @@ module.exports = {
       try {
         // When the iframe is not loaded, IE raises an exception
         // on 'contentWindow'.
-        if (iframe && iframe.contentWindow) {
-          setTimeout(function() {
+        setTimeout(function() {
+          if (iframe && iframe.contentWindow) {
             iframe.contentWindow.postMessage(msg, origin);
-          }, 0);
-        }
+          }
+        }, 0);
       } catch (x) {}
     };
 
@@ -3166,11 +3166,11 @@ module.exports = {
       try {
         // When the iframe is not loaded, IE raises an exception
         // on 'contentWindow'.
-        if (iframe && iframe.contentWindow) {
-          setTimeout(function() {
-            iframe.contentWindow.postMessage(msg, origin);
-          }, 0);
-        }
+        setTimeout(function() {
+          if (iframe && iframe.contentWindow) {
+              iframe.contentWindow.postMessage(msg, origin);
+          }
+        }, 0);
       } catch (x) {}
     };
 
@@ -3368,7 +3368,7 @@ module.exports = {
 };
 
 },{"url-parse":55}],52:[function(_dereq_,module,exports){
-module.exports = '1.0.1';
+module.exports = '1.0.2';
 
 },{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
