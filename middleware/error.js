@@ -2,7 +2,7 @@
 
 /**
  * WARNING: this middleware is only used internally and does not follow the
- * pattern of the other middleware. You should not use it.  
+ * pattern of the other middleware. You should not use it.
  *
  * Handle async middleware errors.
  *
@@ -27,7 +27,7 @@ module.exports = function error(err, req, res) {
 
     return res.end(message);
   }
-  
+
   res.write('HTTP/'+ req.httpVersion +' ');
   res.write(code +' '+ require('http').STATUS_CODES[code] +'\r\n');
   res.write('Connection: close\r\n');
