@@ -140,7 +140,7 @@ function Primus(server, options) {
     'this issue at:',
     '',
     'http://github.com/primus/primus#can-i-use-cluster',
-    '',
+    ''
   ].forEach(function warn(line) {
     console.error('Primus: '+ line);
   });
