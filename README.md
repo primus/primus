@@ -1078,7 +1078,7 @@ primus.destroy({ timeout: 10000 });
 
 ### Events
 
-Primus is build upon the Stream and EventEmitter interfaces. This is a summary
+Primus is built upon the Stream and EventEmitter interfaces. This is a summary
 of the events emitted by Primus.
 
 Event                 | Usage       | Location      | Description
@@ -1363,7 +1363,7 @@ var Socket = primus.Socket
 
 **Please keep in mind that the browser client will always use our fixes.**
 
-**Note: Primus will never support Socket.IO 1.0. As it's just an abstraction build
+**Note: Primus will never support Socket.IO 1.0. As it's just an abstraction built
 upon Engine.IO so it makes more sense to use Engine.IO in Primus directly.
 Socket.IO 0.9.x will be supported as it uses a completely different transport
 system.**
