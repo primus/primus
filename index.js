@@ -518,7 +518,7 @@ Primus.readable('library', function compile(nodejs) {
     '  }',
     '})("'+ global +'", this, function wrapper() {',
     '  var define, module, exports',
-    '    , Primus = '+ client.slice(client.indexOf('return ') + 7, -5) +';',
+    '    , Primus = '+ client.slice(client.indexOf('return ') + 7, -4) +';',
     ''
   ].join('\n');
 
