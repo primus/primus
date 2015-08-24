@@ -6,6 +6,7 @@ var EventEmitter = require('eventemitter3')
   , Recovery = require('recovery')
   , qs = require('querystringify')
   , destroy = require('demolish')
+  , yeast = require('yeast')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
 
@@ -114,7 +115,6 @@ function Primus(url, options) {
   primus.timers = new TickTock(this);           // Contains all our timers.
   primus.socket = null;                         // Reference to the internal connection.
   primus.latency = 0;                           // Latency between messages.
-  primus.stamps = 0;                            // Counter to make timestamps unique.
   primus.disconnect = false;                    // Did we receive a disconnect packet?
   primus.transport = options.transport;         // Transport options.
   primus.transformers = {                       // Message transformers.
@@ -1107,7 +1107,7 @@ Primus.prototype.uri = function uri(options) {
   // forcing an cache busting query string in to the URL.
   //
   var querystring = this.querystring(options.query || '');
-  querystring._primuscb = +new Date() +'-'+ this.stamps++;
+  querystring._primuscb = yeast();
   options.query = this.querystringify(querystring);
 
   //
