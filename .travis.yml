@@ -5,8 +5,10 @@ node_js:
   - "0.10"
   - "0.12"
   - "iojs"
+env:
+  - "CXX=clang"
 before_install:
-  - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ]; then npm install -g npm@2.10.1; fi'
+  - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ]; then npm install -g npm@2.14.0; fi'
 script:
   - "npm run test && npm run integration"
 matrix:
