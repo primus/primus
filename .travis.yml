@@ -5,8 +5,14 @@ node_js:
   - "0.10"
   - "0.12"
   - "iojs"
+addons:
+  apt:
+    sources:
+      - "ubuntu-toolchain-r-test"
+    packages:
+      - "g++-4.8"
 env:
-  - "CXX=clang"
+  - "CXX=g++-4.8"
 before_install:
   - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ]; then npm install -g npm@2.14.0; fi'
 script:
