@@ -337,8 +337,8 @@ middleware layers, etc.
 
 You can use the `spark.write` method to send data over the socket. The data is
 automatically encoded for you using the `parser` that you've set while creating
-the Primus server instance. This method always returns `true` so back pressure
-isn't handled.
+the Primus server instance. This method always returns `true` on success and
+`false` on failure so back pressure isn't handled.
 
 ```js
 spark.write({ foo: 'bar' });
