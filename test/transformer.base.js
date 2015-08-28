@@ -507,6 +507,20 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.on('end', done);
       });
 
+      it('should receive a `reconnect failed` event when reconnection fails', function (done) {
+        var socket = new Socket(server.addr, {
+          reconnect: { min: 50, retries: 4 }
+        });
+
+        socket.on('open', function () {
+          primus.destroy({ reconnect: true });
+        });
+
+        socket.on('reconnect failed', function () {
+          done();
+        });
+      });
+
       it('should reset the reconnect details after a successful reconnect', function (done) {
         var socket = new Socket(server.addr, {
           reconnect: { min: 100, max: 1000 }
@@ -533,7 +547,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
 
           primus = new Primus(server, {
             pathname: server.pathname,
-            transformer: transformer,
+            transformer: transformer
           });
 
           server.listen(server.portnumber);

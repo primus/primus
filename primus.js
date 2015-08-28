@@ -373,9 +373,9 @@ Primus.prototype.initialise = function initialise(options) {
 
   primus.recovery
   .on('reconnected', primus.emits('reconnected'))
-  .on('reconnect failed', primus.emits('reconnect failed', function failed(data) {
+  .on('reconnect failed', primus.emits('reconnect failed', function failed(next) {
     primus.emit('end');
-    return data;
+    next();
   }))
   .on('reconnect timeout', primus.emits('reconnect timeout'))
   .on('reconnect scheduled', primus.emits('reconnect scheduled'))
