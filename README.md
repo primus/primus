@@ -1716,47 +1716,16 @@ primus.transforms('outgoing', function (packet, next) {
 The following plugins are part of the Primus project.
 
 <dl>
-  <dt><a href="https://github.com/primus/substream">substream</a></dt>
+  <dt><a href="https://github.com/primus/fortress-maximus">fortess-maximus</a></dt>
   <dd>
-    Substream is an opinionated but stream compatible connection multiplexer on
-    top of the Primus connections. These streams can be created without
-    pre-defining them on the server or client.
+    Fortress Maximus validates every incoming message on your Primus server as all
+    user input should be seen as a potential security risk.
   </dd>
   <dd>
-    <a href="https://www.npmjs.com/package/substream"><img
-      src="https://img.shields.io/npm/v/substream.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/substream"><img
-      src="https://img.shields.io/travis/primus/substream/master.svg?style=flat-square"
-      alt="Build Status" /></a>
-  </dd>
-</dl>
-
-<dl>
-  <dt><a href="https://github.com/primus/primus-emit">primus-emit</a></dt>
-  <dd>
-    The emit module adds client -> server and server -> client event emitting to Primus.
-  </dd>
-  <dd>
-    <a href="https://www.npmjs.com/package/primus-emit"><img
-      src="https://img.shields.io/npm/v/primus-emit.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/primus-emit"><img
-      src="https://img.shields.io/travis/primus/primus-emit/master.svg?style=flat-square"
-      alt="Build Status" /></a>
-  </dd>
-</dl>
-
-<dl>
-  <dt><a href="https://github.com/primus/omega-supreme">omega-supreme</a></dt>
-  <dd>
-    Omega Supreme allows you to broadcast messages to Primus using a regular
-    HTTP request. These messages can be broacasted to every spark, single spark
-    or a collection of sparks.
-  </dd>
-  <dd>
-    <a href="https://www.npmjs.com/package/omega-supreme"><img
-      src="https://img.shields.io/npm/v/omega-supreme.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/omega-supreme"><img
-      src="https://img.shields.io/travis/primus/omega-supreme/master.svg?style=flat-square"
+    <a href="https://www.npmjs.com/package/fortress-maximus"><img
+      src="https://img.shields.io/npm/v/fortress-maximus.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/primus/fortress-maximus"><img
+      src="https://img.shields.io/travis/primus/fortress-maximus/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1778,21 +1747,6 @@ The following plugins are part of the Primus project.
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/primus/fortress-maximus">fortess-maximus</a></dt>
-  <dd>
-    Fortress Maximus validates every incoming message on your Primus server as all
-    user input should be seen as a potential security risk.
-  </dd>
-  <dd>
-    <a href="https://www.npmjs.com/package/fortress-maximus"><img
-      src="https://img.shields.io/npm/v/fortress-maximus.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/fortress-maximus"><img
-      src="https://img.shields.io/travis/primus/fortress-maximus/master.svg?style=flat-square"
-      alt="Build Status" /></a>
-  </dd>
-</dl>
-
-<dl>
   <dt><a href="https://github.com/primus/mirage">mirage</a></dt>
   <dd>
     Mirage generates and validates persistent session IDs.
@@ -1802,6 +1756,22 @@ The following plugins are part of the Primus project.
       src="https://img.shields.io/npm/v/mirage.svg?style=flat-square"
       alt="NPM version" /></a><a href="https://travis-ci.org/primus/mirage"><img
       src="https://img.shields.io/travis/primus/mirage/master.svg?style=flat-square"
+      alt="Build Status" /></a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="https://github.com/primus/omega-supreme">omega-supreme</a></dt>
+  <dd>
+    Omega Supreme allows you to broadcast messages to Primus using a regular
+    HTTP request. These messages can be broacasted to every spark, single spark
+    or a collection of sparks.
+  </dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/omega-supreme"><img
+      src="https://img.shields.io/npm/v/omega-supreme.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/primus/omega-supreme"><img
+      src="https://img.shields.io/travis/primus/omega-supreme/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1820,6 +1790,36 @@ The following plugins are part of the Primus project.
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="https://github.com/primus/primus-emit">primus-emit</a></dt>
+  <dd>
+    The emit module adds client -> server and server -> client event emitting to Primus.
+  </dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/primus-emit"><img
+      src="https://img.shields.io/npm/v/primus-emit.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/primus/primus-emit"><img
+      src="https://img.shields.io/travis/primus/primus-emit/master.svg?style=flat-square"
+      alt="Build Status" /></a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="https://github.com/primus/substream">substream</a></dt>
+  <dd>
+    Substream is an opinionated but stream compatible connection multiplexer on
+    top of the Primus connections. These streams can be created without
+    pre-defining them on the server or client.
+  </dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/substream"><img
+      src="https://img.shields.io/npm/v/substream.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/primus/substream"><img
+      src="https://img.shields.io/travis/primus/substream/master.svg?style=flat-square"
+      alt="Build Status" /></a>
+  </dd>
+</dl>
+
 #### Community plugins
 
 These are also plugins created by our amazing community. Do you have a module
@@ -1828,28 +1828,40 @@ that you want to have listed here? Make sure it has test suite and runs on
 README.md and see it be merged automatically.
 
 <dl>
-  <dt><a href="https://github.com/cayasso/primus-rooms">primus-rooms</a></dt>
+  <dt><a href="https://github.com/Shopetti/backbone.primus">backbone.primus</a></dt>
+  <dd>Bind primus.io events to backbone models and collections.</dd>
   <dd>
-    A module that adds rooms capabilities to Primus. It's based on the rooms
-    implementation of Socket.IO.
-  </dd>
-  <dd>
-    <a href="https://www.npmjs.com/package/primus-rooms"><img
-      src="https://img.shields.io/npm/v/primus-rooms.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/cayasso/primus-rooms"><img
-      src="https://img.shields.io/travis/cayasso/primus-rooms/master.svg?style=flat-square"
+    <a href="https://travis-ci.org/Shopetti/backbone.primus"><img
+      src="https://img.shields.io/travis/Shopetti/backbone.primus/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/cayasso/primus-multiplex">primus-multiplex</a></dt>
-  <dd>A module that adds multiplexing capabilities to Primus.</dd>
+  <dt>
+    <a href="https://github.com/latentflip/hapi_primus_sessions">
+      hapi_primus_sessions
+    </a>
+  </dt>
   <dd>
-    <a href="https://www.npmjs.com/package/primus-multiplex"><img
-      src="https://img.shields.io/npm/v/primus-multiplex.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/cayasso/primus-multiplex"><img
-      src="https://img.shields.io/travis/cayasso/primus-multiplex/master.svg?style=flat-square"
+    A hapi and primus plugin which extends primus' spark with a `getSession(cb)`
+    method which returns the current hapi session object.
+  </dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/hapi_primus_sessions"><img
+      src="https://img.shields.io/npm/v/hapi_primus_sessions.svg?style=flat-square"
+      alt="NPM version" /></a>
+  </dd>
+</dl>
+
+<dl>
+  <dt><a href="https://github.com/neoziro/primus-cluster">primus-cluster</a></dt>
+  <dd>Scale Primus across multiple servers or with node cluster.</dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/primus-cluster"><img
+      src="https://img.shields.io/npm/v/primus-cluster.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/neoziro/primus-cluster"><img
+      src="https://img.shields.io/travis/neoziro/primus-cluster/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1867,25 +1879,25 @@ README.md and see it be merged automatically.
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/neoziro/primus-cluster">primus-cluster</a></dt>
-  <dd>Scale Primus across multiple servers or with node cluster.</dd>
+  <dt><a href="https://github.com/zemirco/primus-express-session">primus-express-session</a></dt>
+  <dd>Share a user session between Express and Primus.</dd>
   <dd>
-    <a href="https://www.npmjs.com/package/primus-cluster"><img
-      src="https://img.shields.io/npm/v/primus-cluster.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/neoziro/primus-cluster"><img
-      src="https://img.shields.io/travis/neoziro/primus-cluster/master.svg?style=flat-square"
+    <a href="https://www.npmjs.com/package/primus-express-session"><img
+      src="https://img.shields.io/npm/v/primus-express-session.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/zemirco/primus-express-session"><img
+      src="https://img.shields.io/travis/zemirco/primus-express-session/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/swissmanu/primus-responder">primus-responder</a></dt>
-  <dd>Client and server plugin that adds a request/response cycle to Primus.</dd>
+  <dt><a href="https://github.com/cayasso/primus-multiplex">primus-multiplex</a></dt>
+  <dd>A module that adds multiplexing capabilities to Primus.</dd>
   <dd>
-    <a href="https://www.npmjs.com/package/primus-responder"><img
-      src="https://img.shields.io/npm/v/primus-responder.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/swissmanu/primus-responder"><img
-      src="https://img.shields.io/travis/swissmanu/primus-responder/master.svg?style=flat-square"
+    <a href="https://www.npmjs.com/package/primus-multiplex"><img
+      src="https://img.shields.io/npm/v/primus-multiplex.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/cayasso/primus-multiplex"><img
+      src="https://img.shields.io/travis/cayasso/primus-multiplex/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1934,40 +1946,28 @@ README.md and see it be merged automatically.
 </dl>
 
 <dl>
-  <dt>
-    <a href="https://github.com/latentflip/hapi_primus_sessions">
-      hapi_primus_sessions
-    </a>
-  </dt>
+  <dt><a href="https://github.com/swissmanu/primus-responder">primus-responder</a></dt>
+  <dd>Client and server plugin that adds a request/response cycle to Primus.</dd>
   <dd>
-    A hapi and primus plugin which extends primus' spark with a `getSession(cb)`
-    method which returns the current hapi session object.
-  </dd>
-  <dd>
-    <a href="https://www.npmjs.com/package/hapi_primus_sessions"><img
-      src="https://img.shields.io/npm/v/hapi_primus_sessions.svg?style=flat-square"
-      alt="NPM version" /></a>
-  </dd>
-</dl>
-
-<dl>
-  <dt><a href="https://github.com/zemirco/primus-express-session">primus-express-session</a></dt>
-  <dd>Share a user session between Express and Primus.</dd>
-  <dd>
-    <a href="https://www.npmjs.com/package/primus-express-session"><img
-      src="https://img.shields.io/npm/v/primus-express-session.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/zemirco/primus-express-session"><img
-      src="https://img.shields.io/travis/zemirco/primus-express-session/master.svg?style=flat-square"
+    <a href="https://www.npmjs.com/package/primus-responder"><img
+      src="https://img.shields.io/npm/v/primus-responder.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/swissmanu/primus-responder"><img
+      src="https://img.shields.io/travis/swissmanu/primus-responder/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/Shopetti/backbone.primus">backbone.primus</a></dt>
-  <dd>Bind primus.io events to backbone models and collections.</dd>
+  <dt><a href="https://github.com/cayasso/primus-rooms">primus-rooms</a></dt>
   <dd>
-    <a href="https://travis-ci.org/Shopetti/backbone.primus"><img
-      src="https://img.shields.io/travis/Shopetti/backbone.primus/master.svg?style=flat-square"
+    A module that adds rooms capabilities to Primus. It's based on the rooms
+    implementation of Socket.IO.
+  </dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/primus-rooms"><img
+      src="https://img.shields.io/npm/v/primus-rooms.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/cayasso/primus-rooms"><img
+      src="https://img.shields.io/travis/cayasso/primus-rooms/master.svg?style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
