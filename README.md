@@ -1806,6 +1806,20 @@ The following plugins are part of the Primus project.
   </dd>
 </dl>
 
+<dl>
+  <dt><a href="https://github.com/primus/primus-analytics">primus-analytics</a></dt>
+  <dd>
+    Integrates Primus with Google Analytics.
+  </dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/primus-analytics"><img
+      src="https://img.shields.io/npm/v/primus-analytics.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/primus/primus-analytics"><img
+      src="https://img.shields.io/travis/primus/primus-analytics/master.svg?style=flat-square"
+      alt="Build Status" /></a>
+  </dd>
+</dl>
+
 #### Community plugins
 
 These are also plugins created by our amazing community. Do you have a module
