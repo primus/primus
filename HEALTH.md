@@ -22,13 +22,14 @@ Project                                   | Build status | Dependencies | Covera
 [mirage][mirage]                          | [![Build Status](https://img.shields.io/travis/primus/mirage/master.svg?style=flat-square)](https://travis-ci.org/primus/mirage) | [![Dependencies](https://img.shields.io/david/primus/mirage.svg?style=flat-square)](https://david-dm.org/primus/mirage) | [![Coverage Status](https://img.shields.io/coveralls/primus/mirage/master.svg?style=flat-square)](https://coveralls.io/r/primus/mirage?branch=master)
 [omega-supreme][omega-supreme]            | [![Build Status](https://img.shields.io/travis/primus/omega-supreme/master.svg?style=flat-square)](https://travis-ci.org/primus/omega-supreme) | [![Dependencies](https://img.shields.io/david/primus/omega-supreme.svg?style=flat-square)](https://david-dm.org/primus/omega-supreme) | [![Coverage Status](https://img.shields.io/coveralls/primus/omega-supreme/master.svg?style=flat-square)](https://coveralls.io/r/primus/omega-supreme?branch=master)
 [primacron][primacron]                    | [![Build Status](https://img.shields.io/travis/primus/primacron/master.svg?style=flat-square)](https://travis-ci.org/primus/primacron) | [![Dependencies](https://img.shields.io/david/primus/primacron.svg?style=flat-square)](https://david-dm.org/primus/primacron) | [![Coverage Status](https://img.shields.io/coveralls/primus/primacron/master.svg?style=flat-square)](https://coveralls.io/r/primus/primacron?branch=master)
+[primus-analytics][primus-analytics]      | [![Build Status](https://img.shields.io/travis/primus/primus-analytics/master.svg?style=flat-square)](https://travis-ci.org/primus/primus-analytics) | [![Dependencies](https://img.shields.io/david/primus/primus-analytics.svg?style=flat-square)](https://david-dm.org/primus/primus-analytics) | [![Coverage Status](https://img.shields.io/coveralls/primus/primus-analytics/master.svg?style=flat-square)](https://coveralls.io/r/primus/primus-analytics?branch=master)
 [primus-emit][primus-emit]                | [![Build Status](https://img.shields.io/travis/primus/primus-emit/master.svg?style=flat-square)](https://travis-ci.org/primus/primus-emit) | [![Dependencies](https://img.shields.io/david/primus/primus-emit.svg?style=flat-square)](https://david-dm.org/primus/primus-emit) | [![Coverage Status](https://img.shields.io/coveralls/primus/primus-emit/master.svg?style=flat-square)](https://coveralls.io/r/primus/primus-emit?branch=master)
 [substream][substream]                    | [![Build Status](https://img.shields.io/travis/primus/substream/master.svg?style=flat-square)](https://travis-ci.org/primus/substream) | [![Dependencies](https://img.shields.io/david/primus/substream.svg?style=flat-square)](https://david-dm.org/primus/substream) | [![Coverage Status](https://img.shields.io/coveralls/primus/substream/master.svg?style=flat-square)](https://coveralls.io/r/primus/substream?branch=master)
 
 
 [primus]: https://github.com/primus/primus
-[asyncemit]: https://github.com/primus/asyncemit
 [access-control]: https://github.com/primus/access-control
+[asyncemit]: https://github.com/primus/asyncemit
 [binary-pack]: https://github.com/primus/binary-pack
 [condenseify]: https://github.com/primus/condenseify
 [create-server]: https://github.com/primus/create-server
@@ -42,5 +43,6 @@ Project                                   | Build status | Dependencies | Covera
 [mirage]: https://github.com/primus/mirage
 [omega-supreme]: https://github.com/primus/omega-supreme
 [primacron]: https://github.com/primus/primacron
+[primus-analytics]: https://github.com/primus/primus-analytics
 [primus-emit]: https://github.com/primus/primus-emit
 [substream]: https://github.com/primus/substream
