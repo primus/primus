@@ -39,7 +39,6 @@ function Primus(server, options) {
   this.encoder = null;                        // Shorthand to the parser's encoder.
   this.decoder = null;                        // Shorthand to the parser's decoder.
   this.connected = 0;                         // Connection counter.
-  this.sparks = 0;                            // Increment id for connection ids.
   this.timeout = 'timeout' in options         // The timeout used to detect zombie sparks.
     ? options.timeout
     : 35000;
@@ -982,7 +981,7 @@ Primus.readable('close', function close(options, fn) {
     //
     primus.transformers.outgoing.length = primus.transformers.incoming.length = 0;
     primus.transformer = primus.encoder = primus.decoder = primus.server = null;
-    primus.sparks = primus.connected = 0;
+    primus.connected = 0;
 
     primus.connections = Object.create(null);
     primus.ark = Object.create(null);

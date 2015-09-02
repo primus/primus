@@ -31,14 +31,6 @@ describe('Spark', function () {
     expect(new primus.Spark()).to.be.instanceOf(require('stream'));
   });
 
-  it('increments sparks on the Primus server to ensure unique ids', function () {
-    expect(primus.sparks).to.equal(0);
-    var spark = new primus.Spark();
-
-    expect(spark.id).to.include(primus.sparks - 1);
-    expect(primus.sparks).to.equal(1);
-  });
-
   it('uses the supplied id if one is provided', function () {
     var spark = new primus.Spark({}, {}, {}, 'balls');
 
