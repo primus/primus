@@ -6,6 +6,7 @@ var ParserError = require('./errors').ParserError
   , forwarded = require('forwarded-for')
   , Ultron = require('ultron')
   , fuse = require('fusing')
+  , yeast = require('yeast')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
 
@@ -30,7 +31,7 @@ function Spark(primus, headers, address, query, id, request) {
     , spark = this;
 
   query = query || {};
-  id = id || this.uuid(primus);
+  id = id || yeast();
   headers = headers || {};
   address = address || {};
   request = request || headers['primus::req::backup'];
@@ -361,17 +362,6 @@ Spark.readable('transforms', function transforms(primus, connection, type, data,
   }));
 
   return this;
-});
-
-/**
- * Generate a unique UUID.
- *
- * @param {Primus} primus Reference to the primus instance.
- * @returns {String} UUID.
- * @api private
- */
-Spark.readable('uuid', function uuid(primus) {
-  return Date.now() +'$'+ primus.sparks++;
 });
 
 /**
