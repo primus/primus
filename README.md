@@ -83,8 +83,7 @@ repository.
   - [Transforming and intercepting messages](#transforming-and-intercepting-messages)
   - [Primus project plugins](#primus-project-plugins)
   - [Community plugins](#community-plugins)
-- [Example](#example)
-   - [Community](#community)
+- [Community](#community)
 - [FAQ](#FAQ)
   - [Scaling](#what-is-the-best-way-to-scale-primus)
   - [Cluster](#can-i-use-cluster)
@@ -1986,30 +1985,7 @@ README.md and see it be merged automatically.
 
 [Travis CI]: https://travis-ci.org/
 
-### Example
-
-There is a small example folder included in this repository which allows you to
-easily play with the real-time connection. The code in the example is heavily
-commented for your reading pleasure. The example requires some extra
-dependencies so don't forget to run `npm install .` in the folder. The example
-can be run using `npm start` or if you want to customize the
-parsers/transformers you can use:
-
-```
-node index.js --transformer <name> --parser <name> --port <number>
-```
-
-The example is also hosted on [Nodejitsu] an can be accessed at:
-
-http://primus-example.nodejitsu.com/
-
-Please note that the site can be down from time to time as it supports killing
-the server to trigger reconnects. So you can see what happens when you restart
-your server/application.
-
-[Nodejitsu]: https://www.nodejitsu.com/
-
-#### Community
+### Community
 
 Deployed Primus to production or built an awesome demo using the technology?
 We've set up a special [wiki] page for it where you can show your awesome
