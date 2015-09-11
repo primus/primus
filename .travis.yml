@@ -1,11 +1,12 @@
 sudo: false
 language: node_js
 node_js:
-  - "0.8"
-  - "0.10"
-  - "0.12"
-  - "iojs"
   - "4"
+  - "3"
+  - "2"
+  - "1"
+  - "0.12"
+  - "0.10"
 addons:
   apt:
     sources:
@@ -14,8 +15,6 @@ addons:
       - "g++-4.8"
 env:
   - "CXX=g++-4.8"
-before_install:
-  - 'if [ "${TRAVIS_NODE_VERSION}" == "0.8" ]; then npm install -g npm@2.14.2; fi'
 script:
   - "npm run test && npm run integration"
 matrix:
