@@ -51,7 +51,7 @@
   "dependencies": {
     "access-control": "0.0.x",
     "asyncemit": "3.0.x",
-    "create-server": "0.0.x",
+    "create-server": "1.0.x",
     "demolish": "1.0.x",
     "diagnostics": "1.0.x",
     "emits": "3.0.x",
@@ -70,7 +70,7 @@
   "devDependencies": {
     "binary-pack": "1.0.x",
     "browserchannel": "2.0.x",
-    "browserify": "11.0.x",
+    "browserify": "11.1.x",
     "chai": "3.2.x",
     "concat-stream": "1.5.x",
     "condenseify": "1.1.x",
