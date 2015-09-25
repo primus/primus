@@ -55,12 +55,12 @@ Transformer.readable('initialise', function initialise() {
 
   server.listeners('request').forEach(function each(fn) {
     log('found existing request handlers on the HTTP server, moving Primus as first');
-    transformer.on('previous::request', fn);
+    transformer.on('previous::request', fn, server);
   });
 
   server.listeners('upgrade').forEach(function each(fn) {
     log('found existing upgrade handlers on the HTTP server, moving Primus as first');
-    transformer.on('previous::upgrade', fn);
+    transformer.on('previous::upgrade', fn, server);
   });
 
   //

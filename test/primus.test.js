@@ -155,6 +155,57 @@ describe('Primus', function () {
     throw new Error('I should have throwed');
   });
 
+  it('doesn\'t change the context of the original request/upgrade listeners', function (done) {
+    primus.destroy(function () {
+      server = http.createServer();
+
+      server.on('request', function (req, res) {
+        expect(this).to.equal(server);
+
+        res.writeHead(200, { 'Content-Type': 'text/plain' });
+        res.end('foo');
+      });
+
+      server.on('upgrade', function (req, socket) {
+        expect(this).to.equal(server);
+
+        socket.write([
+          'HTTP/1.1 101 Switching Protocols',
+          'Upgrade: WebSocket',
+          'Connection: Upgrade',
+          '',
+          ''
+        ].join('\r\n'));
+
+        socket.pipe(socket);
+      });
+
+      server.on('listening', function () {
+        common.request({
+          url: 'http://localhost:'+ server.portnumber
+        }, function (err, res, body) {
+          if (err) return done(err);
+
+          expect(res.statusCode).to.equal(200);
+          expect(body).to.equal('foo');
+
+          http.get({
+            headers: { 'Connection': 'Upgrade', 'Upgrade': 'websocket' },
+            port: server.portnumber,
+            hostname: 'localhost'
+          }).on('upgrade', function (res, socket) {
+            socket.on('end', done);
+            socket.end();
+          });
+        });
+      });
+
+      primus = new Primus(server);
+      server.portnumber = common.port;
+      server.listen(server.portnumber);
+    });
+  });
+
   it('removes connections internally on disconnect', function (done) {
     var spark = new primus.Spark()
       , sparks = new primus.Spark();
