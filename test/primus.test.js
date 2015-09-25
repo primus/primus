@@ -109,7 +109,7 @@ describe('Primus', function () {
     expect(primus.connected).to.equal(0);
     var spark = new primus.Spark();
 
-    (global.setImmediate || process.nextTick)(function () {
+    setImmediate(function () {
       expect(primus.connected).to.equal(1);
       var sparks = new primus.Spark();
 
@@ -119,7 +119,7 @@ describe('Primus', function () {
         spark.end();
 
         done();
-      }, 0);
+      });
     });
   });
 
@@ -159,7 +159,7 @@ describe('Primus', function () {
     var spark = new primus.Spark()
       , sparks = new primus.Spark();
 
-    (global.setImmediate || process.nextTick)(function () {
+    setImmediate(function () {
       expect(primus.connected).to.equal(2);
       sparks.end();
       spark.end();
@@ -398,7 +398,7 @@ describe('Primus', function () {
       new primus.Spark();
       new primus.Spark();
 
-      (global.setImmediate || process.nextTick)(function () {
+      setImmediate(function () {
         expect(primus.connected).to.equal(2);
 
         var iterations = 0;
@@ -420,12 +420,12 @@ describe('Primus', function () {
       new primus.Spark();
       new primus.Spark();
 
-      (global.setImmediate || process.nextTick)(function () {
+      setImmediate(function () {
         expect(primus.connected).to.equal(2);
 
         var iterations = 0;
 
-        primus.forEach(function (client, id, connections) {
+        primus.forEach(function () {
           iterations++;
 
           return false;
@@ -444,7 +444,7 @@ describe('Primus', function () {
         new primus.Spark();
       }
 
-      (global.setImmediate || process.nextTick)(function () {
+      setImmediate(function () {
         expect(primus.connected).to.equal(4);
 
         var first = true;
