@@ -590,7 +590,7 @@ Primus.prototype.initialise = function initialise(options) {
    *
    * @api private
    */
-  function offline() {
+  primus.offlineHandler = function offline() {
     if (!primus.online) return; // Already or still offline, bailout.
 
     primus.online = false;
@@ -610,7 +610,7 @@ Primus.prototype.initialise = function initialise(options) {
    *
    * @api private
    */
-  function online() {
+  primus.onlineHandler = function online() {
     if (primus.online) return; // Already or still online, bailout.
 
     primus.online = true;
@@ -622,11 +622,11 @@ Primus.prototype.initialise = function initialise(options) {
   }
 
   if (window.addEventListener) {
-    window.addEventListener('offline', offline, false);
-    window.addEventListener('online', online, false);
+    window.addEventListener('offline', primus.offlineHandler, false);
+    window.addEventListener('online', primus.onlineHandler, false);
   } else if (document.body.attachEvent){
-    document.body.attachEvent('onoffline', offline);
-    document.body.attachEvent('ononline', online);
+    document.body.attachEvent('onoffline', primus.offlineHandler);
+    document.body.attachEvent('ononline', primus.onlineHandler);
   }
 
   return primus;
@@ -997,7 +997,17 @@ Primus.prototype.end = function end(data) {
  */
 Primus.prototype.destroy = destroy('url timers options recovery socket transport transformers', {
   before: 'end',
-  after: 'removeAllListeners'
+  after: ['removeAllListeners', function () {
+    if (!this.NETWORK_EVENTS) return;
+
+    if (window.addEventListener) {
+      window.removeEventListener('offline', this.offlineHandler);
+      window.removeEventListener('online', this.onlineHandler);
+    } else if (document.body.attachEvent){
+      document.body.detachEvent('onoffline', this.offlineHandler);
+      document.body.detachEvent('ononline', this.onlineHandler);
+    }
+  }]
 });
 
 /**
