@@ -285,26 +285,6 @@ Primus.prototype.ark = {};
 Primus.prototype.emits = require('emits');
 
 /**
- * A small wrapper around `emits` to add a default parser when one is not
- * supplied. The default parser will defer the emission of the event to make
- * sure that the event is emitted at the correct time.
- *
- * @returns {Function} A function that will emit the event when called.
- * @api private
- */
-Primus.prototype.trigger = function trigger() {
-  for (var i = 0, l = arguments.length, args = new Array(l); i < l; i++) {
-    args[i] = arguments[i];
-  }
-
-  if ('function' !== typeof args[l - 1]) args.push(function defer(next) {
-    setTimeout(next, 0);
-  });
-
-  return this.emits.apply(this, args);
-};
-
-/**
  * Return the given plugin.
  *
  * @param {String} name The name of the plugin.

@@ -9,10 +9,10 @@
  * @api private
  */
 module.exports = function client() {
-  var ondisconnect = this.trigger('incoming::end')
-    , onconnect = this.trigger('incoming::open')
-    , onmessage = this.trigger('incoming::data')
-    , onerror = this.trigger('incoming::error')
+  var ondisconnect = this.emits('incoming::end')
+    , onconnect = this.emits('incoming::open')
+    , onmessage = this.emits('incoming::data')
+    , onerror = this.emits('incoming::error')
     , primus = this
     , socket;
 
