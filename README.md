@@ -475,7 +475,7 @@ in `Primus` and you should add these options to the `reconnect` property:
 Name                | Description                              | Default
 --------------------|------------------------------------------|---------------
 max                 | Maximum delay for a reconnection attempt | `Infinity`
-min                 | Minimum delay for a reconnection attempt  | `500` ms
+min                 | Minimum delay for a reconnection attempt | `500` ms
 retries             | Maximum amount of attempts               | `10`
 reconnect timeout   | Maximum time for an attempt to complete  | `30000` ms
 factor              | Exponential back off factor              | `2`
