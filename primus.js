@@ -997,7 +997,7 @@ Primus.prototype.end = function end(data) {
  */
 Primus.prototype.destroy = destroy('url timers options recovery socket transport transformers', {
   before: 'end',
-  after: ['removeAllListeners', function () {
+  after: ['removeAllListeners', function detach() {
     if (!this.NETWORK_EVENTS) return;
 
     if (window.addEventListener) {
