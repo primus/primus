@@ -617,15 +617,28 @@ module.exports = function base(transformer, pathname, transformer_name) {
         primus.on('connection', function (spark, next) {
           setTimeout(function () {
             pre = 'async';
+
+            socket.write('in');
+
             next();
+
+            socket.write('order');
           }, 1000);
         });
 
         primus.on('connection', function (spark) {
           expect(pre).to.equal('async');
 
+          var data = [];
+
           spark.on('data', function (msg) {
-            expect(msg).equals('hello');
+            data.push(msg);
+
+            if (data.length !== 3) return;
+
+            expect(data[0]).equals('hello');
+            expect(data[1]).equals('in');
+            expect(data[2]).equals('order');
 
             spark.end();
             done();

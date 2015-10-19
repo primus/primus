@@ -43,6 +43,7 @@ function Spark(primus, headers, address, query, id, request) {
   writable('request', request);         // Reference to an HTTP request.
   writable('writable', true);           // Silly stream compatibility.
   writable('readable', true);           // Silly stream compatibility.
+  writable('queue', []);                // Data queue for data events.
   writable('query', query);             // The query string.
   writable('timeout', null);            // Heartbeat timeout.
   writable('ultron', new Ultron(this)); // Our event listening cleanup.
@@ -211,6 +212,7 @@ Spark.readable('__initialise', [function initialise() {
       // Handle "primus::" prefixed protocol messages.
       //
       if (spark.protocol(data)) return;
+
       spark.transforms(primus, spark, 'incoming', data, raw);
     });
   });
@@ -291,7 +293,14 @@ Spark.readable('__initialise', [function initialise() {
   //
   process.nextTick(function tick() {
     primus.asyncemit('connection', spark, function damn(err) {
-      if (!err) return;
+      if (!err) {
+        if (spark.queue) spark.queue.forEach(function each(packet) {
+          spark.emit('data', packet.data, packet.raw);
+        });
+
+        spark.queue = null;
+        return;
+      }
 
       spark.emit('incoming::error', err);
     });
@@ -355,6 +364,14 @@ Spark.readable('transforms', function transforms(primus, connection, type, data,
     // overhead.
     //
     if ('incoming' === type) {
+      //
+      // This is pretty bad edge case, it's possible that the async version of
+      // the `connection` event listener takes so long that we cannot assign
+      // `data` handlers and we are already receiving data as the connection is
+      // already established. In this edge case we need to queue the data and
+      // pass it to the data event once we're listening.
+      //
+      if (connection.queue) return connection.queue.push(packet);
       return connection.emit('data', packet.data, packet.raw);
     }
 
@@ -516,6 +533,7 @@ Spark.readable('end', function end(data, options) {
   this.emit('end');
   this.ultron.destroy();
   delete this.ultron;
+  this.queue = null;
 
   return this;
 });
