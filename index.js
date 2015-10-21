@@ -341,7 +341,7 @@ Primus.readable('authorize', function authorize(auth) {
 Primus.readable('forEach', function forEach(fn, done) {
   if (!done) {
     for (var id in this.connections) {
-      if (fn(this.connections[id], id, this.connections) === false) break;
+      if (fn(this.spark(id), id, this.connections) === false) break;
     }
 
     return this;
@@ -371,7 +371,7 @@ Primus.readable('forEach', function forEach(fn, done) {
       return done();
     }
 
-    spark = primus.connections[id];
+    spark = primus.spark(id);
 
     //
     // The connection may have already been closed.
