@@ -140,7 +140,7 @@ headers             | **cors** Allowed headers                  | `false`
 exposed             | **cors** Headers exposed to the client    | `false`
 
 The options that are prefixed with **cors** are supplied to our
-[access-control](http://github.com/primus/access-control) module which handles
+[access-control](https://github.com/primus/access-control) module which handles
 HTTP Access Control (CORS), so for a more detailed explanation of these options
 check it out.
 
@@ -287,7 +287,7 @@ The `spark` argument is the actual real-time socket/connection. Sparks have a
 really low level interface and only expose a couple properties that are cross
 engine supported. The interface is modeled towards a Node.js stream compatible
 interface. So this will include all methods that are available on the [stream
-interface](http://nodejs.org/api/stream.html) including `Spark#pipe`.
+interface](https://nodejs.org/api/stream.html) including `Spark#pipe`.
 
 #### spark.headers
 
@@ -1854,7 +1854,7 @@ README.md and see it be merged automatically.
 </dl>
 
 <dl>
-  <dt><a href="https://github.com/neoziro/primus-cluster">primus-cluster</a></dt>
+  <dt><a href="https://github.com/lemonde/primus-cluster">primus-cluster</a></dt>
   <dd>Scale Primus across multiple servers or with node cluster.</dd>
   <dd>
     <a href="https://www.npmjs.com/package/primus-cluster"><img
@@ -2005,7 +2005,7 @@ Scaling Primus is as simple as sticking it behind a load balancer that supports
 versions of your application. This is a vital feature that your load balancer
 needs to support. This ensures that the incoming requests always go back to the
 same server. If your load balancer does not support sticky sessions, get another
-one. I highly recommend [HAProxy](http://haproxy.1wt.eu/). According to my own
+one. I highly recommend [HAProxy](http://www.haproxy.org/). According to my own
 testing it is the fastest and best proxy available that supports WebSockets. See
 https://github.com/observing/balancerbattle for more detailed information.
 
