@@ -18,11 +18,7 @@ module.exports = function configuration() {
   return function client(req, res, next) {
     if ('function' !== typeof this.auth) return next();
 
-    req.pause();
-
     this.auth(req, function authorized(err) {
-      req.resume();
-
       if (!err) return next();
 
       var message = JSON.stringify({ error: err.message || err })
