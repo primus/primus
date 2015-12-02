@@ -109,7 +109,12 @@ function Socket(uri, opts){
   this.rememberUpgrade = opts.rememberUpgrade || false;
   this.binaryType = null;
   this.onlyBinaryUpgrades = opts.onlyBinaryUpgrades;
-  this.perMessageDeflate = false !== opts.perMessageDeflate ? (opts.perMessageDeflate || true) : false;
+  this.perMessageDeflate = false !== opts.perMessageDeflate ? (opts.perMessageDeflate || {}) : false;
+
+  if (true === this.perMessageDeflate) this.perMessageDeflate = {};
+  if (this.perMessageDeflate && null == this.perMessageDeflate.threshold) {
+    this.perMessageDeflate.threshold = 1024;
+  }
 
   // SSL options for Node.js client
   this.pfx = opts.pfx || null;
@@ -308,7 +313,7 @@ Socket.prototype.probe = function (name) {
     if (failed) return;
 
     debug('probe transport "%s" opened', name);
-    transport.send([{ type: 'ping', data: 'probe', options: { compress: true } }]);
+    transport.send([{ type: 'ping', data: 'probe' }]);
     transport.once('packet', function (msg) {
       if (failed) return;
       if ('pong' == msg.type && 'probe' == msg.data) {
@@ -327,7 +332,7 @@ Socket.prototype.probe = function (name) {
           cleanup();
 
           self.setTransport(transport);
-          transport.send([{ type: 'upgrade', options: { compress: true } }]);
+          transport.send([{ type: 'upgrade' }]);
           self.emit('upgrade', transport);
           transport = null;
           self.upgrading = false;
@@ -1561,7 +1566,7 @@ Request.prototype.onLoad = function(){
         } catch (e) {
           var ui8Arr = new Uint8Array(this.xhr.response);
           var dataArray = [];
-          for (var idx = 0, length = ui8Arr.legnth; idx < length; idx++) {
+          for (var idx = 0, length = ui8Arr.length; idx < length; idx++) {
             dataArray.push(ui8Arr[idx]);
           }
 
@@ -2030,23 +2035,38 @@ WS.prototype.write = function(packets){
   var self = this;
   this.writable = false;
 
+  var isBrowserWebSocket = global.WebSocket && this.ws instanceof global.WebSocket;
+
   // encodePacket efficient as it uses WS framing
   // no need for encodePayload
   var total = packets.length;
   for (var i = 0, l = total; i < l; i++) {
     (function(packet) {
       parser.encodePacket(packet, self.supportsBinary, function(data) {
+        if (!isBrowserWebSocket) {
+          // always create a new object (GH-437)
+          var opts = {};
+          if (packet.options) {
+            opts.compress = packet.options.compress;
+          }
+
+          if (self.perMessageDeflate) {
+            var len = 'string' == typeof data ? global.Buffer.byteLength(data) : data.length;
+            if (len < self.perMessageDeflate.threshold) {
+              opts.compress = false;
+            }
+          }
+        }
+
         //Sometimes the websocket has already been closed but the browser didn't
         //have a chance of informing us about it yet, in that case send will
         //throw an error
         try {
-          if (global.WebSocket && self.ws instanceof global.WebSocket) {
+          if (isBrowserWebSocket) {
             // TypeError is thrown when passing the second argument on Safari
             self.ws.send(data);
           } else {
-            self.ws.send(data, {
-                compress: packet.options.compress
-            });
+            self.ws.send(data, opts);
           }
         } catch (e){
           debug('websocket closed before onclose event');
