@@ -43,12 +43,6 @@ module.exports = function client() {
       primus.url,
       primus.uri({ protocol: 'http:', query: true, object: true }), {
       //
-      // We have already parsed the hostname and port portions of the URL.
-      // Set the host portion to `null` so Engine.IO does not parse it again.
-      //
-      host: null,
-
-      //
       // Never remember upgrades as switching from a WIFI to a 3G connection
       // could still get your connection blocked as 3G connections are usually
       // behind a reverse proxy so ISP's can optimize mobile traffic by
