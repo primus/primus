@@ -35,9 +35,7 @@ describe('Plugin', function () {
     primus.on('connection', function (spark) {
       spark.on('custom event', function (data) {
         expect(data).to.equal('custom data');
-
-        spark.end();
-        server.close(done);
+        primus.destroy(done);
       });
     });
 
@@ -64,13 +62,11 @@ describe('Plugin', function () {
 
     primus.on('connection', function (spark) {
       expect(spark.query.foo).to.equal('bar');
-      spark.end();
-      server.close(done);
+      primus.destroy(done);
     });
 
     server.listen(port, function () {
-      var Socket = primus.Socket
-        , socket = new Socket('http://localhost:'+ port);
+      new primus.Socket('http://localhost:'+ port);
     });
   });
 
@@ -90,14 +86,26 @@ describe('Plugin', function () {
 
     primus.on('connection', function (spark) {
       expect(spark.join).to.be.a('function');
-      spark.end();
-      server.close(done);
+      primus.destroy(done);
     });
 
     server.listen(port, function () {
-      var Socket = primus.Socket
-        , socket = new Socket('http://localhost:'+ port);
+      new primus.Socket('http://localhost:'+ port);
     });
+  });
+
+  it('doesn\'t mutate the Spark prototype', function () {
+    var expected = Primus.Spark.prototype.__initialise.slice()
+      , server = http.createServer()
+      , primus = new Primus(server);
+
+    primus.use('dummy', {
+      server: function (primus) {
+        primus.Spark.prototype.initialise = function init() {};
+      }
+    });
+
+    expect(Primus.Spark.prototype.__initialise).to.eql(expected);
   });
 
   it('can instantly modify the prototype', function () {
@@ -117,8 +125,7 @@ describe('Plugin', function () {
 
   it('emits an `plugin` event when a new plugin is added', function (next) {
     var server = http.createServer()
-      , primus = new Primus(server)
-      , port = common.port;
+      , primus = new Primus(server);
 
     primus.on('plugin', function (name, obj) {
       expect(name).to.equal('foo');
@@ -135,8 +142,7 @@ describe('Plugin', function () {
   describe('#plugout', function () {
     it('emits a `plugout` event when removing a plugin', function (next) {
       var server = http.createServer()
-        , primus = new Primus(server)
-        , port = common.port;
+        , primus = new Primus(server);
 
       primus.on('plugout', function (name, obj) {
         expect(name).to.equal('foo');
@@ -159,7 +165,7 @@ describe('Plugin', function () {
         , primus = new Primus(server);
 
       var plugin = {
-        server: function (primus) {}
+        server: function () {}
       };
 
       primus.use('spark', plugin);

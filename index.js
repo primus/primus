@@ -78,10 +78,14 @@ function Primus(server, options) {
 
   this.Spark.prototype = Object.create(Spark.prototype, {
     constructor: {
+      configurable: true,
       value: this.Spark,
-      writable: true,
-      enumerable: false,
-      configurable: true
+      writable: true
+    },
+    __initialise: {
+      value: Spark.prototype.__initialise.slice(),
+      configurable: true,
+      writable: true
     }
   });
 
