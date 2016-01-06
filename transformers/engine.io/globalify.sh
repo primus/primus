@@ -38,7 +38,7 @@ var options = {
 // available and the UMD wrapper prevents this global from being set when
 // RequireJS is used. See issue #157.
 //
-browserify(options).plugin(deumdify).bundle().pipe(concat({
+browserify(options).ignore('ws').plugin(deumdify).bundle().pipe(concat({
   encoding: 'string'
 }, function (output) {
   var dest = path.resolve(__dirname, 'library.js');
