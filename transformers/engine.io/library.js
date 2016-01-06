@@ -1,5 +1,7 @@
 (function(f){var g;if(typeof window!=='undefined'){g=window}else if(typeof self!=='undefined'){g=self}g.eio=f()})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
+},{}],2:[function(_dereq_,module,exports){
+
 module.exports = _dereq_('./socket');
 
 /**
@@ -10,7 +12,7 @@ module.exports = _dereq_('./socket');
  */
 module.exports.parser = _dereq_('engine.io-parser');
 
-},{"./socket":2,"engine.io-parser":15}],2:[function(_dereq_,module,exports){
+},{"./socket":3,"engine.io-parser":16}],3:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -742,7 +744,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":3,"./transports":4,"component-emitter":10,"debug":12,"engine.io-parser":15,"indexof":25,"parsejson":26,"parseqs":27,"parseuri":28}],3:[function(_dereq_,module,exports){
+},{"./transport":4,"./transports":5,"component-emitter":11,"debug":13,"engine.io-parser":16,"indexof":26,"parsejson":27,"parseqs":28,"parseuri":29}],4:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -899,7 +901,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":10,"engine.io-parser":15}],4:[function(_dereq_,module,exports){
+},{"component-emitter":11,"engine.io-parser":16}],5:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -956,7 +958,7 @@ function polling(opts){
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling-jsonp":5,"./polling-xhr":6,"./websocket":8,"xmlhttprequest-ssl":9}],5:[function(_dereq_,module,exports){
+},{"./polling-jsonp":6,"./polling-xhr":7,"./websocket":9,"xmlhttprequest-ssl":10}],6:[function(_dereq_,module,exports){
 (function (global){
 
 /**
@@ -1193,7 +1195,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":7,"component-inherit":11}],6:[function(_dereq_,module,exports){
+},{"./polling":8,"component-inherit":12}],7:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module requirements.
@@ -1609,7 +1611,7 @@ function unloadHandler() {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":7,"component-emitter":10,"component-inherit":11,"debug":12,"xmlhttprequest-ssl":9}],7:[function(_dereq_,module,exports){
+},{"./polling":8,"component-emitter":11,"component-inherit":12,"debug":13,"xmlhttprequest-ssl":10}],8:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -1858,7 +1860,7 @@ Polling.prototype.uri = function(){
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":3,"component-inherit":11,"debug":12,"engine.io-parser":15,"parseqs":27,"xmlhttprequest-ssl":9,"yeast":30}],8:[function(_dereq_,module,exports){
+},{"../transport":4,"component-inherit":12,"debug":13,"engine.io-parser":16,"parseqs":28,"xmlhttprequest-ssl":10,"yeast":30}],9:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -1870,14 +1872,15 @@ var parseqs = _dereq_('parseqs');
 var inherit = _dereq_('component-inherit');
 var yeast = _dereq_('yeast');
 var debug = _dereq_('debug')('engine.io-client:websocket');
+var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 
 /**
- * `ws` exposes a WebSocket-compatible interface in
- * Node, or the `WebSocket` or `MozWebSocket` globals
- * in the browser.
+ * Get either the `WebSocket` or `MozWebSocket` globals
+ * in the browser or the WebSocket-compatible interface
+ * exposed by `ws` for Node environment.
  */
 
-var WebSocket = _dereq_('ws');
+var WebSocket = BrowserWebSocket || (typeof window !== 'undefined' ? null : _dereq_('ws'));
 
 /**
  * Module exports.
@@ -1953,7 +1956,7 @@ WS.prototype.doOpen = function(){
     opts.headers = this.extraHeaders;
   }
 
-  this.ws = new WebSocket(uri, protocols, opts);
+  this.ws = BrowserWebSocket ? new WebSocket(uri) : new WebSocket(uri, protocols, opts);
 
   if (this.ws.binaryType === undefined) {
     this.supportsBinary = false;
@@ -2020,15 +2023,13 @@ WS.prototype.write = function(packets){
   var self = this;
   this.writable = false;
 
-  var isBrowserWebSocket = global.WebSocket && this.ws instanceof global.WebSocket;
-
   // encodePacket efficient as it uses WS framing
   // no need for encodePayload
   var total = packets.length;
   for (var i = 0, l = total; i < l; i++) {
     (function(packet) {
       parser.encodePacket(packet, self.supportsBinary, function(data) {
-        if (!isBrowserWebSocket) {
+        if (!BrowserWebSocket) {
           // always create a new object (GH-437)
           var opts = {};
           if (packet.options) {
@@ -2047,7 +2048,7 @@ WS.prototype.write = function(packets){
         //have a chance of informing us about it yet, in that case send will
         //throw an error
         try {
-          if (isBrowserWebSocket) {
+          if (BrowserWebSocket) {
             // TypeError is thrown when passing the second argument on Safari
             self.ws.send(data);
           } else {
@@ -2146,7 +2147,7 @@ WS.prototype.check = function(){
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":3,"component-inherit":11,"debug":12,"engine.io-parser":15,"parseqs":27,"ws":29,"yeast":30}],9:[function(_dereq_,module,exports){
+},{"../transport":4,"component-inherit":12,"debug":13,"engine.io-parser":16,"parseqs":28,"ws":1,"yeast":30}],10:[function(_dereq_,module,exports){
 // browser shim for xmlhttprequest module
 var hasCORS = _dereq_('has-cors');
 
@@ -2184,7 +2185,7 @@ module.exports = function(opts) {
   }
 }
 
-},{"has-cors":24}],10:[function(_dereq_,module,exports){
+},{"has-cors":25}],11:[function(_dereq_,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -2350,7 +2351,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -2358,7 +2359,7 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],12:[function(_dereq_,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 
 /**
  * This is the web browser implementation of `debug()`.
@@ -2528,7 +2529,7 @@ function localstorage(){
   } catch (e) {}
 }
 
-},{"./debug":13}],13:[function(_dereq_,module,exports){
+},{"./debug":14}],14:[function(_dereq_,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -2727,7 +2728,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":14}],14:[function(_dereq_,module,exports){
+},{"ms":15}],15:[function(_dereq_,module,exports){
 /**
  * Helpers.
  */
@@ -2854,7 +2855,7 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],15:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3452,7 +3453,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":16,"after":17,"arraybuffer.slice":18,"base64-arraybuffer":19,"blob":20,"has-binary":21,"utf8":23}],16:[function(_dereq_,module,exports){
+},{"./keys":17,"after":18,"arraybuffer.slice":19,"base64-arraybuffer":20,"blob":21,"has-binary":22,"utf8":24}],17:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -3473,7 +3474,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -3503,7 +3504,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],18:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -3534,7 +3535,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],19:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -3595,7 +3596,7 @@ module.exports = function(arraybuffer, start, end) {
   };
 })("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/");
 
-},{}],20:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Create a blob builder even when vendor prefixes exist
@@ -3695,7 +3696,7 @@ module.exports = (function() {
 })();
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],21:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 (function (global){
 
 /*
@@ -3757,12 +3758,12 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":22}],22:[function(_dereq_,module,exports){
+},{"isarray":23}],23:[function(_dereq_,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 (function (global){
 /*! https://mths.be/utf8js v2.0.0 by @mathias */
 ;(function(root) {
@@ -4000,7 +4001,7 @@ module.exports = Array.isArray || function (arr) {
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],24:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 
 /**
  * Module exports.
@@ -4019,7 +4020,7 @@ try {
   module.exports = false;
 }
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -4030,7 +4031,7 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -4065,7 +4066,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],27:[function(_dereq_,module,exports){
+},{}],28:[function(_dereq_,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -4104,7 +4105,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],29:[function(_dereq_,module,exports){
 /**
  * Parses an URI
  *
@@ -4144,51 +4145,6 @@ module.exports = function parseuri(str) {
 
     return uri;
 };
-
-},{}],29:[function(_dereq_,module,exports){
-
-/**
- * Module dependencies.
- */
-
-var global = (function() { return this; })();
-
-/**
- * WebSocket constructor.
- */
-
-var WebSocket = global.WebSocket || global.MozWebSocket;
-
-/**
- * Module exports.
- */
-
-module.exports = WebSocket ? ws : null;
-
-/**
- * WebSocket constructor.
- *
- * The third `opts` options object gets ignored in web browsers, since it's
- * non-standard, and throws a TypeError if passed to the constructor.
- * See: https://github.com/einaros/ws/issues/227
- *
- * @param {String} uri
- * @param {Array} protocols (optional)
- * @param {Object) opts (optional)
- * @api public
- */
-
-function ws(uri, protocols, opts) {
-  var instance;
-  if (protocols) {
-    instance = new WebSocket(uri, protocols);
-  } else {
-    instance = new WebSocket(uri);
-  }
-  return instance;
-}
-
-if (WebSocket) ws.prototype = WebSocket.prototype;
 
 },{}],30:[function(_dereq_,module,exports){
 'use strict';
@@ -4264,5 +4220,5 @@ module.exports = yeast;
 
 module.exports =  _dereq_('./lib/');
 
-},{"./lib/":1}]},{},[31])(31)
+},{"./lib/":2}]},{},[31])(31)
 });
