@@ -13,7 +13,7 @@ cleanup () {
 
 trap cleanup INT TERM EXIT
 
-git clone https://github.com/Automattic/engine.io-client.git "$TEMPDIR"
+git clone https://github.com/socketio/engine.io-client.git "$TEMPDIR"
 cd "$TEMPDIR"
 git checkout "$(git describe --tags --abbrev=0)"
 NODE_ENV=production npm install
