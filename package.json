@@ -49,7 +49,7 @@
   "author": "Arnout Kazemier",
   "license": "MIT",
   "dependencies": {
-    "access-control": "0.0.x",
+    "access-control": "1.0.x",
     "asyncemit": "3.0.x",
     "create-server": "1.0.x",
     "demolish": "1.0.x",
@@ -91,7 +91,7 @@
     "sockjs": "0.3.x",
     "sockjs-client": "1.0.x",
     "through2": "2.0.x",
-    "ws": "0.8.x"
+    "ws": "1.0.x"
   },
   "pre-commit": "test, integration"
 }
