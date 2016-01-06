@@ -72,7 +72,6 @@
     "browserchannel": "2.0.x",
     "browserify": "12.0.x",
     "chai": "3.4.x",
-    "concat-stream": "1.5.x",
     "condenseify": "1.1.x",
     "derequire": "2.0.x",
     "deumdify": "1.2.x",

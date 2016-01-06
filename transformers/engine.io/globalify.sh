@@ -13,13 +13,12 @@ if (!dir) {
 
 var browserify = require('browserify')
   , derequire = require('derequire')
-  , concat = require('concat-stream')
   , deumdify = require('deumdify')
   , path = require('path')
   , fs = require('fs');
 
 var options = {
-  entries: [ path.resolve(dir, 'index.js') ],
+  entries: [ path.join(dir, 'index.js') ],
   insertGlobalVars: {
     global: function glob() {
       return 'typeof self !== "undefined" ? self : ' +
@@ -38,9 +37,9 @@ var options = {
 // available and the UMD wrapper prevents this global from being set when
 // RequireJS is used. See issue #157.
 //
-browserify(options).ignore('ws').plugin(deumdify).bundle().pipe(concat({
-  encoding: 'string'
-}, function (output) {
-  var dest = path.resolve(__dirname, 'library.js');
-  fs.writeFileSync(dest, derequire(output));
-}));
+browserify(options).ignore('ws').plugin(deumdify).bundle(function (err, buf) {
+  if (err) throw err;
+
+  var dest = path.join(__dirname, 'library.js');
+  fs.writeFileSync(dest, derequire(buf.toString()));
+});

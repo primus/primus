@@ -13,7 +13,6 @@ if (!dir) {
 
 var condenseify = require('condenseify')
   , browserify = require('browserify')
-  , concat = require('concat-stream')
   , derequire = require('derequire')
   , stripify = require('./stripify')
   , deumdify = require('deumdify')
@@ -21,7 +20,7 @@ var condenseify = require('condenseify')
   , fs = require('fs');
 
 var options = {
-  entries: [ path.resolve(dir, 'lib/entry.js') ],
+  entries: [ path.join(dir, 'lib/entry.js') ],
   insertGlobalVars: {
     process: function process() { return '{ env: {} }'; }
   },
@@ -37,8 +36,9 @@ browserify(options)
   .transform(stripify)
   .transform(condenseify)
   .plugin(deumdify)
-  .bundle()
-  .pipe(concat({ encoding: 'string' }, function write(output) {
-    var dest = path.resolve(__dirname, '..',  'library.js');
-    fs.writeFileSync(dest, derequire(output));
-  }));
+  .bundle(function (err, buf) {
+    if (err) throw err;
+
+    var dest = path.join(__dirname, '..',  'library.js');
+    fs.writeFileSync(dest, derequire(buf.toString()));
+  });
