@@ -40,6 +40,5 @@ var options = {
 browserify(options).ignore('ws').plugin(deumdify).bundle(function (err, buf) {
   if (err) throw err;
 
-  var dest = path.join(__dirname, 'library.js');
-  fs.writeFileSync(dest, derequire(buf.toString()));
+  fs.writeFileSync(path.join(__dirname, 'library.js'), derequire(buf));
 });
