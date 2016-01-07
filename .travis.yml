@@ -3,19 +3,9 @@ language: node_js
 node_js:
   - "5"
   - "4"
-  - "3"
-  - "2"
-  - "1"
+  - "iojs"
   - "0.12"
   - "0.10"
-addons:
-  apt:
-    sources:
-      - "ubuntu-toolchain-r-test"
-    packages:
-      - "g++-4.8"
-env:
-  - "CXX=g++-4.8"
 script:
   - "npm run test && npm run integration"
 matrix:
