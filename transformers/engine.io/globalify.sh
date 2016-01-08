@@ -37,8 +37,11 @@ var options = {
 // available and the UMD wrapper prevents this global from being set when
 // RequireJS is used. See issue #157.
 //
-browserify(options).ignore('ws').plugin(deumdify).bundle(function (err, buf) {
-  if (err) throw err;
+browserify(options)
+  .exclude('ws')
+  .plugin(deumdify)
+  .bundle(function (err, buf) {
+    if (err) throw err;
 
-  fs.writeFileSync(path.join(__dirname, 'library.js'), derequire(buf));
-});
+    fs.writeFileSync(path.join(__dirname, 'library.js'), derequire(buf));
+  });
