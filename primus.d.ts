@@ -46,7 +46,6 @@ declare module "primus" {
     }
 
     interface PrimusConnectOptions {
-        reconnect: any;
         timeout: number;
         ping: number;
         pong: number;
