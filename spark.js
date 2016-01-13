@@ -146,6 +146,7 @@ Spark.readable('reserved', function reserved(evt) {
  */
 Spark.prototype.reserved.events = {
   readyStateChange: 1,
+  heartbeat: 1,
   error: 1,
   data: 1,
   end: 1
