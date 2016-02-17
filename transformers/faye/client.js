@@ -19,7 +19,7 @@ module.exports = function client() {
     if ('undefined' !== typeof WebSocket) return WebSocket;
     if ('undefined' !== typeof MozWebSocket) return MozWebSocket;
 
-    try { return Primus.require('faye-websocket').Client; }
+    try { return Primus.requires('faye-websocket').Client; }
     catch (e) {}
 
     return undefined;

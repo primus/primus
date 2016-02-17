@@ -22,7 +22,7 @@ module.exports = function client() {
   var factory = (function factory() {
     if ('undefined' !== typeof eio) return eio;
 
-    try { return Primus.require('engine.io-client'); }
+    try { return Primus.requires('engine.io-client'); }
     catch (e) {}
 
     return undefined;

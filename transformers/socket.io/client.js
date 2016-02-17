@@ -22,9 +22,9 @@ module.exports = function client() {
   var factory = (function factory() {
     if ('undefined' !== typeof io && io.Socket) return io;
 
-    try { return Primus.require('primus-socket.io-client'); }
+    try { return Primus.requires('primus-socket.io-client'); }
     catch (e) {
-      try { return Primus.require('socket.io-client'); }
+      try { return Primus.requires('socket.io-client'); }
       catch (e) {}
     }
 
