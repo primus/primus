@@ -192,7 +192,7 @@ function Primus(url, options) {
  * @returns {Object|Undefined} The module that we required.
  * @api private
  */
-Primus.require = function requires(name) {
+Primus.requires = Primus.require = function requires(name) {
   if ('function' !== typeof require) return undefined;
 
   return !('function' === typeof define && define.amd)
@@ -207,7 +207,7 @@ Primus.require = function requires(name) {
 var Stream;
 
 try {
-  Primus.Stream = Stream = Primus.require('stream');
+  Primus.Stream = Stream = Primus.requires('stream');
 
   //
   // Normally inheritance is done in the same way as we do in our catch
@@ -217,7 +217,7 @@ try {
   //
   // @see https://github.com/joyent/node/issues/4971
   //
-  Primus.require('util').inherits(Primus, Stream);
+  Primus.requires('util').inherits(Primus, Stream);
 } catch (e) {
   Primus.Stream = EventEmitter;
   Primus.prototype = new EventEmitter();
