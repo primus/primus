@@ -4,5 +4,6 @@ issues/
 test/
 transformers/*/*
 !transformers/*/*.js
+primus.d.ts
 *.md
 .*
