@@ -1686,7 +1686,7 @@ accepts 2 arguments we automatically assume it's async and that the last
 argument is the callback variable:
 
 ```js
-primus.transforms('outgoing', function (packet, next) {
+primus.transform('outgoing', function (packet, next) {
   asyncprocess(packet.data, function (err, data) {
     //
     // If you return an error here, it will be emitted as `error` on the
