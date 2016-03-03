@@ -22,5 +22,9 @@
   "faye": {
     "server": "faye-websocket",
     "client": "faye-websocket"
+  },
+  "lws": {
+    "server": "lws",
+    "client": "ws"
   }
 }
