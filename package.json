@@ -93,7 +93,7 @@
     "sockjs-client": "1.0.x",
     "through2": "2.0.x",
     "ws": "1.0.x",
-    "lws": ">=0.6.1"
+    "lws": "0.6.x"
   },
   "pre-commit": "test, integration"
 }
