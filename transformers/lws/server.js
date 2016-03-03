@@ -1,7 +1,7 @@
 'use strict';
 
-var http = require('http')
-  , parse = require('url').parse;
+var parse = require('url').parse
+  , http = require('http');
 
 /**
  * Minimum viable WebSocket server for Node.js that works through the Primus
@@ -12,7 +12,6 @@ var http = require('http')
  */
 module.exports = function server() {
   var WebSocketServer = require('lws').Server
-    , logger = this.logger
     , Spark = this.Spark;
 
   var service = this.service = new WebSocketServer({
@@ -21,11 +20,7 @@ module.exports = function server() {
 
   service.on('message', function (socket, message, binary) {
     var spark = service.getUserData(socket);
-    if (binary) {
-      spark.emit('incoming::data', message);
-    } else {
-      spark.emit('incoming::data', message.toString());
-    }
+    spark.emit('incoming::data', binary ? message : message.toString());
   });
 
   service.on('close', function (socket) {
@@ -36,8 +31,9 @@ module.exports = function server() {
   //
   // Listen to upgrade requests.
   //
-  this.on('upgrade', function upgrade(req, socket, head) {
-    var socket = this.service.handleUpgrade(socket, req, head);
+  this.on('upgrade', function upgrade(req, soc, head) {
+    var socket = this.service.handleUpgrade(soc, req, head);
+
     if (!socket) return;
 
     var spark = new Spark(
