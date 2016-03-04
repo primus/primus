@@ -1268,7 +1268,7 @@ var Socket = primus.Socket
 ### lws
 
 lws is a WebSocket only transformer. It uses the `lws` module which is a
-libwebsocket wrapper for Node.js and C++. To use lws you have to install
+libwebsockets wrapper for Node.js. To use lws you have to install
 the `lws` module:
 
 ```
@@ -1414,7 +1414,7 @@ of the transformer, we just `toLowerCase()` everything.
   side component. We're bundling a snapshot of these libraries inside of Primus.
   We will always be targeting the latest version of these transformers when we
   bundle the library.
-- lws only works on Linux and Mac OS X and only supports Node.js version 4 or
+- lws only works on Linux and Mac OS X 10.7+ and only supports Node.js version 4 or
   above.
 - lws does not currently support HTTPS to WSS. To work around this limitation
   you can use a SSL terminating reverse proxy.
