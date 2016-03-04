@@ -1359,10 +1359,10 @@ var primus = new Primus(server, { transformer: 'sockjs' });
 ```
 
 If you want to use the client interface inside of Node.js you also need to
-install the `sockjs-client-node` module:
+install the `sockjs-client` module:
 
 ```
-npm install sockjs-client-node --save
+npm install sockjs-client --save
 ```
 
 And then you can access it from your server instance:
