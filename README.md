@@ -70,12 +70,13 @@ repository.
 - [Events](#events)
 - [Heartbeats and latency](#heartbeats-and-latency)
 - [Supported real-time frameworks](#supported-real-time-frameworks)
-  - [Engine.IO](#engineio)
-  - [WebSockets](#websockets)
-  - [Faye](#faye)
   - [BrowserChannel](#browserchannel)
-  - [SockJS](#sockjs)
+  - [Engine.IO](#engineio)
+  - [Faye](#faye)
+  - [lws](#lws)
   - [Socket.IO](#socketio)
+  - [SockJS](#sockjs)
+  - [WebSockets](#websockets)
 - [Transformer inconsistencies](#transformer-inconsistencies)
 - [Middleware](#middleware)
 - [Plugins](#plugins)
@@ -1179,6 +1180,34 @@ actually receive a confirmation that the connection has been opened.
 
 The following transformers/transports are supported in Primus:
 
+#### BrowserChannel
+
+BrowserChannel was the original technology that GMail used for their real-time
+communication. It's designed for same domain communication and does not use
+WebSockets. To use BrowserChannel you need to install the `browserchannel`
+module:
+
+```
+npm install browserchannel --save
+```
+
+And tell `Primus` that you want to use `browserchannel` as transformer:
+
+```js
+var primus = new Primus(server, { transformer: 'browserchannel' });
+```
+
+The `browserchannel` transformer comes with built-in node client support and can be
+accessed using:
+
+```js
+var Socket = primus.Socket
+  , socket = new Socket('url');
+```
+
+Please note that you should use at least version `1.0.6` which contains support
+for query strings.
+
 #### Engine.IO
 
 Engine.IO is the low level transport functionality of Socket.IO 1.0. It supports
@@ -1211,38 +1240,12 @@ var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
-#### WebSockets
-
-If you are targeting a high end audience or maybe just something for internal
-uses you can use a pure WebSocket server. This uses the `ws` WebSocket module
-which is known to be one of, if not the fastest, WebSocket servers available in
-Node.js and supports all protocol specifications. To use pure WebSockets you
-need to install the `ws` module:
-
-```
-npm install ws --save
-```
-
-And tell `Primus` that you want to use `WebSockets` as transformer:
-
-```js
-var primus = new Primus(server, { transformer: 'websockets' });
-```
-
-The `WebSockets` transformer comes with built-in node client support and can be
-accessed using:
-
-```js
-var Socket = primus.Socket
-  , socket = new Socket('url');
-```
-
 #### Faye
 
-Faye is an alternative WebSocket only transformer. It uses the `faye-websocket`
-module which is part of the [Faye](http://faye.jcoglan.com/) project and
-supports all protocol specifications. To use this you need to install the
-`faye-websocket` module:
+Faye is a WebSocket only transformer. It uses the `faye-websocket` module which
+is part of the [Faye](http://faye.jcoglan.com/) project and supports all
+protocol specifications. To use this you need to install the `faye-websocket`
+module:
 
 ```
 npm install faye-websocket --save
@@ -1262,55 +1265,27 @@ var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
-#### BrowserChannel
+### lws
 
-BrowserChannel was the original technology that GMail used for their real-time
-communication. It's designed for same domain communication and does not use
-WebSockets. To use BrowserChannel you need to install the `browserchannel`
-module:
+lws is a WebSocket only transformer. It uses the `lws` module which is a
+libwebsocket wrapper for Node.js and C++. To use lws you have to install
+the `lws` module:
 
 ```
-npm install browserchannel --save
+npm install lws --save
 ```
 
-And tell `Primus` that you want to use `browserchannel` as transformer:
+And tell `Primus` that you want to use `lws` as transformer:
 
 ```js
-var primus = new Primus(server, { transformer: 'browserchannel' });
-```
-
-The `browserchannel` transformer comes with built-in node client support and can be
-accessed using:
-
-```js
-var Socket = primus.Socket
-  , socket = new Socket('url');
-```
-
-Please note that you should use at least version `1.0.6` which contains support
-for query strings.
-
-#### SockJS
-
-SockJS is a real-time server that focuses on cross-domain connections and does
-this by using multiple transports. To use SockJS you need to install the
-`sockjs` module:
-
-```
-npm install sockjs --save
-```
-
-And tell `Primus` that you want to use `sockjs` as transformer:
-
-```js
-var primus = new Primus(server, { transformer: 'sockjs' });
+var primus = new Primus(server, { transformer: 'lws' });
 ```
 
 If you want to use the client interface inside of Node.js you also need to
-install the `sockjs-client-node` module:
+install the `ws` module:
 
 ```
-npm install sockjs-client-node --save
+npm install ws --save
 ```
 
 And then you can access it from your server instance:
@@ -1367,6 +1342,62 @@ upon Engine.IO so it makes more sense to use Engine.IO in Primus directly.
 Socket.IO 0.9.x will be supported as it uses a completely different transport
 system.**
 
+#### SockJS
+
+SockJS is a real-time server that focuses on cross-domain connections and does
+this by using multiple transports. To use SockJS you need to install the
+`sockjs` module:
+
+```
+npm install sockjs --save
+```
+
+And tell `Primus` that you want to use `sockjs` as transformer:
+
+```js
+var primus = new Primus(server, { transformer: 'sockjs' });
+```
+
+If you want to use the client interface inside of Node.js you also need to
+install the `sockjs-client-node` module:
+
+```
+npm install sockjs-client-node --save
+```
+
+And then you can access it from your server instance:
+
+```js
+var Socket = primus.Socket
+  , socket = new Socket('url');
+```
+
+#### WebSockets
+
+If you are targeting a high end audience or maybe just something for internal
+uses you can use a pure WebSocket server. This uses the `ws` WebSocket module
+which is known to be one of, if not the fastest, WebSocket servers available in
+Node.js and supports all protocol specifications. To use pure WebSockets you
+need to install the `ws` module:
+
+```
+npm install ws --save
+```
+
+And tell `Primus` that you want to use `WebSockets` as transformer:
+
+```js
+var primus = new Primus(server, { transformer: 'websockets' });
+```
+
+The `WebSockets` transformer comes with built-in node client support and can be
+accessed using:
+
+```js
+var Socket = primus.Socket
+  , socket = new Socket('url');
+```
+
 As you can see from the examples above, it doesn't matter how you write the name
 of the transformer, we just `toLowerCase()` everything.
 
@@ -1377,12 +1408,16 @@ of the transformer, we just `toLowerCase()` everything.
   to `1337` by default.
 - BrowserChannel is the only transformer that does not support cross domain
   connections.
-- SockJS and BrowserChannel are originally written in CoffeeScript which can
-  make it harder to debug when their internals are failing.
+- BrowserChannel and SockJS are written in CoffeeScript and this can make
+  debugging harder when their internals fail.
 - Engine.IO and SockJS do not ship their client-side library with their server
   side component. We're bundling a snapshot of these libraries inside of Primus.
   We will always be targeting the latest version of these transformers when we
   bundle the library.
+- lws only works on Linux and Mac OS X and only supports Node.js version 4 or
+  above.
+- lws does not currently support HTTPS to WSS. To work around this limitation
+  you can use a SSL terminating reverse proxy.
 
 ### Middleware
 
