@@ -1,8 +1,8 @@
 diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
-index d58aa7b..79f8147 100644
+index 4711309..3200bc9 100644
 --- a/transformers/engine.io/library.js
 +++ b/transformers/engine.io/library.js
-@@ -2013,7 +2013,7 @@ module.exports = function(opts) {
+@@ -2188,7 +2188,7 @@ module.exports = function(opts) {
  
    if (!xdomain) {
      try {

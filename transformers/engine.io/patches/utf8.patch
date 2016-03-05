@@ -1,8 +1,8 @@
 diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
-index 79f8147..76bb2be 100644
+index aa46cec..4df3e76 100644
 --- a/transformers/engine.io/library.js
 +++ b/transformers/engine.io/library.js
-@@ -3313,17 +3313,7 @@ module.exports = (function() {
+@@ -4120,17 +4120,7 @@ module.exports = function parseuri(str) {
  		'decode': utf8decode
  	};
  
