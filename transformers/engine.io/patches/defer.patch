@@ -1,0 +1,28 @@
+diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
+index 3200bc9..aa46cec 100644
+--- a/transformers/engine.io/library.js
++++ b/transformers/engine.io/library.js
+@@ -2004,23 +2004,6 @@ WS.prototype.addEventListeners = function(){
+ };
+ 
+ /**
+- * Override `onData` to use a timer on iOS.
+- * See: https://gist.github.com/mloughran/2052006
+- *
+- * @api private
+- */
+-
+-if ('undefined' != typeof navigator
+-  && /iPad|iPhone|iPod/i.test(navigator.userAgent)) {
+-  WS.prototype.onData = function(data){
+-    var self = this;
+-    setTimeout(function(){
+-      Transport.prototype.onData.call(self, data);
+-    }, 0);
+-  };
+-}
+-
+-/**
+  * Writes data to socket.
+  *
+  * @param {Array} array of packets.
