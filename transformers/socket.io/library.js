@@ -1,5 +1,5 @@
 /*!
- * primus-socket.io.js build: 1.0.1, development.
+ * primus-socket.io.js build: 2.0.0, development.
  * Copyright(c) 2011 LearnBoost <dev@learnboost.com>
  * Copyright (c) 2013 Automattic <dev@cloudup.com>
  * Copyright (c) 2015 contributors of the Primus project, http://primus.io
@@ -27,7 +27,7 @@
    * @api public
    */
 
-  io.version = '1.0.1';
+  io.version = '2.0.0';
 
   /**
    * Protocol implemented.
@@ -2293,7 +2293,7 @@
 
   function WS (socket) {
     io.Transport.apply(this, arguments);
-  };
+  }
 
   /**
    * Inherits from Transport.
@@ -2320,7 +2320,7 @@
   WS.prototype.open = function () {
     var query = io.util.query(this.socket.options.query)
       , self = this
-      , Socket
+      , Socket;
 
 
     if (!Socket) {
@@ -2355,23 +2355,10 @@
    * @api public
    */
 
-  // Do to a bug in the current IDevices browser, we need to wrap the send in a 
-  // setTimeout, when they resume from sleeping the browser will crash if 
-  // we don't allow the browser time to detect the socket has been closed
-  if (io.util.ua.iDevice) {
-    WS.prototype.send = function (data) {
-      var self = this;
-      setTimeout(function() {
-         self.websocket.send(data);
-      },0);
-      return this;
-    };
-  } else {
-    WS.prototype.send = function (data) {
-      this.websocket.send(data);
-      return this;
-    };
-  }
+  WS.prototype.send = function (data) {
+    this.websocket.send(data);
+    return this;
+  };
 
   /**
    * Payload
