@@ -476,7 +476,7 @@ Primus.prototype.initialise = function initialise(options) {
   primus.on('incoming::data', function message(raw) {
     primus.decoder(raw, function decoding(err, data) {
       //
-      // Do a "save" emit('error') when we fail to parse a message. We don't
+      // Do a "safe" emit('error') when we fail to parse a message. We don't
       // want to throw here as listening to errors should be optional.
       //
       if (err) return primus.listeners('error').length && primus.emit('error', err);
@@ -1181,8 +1181,8 @@ Primus.connect = function connect(url, options) {
 Primus.EventEmitter = EventEmitter;
 
 //
-// These libraries are automatically are automatically inserted at the
-// server-side using the Primus#library method.
+// These libraries are automatically inserted at the server-side using the
+// Primus#library method.
 //
 Primus.prototype.client = null; // @import {primus::transport};
 Primus.prototype.authorization = null; // @import {primus::auth};

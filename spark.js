@@ -469,7 +469,7 @@ Spark.readable('_write', function _write(data) {
 
   primus.encoder.call(spark, data, function encoded(err, packet) {
     //
-    // Do a "save" emit('error') when we fail to parse a message. We don't
+    // Do a "safe" emit('error') when we fail to parse a message. We don't
     // want to throw here as listening to errors should be optional.
     //
     if (err) return new ParserError('Failed to encode outgoing data: '+ err.message, spark, err);
