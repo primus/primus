@@ -41,7 +41,7 @@ try {
   if (location.origin) {
     defaultUrl = location.origin;
   } else {
-    defaultUrl = location.protocol +'//'+ location.hostname + (location.port ? ':'+ location.port : '');
+    defaultUrl = location.protocol +'//'+ location.host;
   }
 } catch (e) {
   defaultUrl = 'http://127.0.0.1';
