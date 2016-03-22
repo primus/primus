@@ -1009,13 +1009,12 @@ Primus.prototype.clone = function clone(obj) {
  * @api private
  */
 Primus.prototype.merge = function merge(target) {
-  var args = Array.prototype.slice.call(arguments, 1);
-
-  for (var i = 0, l = args.length, key, obj; i < l; i++) {
-    obj = args[i];
+  for (var i = 1, key, obj; i < arguments.length; i++) {
+    obj = arguments[i];
 
     for (key in obj) {
-      if (obj.hasOwnProperty(key)) target[key] = obj[key];
+      if (Object.prototype.hasOwnProperty.call(obj, key))
+        target[key] = obj[key];
     }
   }
 
