@@ -26,5 +26,9 @@
   "lws": {
     "server": "lws",
     "client": "ws"
+  },
+  "uws": {
+    "server": "uws",
+    "client": "ws"
   }
 }
