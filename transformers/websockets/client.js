@@ -29,7 +29,6 @@ module.exports = function client() {
     'Missing required `ws` module. Please run `npm install --save ws`'
   ));
 
-
   //
   // Connect to the given URL.
   //
@@ -61,13 +60,14 @@ module.exports = function client() {
           protocol: prot,
           query: qsa
         }));
+
+        socket.binaryType = 'arraybuffer';
       }
     } catch (e) { return primus.emit('error', e); }
 
     //
     // Setup the Event handlers.
     //
-    socket.binaryType = 'arraybuffer';
     socket.onopen = primus.emits('incoming::open');
     socket.onerror = primus.emits('incoming::error');
     socket.onclose = primus.emits('incoming::end');
