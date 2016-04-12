@@ -76,6 +76,7 @@ repository.
   - [lws](#lws)
   - [Socket.IO](#socketio)
   - [SockJS](#sockjs)
+  - [uws](#uws)
   - [WebSockets](#websockets)
 - [Transformer inconsistencies](#transformer-inconsistencies)
 - [Middleware](#middleware)
@@ -1372,13 +1373,42 @@ var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
+### uws
+
+uws is a WebSocket only transformer. It uses the `uws` module which is probably
+the fastest WebSocket server available in Node.js. To use uws you have to
+install the `uws` module:
+
+```
+npm install uws --save
+```
+
+And tell `Primus` that you want to use `uws` as transformer:
+
+```js
+var primus = new Primus(server, { transformer: 'uws' });
+```
+
+If you want to use the client interface inside of Node.js you also need to
+install the `ws` module:
+
+```
+npm install ws --save
+```
+
+And then you can access it from your server instance:
+
+```js
+var Socket = primus.Socket
+  , socket = new Socket('url');
+```
+
 #### WebSockets
 
-If you are targeting a high end audience or maybe just something for internal
-uses you can use a pure WebSocket server. This uses the `ws` WebSocket module
-which is known to be one of, if not the fastest, WebSocket servers available in
-Node.js and supports all protocol specifications. To use pure WebSockets you
-need to install the `ws` module:
+If you are targeting a high end audience or maybe just need something for
+internal uses you can use a pure WebSocket server. This transformer uses the
+popular `ws` module which is battle tested and supports all protocol
+specifications. To use WebSockets you need to install the `ws` module:
 
 ```
 npm install ws --save
@@ -1418,6 +1448,10 @@ of the transformer, we just `toLowerCase()` everything.
   above.
 - lws does not currently support HTTPS to WSS. To work around this limitation
   you can use a SSL terminating reverse proxy.
+- uws works only on Node.js version 4 or above.
+- uws does not currently support HTTPS to WSS. To work around this limitation
+  you can use a SSL terminating reverse proxy.
+- uws does not currently support compression (permessage-deflate).
 
 ### Middleware
 
