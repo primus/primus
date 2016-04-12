@@ -3,6 +3,16 @@
 var parse = require('url').parse
   , http = require('http');
 
+[
+  '',
+  'The lws transformer has been deprecated in favor of its successor uws.',
+  'We strongly suggest to switch to uws as lws will be removed in future',
+  'versions of Primus.',
+  ''
+].forEach(function each(line) {
+  console.error('Primus: '+ line);
+});
+
 /**
  * Minimum viable WebSocket server for Node.js that works through the Primus
  * interface.

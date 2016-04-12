@@ -45,8 +45,7 @@
     "websocket",
     "websockets",
     "ws",
-    "lws",
-    "node-lws"
+    "uws"
   ],
   "author": "Arnout Kazemier",
   "license": "MIT",
@@ -81,6 +80,7 @@
     "engine.io": "1.6.x",
     "engine.io-client": "1.6.x",
     "faye-websocket": "0.11.x",
+    "lws": "0.6.x",
     "mocha": "2.4.x",
     "pre-commit": "1.1.x",
     "primus-socket.io-client": "2.0.x",
@@ -92,8 +92,8 @@
     "sockjs": "0.3.x",
     "sockjs-client": "1.0.x",
     "through2": "2.0.x",
-    "ws": "1.0.x",
-    "lws": "0.6.x"
+    "uws": "0.2.x",
+    "ws": "1.0.x"
   },
   "pre-commit": "test, integration"
 }
