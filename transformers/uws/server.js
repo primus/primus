@@ -15,13 +15,11 @@ module.exports = function server() {
 
   var service = this.service = new uws.Server();
 
-  service.onMessage(function message(socket, msg, binary) {
-    var spark = service.getData(socket);
+  service.onMessage(function message(socket, msg, binary, spark) {
     spark.emit('incoming::data', binary ? msg : msg.toString());
   });
 
-  service.onDisconnection(function close(socket) {
-    var spark = service.getData(socket);
+  service.onDisconnection(function close(socket, spark) {
     service.setData(socket);
     spark.emit('incoming::end');
   });
