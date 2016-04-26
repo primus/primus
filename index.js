@@ -514,7 +514,7 @@ Primus.readable('library', function compile(nodejs) {
   client = [
     '(function UMDish(name, context, definition, plugins) {',
     '  context[name] = definition.call(context);',
-    '  for (var i=0; i<plugins.length; i++) {',
+    '  for (var i = 0; i < plugins.length; i++) {',
     '    plugins[i](context[name])',
     '  }',
     '  if (typeof module !== "undefined" && module.exports) {',
