@@ -1116,7 +1116,7 @@ Primus.prototype.uri = function uri(options) {
   //
   // Optionally add a search query.
   //
-  if (qsa) server.push('?'+ options.query);
+  if (qsa) server[server.length - 1] += '?'+ options.query;
   else delete options.query;
 
   if (options.object) return options;

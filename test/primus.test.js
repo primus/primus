@@ -661,6 +661,13 @@ describe('Primus', function () {
 
       expect(socket.url).to.eql(socket.parse('http://google.com'));
     });
+
+    it('does not add a trailing slash to the connection URL pathname', function () {
+      var socket = new primus.Socket({ manual: true })
+        , uri = socket.uri({ query: true });
+
+      expect(socket.parse(uri).pathname).to.equal('/primus');
+    });
   });
 
   describe('#save', function () {
