@@ -381,69 +381,6 @@ describe('Primus', function () {
     });
   });
 
-  describe('#asyncemit', function () {
-    it('emits events asynchronously', function (done) {
-      var listeners = 0
-        , pre;
-
-      primus.on('foo', function (data, next) {
-        expect(data).to.equal('bar');
-        setTimeout(function () {
-          pre = 'baz';
-          listeners++;
-          next();
-        }, 10);
-      });
-
-      primus.on('foo', function (data) {
-        expect(data).to.equal('bar');
-        expect(pre).to.equal('baz');
-        listeners++;
-      });
-
-      primus.asyncemit('foo', 'bar', function () {
-        expect(listeners).to.equal(2);
-        done();
-      });
-    });
-
-    it('bails out in case of error', function (done) {
-      primus.on('foo', function (data, next) {
-        expect(data).to.equal('bar');
-        setTimeout(function () {
-          next(new Error('Something wrong happened'));
-        }, 10);
-      });
-
-      primus.on('foo', function () {
-        throw new Error('Should have bailed out');
-      });
-
-      primus.asyncemit('foo', 'bar', function (err) {
-        expect(err).to.be.instanceOf(Error);
-        expect(err.message).to.equal('Something wrong happened');
-        done();
-      });
-    });
-
-    it('calls one-time listeners only once', function (done) {
-      var calls = 0;
-
-      primus.once('foo', function (data, next) {
-        expect(data).to.equal('bar');
-        setTimeout(function () {
-          if (++calls === 2) throw new Error('Listener not removed');
-
-          next();
-        }, 10);
-      });
-
-      primus.asyncemit('foo', 'bar', function () {
-        primus.asyncemit('foo', 'bar', done);
-      });
-    });
-  });
-
   describe('#forEach', function () {
     it('iterates over all active connections', function (done) {
       new primus.Spark();
@@ -529,7 +466,7 @@ describe('Primus', function () {
         new primus.Spark();
       }
 
-      (global.setImmediate || process.nextTick)(function () {
+      setImmediate(function () {
         expect(primus.connected).to.equal(4);
 
         primus.forEach(function (spark, next) {
