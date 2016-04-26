@@ -1,6 +1,6 @@
 # Primus
 
-[![Version npm](https://img.shields.io/npm/v/primus.svg?style=flat-square)](http://browsenpm.org/package/primus)[![Build Status](https://img.shields.io/travis/primus/primus/master.svg?style=flat-square)](https://travis-ci.org/primus/primus)[![Dependencies](https://img.shields.io/david/primus/primus.svg?style=flat-square)](https://david-dm.org/primus/primus)[![Coverage Status](https://img.shields.io/coveralls/primus/primus/master.svg?style=flat-square)](https://coveralls.io/r/primus/primus?branch=master)[![IRC channel](https://img.shields.io/badge/IRC-irc.freenode.net%23primus-00a8ff.svg?style=flat-square)](https://webchat.freenode.net/?channels=primus)
+[![Version npm](https://img.shields.io/npm/v/primus.svg?style=flat-square)](https://www.npmjs.com/package/primus)[![Build Status](https://img.shields.io/travis/primus/primus/master.svg?style=flat-square)](https://travis-ci.org/primus/primus)[![Dependencies](https://img.shields.io/david/primus/primus.svg?style=flat-square)](https://david-dm.org/primus/primus)[![Coverage Status](https://img.shields.io/coveralls/primus/primus/master.svg?style=flat-square)](https://coveralls.io/r/primus/primus?branch=master)[![IRC channel](https://img.shields.io/badge/IRC-irc.freenode.net%23primus-00a8ff.svg?style=flat-square)](https://webchat.freenode.net/?channels=primus)
 
 Primus, the creator god of transformers but now also known as universal wrapper
 for real-time frameworks. There are a lot of real-time frameworks available for
