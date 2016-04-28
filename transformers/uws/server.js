@@ -46,7 +46,7 @@ module.exports = function server() {
       });
     });
 
-    this.service.upgrade(soc._handle.fd, req.headers['sec-websocket-key']);
+    this.service.upgrade(soc._handle.fd, req.headers['sec-websocket-key'], soc.ssl ? soc.ssl._external : null);
     soc.destroy();
   });
 
