@@ -1445,7 +1445,7 @@ of the transformer, we just `toLowerCase()` everything.
   We will always be targeting the latest version of these transformers when we
   bundle the library.
 - lws only works on Linux and Mac OS X 10.7+ and only supports Node.js version 4 or
-  above.
+  5.
 - lws does not currently support HTTPS to WSS. To work around this limitation
   you can use a SSL terminating reverse proxy.
 - uws works only on Node.js version 4 or above.
