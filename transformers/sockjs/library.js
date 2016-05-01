@@ -54,12 +54,18 @@ EventEmitter.prototype.once = function(type, listener) {
   this.on(type, g);
 };
 
-EventEmitter.prototype.emit = function(type) {
+EventEmitter.prototype.emit = function() {
+  var type = arguments[0];
   var listeners = this._listeners[type];
   if (!listeners) {
     return;
   }
-  var args = Array.prototype.slice.call(arguments, 1);
+  // equivalent of Array.prototype.slice.call(arguments, 1);
+  var l = arguments.length;
+  var args = new Array(l - 1);
+  for (var ai = 1; ai < l; ai++) {
+    args[ai - 1] = arguments[ai];
+  }
   for (var i = 0; i < listeners.length; i++) {
     listeners[i].apply(this, args);
   }
@@ -86,11 +92,11 @@ Event.prototype.initEvent = function(eventType, canBubble, cancelable) {
 };
 
 Event.prototype.stopPropagation = function() {};
-Event.prototype.preventDefault  = function() {};
+Event.prototype.preventDefault = function() {};
 
 Event.CAPTURING_PHASE = 1;
-Event.AT_TARGET       = 2;
-Event.BUBBLING_PHASE  = 3;
+Event.AT_TARGET = 2;
+Event.BUBBLING_PHASE = 3;
 
 module.exports = Event;
 
@@ -135,9 +141,11 @@ EventTarget.prototype.removeEventListener = function(eventType, listener) {
   }
 };
 
-EventTarget.prototype.dispatchEvent = function(event) {
+EventTarget.prototype.dispatchEvent = function() {
+  var event = arguments[0];
   var t = event.type;
-  var args = Array.prototype.slice.call(arguments, 0);
+  // equivalent of Array.prototype.slice.call(arguments, 0);
+  var args = arguments.length === 1 ? [event] : Array.apply(null, arguments);
   // TODO: This doesn't match the real behavior; per spec, onfoo get
   // their place in line from the /first/ time they're set from
   // non-null. Although WebKit bumps it to the end every time it's
@@ -267,7 +275,7 @@ module.exports = function(SockJS, availableTransports) {
         var baseUrl = p[3];
         // change this to semver logic
         if (version !== SockJS.version) {
-          throw new Error('Incompatibile SockJS! Main site uses:' +
+          throw new Error('Incompatible SockJS! Main site uses:' +
                     ' "' + version + '", the iframe:' +
                     ' "' + SockJS.version + '".');
         }
@@ -586,6 +594,7 @@ function SockJS(url, protocols, options) {
     log.warn("'protocols_whitelist' is DEPRECATED. Use 'transports' instead.");
   }
   this._transportsWhitelist = options.transports;
+  this._transportOptions = options.transportOptions || {};
 
   var sessionId = options.sessionId || 8;
   if (typeof sessionId === 'function') {
@@ -595,7 +604,7 @@ function SockJS(url, protocols, options) {
       return random.string(sessionId);
     };
   } else {
-    throw new TypeError("If sessionId is used in the options, it needs to be a number or a function.");
+    throw new TypeError('If sessionId is used in the options, it needs to be a number or a function.');
   }
 
   this._server = options.server || random.numberString(1000);
@@ -744,7 +753,8 @@ SockJS.prototype._connect = function() {
     this._transportTimeoutId = setTimeout(this._transportTimeout.bind(this), timeoutMs);
 
     var transportUrl = urlUtils.addPath(this._transUrl, '/' + this._server + '/' + this._generateSessionId());
-    var transportObj = new Transport(transportUrl, this._transUrl);
+    var options = this._transportOptions[Transport.transportName];
+    var transportObj = new Transport(transportUrl, this._transUrl, options);
     transportObj.on('message', this._transportMessage.bind(this));
     transportObj.once('close', this._transportClose.bind(this));
     transportObj.transportName = Transport.transportName;
@@ -1418,7 +1428,9 @@ AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
 
   try {
     this.xhr = new XHR();
-  } catch (x) {}
+  } catch (x) {
+    // intentionally empty
+  }
 
   if (!this.xhr) {
     this.emit('finish', 0, 'no xhr support');
@@ -1473,7 +1485,9 @@ AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
         try {
           status = x.status;
           text = x.responseText;
-        } catch (e) {}
+        } catch (e) {
+          // intentionally empty
+        }
         // IE returns 1223 for 204: http://bugs.jquery.com/ticket/1450
         if (status === 1223) {
           status = 204;
@@ -1527,7 +1541,9 @@ AbstractXHRObject.prototype._cleanup = function(abort) {
   if (abort) {
     try {
       this.xhr.abort();
-    } catch (x) {}
+    } catch (x) {
+      // intentionally empty
+    }
   }
   this.unloadRef = this.xhr = null;
 };
@@ -1554,7 +1570,9 @@ if (!AbstractXHRObject.enabled && (axo in global)) {
 var cors = false;
 try {
   cors = 'withCredentials' in new XHR();
-} catch (ignored) {}
+} catch (ignored) {
+  // intentionally empty
+}
 
 AbstractXHRObject.supportsCORS = cors;
 
@@ -1682,7 +1700,9 @@ IframeTransport.prototype.close = function() {
       // When the iframe is not loaded, IE raises an exception
       // on 'contentWindow'.
       this.postMessage('c');
-    } catch (x) {}
+    } catch (x) {
+      // intentionally empty
+    }
     this.iframeObj.cleanup();
     this.iframeObj = null;
     this.onmessageCallback = this.iframeObj = null;
@@ -1803,7 +1823,7 @@ function createAjaxSender(AjaxObject) {
   return function(url, payload, callback) {
     var opt = {};
     if (typeof payload === 'string') {
-      opt.headers = {'Content-type':'text/plain'};
+      opt.headers = {'Content-type': 'text/plain'};
     }
     var ajaxUrl = urlUtils.addPath(url, '/xhr_send');
     var xo = new AjaxObject('POST', ajaxUrl, payload, opt);
@@ -2154,7 +2174,9 @@ var axo = ['Active'].concat('Object').join('X');
 if (axo in global) {
   try {
     HtmlfileReceiver.htmlfileEnabled = !!new global[axo]('htmlfile');
-  } catch (x) {}
+  } catch (x) {
+    // intentionally empty
+  }
 }
 
 HtmlfileReceiver.enabled = HtmlfileReceiver.htmlfileEnabled || iframeUtils.iframeEnabled;
@@ -2280,7 +2302,9 @@ JsonpReceiver.prototype._createScript = function(url) {
         try {
           // In IE, actually execute the script.
           script.onclick();
-        } catch (x) {}
+        } catch (x) {
+          // intentionally empty
+        }
       }
       if (script) {
         self._abort(new Error('JSONP script loaded abnormally (onreadystatechange)'));
@@ -2306,7 +2330,9 @@ JsonpReceiver.prototype._createScript = function(url) {
       try {
         script.htmlFor = script.id;
         script.event = 'onclick';
-      } catch (x) {}
+      } catch (x) {
+        // intentionally empty
+      }
       script.async = true;
     } else {
       // Opera, second sync script hack
@@ -2554,7 +2580,9 @@ XDRObject.prototype._cleanup = function(abort) {
   if (abort) {
     try {
       this.xdr.abort();
-    } catch (x) {}
+    } catch (x) {
+      // intentionally empty
+    }
   }
   this.unloadRef = this.xdr = null;
 };
@@ -2641,7 +2669,7 @@ var utils = _dereq_('../utils/event')
   , WebsocketDriver = _dereq_('./driver/websocket')
   ;
 
-function WebSocketTransport(transUrl) {
+function WebSocketTransport(transUrl, ignore, options) {
   if (!WebSocketTransport.enabled()) {
     throw new Error('Transport created when disabled');
   }
@@ -2657,7 +2685,7 @@ function WebSocketTransport(transUrl) {
   }
   this.url = url;
 
-  this.ws = new WebsocketDriver(this.url);
+  this.ws = new WebsocketDriver(this.url, undefined, options);
   this.ws.onmessage = function(e) {
     self.emit('message', e.data);
   };
@@ -3074,7 +3102,9 @@ module.exports = {
       // Explorer had problems with that.
       try {
         iframe.onload = null;
-      } catch (x) {}
+      } catch (x) {
+        // intentionally empty
+      }
       iframe.onerror = null;
     };
     var cleanup = function() {
@@ -3107,7 +3137,9 @@ module.exports = {
             iframe.contentWindow.postMessage(msg, origin);
           }
         }, 0);
-      } catch (x) {}
+      } catch (x) {
+        // intentionally empty
+      }
     };
 
     iframe.src = iframeUrl;
@@ -3156,7 +3188,7 @@ module.exports = {
         CollectGarbage();
       }
     };
-    var onerror = function(r)  {
+    var onerror = function(r) {
       if (doc) {
         cleanup();
         errorCallback(r);
@@ -3171,7 +3203,9 @@ module.exports = {
               iframe.contentWindow.postMessage(msg, origin);
           }
         }, 0);
-      } catch (x) {}
+      } catch (x) {
+        // intentionally empty
+      }
     };
 
     doc.open();
@@ -3215,7 +3249,14 @@ if (global.document) {
 
 var logObject = {};
 ['log', 'debug', 'warn'].forEach(function (level) {
-  var levelExists = global.console && global.console[level] && global.console[level].apply;
+  var levelExists;
+
+  try {
+    levelExists = global.console && global.console[level] && global.console[level].apply;
+  } catch(e) {
+    // do nothing
+  }
+
   logObject[level] = levelExists ? function () {
     return global.console[level].apply(global.console, arguments);
   } : (level === 'log' ? function () {} : logObject.log);
@@ -3368,7 +3409,7 @@ module.exports = {
 };
 
 },{"url-parse":57}],52:[function(_dereq_,module,exports){
-module.exports = '1.0.3';
+module.exports = '1.1.0';
 
 },{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
