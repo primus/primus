@@ -79,6 +79,7 @@ repository.
   - [uws](#uws)
   - [WebSockets](#websockets)
 - [Transformer inconsistencies](#transformer-inconsistencies)
+- [Parsers](#parsers)
 - [Middleware](#middleware)
 - [Plugins](#plugins)
   - [Extending the Spark / Socket](#extending-the-spark--socket)
@@ -150,18 +151,6 @@ The heartbeat timeout is used to forcefully disconnect a spark if no data is
 received from the client within the specified amount of time. It is possible
 to completely disable the heartbeat timeout by setting the value of the
 `timeout` option to `false`.
-
-In addition to support different frameworks we've also made it possible to use
-custom encoding and decoding libraries. We're using `JSON` by default but you
-could also use `msgpack` or `EJSON` for example (but these parsers need to be
-supported by Primus, so check out the parser folder for examples). To set parser
-you can supply a `parser` configuration option:
-
-```js
-var primus = new Primus(server, { parser: 'JSON' });
-```
-
-All parsers have an `async` interface for error handling.
 
 If you don't have a pre-existing server where you want or can attach your Primus
 server to you can also use the `Primus.createServer` convenience method. The
@@ -1450,6 +1439,20 @@ of the transformer, we just `toLowerCase()` everything.
   you can use a SSL terminating reverse proxy.
 - uws works only on Node.js version 4 or above.
 - uws does not currently support compression (permessage-deflate).
+
+### Parsers
+
+In addition to support different frameworks we've also made it possible to use
+custom encoding and decoding libraries. We're using `JSON` by default but you
+could also use `binary` or `EJSON` for example (but these parsers need to be
+supported by Primus, so check out the parser folder for examples). To specify
+the parser to use you can supply a `parser` configuration option:
+
+```js
+var primus = new Primus(server, { parser: 'JSON' });
+```
+
+All parsers have an `async` interface for error handling.
 
 ### Middleware
 
