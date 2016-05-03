@@ -48,9 +48,7 @@ module.exports = function server() {
 
     var ticket = this.service.transfer(soc._handle.fd, soc.ssl ? soc.ssl._external : null);
     soc.on('close', function(error) {
-      if (!error) {
-        service.upgrade(ticket, req.headers['sec-websocket-key']);
-      }
+      service.upgrade(ticket, req.headers['sec-websocket-key']);
     });
     soc.destroy();
   });
