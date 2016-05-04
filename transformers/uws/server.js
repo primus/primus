@@ -28,28 +28,30 @@ module.exports = function server() {
   // Listen to upgrade requests.
   //
   this.on('upgrade', function upgrade(req, soc, head) {
-    this.service.onConnection(function create(socket) {
-      var spark = new Spark(
-          req.headers               // HTTP request headers.
-        , req                       // IP address location.
-        , parse(req.url).query      // Optional query string.
-        , null                      // We don't have an unique id.
-        , req                       // Reference to the HTTP req.
-      );
+    var ticket = service.transfer(soc._handle.fd, soc.ssl ? soc.ssl._external : null);
 
-      service.setData(socket, spark);
+    soc.on('close', function destroy() {
+      service.onConnection(function create(socket) {
+        var spark = new Spark(
+            req.headers               // HTTP request headers.
+          , req                       // IP address location.
+          , parse(req.url).query      // Optional query string.
+          , null                      // We don't have an unique id.
+          , req                       // Reference to the HTTP req.
+        );
 
-      spark.on('outgoing::end', function end() {
-        service.close(socket);
-      }).on('outgoing::data', function write(data) {
-        service.send(socket, data, 'string' === typeof data ? false : true);
+        service.setData(socket, spark);
+
+        spark.on('outgoing::end', function end() {
+          service.close(socket);
+        }).on('outgoing::data', function write(data) {
+          service.send(socket, data, 'string' === typeof data ? false : true);
+        });
       });
-    });
 
-    var ticket = this.service.transfer(soc._handle.fd, soc.ssl ? soc.ssl._external : null);
-    soc.on('close', function(error) {
       service.upgrade(ticket, req.headers['sec-websocket-key']);
     });
+
     soc.destroy();
   });
 
