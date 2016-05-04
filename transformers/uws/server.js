@@ -19,7 +19,7 @@ module.exports = function server() {
     spark.emit('incoming::data', binary ? msg : msg.toString());
   });
 
-  service.onDisconnection(function close(socket, spark) {
+  service.onDisconnection(function close(socket, code, msg, spark) {
     service.setData(socket);
     spark.emit('incoming::end');
   });
