@@ -15,7 +15,7 @@ trap cleanup INT TERM EXIT
 
 git clone https://github.com/socketio/engine.io-client.git "$TEMPDIR"
 cd "$TEMPDIR"
-git checkout "$(git describe --tags --abbrev=0)"
+git checkout "$(git rev-list --tags --max-count=1)"
 NODE_ENV=production npm install
 "$DESTDIR"/globalify.sh "$TEMPDIR"
 cd "$DESTDIR"
