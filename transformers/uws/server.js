@@ -45,7 +45,7 @@ module.exports = function server() {
         spark.on('outgoing::end', function end() {
           service.close(socket);
         }).on('outgoing::data', function write(data) {
-          service.send(socket, data, 'string' === typeof data ? false : true);
+          service.send(socket, data, Buffer.isBuffer(data));
         });
       });
 
