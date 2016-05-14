@@ -28,29 +28,34 @@ module.exports = function server() {
   // Listen to upgrade requests.
   //
   this.on('upgrade', function upgrade(req, soc, head) {
-    var ticket = service.transfer(soc._handle.fd, soc.ssl ? soc.ssl._external : null);
+    var secKey = req.headers['sec-websocket-key']
+      , ticket;
 
-    soc.on('close', function destroy() {
-      service.onConnection(function create(socket) {
-        var spark = new Spark(
-            req.headers               // HTTP request headers.
-          , req                       // IP address location.
-          , parse(req.url).query      // Optional query string.
-          , null                      // We don't have an unique id.
-          , req                       // Reference to the HTTP req.
-        );
+    if (secKey && secKey.length === 24) {
+      ticket = service.transfer(soc._handle.fd, soc.ssl ? soc.ssl._external : null);
 
-        service.setData(socket, spark);
+      soc.on('close', function destroy() {
+        service.onConnection(function create(socket) {
+          var spark = new Spark(
+              req.headers               // HTTP request headers.
+            , req                       // IP address location.
+            , parse(req.url).query      // Optional query string.
+            , null                      // We don't have an unique id.
+            , req                       // Reference to the HTTP req.
+          );
 
-        spark.on('outgoing::end', function end() {
-          service.close(socket);
-        }).on('outgoing::data', function write(data) {
-          service.send(socket, data, Buffer.isBuffer(data));
+          service.setData(socket, spark);
+
+          spark.on('outgoing::end', function end() {
+            service.close(socket);
+          }).on('outgoing::data', function write(data) {
+            service.send(socket, data, Buffer.isBuffer(data));
+          });
         });
-      });
 
-      service.upgrade(ticket, req.headers['sec-websocket-key']);
-    });
+        service.upgrade(ticket, secKey);
+      });
+    }
 
     soc.destroy();
   });
