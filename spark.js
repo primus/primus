@@ -533,8 +533,7 @@ Spark.readable('end', function end(data, options) {
   this.emit('outgoing::end');
   this.emit('end');
   this.ultron.destroy();
-  delete this.ultron;
-  this.queue = null;
+  this.ultron = this.queue = null;
 
   return this;
 });
