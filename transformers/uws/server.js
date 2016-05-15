@@ -21,6 +21,7 @@ module.exports = function server() {
 
   service.onDisconnection(function close(socket, code, msg, spark) {
     service.setData(socket);
+    spark.ultron.remove('outgoing::end');
     spark.emit('incoming::end');
   });
 
@@ -46,7 +47,7 @@ module.exports = function server() {
 
           service.setData(socket, spark);
 
-          spark.on('outgoing::end', function end() {
+          spark.ultron.on('outgoing::end', function end() {
             service.close(socket);
           }).on('outgoing::data', function write(data) {
             service.send(socket, data, Buffer.isBuffer(data));
