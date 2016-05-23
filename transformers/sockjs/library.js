@@ -1586,7 +1586,14 @@ module.exports = global.EventSource;
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],18:[function(_dereq_,module,exports){
 (function (global){
-module.exports = global.WebSocket || global.MozWebSocket;
+'use strict';
+
+var Driver = global.WebSocket || global.MozWebSocket;
+if (Driver) {
+	module.exports = function WebSocketBrowserDriver(url) {
+		return new Driver(url);
+	};
+}
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],19:[function(_dereq_,module,exports){
@@ -2685,7 +2692,7 @@ function WebSocketTransport(transUrl, ignore, options) {
   }
   this.url = url;
 
-  this.ws = new WebsocketDriver(this.url, undefined, options);
+  this.ws = new WebsocketDriver(this.url, [], options);
   this.ws.onmessage = function(e) {
     self.emit('message', e.data);
   };
@@ -3409,7 +3416,7 @@ module.exports = {
 };
 
 },{"url-parse":57}],52:[function(_dereq_,module,exports){
-module.exports = '1.1.0';
+module.exports = '1.1.1';
 
 },{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
