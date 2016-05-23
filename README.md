@@ -476,7 +476,7 @@ primus = Primus.connect(url, {
   reconnect: {
       max: Infinity // Number: The max delay before we try to reconnect.
     , min: 500 // Number: The minimum delay before we try reconnect.
-    , retries: 10 // Number: How many times we shoult try to reconnect.
+    , retries: 10 // Number: How many times we should try to reconnect.
   }
 });
 ```
@@ -501,7 +501,7 @@ provide users with highest level of customization:
 <dl>
   <dt>disconnect</dt>
   <dd>
-    Reconnect when we detect an unintential disconnect in the connection.
+    Reconnect when we detect an unintentional disconnect in the connection.
   </dd>
   <dt>online</dt>
   <dd>
@@ -547,7 +547,7 @@ reconnection, this is done by setting the `strategy` to `false`:
 var primus = new Primus(url, { strategy: false });
 ```
 If you want to manually control the reconnection you can call `primus.end()`
-to close the connection and `primus.open()` to enstablish a new one. **Be sure
+to close the connection and `primus.open()` to establish a new one. **Be sure
 to use `primus.open()` correctly, see below for details.**
 
 [reconnect]: #reconnect
@@ -575,7 +575,7 @@ of Primus.
 
 This method opens a connection with the server. By default it is called
 automatically when the Primus instance is created, but there are cases where
-it's desiderable to open the connection manually. To do this set the `manual`
+it's desirable to open the connection manually. To do this set the `manual`
 option to `true` and when you have the Primus instance call the method:
 
 ```js
@@ -740,7 +740,7 @@ primus.end();
 
 #### primus.destroy()
 
-This method literraly destroys the `primus` instance. Internally it calls the
+This method literally destroys the `primus` instance. Internally it calls the
 `primus.end()` method but it also frees some potentially heavy objects like
 the underlying socket, the timers, the message transformers, etc. It also
 removes all the event listeners but before doing that it emits a final `destroy`
@@ -758,7 +758,7 @@ primus.destroy();
 #### primus.emits(event, parser)
 
 This method is analogous to the [`spark.emits`](#sparkemitsevent-parser) method.
-It returs a function that emits the given event every time it's called. See
+It returns a function that emits the given event every time it's called. See
 [emits](https://github.com/primus/emits) for detailed usage instructions.
 
 ```js
