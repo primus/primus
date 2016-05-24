@@ -2093,13 +2093,13 @@ primacron can be time savers.
 
 The `cluster` module that ships with Node.js is flawed, seriously flawed.
 Cluster in node < 0.12.0 lets the Operating System decide which worker process
-should receive the request. This results in in a not even distribution across
+should receive the request. This results in a not even distribution across
 the workers. If you have 3 workers, it's possible that one is used at 70%,
 another at 20% and the last one at 10%. This is of course not wanted when using
 a cluster. In addition, the load balancing done by the OS is not sticky.
 
-Cluster in node 0.12 implements a custom round robin algorithm in order to fix
-this un-even distribution of the load across the workers, but it does not
+Cluster in node >= 0.12.0 implements a custom round robin algorithm in order to
+fix this un-even distribution of the load across the workers, but it does not
 address the sticky session requirement.
 
 There are also projects like `stick-session` which attempt to implement
@@ -2109,7 +2109,7 @@ problem but when you add this behind a load balancer the remote address will be
 set to the address of the load balancer that forwards the requests. So all in all
 it only causes more scalability problems instead of solving them. This is why
 we've opted to warn people about the risks of `cluster` when we detect that the
-Primus library is run in a worker environment. **USE IT AT YOUR OWN RISK**
+Primus library is run in a worker environment. **USE IT AT YOUR OWN RISK**.
 
 To turn off the cluster warning in your Primus instance you can set the option
 `iknowclusterwillbreakconnections` to `true`.
