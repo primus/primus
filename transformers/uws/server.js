@@ -33,6 +33,7 @@ module.exports = function server() {
       , ticket;
 
     if (secKey && secKey.length === 24) {
+      soc.setNoDelay(true);
       ticket = service.transfer(soc._handle.fd, soc.ssl ? soc.ssl._external : null);
 
       soc.on('close', function destroy() {
