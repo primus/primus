@@ -174,21 +174,19 @@ Object.defineProperty(Primus.prototype, 'client', {
 Object.defineProperty(Primus.prototype, 'Socket', {
   get: function () {
     return require('load').compiler(this.library(true), 'primus.js', {
-      __filename: 'primus.js',
       __dirname: process.cwd(),
+      __filename: 'primus.js',
 
       //
-      // The following globals are introduced so libraries that use `instanceOf`
-      // checks for type checking do not fail as `load` uses a new execution
-      // context to import these files.
+      // The following globals are introduced so libraries that use `instanceof`
+      // checks for type checking do not fail as `load` runs the code in a new
+      // context.
       //
-      Date: Date,
       Uint8Array: Uint8Array,
-      Error: Error,
-      Array: Array,
-      String: String,
       Object: Object,
-      RegExp: RegExp
+      RegExp: RegExp,
+      Array: Array,
+      Date: Date
     }).Primus;
   }
 });
