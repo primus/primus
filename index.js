@@ -6,7 +6,8 @@ var PrimusError = require('./errors').PrimusError
   , log = require('diagnostics')('primus')
   , Spark = require('./spark')
   , fuse = require('fusing')
-  , fs = require('fs');
+  , fs = require('fs')
+  , vm = require('vm');
 
 /**
  * Primus is a universal wrapper for real-time frameworks that provides a common
@@ -173,21 +174,35 @@ Object.defineProperty(Primus.prototype, 'client', {
 //
 Object.defineProperty(Primus.prototype, 'Socket', {
   get: function () {
-    return require('load').compiler(this.library(true), 'primus.js', {
+    var sandbox = vm.createContext({
+      clearImmediate: clearImmediate,
+      clearInterval: clearInterval,
+      clearTimeout: clearTimeout,
+      setImmediate: setImmediate,
       __dirname: process.cwd(),
+      setInterval: setInterval,
       __filename: 'primus.js',
+      setTimeout: setTimeout,
+      console: console,
+      process: process,
+      require: require,
+      Buffer: Buffer,
 
       //
       // The following globals are introduced so libraries that use `instanceof`
-      // checks for type checking do not fail as `load` runs the code in a new
+      // checks for type checking do not fail as the code is run in a new
       // context.
       //
       Uint8Array: Uint8Array,
       Object: Object,
       RegExp: RegExp,
       Array: Array,
+      Error: Error,
       Date: Date
-    }).Primus;
+    });
+
+    vm.runInContext(this.library(true), sandbox, 'primus.js');
+    return sandbox.Primus;
   }
 });
 
