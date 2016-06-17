@@ -1,7 +1,8 @@
 'use strict';
 
 var parse = require('url').parse
-  , http = require('http');
+  , http = require('http')
+  , uws = require('uws');
 
 /**
  * Server of µWebSockets transformer.
@@ -10,10 +11,9 @@ var parse = require('url').parse
  * @api private
  */
 module.exports = function server() {
-  var uws = require('uws').uws
+  var options = this.primus.options.compression ? uws.PERMESSAGE_DEFLATE : 0
+    , service = this.service = new uws.uws.Server(0, options)
     , Spark = this.Spark;
-
-  var service = this.service = new uws.Server();
 
   service.onMessage(function message(socket, msg, binary, spark) {
     spark.emit('incoming::data', binary ? msg : msg.toString());
@@ -51,7 +51,9 @@ module.exports = function server() {
           spark.ultron.on('outgoing::end', function end() {
             service.close(socket);
           }).on('outgoing::data', function write(data) {
-            service.send(socket, data, Buffer.isBuffer(data));
+            var opcode = Buffer.isBuffer(data) ? uws.OPCODE_BINARY : uws.OPCODE_TEXT;
+
+            service.send(socket, data, opcode);
           });
         });
 

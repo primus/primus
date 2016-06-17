@@ -1438,7 +1438,6 @@ of the transformer, we just `toLowerCase()` everything.
 - lws does not currently support HTTPS to WSS. To work around this limitation
   you can use a SSL terminating reverse proxy.
 - uws works only on Node.js version 4 or above.
-- uws does not currently support compression (permessage-deflate).
 
 ### Parsers
 
