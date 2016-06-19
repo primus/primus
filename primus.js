@@ -1183,7 +1183,7 @@ Primus.EventEmitter = EventEmitter;
 // These libraries are automatically inserted at the server-side using the
 // Primus#library method.
 //
-Primus.prototype.client = null; // @import {primus::transport};
+Primus.prototype.client = null; // @import {primus::client};
 Primus.prototype.authorization = null; // @import {primus::auth};
 Primus.prototype.pathname = null; // @import {primus::pathname};
 Primus.prototype.encoder = null; // @import {primus::encoder};

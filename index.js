@@ -99,7 +99,7 @@ function Primus(server, options) {
   }
 
   this.parsers(options.parser);
-  this.initialise(options.transformer || options.transport, options);
+  this.initialise(options.transformer, options);
 
   //
   // If the plugins are supplied through the options, also initialise them.
@@ -253,7 +253,7 @@ Primus.readable('is', function is(what, where) {
 });
 
 /**
- * Initialise the real-time transport that was chosen.
+ * Initialise the real-time engine that was chosen.
  *
  * @param {Mixed} Transformer The name of the transformer or a constructor;
  * @param {Object} options Options.
@@ -271,7 +271,7 @@ Primus.readable('initialise', function initialise(Transformer, options) {
     this.spec.transformer = transformer;
 
     //
-    // This is a unknown transporter, it could be people made a typo.
+    // This is a unknown transformer, it could be people made a typo.
     //
     if (!(Transformer in Primus.transformers)) {
       log('the supplied transformer %s is not supported, please use %s', transformer, Primus.transformers);
@@ -525,7 +525,6 @@ Primus.prototype.spark = function spark(id) {
 Primus.readable('library', function compile(nodejs) {
   var library = [ !nodejs ? this.transformer.library : null ]
     , global = this.options.global || 'Primus'
-    , transport = this.transformer.client
     , parser = this.parser.library || ''
     , client = this.client;
 
@@ -556,7 +555,7 @@ Primus.readable('library', function compile(nodejs) {
   client = client
     .replace('null; // @import {primus::pathname}', '"'+ this.pathname.toString() +'"')
     .replace('null; // @import {primus::version}', '"'+ this.version +'"')
-    .replace('null; // @import {primus::transport}', transport.toString())
+    .replace('null; // @import {primus::client}', this.transformer.client.toString())
     .replace('null; // @import {primus::auth}', (!!this.auth).toString())
     .replace('null; // @import {primus::encoder}', this.encoder.toString())
     .replace('null; // @import {primus::decoder}', this.decoder.toString());
