@@ -1,7 +1,8 @@
 'use strict';
 
 var PrimusError = require('../../errors').PrimusError
-  , parse = require('url').parse;
+  , parse = require('url').parse
+  , sockjs = require('sockjs');
 
 /**
  * Minimum viable Sockjs server for Node.js that works through the primus
@@ -11,8 +12,7 @@ var PrimusError = require('../../errors').PrimusError
  * @api private
  */
 module.exports = function server() {
-  var sockjs = require('sockjs')
-    , primus = this.primus
+  var primus = this.primus
     , prefix = primus.pathname
     , Spark = this.Spark
     , fayeOptions = null;
@@ -77,11 +77,12 @@ module.exports = function server() {
   //
   // Listen to requests.
   //
-  var handle = this.service.listener({
-    faye_server_options: fayeOptions,
+  var handle = this.service.listener(Object.assign({
+    faye_server_options: fayeOptions
+  }, primus.options.transport, {
     log: this.logger.plain,
     prefix: prefix
-  }).getHandler();
+  })).getHandler();
 
   //
   // Here be demons. SockJS has this really horrible "security" feature where it

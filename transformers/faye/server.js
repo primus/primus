@@ -1,6 +1,7 @@
 'use strict';
 
 var PrimusError = require('../../errors').PrimusError
+  , Faye = require('faye-websocket')
   , parse = require('url').parse
   , http = require('http');
 
@@ -11,8 +12,7 @@ var PrimusError = require('../../errors').PrimusError
  * @api private
  */
 module.exports = function server() {
-  var Faye = require('faye-websocket')
-    , primus = this.primus
+  var primus = this.primus
     , Spark = this.Spark
     , options = {};
 
@@ -36,6 +36,8 @@ module.exports = function server() {
       throw new PrimusError('Missing dependencies for transformer: "faye"', primus);
     }
   }
+
+  options = Object.assign(options, primus.options.transport);
 
   //
   // Listen to upgrade requests.

@@ -27,6 +27,7 @@ function Primus(server, options) {
   }
 
   options = options || {};
+  options.transport = options.transport || {};
   this.fuse();
 
   var primus = this

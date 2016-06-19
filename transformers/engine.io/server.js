@@ -1,5 +1,7 @@
 'use strict';
 
+var Engine = require('engine.io').Server;
+
 /**
  * Minimum viable Engine.IO server for Node.js that works through the primus
  * interface.
@@ -8,13 +10,12 @@
  * @api private
  */
 module.exports = function server() {
-  var Engine = require('engine.io').Server
-    , Spark = this.Spark;
+  var Spark = this.Spark;
 
-  var service = this.service = new Engine({
+  var service = this.service = new Engine(Object.assign({
     perMessageDeflate: !!this.primus.options.compression,
     httpCompression: !!this.primus.options.compression
-  });
+  }, this.primus.options.transport));
 
   //
   // We've received a new connection, create a new Spark. The Spark will

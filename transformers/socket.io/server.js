@@ -1,6 +1,7 @@
 'use strict';
 
-var PrimusError = require('../../errors').PrimusError;
+var PrimusError = require('../../errors').PrimusError
+  , Engine = require('socket.io').Manager;
 
 /**
  * Minimum viable WebSocket server for Node.js that works through the Primus
@@ -10,9 +11,8 @@ var PrimusError = require('../../errors').PrimusError;
  * @api private
  */
 module.exports = function server() {
-  var Engine = require('socket.io').Manager
-    , Spark = this.Spark
-    , primus = this.primus;
+  var primus = this.primus
+    , Spark = this.Spark;
 
   //
   // Socket.IO is not, and will never be supported as long as it's using
@@ -39,7 +39,7 @@ module.exports = function server() {
   //
   // Listen to upgrade requests.
   //
-  var service = this.service = new Engine(this, {
+  var service = this.service = new Engine(this, Object.assign(primus.options.transport, {
     'resource': primus.pathname,
 
     //
@@ -74,7 +74,7 @@ module.exports = function server() {
     // transformers.
     //
     'client store expiration': 0
-  });
+  }));
 
   //
   // We've received a new connection, create a new Spark. The Spark will
