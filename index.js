@@ -110,11 +110,7 @@ function Primus(server, options) {
     options.plugin.split(/[, ]+/).forEach(function register(name) {
       primus.use(name, name);
     });
-
-    return;
-  }
-
-  if ('object' === typeof options.plugin) {
+  } else if ('object' === typeof options.plugin) {
     for (key in options.plugin) {
       this.use(key, options.plugin[key]);
     }
