@@ -134,6 +134,7 @@ plugin              | The plugins that should be applied        | `{}`
 timeout             | The heartbeat timeout                     | `35000`
 global              | Set a custom client class / global name   | `Primus`
 compression         | Use permessage-deflate / HTTP compression | `false`
+transport           | Transformer specific configuration        | `{}`
 origins             | **cors** List of origins                  | `*`
 methods             | **cors** List of accepted HTTP methods    | `GET,HEAD,PUT,POST,DELETE,OPTIONS`
 credentials         | **cors** Allow sending of credentials     | `true`
@@ -145,6 +146,13 @@ The options that are prefixed with **cors** are supplied to our
 [access-control](https://github.com/primus/access-control) module which handles
 HTTP Access Control (CORS), so for a more detailed explanation of these options
 check it out.
+
+The `transport` option allows you to use any configuration option supported by
+the underlying real-time framework. Its use is discouraged as these options
+are framework specific and no longer work if you change transformer. Our advise
+is to use it only if you know what you are doing and if you need fine-grained
+control over the real-time framework. Please also keep in mind that some of
+these options are overriden by Primus.
 
 The heartbeat timeout is used to forcefully disconnect a spark if no data is
 received from the client within the specified amount of time. It is possible

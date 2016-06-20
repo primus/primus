@@ -11,9 +11,23 @@ var parse = require('url').parse
  * @api private
  */
 module.exports = function server() {
-  var options = this.primus.options.compression ? uws.PERMESSAGE_DEFLATE : 0
-    , service = this.service = new uws.uws.Server(0, options)
-    , Spark = this.Spark;
+  var options = this.primus.options
+    , Spark = this.Spark
+    , mask = 0;
+
+  if (options.compression || options.transport.perMessageDeflate) {
+    mask = uws.PERMESSAGE_DEFLATE;
+    if (options.transport.perMessageDeflate) {
+      if (options.transport.perMessageDeflate.serverNoContextTakeover) {
+        mask |= uws.SERVER_NO_CONTEXT_TAKEOVER;
+      }
+      if (options.transport.perMessageDeflate.clientNoContextTakeover) {
+        mask |= uws.CLIENT_NO_CONTEXT_TAKEOVER;
+      }
+    }
+  }
+
+  var service = this.service = new uws.uws.Server(0, mask, options.transport.maxPayload);
 
   service.onMessage(function message(socket, msg, binary, spark) {
     spark.emit('incoming::data', binary ? msg : msg.toString());
@@ -33,7 +47,7 @@ module.exports = function server() {
       , ticket;
 
     if (secKey && secKey.length === 24) {
-      soc.setNoDelay(true);
+      soc.setNoDelay(options.transport.noDelay);
       ticket = service.transfer(soc._handle.fd, soc.ssl ? soc.ssl._external : null);
 
       soc.on('close', function destroy() {

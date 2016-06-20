@@ -1,7 +1,8 @@
 'use strict';
 
-var http = require('http')
-  , parse = require('url').parse;
+var WebSocketServer = require('ws').Server
+  , parse = require('url').parse
+  , http = require('http');
 
 /**
  * Minimum viable WebSocket server for Node.js that works through the Primus
@@ -11,15 +12,15 @@ var http = require('http')
  * @api private
  */
 module.exports = function server() {
-  var WebSocketServer = require('ws').Server
-    , logger = this.logger
+  var logger = this.logger
     , Spark = this.Spark;
 
-  var service = this.service = new WebSocketServer({
-    perMessageDeflate: !!this.primus.options.compression,
+  var service = this.service = new WebSocketServer(Object.assign({
+    perMessageDeflate: !!this.primus.options.compression
+  }, this.primus.options.transport, {
     clientTracking: false,
     noServer: true
-  });
+  }));
 
   /**
    * Noop! Pointless, empty function that will actually be really useful.

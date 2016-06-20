@@ -1,6 +1,7 @@
 'use strict';
 
-var http = require('http');
+var browserchannel = require('browserchannel')
+  , http = require('http');
 
 /**
  * Minimum viable Browserchannel server for Node.js that works through the primus
@@ -10,8 +11,7 @@ var http = require('http');
  * @api private
  */
 module.exports = function server() {
-  var browserchannel = require('browserchannel')
-    , primus = this.primus
+  var primus = this.primus
     , Spark = this.Spark;
 
   //
@@ -19,9 +19,9 @@ module.exports = function server() {
   // automatically announce it self as a new connection once it's created (after
   // the next tick).
   //
-  this.service = browserchannel.server({
+  this.service = browserchannel.server(Object.assign(primus.options.transport, {
     base: primus.pathname
-  }, function connection(socket) {
+  }), function connection(socket) {
     var spark = new Spark(
         socket.headers                          // HTTP request headers.
       , {                                       // IP address Location.
