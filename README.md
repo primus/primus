@@ -1447,9 +1447,9 @@ of components in Primus are implemented through middleware layers:
 - `no-cache`: Add no-cache headers to every HTTP request.
 - `x-xss`: Add `X-XSS-Protection` headers to every HTTP request.
 
-#### Primus.before(name, fn, options, index)
+#### Primus.use(name, fn, options, index)
 
-The `primus.before` method is how you add middleware layers to your system. All
+The `primus.use` method is how you add middleware layers to your system. All
 middleware layers need to be named. This allows you to also enable, disable and
 remove middleware layers. The supplied function can either be a pre-configured
 function that is ready to answer request/response or an unconfigured
@@ -1458,7 +1458,7 @@ We execute this function automatically with `Primus` as context of the function
 and optionally, the options that got provided:
 
 ```js
-primus.before('name', function () {
+primus.use('name', function () {
   var primus = this;
 
   return function (req, res) {
@@ -1473,12 +1473,12 @@ the function directly:
 
 ```js
 // sync middleware
-primus.before('name', function (req, res) {
+primus.use('name', function (req, res) {
 
 });
 
 // async middleware
-primus.before('name', function (req, res, next) {
+primus.use('name', function (req, res, next) {
   doStuff();
 });
 ```
@@ -1490,7 +1490,7 @@ property to the middleware function and set it to `false` if you don't want it
 to be triggered.
 
 ```js
-primus.before('name', function () {
+primus.use('name', function () {
   function middleware(req, res, next) {
 
   }
@@ -1508,7 +1508,7 @@ argument.
 
 ```js
 // add a middleware after the first two in the stack
-primus.before('name', function (req, res) {
+primus.use('name', function (req, res) {
 
 }, 2);
 ```
@@ -1560,12 +1560,12 @@ Plugins are added on the server side in the form of an `Object`:
 //
 // Require a plugin directly.
 //
-primus.use('name', require('metroplex'));
+primus.plugin('name', require('metroplex'));
 
 //
 // Or supply it manually with the required object structure
 //
-primus.use('name', {
+primus.plugin('name', {
   server: function (primus, options) {},
   client: function (primus, options) {},
   library: 'client side library'
@@ -1594,7 +1594,7 @@ var primus = new Primus(server, { plugin: 'metroplex, primus-emit' })
 To remove added plugins you can use the `plugout` method:
 
 ```js
-primus.use('name', require('metroplex'));
+primus.plugin('name', require('metroplex'));
 primus.plugout('name'); // returns true/false indicating successful removal.
 ```
 
@@ -1656,7 +1656,7 @@ easily add new functionality to the socket. For example adding join room
 function would be as easy as:
 
 ```js
-primus.use('rooms', {
+primus.plugin('rooms', {
   server: function (primus) {
     var Spark = primus.Spark;
 
@@ -1700,7 +1700,7 @@ primus.transform('incoming', function (packet) {
 These transformations can easily be done in the plugins:
 
 ```js
-primus.use('name', {
+primus.plugin('name', {
   server: function (primus) {
     primus.transform('outgoing', function (packet) {
       packet.data = 'foo';

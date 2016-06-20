@@ -41,7 +41,7 @@ npm install --save primus-rooms
 After installing you can add the plugin using:
 
 ```js
-primus.use('rooms', require('primus-rooms'));
+primus.plugin('rooms', require('primus-rooms'));
 ```
 
 And now you can join and leave rooms again. Manually leaving rooms when the
@@ -83,5 +83,5 @@ And the only thing we need to do to use it to add the plugin to the Primus
 server using:
 
 ```js
-primus.use('emit', require('primus-emit'));
+primus.plugin('emit', require('primus-emit'));
 ```

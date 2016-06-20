@@ -59,8 +59,8 @@ var server = http.createServer(app)
 // first will populate `req.signedCookies` and the second `req.session` for the
 // requests captured by Primus.
 //
-primus.before('cookies', cookies);
-primus.before('session', primusSession, { store: store });
+primus.use('cookies', cookies);
+primus.use('session', primusSession, { store: store });
 
 primus.on('connection', function connection(spark) {
   //

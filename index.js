@@ -109,11 +109,11 @@ function Primus(server, options) {
   //
   if ('string' === typeof options.plugin) {
     options.plugin.split(/[, ]+/).forEach(function register(name) {
-      primus.use(name, name);
+      primus.plugin(name, name);
     });
   } else if ('object' === typeof options.plugin) {
     for (key in options.plugin) {
-      this.use(key, options.plugin[key]);
+      this.plugin(key, options.plugin[key]);
     }
   }
 
@@ -319,13 +319,13 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   //
   // Add our default middleware layers.
   //
-  this.before('forwarded', require('./middleware/forwarded'));
-  this.before('cors', require('./middleware/access-control'));
-  this.before('primus.js', require('./middleware/primus'));
-  this.before('spec', require('./middleware/spec'));
-  this.before('x-xss', require('./middleware/xss'));
-  this.before('no-cache', require('./middleware/no-cache'));
-  this.before('authorization', require('./middleware/authorization'));
+  this.use('forwarded', require('./middleware/forwarded'));
+  this.use('cors', require('./middleware/access-control'));
+  this.use('primus.js', require('./middleware/primus'));
+  this.use('spec', require('./middleware/spec'));
+  this.use('x-xss', require('./middleware/xss'));
+  this.use('no-cache', require('./middleware/no-cache'));
+  this.use('authorization', require('./middleware/authorization'));
 
   //
   // Emit the initialised event after the next tick so we have some time to
@@ -648,7 +648,7 @@ Primus.readable('save', function save(path, fn) {
  * Register a new Primus plugin.
  *
  * ```js
- * primus.use('ack', {
+ * primus.plugin('ack', {
  *   //
  *   // Only ran on the server.
  *   //
@@ -672,21 +672,22 @@ Primus.readable('save', function save(path, fn) {
  *
  * @param {String} name The name of the plugin.
  * @param {Object} energon The plugin that contains client and server extensions.
- * @returns {Primus}
+ * @returns {Mixed}
  * @api public
  */
-Primus.readable('use', function use(name, energon) {
-  if ('object' === typeof name && !energon) {
-    energon = name;
-    name = energon.name;
+Primus.readable('plugin', function plugin(name, energon) {
+  if (!name) return this.ark;
+
+  if (!energon) {
+    if ('string' === typeof name) return this.ark[name];
+    if ('object' === typeof name) {
+      energon = name;
+      name = energon.name;
+    }
   }
 
-  if (!name) {
-    throw new PrimusError('Plugin should be specified with a name', this);
-  }
-
-  if ('string' !== typeof name) {
-    throw new PrimusError('Plugin names should be a string', this);
+  if ('string' !== typeof name || !name) {
+    throw new PrimusError('Plugin name must be a non empty string', this);
   }
 
   if ('string' === typeof energon) {
@@ -705,7 +706,7 @@ Primus.readable('use', function use(name, energon) {
   // Plugin require a client, server or both to be specified in the object.
   //
   if (!energon.server && !energon.client) {
-    throw new PrimusError('The plugin is missing a client or server function', this);
+    throw new PrimusError('Plugin is missing a client or server function', this);
   }
 
   //
@@ -713,7 +714,7 @@ Primus.readable('use', function use(name, energon) {
   // unintentional.
   //
   if (name in this.ark) {
-    throw new PrimusError('The plugin name was already defined', this);
+    throw new PrimusError('Plugin name already defined', this);
   }
 
   log('adding %s as new plugin', name);
@@ -726,25 +727,6 @@ Primus.readable('use', function use(name, energon) {
   energon.server.call(this, this, this.options);
 
   return this;
-});
-
-/**
- * Return the given plugin.
- *
- * @param {String} name The name of the plugin.
- * @returns {Mixed}
- * @api public
- */
-Primus.readable('plugin', function plugin(name) {
-  if (name) return this.ark[name];
-
-  var plugins = {};
-
-  for (name in this.ark) {
-    plugins[name] = this.ark[name];
-  }
-
-  return plugins;
 });
 
 /**
@@ -775,7 +757,7 @@ Primus.readable('plugout', function plugout(name) {
  * @returns {Primus}
  * @api public
  */
-Primus.readable('before', function before(name, fn, options, level) {
+Primus.readable('use', function use(name, fn, options, level) {
   if ('function' === typeof name) {
     level = options;
     options = fn;

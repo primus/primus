@@ -20,23 +20,23 @@ describe('Middleware', function () {
     primus.destroy(done);
   });
 
-  describe('#before', function () {
+  describe('#use', function () {
     it('is chainable', function () {
-      expect(primus.before('foo', function (req, res) {})).to.equal(primus);
+      expect(primus.use('foo', function (req, res) {})).to.equal(primus);
     });
 
     it('throws when no function is provided', function (done) {
-      try { primus.before('foo', new Date()); }
+      try { primus.use('foo', new Date()); }
       catch (e) { done(); }
     });
 
     it('throws when function doesnt accept req/res args', function (done) {
-      try { primus.before('foo', function () { return function () {}; }); }
+      try { primus.use('foo', function () { return function () {}; }); }
       catch (e) { done(); }
     });
 
     it('calls the function if it has less then 2 arguments', function (done) {
-      primus.before('example', function (options) {
+      primus.use('example', function (options) {
         expect(this).to.equal(primus);
         expect(options).to.be.a('object');
         expect(options.foo).to.equal('bar');
@@ -50,7 +50,7 @@ describe('Middleware', function () {
     it('extracts a name if none is given', function () {
       expect(primus.indexOfLayer('connect')).to.equal(-1);
 
-      primus.before(function connect(req, res, bar) {});
+      primus.use(function connect(req, res, bar) {});
       expect(primus.indexOfLayer('connect')).to.be.above(-1);
     });
 
@@ -58,7 +58,7 @@ describe('Middleware', function () {
       function foo(req, res, next) { }
       function bar(req, res) { }
 
-      primus.before('foo', foo).before('bar', bar);
+      primus.use('foo', foo).use('bar', bar);
 
       var index = primus.indexOfLayer('foo')
         , layer = primus.layers[index];
@@ -77,7 +77,7 @@ describe('Middleware', function () {
       function foo(req, res, next) { }
       function bar(req, res) { }
 
-      primus.before('foo', foo);
+      primus.use('foo', foo);
 
       var index = primus.indexOfLayer('foo')
         , layer = primus.layers[index];
@@ -87,7 +87,7 @@ describe('Middleware', function () {
       expect(layer.length).to.equal(3);
       expect(layer.fn).to.equal(foo);
 
-      primus.before('foo', bar);
+      primus.use('foo', bar);
       expect(primus.indexOfLayer('foo')).to.equal(index);
 
       index = primus.indexOfLayer('foo');
@@ -103,7 +103,7 @@ describe('Middleware', function () {
       function foo(req, res, next) { }
       function bar(req, res, next) { }
 
-      primus.before('foo', foo, 3);
+      primus.use('foo', foo, 3);
 
       var index = primus.indexOfLayer('foo')
         , layer = primus.layers[index];
@@ -114,7 +114,7 @@ describe('Middleware', function () {
       expect(layer.fn).to.equal(foo);
       expect(index).to.equal(3);
 
-      primus.before(bar, 4);
+      primus.use(bar, 4);
 
       index = primus.indexOfLayer('bar');
       layer = primus.layers[index];
@@ -125,7 +125,7 @@ describe('Middleware', function () {
       expect(layer.fn).to.equal(bar);
       expect(index).to.equal(4);
 
-      primus.before(function baz(options) {
+      primus.use(function baz(options) {
         expect(this).to.equal(primus);
         expect(options).to.be.a('object');
         expect(options).to.eql({});
@@ -147,7 +147,7 @@ describe('Middleware', function () {
     it('returns the index based on name', function () {
       expect(primus.indexOfLayer('foo')).to.equal(-1);
 
-      primus.before('foo', function (req, res) {
+      primus.use('foo', function (req, res) {
         throw new Error('Dont execute me');
       });
 
@@ -157,8 +157,8 @@ describe('Middleware', function () {
 
   describe('#remove', function () {
     it('removes the layer from the stack', function () {
-      primus.before('bar', function (req, res) {});
-      primus.before('foo', function (req, res) {
+      primus.use('bar', function (req, res) {});
+      primus.use('foo', function (req, res) {
         throw new Error('boom');
       });
 
@@ -173,7 +173,7 @@ describe('Middleware', function () {
 
   describe('#disable', function () {
     it('disables the middleware', function () {
-      primus.before('foo', function (req, res) {});
+      primus.use('foo', function (req, res) {});
 
       var index = primus.indexOfLayer('foo')
         , layer = primus.layers[index];
@@ -186,7 +186,7 @@ describe('Middleware', function () {
 
   describe('#enable', function () {
     it('enables the middleware', function () {
-      primus.before('foo', function (req, res) {});
+      primus.use('foo', function (req, res) {});
 
       var index = primus.indexOfLayer('foo')
         , layer = primus.layers[index];

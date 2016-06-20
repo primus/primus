@@ -258,20 +258,20 @@ describe('Primus', function () {
     throw new Error('Should have thrown');
   });
 
-  describe('#use', function () {
+  describe('#plugin', function () {
     it('throws an error if no valid name is provided', function () {
-      try { primus.use({}); }
+      try { primus.plugin({}); }
       catch (e) {
         expect(e).to.be.instanceOf(Error);
-        expect(e.message).to.include('Plugin');
-        return expect(e.message).to.include('a name');
+        expect(e.message).to.equal('Plugin name must be a non empty string');
+        return;
       }
 
       throw new Error('Should have thrown');
     });
 
     it('should check if the name is a string', function () {
-      try { primus.use(function () {}); }
+      try { primus.plugin(function () {}); }
       catch (e) {
         expect(e).to.be.instanceOf(Error);
         expect(e.message).to.include('Plugin');
@@ -282,13 +282,13 @@ describe('Primus', function () {
     });
 
     it('doesnt allow duplicate definitions', function () {
-      primus.use('foo', { client: function () {} });
+      primus.plugin('foo', { client: function () {} });
 
-      try { primus.use('foo', { client: function () {} }); }
+      try { primus.plugin('foo', { client: function () {} }); }
       catch (e) {
         expect(e).to.be.instanceOf(Error);
-        expect(e.message).to.include('plugin');
-        return expect(e.message).to.include('defined');
+        expect(e.message).to.equal('Plugin name already defined');
+        return;
       }
 
       throw new Error('Should have thrown');
@@ -297,7 +297,7 @@ describe('Primus', function () {
     it('should have a client or server function', function () {
       var called = 0;
 
-      try { primus.use('cow', { foo: 'bar' }); }
+      try { primus.plugin('cow', { foo: 'bar' }); }
       catch (e) {
         expect(e).to.be.instanceOf(Error);
         expect(e.message).to.include('missing');
@@ -308,9 +308,9 @@ describe('Primus', function () {
 
       expect(called).to.equal(1);
 
-      primus.use('client', { client: function () {} });
-      primus.use('server', { server: function () {} });
-      primus.use('both', { server: function () {}, client: function () {} });
+      primus.plugin('client', { client: function () {} });
+      primus.plugin('server', { server: function () {} });
+      primus.plugin('both', { server: function () {}, client: function () {} });
     });
 
     it('should accept function as second argument', function () {
@@ -318,7 +318,7 @@ describe('Primus', function () {
       Room.server = function (p) { p.foo = 'bar'; };
       Room.client = function () {};
 
-      primus.use('room', Room);
+      primus.plugin('room', Room);
 
       expect(primus.foo).to.equal('bar');
     });
@@ -336,27 +336,26 @@ describe('Primus', function () {
       var b = Object.create(B.prototype);
 
       primus
-      .use('a', a)
-      .use('b', b);
+      .plugin('a', a)
+      .plugin('b', b);
 
       expect(primus.foo).to.equal('bar');
       expect(primus.bar).to.equal('foo');
     });
 
     it('should check if energon is an object or a function', function () {
-      try { primus.use('room'); }
+      try { primus.plugin('room', true); }
       catch (e) {
         expect(e).to.be.instanceOf(Error);
-        expect(e.message).to.include('Plugin');
-        expect(e.message).to.include('object');
-        return expect(e.message).to.include('function');
+        expect(e.message).to.equal('Plugin should be an object or function');
+        return;
       }
 
       throw new Error('Should have thrown');
     });
 
     it('returns this', function () {
-      var x = primus.use('foo', { client: function () {}});
+      var x = primus.plugin('foo', { client: function () {}});
 
       expect(x).to.equal(primus);
     });
@@ -368,7 +367,7 @@ describe('Primus', function () {
     it('calls the supplied server plugin', function (done) {
       var primus = new Primus(server, { foo: 'bar' });
 
-      primus.use('test', {
+      primus.plugin('test', {
         server: function server(pri, options) {
           expect(options).to.be.a('object');
           expect(options.foo).to.equal('bar');
@@ -529,7 +528,7 @@ describe('Primus', function () {
       var primus = new Primus(server)
         , library;
 
-      primus.use('log', { client: function () {
+      primus.plugin('log', { client: function () {
         console.log('i am a client plugin');
       }});
 
