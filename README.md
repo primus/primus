@@ -73,7 +73,6 @@ repository.
   - [BrowserChannel](#browserchannel)
   - [Engine.IO](#engineio)
   - [Faye](#faye)
-  - [lws](#lws)
   - [Socket.IO](#socketio)
   - [SockJS](#sockjs)
   - [uws](#uws)
@@ -1255,36 +1254,6 @@ var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
-### lws
-
-lws is a WebSocket only transformer. It uses the `lws` module which is a
-libwebsockets wrapper for Node.js. To use lws you have to install
-the `lws` module:
-
-```
-npm install lws --save
-```
-
-And tell `Primus` that you want to use `lws` as transformer:
-
-```js
-var primus = new Primus(server, { transformer: 'lws' });
-```
-
-If you want to use the client interface inside of Node.js you also need to
-install the `ws` module:
-
-```
-npm install ws --save
-```
-
-And then you can access it from your server instance:
-
-```js
-var Socket = primus.Socket
-  , socket = new Socket('url');
-```
-
 #### Socket.IO
 
 The Socket.IO transport was written against Socket.IO 0.9.x. It was one of the
@@ -1362,7 +1331,7 @@ var Socket = primus.Socket
   , socket = new Socket('url');
 ```
 
-### uws
+#### uws
 
 uws is a WebSocket only transformer. It uses the `uws` module which is probably
 the fastest WebSocket server available in Node.js. To use uws you have to
@@ -1433,10 +1402,6 @@ of the transformer, we just `toLowerCase()` everything.
   side component. We're bundling a snapshot of these libraries inside of Primus.
   We will always be targeting the latest version of these transformers when we
   bundle the library.
-- lws only works on Linux and Mac OS X 10.7+ and only supports Node.js version 4 or
-  5.
-- lws does not currently support HTTPS to WSS. To work around this limitation
-  you can use a SSL terminating reverse proxy.
 - uws works only on Node.js version 4 or above.
 
 ### Parsers
