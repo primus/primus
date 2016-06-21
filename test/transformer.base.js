@@ -1326,7 +1326,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
       });
 
       it('correctly handles requests when a middleware returns an error', function (done) {
-        primus.before('foo', function foo(req, res, next) {
+        primus.use('foo', function foo(req, res, next) {
           next(new Error('foo failed'));
         });
 

@@ -11,7 +11,7 @@ describe('Plugin', function () {
       , primus = new Primus(server)
       , port = common.port;
 
-    primus.use('emit', {
+    primus.plugin('emit', {
       server: function (primus) {
         primus.transform('incoming', function (packet) {
           var data = packet.data;
@@ -52,7 +52,7 @@ describe('Plugin', function () {
       , primus = new Primus(server)
       , port = common.port;
 
-    primus.use('qs', {
+    primus.plugin('qs', {
       client: function (primus) {
         primus.on('outgoing::url', function (options) {
           options.query = 'foo=bar';
@@ -75,7 +75,7 @@ describe('Plugin', function () {
       , primus = new Primus(server)
       , port = common.port;
 
-    primus.use('spark', {
+    primus.plugin('spark', {
       server: function (primus) {
         var Spark = primus.Spark;
 
@@ -99,7 +99,7 @@ describe('Plugin', function () {
       , server = http.createServer()
       , primus = new Primus(server);
 
-    primus.use('dummy', {
+    primus.plugin('dummy', {
       server: function (primus) {
         primus.Spark.prototype.initialise = function init() {};
       }
@@ -114,7 +114,7 @@ describe('Plugin', function () {
 
     expect(primus.channel).to.be.a('undefined');
 
-    primus.use('spark', {
+    primus.plugin('spark', {
       server: function (primus) {
         primus.channel = function channel() {};
       }
@@ -123,7 +123,7 @@ describe('Plugin', function () {
     expect(primus.channel).to.be.a('function');
   });
 
-  it('emits an `plugin` event when a new plugin is added', function (next) {
+  it('emits a `plugin` event when a new plugin is added', function (next) {
     var server = http.createServer()
       , primus = new Primus(server);
 
@@ -134,9 +134,36 @@ describe('Plugin', function () {
       next();
     });
 
-    primus.use('foo', {
+    primus.plugin('foo', {
       server: function () {}
     });
+  });
+
+  it('allows to get a registered plugin by name', function () {
+    var server = http.createServer()
+      , primus = new Primus(server);
+
+    var plugin = {
+      server: function () {}
+    };
+
+    primus.plugin('spark', plugin);
+    expect(primus.plugin('spark')).to.equal(plugin);
+    expect(primus.plugin('undef')).to.equal(undefined);
+  });
+
+  it('allows to get all registered plugins', function () {
+    var server = http.createServer()
+      , primus = new Primus(server);
+
+    expect(primus.plugin()).to.eql({});
+
+    var plugin = {
+      server: function () {}
+    };
+
+    primus.plugin('spark', plugin);
+    expect(primus.plugin()).to.eql({ spark: plugin });
   });
 
   describe('#plugout', function () {
@@ -151,34 +178,11 @@ describe('Plugin', function () {
         next();
       });
 
-      primus.use('foo', {
+      primus.plugin('foo', {
         server: function () {}
       });
 
       expect(primus.plugout('foo')).to.equal(true);
-    });
-  });
-
-  describe('#plugin', function () {
-    it('returns the plugin for the given name', function () {
-      var server = http.createServer()
-        , primus = new Primus(server);
-
-      var plugin = {
-        server: function () {}
-      };
-
-      primus.use('spark', plugin);
-      expect(primus.plugin('spark')).to.equal(plugin);
-      expect(primus.plugin('undef')).to.equal(undefined);
-    });
-
-    it('returns an empty Object', function () {
-      var server = http.createServer()
-        , primus = new Primus(server);
-
-      expect(primus.plugin()).to.be.a('object');
-      expect(Object.keys(primus.plugin())).to.have.length(0);
     });
   });
 });
