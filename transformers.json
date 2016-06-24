@@ -7,10 +7,6 @@
     "server": "engine.io",
     "client": "engine.io-client"
   },
-  "socket.io": {
-    "server": "socket.io",
-    "client": "primus-socket.io-client"
-  },
   "browserchannel": {
     "server": "browserchannel",
     "client": "browserchannel"
