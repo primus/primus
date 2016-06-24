@@ -1,8 +1,9 @@
 'use strict';
 
-var PrimusError = require('../../errors').PrimusError
-  , parse = require('url').parse
-  , sockjs = require('sockjs');
+const sockjs = require('sockjs');
+const url = require('url');
+
+const PrimusError = require('../../errors').PrimusError;
 
 /**
  * Minimum viable Sockjs server for Node.js that works through the primus
@@ -12,14 +13,12 @@ var PrimusError = require('../../errors').PrimusError
  * @api private
  */
 module.exports = function server() {
-  var primus = this.primus
-    , prefix = primus.pathname
-    , Spark = this.Spark
-    , fayeOptions = null;
+  let fayeOptions = { maxLength: this.primus.options.maxLength };
+  let prefix = this.primus.pathname;
 
-  if (primus.options.compression) {
+  if (this.primus.options.compression) {
     try {
-      fayeOptions = { extensions: [ require('permessage-deflate') ] };
+      fayeOptions.extensions = [ require('permessage-deflate') ];
     } catch (e) {
       [
         '',
@@ -30,11 +29,12 @@ module.exports = function server() {
         '',
         '  npm install --save permessage-deflate',
         ''
-      ].forEach(function each(line) {
-        console.error('Primus: '+ line);
-      });
+      ].forEach((line) => console.error(`Primus: ${line}`));
 
-      throw new PrimusError('Missing dependencies for transformer: "sockjs"', primus);
+      throw new PrimusError(
+        'Missing dependencies for transformer: "sockjs"',
+        this.primus
+      );
     }
   }
 
@@ -47,27 +47,25 @@ module.exports = function server() {
   // automatically announce it self as a new connection once it's created (after
   // the next tick).
   //
-  this.service.on('connection', function connection(socket) {
-    var headers = socket.headers.via;
+  this.service.on('connection', (socket) => {
+    const headers = socket.headers.via;
+
     headers.via = headers._via;
     socket.headers.via = null;
 
-    var spark = new Spark(
-        headers                     // HTTP request headers.
-      , socket                      // IP address location.
-      , parse(socket.url).query     // Optional query string.
-      , socket.id                   // Unique connection id.
+    const spark = new this.Spark(
+        headers                      // HTTP request headers.
+      , socket                       // IP address location.
+      , url.parse(socket.url).query  // Optional query string.
+      , socket.id                    // Unique connection id.
     );
 
-    spark.on('outgoing::end', function end() {
-      if (socket) socket.close();
-    }).on('outgoing::data', function write(data) {
-      socket.write(data);
-    });
+    spark.on('outgoing::end', () => socket && socket.close());
+    spark.on('outgoing::data', (data) => socket.write(data));
 
     socket.on('error', spark.emits('incoming::error'));
     socket.on('data', spark.emits('incoming::data'));
-    socket.on('close', spark.emits('incoming::end', function parser(next) {
+    socket.on('close', spark.emits('incoming::end', (next) => {
       socket.removeAllListeners();
       socket = null;
       next();
@@ -77,9 +75,9 @@ module.exports = function server() {
   //
   // Listen to requests.
   //
-  var handle = this.service.listener(Object.assign({
+  const handle = this.service.listener(Object.assign({
     faye_server_options: fayeOptions
-  }, primus.options.transport, {
+  }, this.primus.options.transport, {
     log: this.logger.plain,
     prefix: prefix
   })).getHandler();
@@ -91,16 +89,14 @@ module.exports = function server() {
   // around this by storing the full header in an accepted header key and re-use
   // that when we construct a Primus Spark.
   //
-  this.on('upgrade', function upgrade(req, socket, head) {
-    var headers = req.headers;
-    headers._via = req.headers.via;
-    req.headers.via = headers;
+  this.on('upgrade', (req, socket, head) => {
+    req.headers._via = req.headers.via;
+    req.headers.via = req.headers;
 
     handle.call(this, req, socket, head);
-  }).on('request', function request(req, res) {
-    var headers = req.headers;
-    headers._via = req.headers.via;
-    req.headers.via = headers;
+  }).on('request', (req, res) => {
+    req.headers._via = req.headers.via;
+    req.headers.via = req.headers;
 
     handle.call(this, req, res);
   });

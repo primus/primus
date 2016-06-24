@@ -1446,6 +1446,37 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
       });
 
+      if ('browserchannel' !== transformer)
+      it('closes the connection when `maxLength` is exceeded', function (done) {
+        primus.destroy(function () {
+          primus = new Primus(server, {
+            pathname: server.pathname,
+            transformer: transformer,
+            maxLength: 5
+          });
+
+          primus.on('connection', function (spark) {
+            spark.on('data', function () {
+              done(new Error('Test invalidation'));
+            });
+          });
+
+          server.listen(server.portnumber, function () {
+            var socket = new primus.Socket(server.addr, { strategy: false });
+
+            socket.on('open', function () {
+              //
+              // Workaround for https://github.com/websockets/ws/issues/784,
+              // to be removed once the issue is fixed.
+              //
+              if ('websockets' === transformer) this.socket._isServer = true;
+              socket.write('abcdef');
+            });
+            socket.on('end', done);
+          });
+        });
+      });
+
       describe('#transform', function () {
         it('thrown an error if an invalid type is given', function (done) {
           try { primus.transform('cowsack', function () {}); }

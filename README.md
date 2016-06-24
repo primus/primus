@@ -133,6 +133,7 @@ plugin              | The plugins that should be applied        | `{}`
 timeout             | The heartbeat timeout                     | `35000`
 global              | Set a custom client class / global name   | `Primus`
 compression         | Use permessage-deflate / HTTP compression | `false`
+maxLength           | Maximum allowed packet size, in bytes     | `10485760`
 transport           | Transformer specific configuration        | `{}`
 origins             | **cors** List of origins                  | `*`
 methods             | **cors** List of accepted HTTP methods    | `GET,HEAD,PUT,POST,DELETE,OPTIONS`

@@ -27,8 +27,9 @@ function Primus(server, options) {
   }
 
   options = options || {};
-  options.transport = options.transport || {};  // Transformer specific options.
-  options.timeout = 'timeout' in options        // Heartbeat timeout.
+  options.maxLength = options.maxLength || 10485760;  // Maximum allowed packet size.
+  options.transport = options.transport || {};        // Transformer specific options.
+  options.timeout = 'timeout' in options              // Heartbeat timeout.
     ? options.timeout
     : 35000;
 
