@@ -90,7 +90,7 @@
     "through2": "2.0.x",
     "tick-tock": "1.0.x",
     "url-parse": "1.1.x",
-    "uws": "0.5.x",
+    "uws": "0.6.x",
     "ws": "1.1.x"
   },
   "pre-commit": "test, integration"
