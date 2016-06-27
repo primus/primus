@@ -27,7 +27,11 @@ function Primus(server, options) {
   }
 
   options = options || {};
-  options.transport = options.transport || {};
+  options.transport = options.transport || {};  // Transformer specific options.
+  options.timeout = 'timeout' in options        // Heartbeat timeout.
+    ? options.timeout
+    : 35000;
+
   this.fuse();
 
   var primus = this
@@ -41,9 +45,6 @@ function Primus(server, options) {
   this.encoder = null;                        // Shorthand to the parser's encoder.
   this.decoder = null;                        // Shorthand to the parser's decoder.
   this.connected = 0;                         // Connection counter.
-  this.timeout = 'timeout' in options         // The timeout used to detect zombie sparks.
-    ? options.timeout
-    : 35000;
   this.whitelist = [];                        // Forwarded-for white listing.
   this.options = options;                     // The configuration.
   this.transformers = {                       // Message transformers.
@@ -63,9 +64,9 @@ function Primus(server, options) {
   // connect to the server.
   //
   this.spec = {
-    version: this.version,
+    timeout: options.timeout,
     pathname: this.pathname,
-    timeout: this.timeout
+    version: this.version
   };
 
   //
@@ -566,11 +567,11 @@ Primus.readable('library', function compile(nodejs) {
   // `ping` interval of the client to ensure that we've sent the server
   // a message before the timeout gets triggered and we get disconnected.
   //
-  if (this.timeout) {
+  if (this.options.timeout) {
     log('updating the default value of the client `ping` option');
     client = client.replace(
       'options.ping : 25e3;',
-      'options.ping : '+ (this.timeout - 10000) +';'
+      'options.ping : '+ (this.options.timeout - 10000) +';'
     );
   } else {
     log('setting the default value of the client `ping` option to `false`');
