@@ -73,7 +73,6 @@ repository.
   - [BrowserChannel](#browserchannel)
   - [Engine.IO](#engineio)
   - [Faye](#faye)
-  - [Socket.IO](#socketio)
   - [SockJS](#sockjs)
   - [uws](#uws)
   - [WebSockets](#websockets)
@@ -1261,53 +1260,6 @@ accessed using:
 var Socket = primus.Socket
   , socket = new Socket('url');
 ```
-
-#### Socket.IO
-
-The Socket.IO transport was written against Socket.IO 0.9.x. It was one of the
-first real-time servers written on Node.js and is one of the most used modules
-in Node.js. It uses multiple transports to connect the server. To use Socket.IO
-you need to install the `socket.io` module:
-
-```
-npm install socket.io@0.9.x --save
-```
-
-And tell `Primus` that you want to use `socket.io` as transformer:
-
-```js
-var primus = new Primus(server, { transformer: 'socket.io' });
-```
-
-If you want to use the client interface inside of Node.js you also need to
-install the `primus-socket.io-client` module. This a fork of `socket.io-client`
-maintained by us to fix the bugs found on the 0.9 branch which is no longer
-supported upstream:
-
-```
-npm install primus-socket.io-client --save
-```
-
-If you want, you can opt out of our fixes and use the original `socket.io-client`.
-To do that just install `socket.io-client` instead of `primus-socket.io-client`:
-
-```
-npm install socket.io-client@0.9.x --save
-```
-
-And then you can access it from your server instance:
-
-```js
-var Socket = primus.Socket
-  , socket = new Socket('url');
-```
-
-**Please keep in mind that the browser client will always use our fixes.**
-
-**Note: Primus will never support Socket.IO 1.0. As it's just an abstraction built
-upon Engine.IO so it makes more sense to use Engine.IO in Primus directly.
-Socket.IO 0.9.x will be supported as it uses a completely different transport
-system.**
 
 #### SockJS
 
