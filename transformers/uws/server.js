@@ -71,7 +71,7 @@ module.exports = function server() {
           });
         });
 
-        service.upgrade(ticket, secKey);
+        service.upgrade(ticket, secKey, req.headers['sec-websocket-extensions']);
       });
     }
 
