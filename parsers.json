@@ -5,5 +5,8 @@
   },
   "binary": {
     "server": "binary-pack"
+  },
+  "msgpack": {
+    "server": "primus-msgpack"
   }
 }

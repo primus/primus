@@ -60,4 +60,14 @@ describe('Parsers', function () {
       sendsAndReceivesTest('ejson', done);
     });
   });
+
+  describe('msgpack', function () {
+    it('connects with the parser', function (done) {
+      connectsTest('msgpack', done);
+    });
+
+    it('sends and receives data using the parser', function (done) {
+      sendsAndReceivesTest('msgpack', done);
+    });
+  });
 });
