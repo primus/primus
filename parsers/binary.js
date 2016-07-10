@@ -1,6 +1,6 @@
 'use strict';
 
-var BinaryPack = require('binary-pack');
+const BinaryPack = require('binary-pack');
 
 /**
  * Message encoder.
@@ -37,15 +37,18 @@ exports.decoder = function decoder(data, fn) {
 //
 // Expose the library so it can be added in our Primus module.
 //
-exports.library = [
-  'var BinaryPack = (function () {',
-  '  try { return require("binary-pack"); }',
-  '  catch (e) {}',
-  '  var exports = {};',
-  '  (function () { ',
-      BinaryPack.BrowserSource,
-  '  }).call(exports);',
-  '  return exports.BinaryPack;',
-  '})();',
-  ''
-].join('\n');
+exports.library = `var BinaryPack = (function () {
+  var exports, bp;
+
+  try { bp = Primus.requires('binary-pack'); }
+  catch (e) {}
+
+  if (bp) return bp;
+
+  exports = {};
+  (function () {
+    ${BinaryPack.BrowserSource}
+  }).call(exports);
+  return exports.BinaryPack;
+})();
+`;
