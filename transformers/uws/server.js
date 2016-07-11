@@ -48,7 +48,10 @@ module.exports = function server() {
 
     if (secKey && secKey.length === 24) {
       soc.setNoDelay(options.transport.noDelay);
-      ticket = service.transfer(soc._handle.fd, soc.ssl ? soc.ssl._external : null);
+      ticket = service.transfer(
+        soc._handle.fd === -1 ? soc._handle : soc._handle.fd,
+        soc.ssl ? soc.ssl._external : null
+      );
 
       soc.on('close', function destroy() {
         service.onConnection(function create(socket) {
