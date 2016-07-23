@@ -1,9 +1,10 @@
 'use strict';
 
-var PrimusError = require('../../errors').PrimusError
-  , Faye = require('faye-websocket')
-  , parse = require('url').parse
-  , http = require('http');
+const Faye = require('faye-websocket');
+const http = require('http');
+const url = require('url');
+
+const PrimusError = require('../../errors').PrimusError;
 
 /**
  * Minimum viable WebSocket server that works through the Primus interface.
@@ -12,11 +13,9 @@ var PrimusError = require('../../errors').PrimusError
  * @api private
  */
 module.exports = function server() {
-  var primus = this.primus
-    , Spark = this.Spark
-    , options = {};
+  let options = { maxLength: this.primus.options.maxLength };
 
-  if (primus.options.compression) {
+  if (this.primus.options.compression) {
     try {
       options.extensions = [ require('permessage-deflate') ];
     } catch (e) {
@@ -29,49 +28,49 @@ module.exports = function server() {
         '',
         '  npm install --save permessage-deflate',
         ''
-      ].forEach(function each(line) {
-        console.error('Primus: '+ line);
-      });
+      ].forEach((line) => console.error(`Primus: ${line}`));
 
-      throw new PrimusError('Missing dependencies for transformer: "faye"', primus);
+      throw new PrimusError(
+        'Missing dependencies for transformer: "faye"',
+        this.primus
+      );
     }
   }
 
-  options = Object.assign(options, primus.options.transport);
+  options = Object.assign(options, this.primus.options.transport);
 
   //
   // Listen to upgrade requests.
   //
-  this.on('upgrade', function upgrade(req, socket, head) {
+  this.on('upgrade', (req, socket, head) => {
     if (!Faye.isWebSocket(req)) return socket.destroy();
 
-    var websocket = new Faye(req, socket, head, null, options);
+    let websocket = new Faye(req, socket, head, null, options);
 
     //
     // The WebSocket handshake is complete only when the `open` event is fired.
     //
-    websocket.on('open', function open() {
-      var spark = new Spark(
-          req.headers          // HTTP request headers.
-        , req                  // IP address location.
-        , parse(req.url).query // Optional query string.
-        , null                 // We don't have an unique id.
-        , req                  // Reference to the HTTP req.
+    websocket.on('open', () => {
+      const spark = new this.Spark(
+          req.headers               // HTTP request headers.
+        , req                       // IP address location.
+        , url.parse(req.url).query  // Optional query string.
+        , null                      // We don't have an unique id.
+        , req                       // Reference to the HTTP req.
       );
 
-      spark.on('outgoing::end', function end() {
-        if (websocket) websocket.close();
-      }).on('outgoing::data', function write(data) {
+      spark.on('outgoing::end', () => websocket && websocket.close());
+      spark.on('outgoing::data', (data) => {
         if ('string' === typeof data) return websocket.send(data);
 
         websocket.send(data, { binary: true });
       });
 
       websocket.on('error', spark.emits('incoming::error'));
-      websocket.on('message', spark.emits('incoming::data', function parse(next, evt) {
+      websocket.on('message', spark.emits('incoming::data', (next, evt) => {
         next(undefined, evt.data);
       }));
-      websocket.on('close', spark.emits('incoming::end', function close(next) {
+      websocket.on('close', spark.emits('incoming::end', (next) => {
         websocket.removeAllListeners();
         websocket = null;
         next();
@@ -82,7 +81,7 @@ module.exports = function server() {
   //
   // Listen to non-upgrade requests.
   //
-  this.on('request', function request(req, res) {
+  this.on('request', (req, res) => {
     res.writeHead(426, { 'content-type': 'text/plain' });
     res.end(http.STATUS_CODES[426]);
   });

@@ -1,8 +1,8 @@
 'use strict';
 
-var WebSocketServer = require('ws').Server
-  , parse = require('url').parse
-  , http = require('http');
+const http = require('http');
+const url = require('url');
+const ws = require('ws');
 
 /**
  * Minimum viable WebSocket server for Node.js that works through the Primus
@@ -12,11 +12,9 @@ var WebSocketServer = require('ws').Server
  * @api private
  */
 module.exports = function server() {
-  var logger = this.logger
-    , Spark = this.Spark;
-
-  var service = this.service = new WebSocketServer(Object.assign({
-    perMessageDeflate: !!this.primus.options.compression
+  this.service = new ws.Server(Object.assign({
+    perMessageDeflate: !!this.primus.options.compression,
+    maxPayload: this.primus.options.maxLength
   }, this.primus.options.transport, {
     clientTracking: false,
     noServer: true
@@ -28,26 +26,23 @@ module.exports = function server() {
    * @param {Error} err We failed at something.
    * @api private
    */
-  function noop(err) {
-    if (err) logger.error(err);
-  }
+  const noop = (err) => err && this.logger.error(err);
 
   //
   // Listen to upgrade requests.
   //
-  this.on('upgrade', function upgrade(req, socket, head) {
-    this.service.handleUpgrade(req, socket, head, function create(socket) {
-      var spark = new Spark(
+  this.on('upgrade', (req, socket, head) => {
+    this.service.handleUpgrade(req, socket, head, (socket) => {
+      const spark = new this.Spark(
           socket.upgradeReq.headers               // HTTP request headers.
         , socket.upgradeReq                       // IP address location.
-        , parse(socket.upgradeReq.url).query      // Optional query string.
+        , url.parse(socket.upgradeReq.url).query  // Optional query string.
         , null                                    // We don't have an unique id.
         , socket.upgradeReq                       // Reference to the HTTP req.
       );
 
-      spark.on('outgoing::end', function end() {
-        if (socket) socket.close();
-      }).on('outgoing::data', function write(data) {
+      spark.on('outgoing::end', () => socket && socket.close());
+      spark.on('outgoing::data', (data) => {
         if (socket.readyState !== socket.OPEN) return;
         if ('string' === typeof data) return socket.send(data, noop);
 
@@ -56,10 +51,10 @@ module.exports = function server() {
 
       socket.on('message', spark.emits('incoming::data'));
       socket.on('error', spark.emits('incoming::error'));
-      socket.on('ping', spark.emits('incoming::ping', function strip(next) {
+      socket.on('ping', spark.emits('incoming::ping', (next) => {
         next(undefined, null);
       }));
-      socket.on('close', spark.emits('incoming::end', function clear(next) {
+      socket.on('close', spark.emits('incoming::end', (next) => {
         socket.removeAllListeners();
         socket = null;
         next();
@@ -70,12 +65,10 @@ module.exports = function server() {
   //
   // Listen to non-upgrade requests.
   //
-  this.on('request', function request(req, res) {
+  this.on('request', (req, res) => {
     res.writeHead(426, { 'content-type': 'text/plain' });
     res.end(http.STATUS_CODES[426]);
   });
 
-  this.on('close', function close() {
-    service.close();
-  });
+  this.once('close',  () => this.service.close());
 };

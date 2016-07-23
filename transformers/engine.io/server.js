@@ -1,6 +1,6 @@
 'use strict';
 
-var Engine = require('engine.io').Server;
+const engine = require('engine.io');
 
 /**
  * Minimum viable Engine.IO server for Node.js that works through the primus
@@ -10,11 +10,10 @@ var Engine = require('engine.io').Server;
  * @api private
  */
 module.exports = function server() {
-  var Spark = this.Spark;
-
-  var service = this.service = new Engine(Object.assign({
+  this.service = new engine.Server(Object.assign({
     perMessageDeflate: !!this.primus.options.compression,
-    httpCompression: !!this.primus.options.compression
+    httpCompression: !!this.primus.options.compression,
+    maxHttpBufferSize: this.primus.options.maxLength
   }, this.primus.options.transport));
 
   //
@@ -22,24 +21,21 @@ module.exports = function server() {
   // automatically announce it self as a new connection once it's created (after
   // the next tick).
   //
-  this.service.on('connection', function connection(socket) {
-    var spark = new Spark(
-        socket.request.headers                      // HTTP request headers.
-      , socket.request.primus                       // IP Address location.
-      , socket.request.query                        // Optional query string.
-      , socket.id                                   // Unique connection id.
-      , socket.request                              // Reference to the HTTP req.
+  this.service.on('connection', (socket) => {
+    const spark = new this.Spark(
+        socket.request.headers  // HTTP request headers.
+      , socket.request.primus   // IP Address location.
+      , socket.request.query    // Optional query string.
+      , socket.id               // Unique connection id.
+      , socket.request          // Reference to the HTTP req.
     );
 
-    spark.on('outgoing::end', function end() {
-      if (socket) socket.close();
-    }).on('outgoing::data', function write(data) {
-      socket.write(data);
-    });
+    spark.on('outgoing::end', () => socket && socket.close());
+    spark.on('outgoing::data', (data) => socket.write(data));
 
     socket.on('error', spark.emits('incoming::error'));
     socket.on('data', spark.emits('incoming::data'));
-    socket.on('close', spark.emits('incoming::end', function parser(next) {
+    socket.on('close', spark.emits('incoming::end', (next) => {
       socket.removeAllListeners();
       socket = null;
       next();
@@ -49,9 +45,9 @@ module.exports = function server() {
   //
   // Listen to upgrade requests.
   //
-  this.on('upgrade', function upgrade(req, socket, head) {
+  this.on('upgrade', (req, socket, head) => {
     this.service.handleUpgrade(req, socket, head);
-  }).on('request', function request(req, res) {
+  }).on('request', (req, res) => {
     //
     // Engine.IO closes the handshake socket before we receive a `connection`
     // event. And as the socket is already answered it can be undefined.
@@ -62,8 +58,8 @@ module.exports = function server() {
     };
 
     this.service.handleRequest(req, res);
-  }).once('close', function close() {
-    service.close();
-    if (service.ws) service.ws.close();
+  }).once('close',  () => {
+    if (this.service.ws) this.service.ws.close();
+    this.service.close();
   });
 };
