@@ -1363,7 +1363,6 @@ of the transformer, we just `toLowerCase()` everything.
   side component. We're bundling a snapshot of these libraries inside of Primus.
   We will always be targeting the latest version of these transformers when we
   bundle the library.
-- uws works only on Node.js version 4 or above.
 
 ### Parsers
 
