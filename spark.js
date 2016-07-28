@@ -266,28 +266,6 @@ Spark.readable('__initialise', [function initialise() {
   ultron.on('end', function end() {
     clearTimeout(spark.timeout);
     primus.emit('disconnection', spark);
-
-    //
-    // We are most likely the first `end` event in the EventEmitter stack which
-    // will make our callback the first to be execute. If we instantly delete
-    // properties it will cause that our users can't access them anymore in
-    // their `end` listener. So if they need to un-register something based on
-    // the spark.id, that would be impossible. Therefor we delay our deletion
-    // with a non scientific amount of milliseconds to give people some time to
-    // use these references for the last time.
-    //
-    setTimeout(function timeout() {
-      log('releasing references from our spark object for %s', spark.id);
-      //
-      // Release references.
-      // @TODO also remove the references that we're set by users.
-      //
-      [
-        'id', 'primus', 'remote', 'headers', 'request', 'query'
-      ].forEach(function each(key) {
-        delete spark[key];
-      });
-    }, 10);
   });
 
   //
