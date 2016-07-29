@@ -173,19 +173,13 @@ Object.defineProperty(Primus.prototype, 'client', {
 //
 Object.defineProperty(Primus.prototype, 'Socket', {
   get: function () {
-    var sandbox = vm.createContext({
-      clearImmediate: clearImmediate,
-      clearInterval: clearInterval,
-      clearTimeout: clearTimeout,
-      setImmediate: setImmediate,
+    const sandbox = Object.keys(global).reduce((acc, key) => {
+      if (key !== 'global' && key !== 'require') acc[key] = global[key];
+      return acc;
+    }, {
       __dirname: process.cwd(),
-      setInterval: setInterval,
       __filename: 'primus.js',
-      setTimeout: setTimeout,
-      console: console,
-      process: process,
       require: require,
-      Buffer: Buffer,
 
       //
       // The following globals are introduced so libraries that use `instanceof`
@@ -200,7 +194,7 @@ Object.defineProperty(Primus.prototype, 'Socket', {
       Date: Date
     });
 
-    vm.runInContext(this.library(true), sandbox, 'primus.js');
+    vm.runInNewContext(this.library(true), sandbox, { filename: 'primus.js' });
     return sandbox.Primus;
   }
 });
