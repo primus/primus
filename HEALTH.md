@@ -24,6 +24,7 @@ Project                              | Version                                  
 [primacron][primacron]               | [![Version npm][npm-primacron-badge]][npm-primacron]               | [![Build Status][travis-primacron-badge]][travis-primacron]               | [![Dependencies][david-primacron-badge]][david-primacron]               | [![Coverage Status][coverage-primacron-badge]][coverage-primacron]
 [primus-analytics][primus-analytics] | [![Version npm][npm-primus-analytics-badge]][npm-primus-analytics] | [![Build Status][travis-primus-analytics-badge]][travis-primus-analytics] | [![Dependencies][david-primus-analytics-badge]][david-primus-analytics] | [![Coverage Status][coverage-primus-analytics-badge]][coverage-primus-analytics]
 [primus-emit][primus-emit]           | [![Version npm][npm-primus-emit-badge]][npm-primus-emit]           | [![Build Status][travis-primus-emit-badge]][travis-primus-emit]           | [![Dependencies][david-primus-emit-badge]][david-primus-emit]           | [![Coverage Status][coverage-primus-emit-badge]][coverage-primus-emit]
+[primus-msgpack][primus-msgpack]     | [![Version npm][npm-primus-msgpack-badge]][npm-primus-msgpack]     | [![Build Status][travis-primus-msgpack-badge]][travis-primus-msgpack]     | [![Dependencies][david-primus-msgpack-badge]][david-primus-msgpack]     | [![Coverage Status][coverage-primus-msgpack-badge]][coverage-primus-msgpack]
 [substream][substream]               | [![Version npm][npm-substream-badge]][npm-substream]               | [![Build Status][travis-substream-badge]][travis-substream]               | [![Dependencies][david-substream-badge]][david-substream]               | [![Coverage Status][coverage-substream-badge]][coverage-substream]
 
 [primus]: https://github.com/primus/primus
@@ -205,6 +206,16 @@ Project                              | Version                                  
 [david-primus-emit]: https://david-dm.org/primus/primus-emit
 [coverage-primus-emit-badge]: https://img.shields.io/coveralls/primus/primus-emit/master.svg?style=flat-square
 [coverage-primus-emit]: https://coveralls.io/r/primus/primus-emit?branch=master
+
+[primus-msgpack]: https://github.com/primus/primus-msgpack
+[npm-primus-msgpack-badge]: https://img.shields.io/npm/v/primus-msgpack.svg?style=flat-square
+[npm-primus-msgpack]: https://www.npmjs.com/package/primus-msgpack
+[travis-primus-msgpack-badge]: https://img.shields.io/travis/primus/primus-msgpack/master.svg?style=flat-square
+[travis-primus-msgpack]: https://travis-ci.org/primus/primus-msgpack
+[david-primus-msgpack-badge]: https://img.shields.io/david/primus/primus-msgpack.svg?style=flat-square
+[david-primus-msgpack]: https://david-dm.org/primus/primus-msgpack
+[coverage-primus-msgpack-badge]: https://img.shields.io/coveralls/primus/primus-msgpack/master.svg?style=flat-square
+[coverage-primus-msgpack]: https://coveralls.io/r/primus/primus-msgpack?branch=master
 
 [substream]: https://github.com/primus/substream
 [npm-substream-badge]: https://img.shields.io/npm/v/substream.svg?style=flat-square
