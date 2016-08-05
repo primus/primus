@@ -161,7 +161,7 @@ to completely disable the heartbeat timeout by setting the value of the
 
 If you don't have a pre-existing server where you want or can attach your Primus
 server to you can also use the `Primus.createServer` convenience method. The
-`createServer method will automatically:
+`createServer` method will automatically:
 
 - Setup a HTTP, HTTPS or SPDY server for you on the given port number.
 - Setup your Primus server with the given configuration.
