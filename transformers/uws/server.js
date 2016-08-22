@@ -42,15 +42,23 @@ module.exports = function server() {
   //
   // Listen to upgrade requests.
   //
-  this.on('upgrade', (req, soc, head) => {
+  this.on('upgrade', (req, soc) => {
     const secKey = req.headers['sec-websocket-key'];
-    let ticket;
 
     if (secKey && secKey.length === 24) {
       soc.setNoDelay(options.transport.noDelay);
-      ticket = this.service.transfer(
-        soc._handle.fd === -1 ? soc._handle : soc._handle.fd,
-        soc.ssl ? soc.ssl._external : null
+
+      let socketHandle = soc._handle;
+      let sslState = null;
+
+      if (soc.ssl) {
+        socketHandle = soc._parent._handle;
+        sslState = soc.ssl._external;
+      }
+
+      const ticket = this.service.transfer(
+        socketHandle.fd === -1 ? socketHandle : socketHandle.fd,
+        sslState
       );
 
       soc.on('close', () => {
