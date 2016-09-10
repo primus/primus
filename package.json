@@ -54,7 +54,7 @@
     "asyncemit": "3.0.x",
     "create-server": "1.0.x",
     "diagnostics": "1.0.x",
-    "eventemitter3": "1.2.x",
+    "eventemitter3": "2.0.x",
     "forwarded-for": "1.0.x",
     "fusing": "1.0.x",
     "setheader": "0.0.x",
