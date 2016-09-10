@@ -20,6 +20,9 @@ var PrimusError = require('./errors').PrimusError
  */
 function Primus(server, options) {
   if (!(this instanceof Primus)) return new Primus(server, options);
+
+  this.fuse();
+
   if ('object' !== typeof server) {
     var message = 'The first argument of the constructor must be ' +
       'an HTTP or HTTPS server instance';
@@ -32,8 +35,6 @@ function Primus(server, options) {
   options.timeout = 'timeout' in options              // Heartbeat timeout.
     ? options.timeout
     : 35000;
-
-  this.fuse();
 
   var primus = this
     , key;

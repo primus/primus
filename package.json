@@ -75,6 +75,7 @@
     "engine.io": "1.6.x",
     "engine.io-client": "1.6.x",
     "faye-websocket": "0.11.x",
+    "inherits": "2.0.x",
     "mocha": "3.0.x",
     "pre-commit": "1.1.x",
     "primus-msgpack": "1.0.x",

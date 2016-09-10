@@ -5,6 +5,7 @@ var EventEmitter = require('eventemitter3')
   , TickTock = require('tick-tock')
   , Recovery = require('recovery')
   , qs = require('querystringify')
+  , inherits = require('inherits')
   , destroy = require('demolish')
   , yeast = require('yeast')
   , u2028 = /\u2028/g
@@ -70,6 +71,9 @@ try {
  */
 function Primus(url, options) {
   if (!(this instanceof Primus)) return new Primus(url, options);
+
+  Primus.Stream.call(this);
+
   if ('function' !== typeof this.client) {
     var message = 'The client library has not been compiled correctly, ' +
       'see https://github.com/primus/primus#client-library for more details';
@@ -202,26 +206,15 @@ Primus.requires = Primus.require = function requires(name) {
 
 //
 // It's possible that we're running in Node.js or in a Node.js compatible
-// environment. In this cases we inherit from the Stream base class.
+// environment. In this cases we try to inherit from the Stream base class.
 //
-var Stream;
-
 try {
-  Primus.Stream = Stream = Primus.requires('stream');
+  Primus.Stream = Primus.requires('stream');
+} catch (e) { }
 
-  //
-  // Normally inheritance is done in the same way as we do in our catch
-  // statement. But due to changes to the EventEmitter interface in Node 0.10
-  // this will trigger annoying memory leak warnings and other potential issues
-  // outlined in the issue linked below.
-  //
-  // @see https://github.com/joyent/node/issues/4971
-  //
-  Primus.requires('util').inherits(Primus, Stream);
-} catch (e) {
-  Primus.Stream = EventEmitter;
-  Primus.prototype = new EventEmitter();
-}
+if (!Primus.Stream) Primus.Stream = EventEmitter;
+
+inherits(Primus, Primus.Stream);
 
 /**
  * Primus readyStates, used internally to set the correct ready state.
