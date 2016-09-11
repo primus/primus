@@ -11,7 +11,6 @@ var util = require('util');
  * @api public
  */
 function PrimusError(message, logger) {
-  Error.call(this);
   Error.captureStackTrace(this, this.constructor);
 
   this.message = message;
@@ -32,7 +31,6 @@ util.inherits(PrimusError, Error);
  * @api public
  */
 function ParserError(message, spark) {
-  Error.call(this);
   Error.captureStackTrace(this, this.constructor);
 
   this.message = message;
