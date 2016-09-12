@@ -29,8 +29,14 @@ module.exports = function server() {
 
   this.service = new uws.uws.Server(0, mask, maxLength);
 
-  this.service.onMessage((socket, msg, binary, spark) => {
-    spark.emit('incoming::data', binary ? msg : msg.toString());
+  this.service.onMessage((msg, spark) => {
+    //
+    // Binary data is passed zero-copy as an `ArrayBuffer` so we first have to
+    // convert it to a `Buffer` and then copy it to a new `Buffer`.
+    //
+    if ('string' !== typeof msg) msg = Buffer.from(Buffer.from(msg));
+
+    spark.emit('incoming::data', msg);
   });
 
   this.service.onDisconnection((socket, code, msg, spark) => {
