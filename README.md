@@ -2038,9 +2038,9 @@ Primus library is run in a worker environment. **USE IT AT YOUR OWN RISK**.
 To turn off the cluster warning in your Primus instance you can set the option
 `iknowclusterwillbreakconnections` to `true`.
 
-#### How do I use Primus with Express 3
+#### How do I use Primus with Express 3/4
 
-Express 3's `express()` instance isn't a valid HTTP server. In order to make it
+Express's `express()` instance isn't a valid HTTP server. In order to make it
 work with `Primus` and other real-time transformers you need to feed the instance
 to a real `http` server and supply this server. See example below:
 
