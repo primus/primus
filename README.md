@@ -88,7 +88,7 @@ repository.
 - [FAQ](#FAQ)
   - [Scaling](#what-is-the-best-way-to-scale-primus)
   - [Cluster](#can-i-use-cluster)
-  - [Express](#how-do-i-use-primus-with-express-3)
+  - [Express](#how-do-i-use-primus-with-express)
   - [RequireJS](#is-requirejs-supported)
   - [Custom headers](#can-i-send-custom-headers-to-the-server)
 - [Versioning](#versioning)
@@ -2038,9 +2038,9 @@ Primus library is run in a worker environment. **USE IT AT YOUR OWN RISK**.
 To turn off the cluster warning in your Primus instance you can set the option
 `iknowclusterwillbreakconnections` to `true`.
 
-#### How do I use Primus with Express 3/4
+#### How do I use Primus with Express
 
-Express's `express()` instance isn't a valid HTTP server. In order to make it
+Express' `express()` instance isn't a valid HTTP server. In order to make it
 work with `Primus` and other real-time transformers you need to feed the instance
 to a real `http` server and supply this server. See example below:
 
