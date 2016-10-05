@@ -1,8 +1,8 @@
 diff --git a/transformers/engine.io/library.js b/transformers/engine.io/library.js
-index 3200bc9..aa46cec 100644
+index ae51096..4533d10 100644
 --- a/transformers/engine.io/library.js
 +++ b/transformers/engine.io/library.js
-@@ -2004,23 +2004,6 @@ WS.prototype.addEventListeners = function(){
+@@ -1989,23 +1989,6 @@ WS.prototype.addEventListeners = function () {
  };
  
  /**
@@ -12,11 +12,11 @@ index 3200bc9..aa46cec 100644
 - * @api private
 - */
 -
--if ('undefined' != typeof navigator
--  && /iPad|iPhone|iPod/i.test(navigator.userAgent)) {
--  WS.prototype.onData = function(data){
+-if ('undefined' !== typeof navigator &&
+-  /iPad|iPhone|iPod/i.test(navigator.userAgent)) {
+-  WS.prototype.onData = function (data) {
 -    var self = this;
--    setTimeout(function(){
+-    setTimeout(function () {
 -      Transport.prototype.onData.call(self, data);
 -    }, 0);
 -  };
