@@ -4,6 +4,8 @@ const http = require('http');
 const url = require('url');
 const uws = require('uws');
 
+const native = uws.native;
+
 /**
  * Server of µWebSockets transformer.
  *
@@ -12,24 +14,47 @@ const uws = require('uws');
  */
 module.exports = function server() {
   const options = this.primus.options;
-  const maxLength = options.transport.maxPayload || options.maxLength;
-  let mask = 0;
 
-  if (options.compression || options.transport.perMessageDeflate) {
-    mask = uws.PERMESSAGE_DEFLATE;
-    if (options.transport.perMessageDeflate) {
-      if (options.transport.perMessageDeflate.serverNoContextTakeover) {
-        mask |= uws.SERVER_NO_CONTEXT_TAKEOVER;
-      }
-      if (options.transport.perMessageDeflate.clientNoContextTakeover) {
-        mask |= uws.CLIENT_NO_CONTEXT_TAKEOVER;
-      }
-    }
-  }
+  //
+  // The `maxPayload` option is ignored by `uws` since version 0.10.0.
+  // The value has been hardcoded to 16 MiB in version 0.10.9 so using
+  // `options.transport.maxPayload` or `options.maxLength` as second
+  // argument is useless here.
+  //
+  const group = native.server.group.create(
+    options.compression || options.transport.perMessageDeflate ? 1 : 0
+  );
 
-  this.service = new uws.uws.Server(0, mask, maxLength);
+  let upgradeReq = null;
 
-  this.service.onMessage((msg, spark) => {
+  native.server.group.onConnection(group, (socket) => {
+    const spark = new this.Spark(
+      upgradeReq.headers,               // HTTP request headers.
+      upgradeReq,                       // IP address location.
+      url.parse(upgradeReq.url).query,  // Optional query string.
+      null,                             // We don't have an unique id.
+      upgradeReq                        // Reference to the HTTP req.
+    );
+
+    native.setUserData(socket, spark);
+
+    spark.ultron.on('outgoing::end', () => native.server.close(socket));
+    spark.on('outgoing::data', (data) => {
+      const opcode = Buffer.isBuffer(data)
+        ? uws.OPCODE_BINARY
+        : uws.OPCODE_TEXT;
+
+      native.server.send(socket, data, opcode);
+    });
+  });
+
+  native.server.group.onDisconnection(group, (socket, code, msg, spark) => {
+    native.clearUserData(socket);
+    spark.ultron.remove('outgoing::end');
+    spark.emit('incoming::end');
+  });
+
+  native.server.group.onMessage(group, (msg, spark) => {
     //
     // Binary data is passed zero-copy as an `ArrayBuffer` so we first have to
     // convert it to a `Buffer` and then copy it to a new `Buffer`.
@@ -37,12 +62,6 @@ module.exports = function server() {
     if ('string' !== typeof msg) msg = Buffer.from(Buffer.from(msg));
 
     spark.emit('incoming::data', msg);
-  });
-
-  this.service.onDisconnection((socket, code, msg, spark) => {
-    this.service.setData(socket);
-    spark.ultron.remove('outgoing::end');
-    spark.emit('incoming::end');
   });
 
   //
@@ -62,34 +81,25 @@ module.exports = function server() {
         sslState = soc.ssl._external;
       }
 
-      const ticket = this.service.transfer(
+      const ticket = native.transfer(
         socketHandle.fd === -1 ? socketHandle : socketHandle.fd,
         sslState
       );
 
       soc.on('close', () => {
-        this.service.onConnection((socket) => {
-          const spark = new this.Spark(
-              req.headers               // HTTP request headers.
-            , req                       // IP address location.
-            , url.parse(req.url).query  // Optional query string.
-            , null                      // We don't have an unique id.
-            , req                       // Reference to the HTTP req.
-          );
+        upgradeReq = req;
+        native.upgrade(
+          group,
+          ticket,
+          secKey,
+          req.headers['sec-websocket-extensions']
+        );
 
-          this.service.setData(socket, spark);
-
-          spark.ultron.on('outgoing::end', () => this.service.close(socket));
-          spark.on('outgoing::data', (data) => {
-            const opcode = Buffer.isBuffer(data)
-              ? uws.OPCODE_BINARY
-              : uws.OPCODE_TEXT;
-
-            this.service.send(socket, data, opcode);
-          });
-        });
-
-        this.service.upgrade(ticket, secKey, req.headers['sec-websocket-extensions']);
+        //
+        // Delete references to destroyed socket.
+        //
+        req.client = req.connection = req.socket = null;
+        upgradeReq = null;
       });
     }
 
@@ -104,5 +114,5 @@ module.exports = function server() {
     res.end(http.STATUS_CODES[426]);
   });
 
-  this.once('close', () => this.service.close());
+  this.once('close', () => native.server.group.close(group));
 };
