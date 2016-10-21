@@ -16,7 +16,7 @@ module.exports.parser = _dereq_('engine.io-parser');
  * Module dependencies.
  */
 
-var transports = _dereq_('./transports');
+var transports = _dereq_('./transports/index');
 var Emitter = _dereq_('component-emitter');
 var debug = _dereq_('debug')('engine.io-client:socket');
 var index = _dereq_('indexof');
@@ -86,6 +86,7 @@ function Socket (uri, opts) {
   this.transports = opts.transports || ['polling', 'websocket'];
   this.readyState = '';
   this.writeBuffer = [];
+  this.prevBufferLen = 0;
   this.policyPort = opts.policyPort || 843;
   this.rememberUpgrade = opts.rememberUpgrade || false;
   this.binaryType = null;
@@ -114,6 +115,16 @@ function Socket (uri, opts) {
     }
   }
 
+  // set on handshake
+  this.id = null;
+  this.upgrades = null;
+  this.pingInterval = null;
+  this.pingTimeout = null;
+
+  // set on heartbeat
+  this.pingIntervalTimer = null;
+  this.pingTimeoutTimer = null;
+
   this.open();
 }
 
@@ -140,7 +151,7 @@ Socket.protocol = parser.protocol; // this is an int
 
 Socket.Socket = Socket;
 Socket.Transport = _dereq_('./transport');
-Socket.transports = _dereq_('./transports');
+Socket.transports = _dereq_('./transports/index');
 Socket.parser = _dereq_('engine.io-parser');
 
 /**
@@ -733,7 +744,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":3,"./transports":4,"component-emitter":14,"debug":16,"engine.io-parser":18,"indexof":22,"parsejson":25,"parseqs":26,"parseuri":27}],3:[function(_dereq_,module,exports){
+},{"./transport":3,"./transports/index":4,"component-emitter":14,"debug":16,"engine.io-parser":18,"indexof":22,"parsejson":25,"parseqs":26,"parseuri":27}],3:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -1579,9 +1590,10 @@ Request.prototype.abort = function () {
  * emitted.
  */
 
+Request.requestsCount = 0;
+Request.requests = {};
+
 if (global.document) {
-  Request.requestsCount = 0;
-  Request.requests = {};
   if (global.attachEvent) {
     global.attachEvent('onunload', unloadHandler);
   } else if (global.addEventListener) {
@@ -2951,7 +2963,7 @@ var after = _dereq_('after');
 var utf8 = _dereq_('wtf-8');
 
 var base64encoder;
-if (global.ArrayBuffer) {
+if (global && global.ArrayBuffer) {
   base64encoder = _dereq_('base64-arraybuffer');
 }
 
@@ -3164,8 +3176,11 @@ exports.encodeBase64Packet = function(packet, callback) {
  */
 
 exports.decodePacket = function (data, binaryType, utf8decode) {
+  if (data === undefined) {
+    return err;
+  }
   // String data
-  if (typeof data == 'string' || data === undefined) {
+  if (typeof data == 'string') {
     if (data.charAt(0) == 'b') {
       return exports.decodeBase64Packet(data.substr(1), binaryType);
     }
@@ -4208,7 +4223,7 @@ module.exports = yeast;
 
 },{}],30:[function(_dereq_,module,exports){
 
-module.exports = _dereq_('./lib/');
+module.exports = _dereq_('./lib/index');
 
-},{"./lib/":1}]},{},[30])(30)
+},{"./lib/index":1}]},{},[30])(30)
 });
