@@ -429,7 +429,8 @@ Socket.prototype.onOpen = function () {
  */
 
 Socket.prototype.onPacket = function (packet) {
-  if ('opening' === this.readyState || 'open' === this.readyState) {
+  if ('opening' === this.readyState || 'open' === this.readyState ||
+      'closing' === this.readyState) {
     debug('socket receive: type "%s", data "%s"', packet.type, packet.data);
 
     this.emit('packet', packet);
@@ -1416,6 +1417,10 @@ Request.prototype.create = function () {
       } catch (e) {}
     }
 
+    try {
+      xhr.setRequestHeader('Accept', '*/*');
+    } catch (e) {}
+
     // ie6 check
     if ('withCredentials' in xhr) {
       xhr.withCredentials = true;
@@ -2136,10 +2141,8 @@ WS.prototype.check = function () {
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"../transport":3,"component-inherit":15,"debug":16,"engine.io-parser":18,"parseqs":26,"ws":undefined,"yeast":29}],9:[function(_dereq_,module,exports){
+(function (global){
 // browser shim for xmlhttprequest module
-
-// Indicate to eslint that ActiveXObject is global
-/* global ActiveXObject */
 
 var hasCORS = _dereq_('has-cors');
 
@@ -2172,11 +2175,12 @@ module.exports = function (opts) {
 
   if (!xdomain) {
     try {
-      return new window[(['Active'].concat('Object').join('X'))]('Microsoft.XMLHTTP');
+      return new global[['Active'].concat('Object').join('X')]('Microsoft.XMLHTTP');
     } catch (e) { }
   }
 };
 
+}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{"has-cors":21}],10:[function(_dereq_,module,exports){
 module.exports = after
 
