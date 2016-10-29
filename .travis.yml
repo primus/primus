@@ -1,8 +1,8 @@
 sudo: false
 language: node_js
 node_js:
+  - "7"
   - "6"
-  - "5"
   - "4"
 script:
   - "npm run test && npm run integration"
