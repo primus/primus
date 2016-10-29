@@ -70,7 +70,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
       if (
           'unixdomainwebsockets' !== transformer_name
         && 'browserchannel' !== transformer
-        && !/^v0\.(?:8|10)/.test(process.version)
+        && !process.env.TRAVIS
       ) it('supports literal IPv6 addresses in the connection URL', function (done) {
         var socket = new Socket('http://[::1]:'+ server.portnumber);
 
