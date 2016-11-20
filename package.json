@@ -72,7 +72,7 @@
     "deumdify": "1.2.x",
     "ejson": "2.1.x",
     "emits": "3.0.x",
-    "engine.io": "1.7.x",
+    "engine.io": "1.8.x",
     "engine.io-client": "1.7.x",
     "faye-websocket": "0.11.x",
     "inherits": "2.0.x",
