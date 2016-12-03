@@ -191,13 +191,6 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
   if (!this.test(req)) return this.emit('previous::upgrade', req, socket, head);
 
   //
-  // Copy buffer to prevent large buffer retention in Node core.
-  // @see jmatthewsr-ms/node-slab-memory-issues
-  //
-  var buffy = new Buffer(head.length);
-  head.copy(buffy);
-
-  //
   // See Transformer#request for an explanation of this madness.
   //
   req.headers['primus::req::backup'] = req;
@@ -206,7 +199,7 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
   });
 
   log('handling HTTP upgrade for url: %s', req.url);
-  this.forEach('upgrade', req, socket, this.emits('upgrade', req, socket, buffy));
+  this.forEach('upgrade', req, socket, this.emits('upgrade', req, socket, head));
 });
 
 /**
