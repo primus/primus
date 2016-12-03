@@ -6,13 +6,10 @@ const uws = require('uws');
 
 const native = uws.native;
 
-/**
- * uws v0.12.0+ needs a set "no operation" callback.
- */
-function noop() {}
-if (native.setNoop) {
-  native.setNoop(noop);
-}
+//
+// uws v0.12.0+ needs a set "no operation" callback.
+//
+if (native.setNoop) native.setNoop(() => {});
 
 /**
  * Server of µWebSockets transformer.
