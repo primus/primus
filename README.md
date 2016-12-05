@@ -1966,6 +1966,20 @@ README.md and see it be merged automatically.
 </dl>
 
 <dl>
+  <dt><a href="https://github.com/fadeenk/primus-rooms-redis-adapter">primus-rooms-redis-adapter</a></dt>
+  <dd>
+    A redis adapter for primus-rooms module. Supports integration with metroplex and omega-supreme.
+  </dd>
+  <dd>
+    <a href="https://www.npmjs.com/package/primus-rooms-redis-adapter"><img
+      src="https://img.shields.io/npm/v/primus-rooms-redis-adapter.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://travis-ci.org/fadeenk/primus-rooms-redis-adapter"><img
+      src="https://img.shields.io/travis/fadeenk/primus-rooms-redis-adapter/master.svg?style=flat-square"
+      alt="Build Status" /></a>
+  </dd>
+</dl>
+
+<dl>
   <dt><a href="https://github.com/Fishrock123/primus-spark-latency">primus-spark-latency</a></dt>
   <dd>Adds a latency property to primus sparks server-side.</dd>
   <dd>
