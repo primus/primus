@@ -1968,7 +1968,7 @@ README.md and see it be merged automatically.
 <dl>
   <dt><a href="https://github.com/fadeenk/primus-rooms-redis-adapter">primus-rooms-redis-adapter</a></dt>
   <dd>
-    A redis adapter for promis-rooms module. Supports integration with metroplex and omega-supreme.
+    A redis adapter for primus-rooms module. Supports integration with metroplex and omega-supreme.
   </dd>
   <dd>
     <a href="https://www.npmjs.com/package/primus-rooms-redis-adapter"><img
