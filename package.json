@@ -53,7 +53,7 @@
     "access-control": "~1.0.0",
     "asyncemit": "~3.0.1",
     "create-server": "~1.0.1",
-    "diagnostics": "~1.0.1",
+    "diagnostics": "~1.1.0",
     "eventemitter3": "~2.0.2",
     "forwarded-for": "~1.0.1",
     "fusing": "~1.0.0",
