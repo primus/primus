@@ -10,7 +10,7 @@ module.exports = _dereq_('./socket');
  */
 module.exports.parser = _dereq_('engine.io-parser');
 
-},{"./socket":2,"engine.io-parser":18}],2:[function(_dereq_,module,exports){
+},{"./socket":2,"engine.io-parser":16}],2:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -18,7 +18,7 @@ module.exports.parser = _dereq_('engine.io-parser');
 
 var transports = _dereq_('./transports/index');
 var Emitter = _dereq_('component-emitter');
-var debug = _dereq_('debug')('engine.io-client:socket');
+
 var index = _dereq_('indexof');
 var parser = _dereq_('engine.io-parser');
 var parseuri = _dereq_('parseuri');
@@ -168,7 +168,6 @@ Socket.parser = _dereq_('engine.io-parser');
  */
 
 Socket.prototype.createTransport = function (name) {
-  debug('creating transport "%s"', name);
   var query = clone(this.query);
 
   // append engine.io protocol identifier
@@ -262,11 +261,9 @@ Socket.prototype.open = function () {
  */
 
 Socket.prototype.setTransport = function (transport) {
-  debug('setting transport %s', transport.name);
   var self = this;
 
   if (this.transport) {
-    debug('clearing existing transport %s', this.transport.name);
     this.transport.removeAllListeners();
   }
 
@@ -297,7 +294,6 @@ Socket.prototype.setTransport = function (transport) {
  */
 
 Socket.prototype.probe = function (name) {
-  debug('probing transport "%s"', name);
   var transport = this.createTransport(name, { probe: 1 });
   var failed = false;
   var self = this;
@@ -311,22 +307,18 @@ Socket.prototype.probe = function (name) {
     }
     if (failed) return;
 
-    debug('probe transport "%s" opened', name);
     transport.send([{ type: 'ping', data: 'probe' }]);
     transport.once('packet', function (msg) {
       if (failed) return;
       if ('pong' === msg.type && 'probe' === msg.data) {
-        debug('probe transport "%s" pong', name);
         self.upgrading = true;
         self.emit('upgrading', transport);
         if (!transport) return;
         Socket.priorWebsocketSuccess = 'websocket' === transport.name;
 
-        debug('pausing current transport "%s"', self.transport.name);
         self.transport.pause(function () {
           if (failed) return;
           if ('closed' === self.readyState) return;
-          debug('changing transport and sending upgrade packet');
 
           cleanup();
 
@@ -338,7 +330,6 @@ Socket.prototype.probe = function (name) {
           self.flush();
         });
       } else {
-        debug('probe transport "%s" failed', name);
         var err = new Error('probe error');
         err.transport = transport.name;
         self.emit('upgradeError', err);
@@ -365,8 +356,6 @@ Socket.prototype.probe = function (name) {
 
     freezeTransport();
 
-    debug('probe transport "%s" failed because of error: %s', name, err);
-
     self.emit('upgradeError', error);
   }
 
@@ -382,7 +371,6 @@ Socket.prototype.probe = function (name) {
   // When the socket is upgraded while we're probing
   function onupgrade (to) {
     if (transport && to.name !== transport.name) {
-      debug('"%s" works - aborting "%s"', to.name, transport.name);
       freezeTransport();
     }
   }
@@ -413,7 +401,6 @@ Socket.prototype.probe = function (name) {
  */
 
 Socket.prototype.onOpen = function () {
-  debug('socket open');
   this.readyState = 'open';
   Socket.priorWebsocketSuccess = 'websocket' === this.transport.name;
   this.emit('open');
@@ -422,7 +409,6 @@ Socket.prototype.onOpen = function () {
   // we check for `readyState` in case an `open`
   // listener already closed the socket
   if ('open' === this.readyState && this.upgrade && this.transport.pause) {
-    debug('starting upgrade probes');
     for (var i = 0, l = this.upgrades.length; i < l; i++) {
       this.probe(this.upgrades[i]);
     }
@@ -438,7 +424,6 @@ Socket.prototype.onOpen = function () {
 Socket.prototype.onPacket = function (packet) {
   if ('opening' === this.readyState || 'open' === this.readyState ||
       'closing' === this.readyState) {
-    debug('socket receive: type "%s", data "%s"', packet.type, packet.data);
 
     this.emit('packet', packet);
 
@@ -467,7 +452,6 @@ Socket.prototype.onPacket = function (packet) {
         break;
     }
   } else {
-    debug('packet received with socket readyState "%s"', this.readyState);
   }
 };
 
@@ -521,7 +505,6 @@ Socket.prototype.setPing = function () {
   var self = this;
   clearTimeout(self.pingIntervalTimer);
   self.pingIntervalTimer = setTimeout(function () {
-    debug('writing ping packet - expecting pong within %sms', self.pingTimeout);
     self.ping();
     self.onHeartbeat(self.pingTimeout);
   }, self.pingInterval);
@@ -570,7 +553,6 @@ Socket.prototype.onDrain = function () {
 Socket.prototype.flush = function () {
   if ('closed' !== this.readyState && this.transport.writable &&
     !this.upgrading && this.writeBuffer.length) {
-    debug('flushing %d packets in socket', this.writeBuffer.length);
     this.transport.send(this.writeBuffer);
     // keep track of current length of writeBuffer
     // splice writeBuffer and callbackBuffer on `drain`
@@ -663,7 +645,6 @@ Socket.prototype.close = function () {
 
   function close () {
     self.onClose('forced close');
-    debug('socket closing - telling transport to close');
     self.transport.close();
   }
 
@@ -689,7 +670,6 @@ Socket.prototype.close = function () {
  */
 
 Socket.prototype.onError = function (err) {
-  debug('socket error %j', err);
   Socket.priorWebsocketSuccess = false;
   this.emit('error', err);
   this.onClose('transport error', err);
@@ -703,7 +683,6 @@ Socket.prototype.onError = function (err) {
 
 Socket.prototype.onClose = function (reason, desc) {
   if ('opening' === this.readyState || 'open' === this.readyState || 'closing' === this.readyState) {
-    debug('socket close with reason: "%s"', reason);
     var self = this;
 
     // clear timers
@@ -752,7 +731,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./transport":3,"./transports/index":4,"component-emitter":14,"debug":16,"engine.io-parser":18,"indexof":22,"parsejson":25,"parseqs":26,"parseuri":27}],3:[function(_dereq_,module,exports){
+},{"./transport":3,"./transports/index":4,"component-emitter":14,"engine.io-parser":16,"indexof":20,"parsejson":22,"parseqs":23,"parseuri":24}],3:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -911,7 +890,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":14,"engine.io-parser":18}],4:[function(_dereq_,module,exports){
+},{"component-emitter":14,"engine.io-parser":16}],4:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies
@@ -1213,7 +1192,6 @@ var XMLHttpRequest = _dereq_('xmlhttprequest-ssl');
 var Polling = _dereq_('./polling');
 var Emitter = _dereq_('component-emitter');
 var inherit = _dereq_('component-inherit');
-var debug = _dereq_('debug')('engine.io-client:polling-xhr');
 
 /**
  * Module exports.
@@ -1326,7 +1304,6 @@ XHR.prototype.doWrite = function (data, fn) {
  */
 
 XHR.prototype.doPoll = function () {
-  debug('xhr poll');
   var req = this.request();
   var self = this;
   req.on('data', function (data) {
@@ -1401,7 +1378,6 @@ Request.prototype.create = function () {
   var self = this;
 
   try {
-    debug('xhr open %s: %s', this.method, this.uri);
     xhr.open(this.method, this.uri, this.async);
     try {
       if (this.extraHeaders) {
@@ -1464,7 +1440,6 @@ Request.prototype.create = function () {
       };
     }
 
-    debug('xhr data %s', this.data);
     xhr.send(this.data);
   } catch (e) {
     // Need to defer since .create() is called directly fhrom the constructor
@@ -1631,7 +1606,7 @@ function unloadHandler () {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":7,"component-emitter":14,"component-inherit":15,"debug":16,"xmlhttprequest-ssl":9}],7:[function(_dereq_,module,exports){
+},{"./polling":7,"component-emitter":14,"component-inherit":15,"xmlhttprequest-ssl":9}],7:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -1641,7 +1616,6 @@ var parseqs = _dereq_('parseqs');
 var parser = _dereq_('engine.io-parser');
 var inherit = _dereq_('component-inherit');
 var yeast = _dereq_('yeast');
-var debug = _dereq_('debug')('engine.io-client:polling');
 
 /**
  * Module exports.
@@ -1710,7 +1684,6 @@ Polling.prototype.pause = function (onPause) {
   this.readyState = 'pausing';
 
   function pause () {
-    debug('paused');
     self.readyState = 'paused';
     onPause();
   }
@@ -1719,19 +1692,15 @@ Polling.prototype.pause = function (onPause) {
     var total = 0;
 
     if (this.polling) {
-      debug('we are currently polling - waiting to pause');
       total++;
       this.once('pollComplete', function () {
-        debug('pre-pause polling complete');
         --total || pause();
       });
     }
 
     if (!this.writable) {
-      debug('we are currently writing - waiting to pause');
       total++;
       this.once('drain', function () {
-        debug('pre-pause writing complete');
         --total || pause();
       });
     }
@@ -1747,7 +1716,6 @@ Polling.prototype.pause = function (onPause) {
  */
 
 Polling.prototype.poll = function () {
-  debug('polling');
   this.polling = true;
   this.doPoll();
   this.emit('poll');
@@ -1761,7 +1729,6 @@ Polling.prototype.poll = function () {
 
 Polling.prototype.onData = function (data) {
   var self = this;
-  debug('polling got data %s', data);
   var callback = function (packet, index, total) {
     // if its the first message we consider the transport open
     if ('opening' === self.readyState) {
@@ -1790,7 +1757,6 @@ Polling.prototype.onData = function (data) {
     if ('open' === this.readyState) {
       this.poll();
     } else {
-      debug('ignoring poll - transport state "%s"', this.readyState);
     }
   }
 };
@@ -1805,17 +1771,14 @@ Polling.prototype.doClose = function () {
   var self = this;
 
   function close () {
-    debug('writing close packet');
     self.write([{ type: 'close' }]);
   }
 
   if ('open' === this.readyState) {
-    debug('transport open - closing');
     close();
   } else {
     // in case we're trying to close while
     // handshaking is in progress (GH-164)
-    debug('transport not open - deferring close');
     this.once('open', close);
   }
 };
@@ -1878,7 +1841,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":3,"component-inherit":15,"debug":16,"engine.io-parser":18,"parseqs":26,"xmlhttprequest-ssl":9,"yeast":29}],8:[function(_dereq_,module,exports){
+},{"../transport":3,"component-inherit":15,"engine.io-parser":16,"parseqs":23,"xmlhttprequest-ssl":9,"yeast":26}],8:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -1889,7 +1852,7 @@ var parser = _dereq_('engine.io-parser');
 var parseqs = _dereq_('parseqs');
 var inherit = _dereq_('component-inherit');
 var yeast = _dereq_('yeast');
-var debug = _dereq_('debug')('engine.io-client:websocket');
+
 var BrowserWebSocket = global.WebSocket || global.MozWebSocket;
 var NodeWebSocket;
 if (typeof window === 'undefined') {
@@ -2075,7 +2038,6 @@ WS.prototype.write = function (packets) {
             self.ws.send(data, opts);
           }
         } catch (e) {
-          debug('websocket closed before onclose event');
         }
 
         --total || done();
@@ -2167,7 +2129,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"../transport":3,"component-inherit":15,"debug":16,"engine.io-parser":18,"parseqs":26,"ws":undefined,"yeast":29}],9:[function(_dereq_,module,exports){
+},{"../transport":3,"component-inherit":15,"engine.io-parser":16,"parseqs":23,"ws":undefined,"yeast":26}],9:[function(_dereq_,module,exports){
 (function (global){
 // browser shim for xmlhttprequest module
 
@@ -2208,7 +2170,7 @@ module.exports = function (opts) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"has-cors":21}],10:[function(_dereq_,module,exports){
+},{"has-cors":19}],10:[function(_dereq_,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -2612,389 +2574,6 @@ module.exports = function(a, b){
   a.prototype.constructor = a;
 };
 },{}],16:[function(_dereq_,module,exports){
-(function (process){
-
-/**
- * This is the web browser implementation of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = _dereq_('./debug');
-exports.log = log;
-exports.formatArgs = formatArgs;
-exports.save = save;
-exports.load = load;
-exports.useColors = useColors;
-exports.storage = 'undefined' != typeof chrome
-               && 'undefined' != typeof chrome.storage
-                  ? chrome.storage.local
-                  : localstorage();
-
-/**
- * Colors.
- */
-
-exports.colors = [
-  'lightseagreen',
-  'forestgreen',
-  'goldenrod',
-  'dodgerblue',
-  'darkorchid',
-  'crimson'
-];
-
-/**
- * Currently only WebKit-based Web Inspectors, Firefox >= v31,
- * and the Firebug extension (any Firefox version) are known
- * to support "%c" CSS customizations.
- *
- * TODO: add a `localStorage` variable to explicitly enable/disable colors
- */
-
-function useColors() {
-  // is webkit? http://stackoverflow.com/a/16459606/376773
-  // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-  return (typeof document !== 'undefined' && 'WebkitAppearance' in document.documentElement.style) ||
-    // is firebug? http://stackoverflow.com/a/398120/376773
-    (window.console && (console.firebug || (console.exception && console.table))) ||
-    // is firefox >= v31?
-    // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-    (navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) && parseInt(RegExp.$1, 10) >= 31);
-}
-
-/**
- * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
- */
-
-exports.formatters.j = function(v) {
-  try {
-    return JSON.stringify(v);
-  } catch (err) {
-    return '[UnexpectedJSONParseError]: ' + err.message;
-  }
-};
-
-
-/**
- * Colorize log arguments if enabled.
- *
- * @api public
- */
-
-function formatArgs() {
-  var args = arguments;
-  var useColors = this.useColors;
-
-  args[0] = (useColors ? '%c' : '')
-    + this.namespace
-    + (useColors ? ' %c' : ' ')
-    + args[0]
-    + (useColors ? '%c ' : ' ')
-    + '+' + exports.humanize(this.diff);
-
-  if (!useColors) return args;
-
-  var c = 'color: ' + this.color;
-  args = [args[0], c, 'color: inherit'].concat(Array.prototype.slice.call(args, 1));
-
-  // the final "%c" is somewhat tricky, because there could be other
-  // arguments passed either before or after the %c, so we need to
-  // figure out the correct index to insert the CSS into
-  var index = 0;
-  var lastC = 0;
-  args[0].replace(/%[a-z%]/g, function(match) {
-    if ('%%' === match) return;
-    index++;
-    if ('%c' === match) {
-      // we only are interested in the *last* %c
-      // (the user may have provided their own)
-      lastC = index;
-    }
-  });
-
-  args.splice(lastC, 0, c);
-  return args;
-}
-
-/**
- * Invokes `console.log()` when available.
- * No-op when `console.log` is not a "function".
- *
- * @api public
- */
-
-function log() {
-  // this hackery is required for IE8/9, where
-  // the `console.log` function doesn't have 'apply'
-  return 'object' === typeof console
-    && console.log
-    && Function.prototype.apply.call(console.log, console, arguments);
-}
-
-/**
- * Save `namespaces`.
- *
- * @param {String} namespaces
- * @api private
- */
-
-function save(namespaces) {
-  try {
-    if (null == namespaces) {
-      exports.storage.removeItem('debug');
-    } else {
-      exports.storage.debug = namespaces;
-    }
-  } catch(e) {}
-}
-
-/**
- * Load `namespaces`.
- *
- * @return {String} returns the previously persisted debug modes
- * @api private
- */
-
-function load() {
-  var r;
-  try {
-    return exports.storage.debug;
-  } catch(e) {}
-
-  // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-  if (typeof process !== 'undefined' && 'env' in process) {
-    return process.env.DEBUG;
-  }
-}
-
-/**
- * Enable namespaces listed in `localStorage.debug` initially.
- */
-
-exports.enable(load());
-
-/**
- * Localstorage attempts to return the localstorage.
- *
- * This is necessary because safari throws
- * when a user disables cookies/localstorage
- * and you attempt to access it.
- *
- * @return {LocalStorage}
- * @api private
- */
-
-function localstorage(){
-  try {
-    return window.localStorage;
-  } catch (e) {}
-}
-
-}).call(this,_dereq_('_process'))
-},{"./debug":17,"_process":undefined}],17:[function(_dereq_,module,exports){
-
-/**
- * This is the common logic for both the Node.js and web browser
- * implementations of `debug()`.
- *
- * Expose `debug()` as the module.
- */
-
-exports = module.exports = debug.debug = debug;
-exports.coerce = coerce;
-exports.disable = disable;
-exports.enable = enable;
-exports.enabled = enabled;
-exports.humanize = _dereq_('ms');
-
-/**
- * The currently active debug mode names, and names to skip.
- */
-
-exports.names = [];
-exports.skips = [];
-
-/**
- * Map of special "%n" handling functions, for the debug "format" argument.
- *
- * Valid key names are a single, lowercased letter, i.e. "n".
- */
-
-exports.formatters = {};
-
-/**
- * Previously assigned color.
- */
-
-var prevColor = 0;
-
-/**
- * Previous log timestamp.
- */
-
-var prevTime;
-
-/**
- * Select a color.
- *
- * @return {Number}
- * @api private
- */
-
-function selectColor() {
-  return exports.colors[prevColor++ % exports.colors.length];
-}
-
-/**
- * Create a debugger with the given `namespace`.
- *
- * @param {String} namespace
- * @return {Function}
- * @api public
- */
-
-function debug(namespace) {
-
-  // define the `disabled` version
-  function disabled() {
-  }
-  disabled.enabled = false;
-
-  // define the `enabled` version
-  function enabled() {
-
-    var self = enabled;
-
-    // set `diff` timestamp
-    var curr = +new Date();
-    var ms = curr - (prevTime || curr);
-    self.diff = ms;
-    self.prev = prevTime;
-    self.curr = curr;
-    prevTime = curr;
-
-    // add the `color` if not set
-    if (null == self.useColors) self.useColors = exports.useColors();
-    if (null == self.color && self.useColors) self.color = selectColor();
-
-    var args = new Array(arguments.length);
-    for (var i = 0; i < args.length; i++) {
-      args[i] = arguments[i];
-    }
-
-    args[0] = exports.coerce(args[0]);
-
-    if ('string' !== typeof args[0]) {
-      // anything else let's inspect with %o
-      args = ['%o'].concat(args);
-    }
-
-    // apply any `formatters` transformations
-    var index = 0;
-    args[0] = args[0].replace(/%([a-z%])/g, function(match, format) {
-      // if we encounter an escaped % then don't increase the array index
-      if (match === '%%') return match;
-      index++;
-      var formatter = exports.formatters[format];
-      if ('function' === typeof formatter) {
-        var val = args[index];
-        match = formatter.call(self, val);
-
-        // now we need to remove `args[index]` since it's inlined in the `format`
-        args.splice(index, 1);
-        index--;
-      }
-      return match;
-    });
-
-    // apply env-specific formatting
-    args = exports.formatArgs.apply(self, args);
-
-    var logFn = enabled.log || exports.log || console.log.bind(console);
-    logFn.apply(self, args);
-  }
-  enabled.enabled = true;
-
-  var fn = exports.enabled(namespace) ? enabled : disabled;
-
-  fn.namespace = namespace;
-
-  return fn;
-}
-
-/**
- * Enables a debug mode by namespaces. This can include modes
- * separated by a colon and wildcards.
- *
- * @param {String} namespaces
- * @api public
- */
-
-function enable(namespaces) {
-  exports.save(namespaces);
-
-  var split = (namespaces || '').split(/[\s,]+/);
-  var len = split.length;
-
-  for (var i = 0; i < len; i++) {
-    if (!split[i]) continue; // ignore empty strings
-    namespaces = split[i].replace(/[\\^$+?.()|[\]{}]/g, '\\$&').replace(/\*/g, '.*?');
-    if (namespaces[0] === '-') {
-      exports.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-    } else {
-      exports.names.push(new RegExp('^' + namespaces + '$'));
-    }
-  }
-}
-
-/**
- * Disable debug output.
- *
- * @api public
- */
-
-function disable() {
-  exports.enable('');
-}
-
-/**
- * Returns true if the given mode name is enabled, false otherwise.
- *
- * @param {String} name
- * @return {Boolean}
- * @api public
- */
-
-function enabled(name) {
-  var i, len;
-  for (i = 0, len = exports.skips.length; i < len; i++) {
-    if (exports.skips[i].test(name)) {
-      return false;
-    }
-  }
-  for (i = 0, len = exports.names.length; i < len; i++) {
-    if (exports.names[i].test(name)) {
-      return true;
-    }
-  }
-  return false;
-}
-
-/**
- * Coerce `val`.
- *
- * @param {Mixed} val
- * @return {Mixed}
- * @api private
- */
-
-function coerce(val) {
-  if (val instanceof Error) return val.stack || val.message;
-  return val;
-}
-
-},{"ms":24}],18:[function(_dereq_,module,exports){
 (function (global){
 /**
  * Module dependencies.
@@ -3607,7 +3186,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":19,"after":10,"arraybuffer.slice":11,"base64-arraybuffer":12,"blob":13,"has-binary":20,"wtf-8":28}],19:[function(_dereq_,module,exports){
+},{"./keys":17,"after":10,"arraybuffer.slice":11,"base64-arraybuffer":12,"blob":13,"has-binary":18,"wtf-8":25}],17:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -3628,7 +3207,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],20:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 (function (global){
 
 /*
@@ -3691,7 +3270,7 @@ function hasBinary(data) {
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"isarray":23}],21:[function(_dereq_,module,exports){
+},{"isarray":21}],19:[function(_dereq_,module,exports){
 
 /**
  * Module exports.
@@ -3710,7 +3289,7 @@ try {
   module.exports = false;
 }
 
-},{}],22:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -3721,163 +3300,12 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],23:[function(_dereq_,module,exports){
+},{}],21:[function(_dereq_,module,exports){
 module.exports = Array.isArray || function (arr) {
   return Object.prototype.toString.call(arr) == '[object Array]';
 };
 
-},{}],24:[function(_dereq_,module,exports){
-/**
- * Helpers.
- */
-
-var s = 1000
-var m = s * 60
-var h = m * 60
-var d = h * 24
-var y = d * 365.25
-
-/**
- * Parse or format the given `val`.
- *
- * Options:
- *
- *  - `long` verbose formatting [false]
- *
- * @param {String|Number} val
- * @param {Object} options
- * @throws {Error} throw an error if val is not a non-empty string or a number
- * @return {String|Number}
- * @api public
- */
-
-module.exports = function (val, options) {
-  options = options || {}
-  var type = typeof val
-  if (type === 'string' && val.length > 0) {
-    return parse(val)
-  } else if (type === 'number' && isNaN(val) === false) {
-    return options.long ?
-			fmtLong(val) :
-			fmtShort(val)
-  }
-  throw new Error('val is not a non-empty string or a valid number. val=' + JSON.stringify(val))
-}
-
-/**
- * Parse the given `str` and return milliseconds.
- *
- * @param {String} str
- * @return {Number}
- * @api private
- */
-
-function parse(str) {
-  str = String(str)
-  if (str.length > 10000) {
-    return
-  }
-  var match = /^((?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|years?|yrs?|y)?$/i.exec(str)
-  if (!match) {
-    return
-  }
-  var n = parseFloat(match[1])
-  var type = (match[2] || 'ms').toLowerCase()
-  switch (type) {
-    case 'years':
-    case 'year':
-    case 'yrs':
-    case 'yr':
-    case 'y':
-      return n * y
-    case 'days':
-    case 'day':
-    case 'd':
-      return n * d
-    case 'hours':
-    case 'hour':
-    case 'hrs':
-    case 'hr':
-    case 'h':
-      return n * h
-    case 'minutes':
-    case 'minute':
-    case 'mins':
-    case 'min':
-    case 'm':
-      return n * m
-    case 'seconds':
-    case 'second':
-    case 'secs':
-    case 'sec':
-    case 's':
-      return n * s
-    case 'milliseconds':
-    case 'millisecond':
-    case 'msecs':
-    case 'msec':
-    case 'ms':
-      return n
-    default:
-      return undefined
-  }
-}
-
-/**
- * Short format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function fmtShort(ms) {
-  if (ms >= d) {
-    return Math.round(ms / d) + 'd'
-  }
-  if (ms >= h) {
-    return Math.round(ms / h) + 'h'
-  }
-  if (ms >= m) {
-    return Math.round(ms / m) + 'm'
-  }
-  if (ms >= s) {
-    return Math.round(ms / s) + 's'
-  }
-  return ms + 'ms'
-}
-
-/**
- * Long format for `ms`.
- *
- * @param {Number} ms
- * @return {String}
- * @api private
- */
-
-function fmtLong(ms) {
-  return plural(ms, d, 'day') ||
-    plural(ms, h, 'hour') ||
-    plural(ms, m, 'minute') ||
-    plural(ms, s, 'second') ||
-    ms + ' ms'
-}
-
-/**
- * Pluralization helper.
- */
-
-function plural(ms, n, name) {
-  if (ms < n) {
-    return
-  }
-  if (ms < n * 1.5) {
-    return Math.floor(ms / n) + ' ' + name
-  }
-  return Math.ceil(ms / n) + ' ' + name + 's'
-}
-
-},{}],25:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 (function (global){
 /**
  * JSON parse.
@@ -3912,7 +3340,7 @@ module.exports = function parsejson(data) {
   }
 };
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],26:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -3951,7 +3379,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],27:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 /**
  * Parses an URI
  *
@@ -3992,7 +3420,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],28:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 (function (global){
 /*! https://mths.be/wtf8 v1.0.0 by @mathias */
 ;(function(root) {
@@ -4220,7 +3648,7 @@ module.exports = function parseuri(str) {
 }(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],29:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')
@@ -4290,9 +3718,9 @@ yeast.encode = encode;
 yeast.decode = decode;
 module.exports = yeast;
 
-},{}],30:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 
 module.exports = _dereq_('./lib/index');
 
-},{"./lib/index":1}]},{},[30])(30)
+},{"./lib/index":1}]},{},[27])(27)
 });

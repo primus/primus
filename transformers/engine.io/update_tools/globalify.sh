@@ -2,22 +2,24 @@
 
 'use strict';
 
-var dir = process.argv.slice(2)[0];
+const dir = process.argv.slice(2)[0];
 
 if (!dir) {
-  var message = 'usage: globalify <directory>\n       ' +
+  const message = 'usage: globalify <directory>\n       ' +
     'build the engine.io-client pruning the UMD wrapper';
   console.log(message);
   process.exit(1);
 }
 
-var browserify = require('browserify')
-  , derequire = require('derequire')
-  , deumdify = require('deumdify')
-  , path = require('path')
-  , fs = require('fs');
+const condenseify = require('condenseify');
+const browserify = require('browserify');
+const derequire = require('derequire');
+const stripify = require('./stripify');
+const deumdify = require('deumdify');
+const path = require('path');
+const fs = require('fs');
 
-var options = {
+const options = {
   entries: [ path.join(dir, 'index.js') ],
   insertGlobalVars: {
     global: function glob() {
@@ -38,10 +40,13 @@ var options = {
 // RequireJS is used. See issue #157.
 //
 browserify(options)
+  .exclude('debug')
   .exclude('ws')
+  .transform(stripify)
+  .transform(condenseify)
   .plugin(deumdify)
   .bundle(function (err, buf) {
     if (err) throw err;
 
-    fs.writeFileSync(path.join(__dirname, 'library.js'), derequire(buf));
+    fs.writeFileSync(path.join(__dirname, '..', 'library.js'), derequire(buf));
   });
