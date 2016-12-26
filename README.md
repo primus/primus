@@ -939,6 +939,9 @@ primus.authorize(function (req, done) {
 });
 ```
 
+Please note that the auth hook is run each and every time a request is made to
+the server.
+
 #### Client
 
 Unfortunately, the amount of detail you get in your client when authorization
