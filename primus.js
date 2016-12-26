@@ -325,6 +325,7 @@ Primus.prototype.reserved.events = {
   'reconnect': 1,
   'offline': 1,
   'timeout': 1,
+  'destroy': 1,
   'online': 1,
   'error': 1,
   'close': 1,
