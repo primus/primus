@@ -75,7 +75,7 @@ module.exports = function server() {
   this.on('upgrade', (req, soc) => {
     const secKey = req.headers['sec-websocket-key'];
 
-    if (secKey && secKey.length === 24) {
+    if (soc.readable && soc.writable && secKey && secKey.length === 24) {
       soc.setNoDelay(options.transport.noDelay);
 
       let socketHandle = soc._handle;
