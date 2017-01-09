@@ -58,7 +58,7 @@
     "forwarded-for": "~1.0.1",
     "fusing": "~1.0.0",
     "setheader": "~0.0.4",
-    "ultron": "~1.0.2",
+    "ultron": "~1.1.0",
     "yeast": "~0.1.2"
   },
   "devDependencies": {
