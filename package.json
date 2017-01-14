@@ -91,7 +91,7 @@
     "tick-tock": "~1.0.0",
     "url-parse": "~1.1.7",
     "uws": "~0.12.0",
-    "ws": "~1.1.1"
+    "ws": "~2.0.0-beta.1"
   },
   "pre-commit": "test, integration"
 }
