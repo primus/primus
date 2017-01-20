@@ -188,20 +188,6 @@ describe('Spark', function () {
 
       var spark = new primus.Spark();
     });
-
-    it('can disable the disconnect timeout', function (done) {
-      var primus = new Primus(server, { timeout: false })
-        , spark = new primus.Spark();
-
-      spark.on('data', function (msg) {
-        expect(msg).to.equal('foo');
-        expect(spark.timeout).to.equal(null);
-        primus.destroy(done);
-      });
-
-      expect(spark.timeout).to.equal(null);
-      spark.emit('data', 'foo');
-    });
   });
 
   describe('#write', function () {
@@ -277,49 +263,52 @@ describe('Spark', function () {
   });
 
   describe('ping/pong', function () {
-    it('emits `outgoing::pong` on a ping event', function (done) {
+    it('emits `incoming::pong` on a pong event', function (done) {
       var spark = new primus.Spark()
         , now = Date.now();
 
-      spark.on('outgoing::pong', function (time) {
+      spark.on('incoming::pong', function (time) {
         expect(time).to.equal(now);
         done();
       });
 
-      spark.emit('incoming::data', JSON.stringify('primus::ping::'+ now));
+      spark.emit('incoming::data', JSON.stringify('primus::pong::'+ now));
     });
 
-    it('writes `primus::pong::<timestamp>` on a ping event', function (done) {
+    it('emits `heartbeat` on a pong event', function (done) {
       var spark = new primus.Spark()
         , now = Date.now();
 
-      spark.once('outgoing::data', function (data) {
-        expect(data).to.equal(JSON.stringify('primus::pong::'+ now));
+      spark.on('heartbeat', function () {
         done();
       });
 
-      spark.emit('incoming::data', JSON.stringify('primus::ping::'+ now));
+      spark.emit('incoming::data', JSON.stringify('primus::pong::'+ now));
     });
 
-    it('emits `heartbeat` when heartbeat is called directly', function (done) {
-      var spark = new primus.Spark();
+    it('emits `outgoing::ping` when sending a ping', function (done) {
+      var primus = new Primus(server, { timeout: 25 })
+        , spark = new primus.Spark();
 
-      spark.on('heartbeat', done);
-      spark.heartbeat();
+      spark.on('outgoing::ping', function () {
+        spark.on('end', function () {
+          primus.destroy(done);
+        });
+      });
     });
 
-    it('emits `heartbeat` when data is received', function (done) {
-      var spark = new primus.Spark();
+    it('writes `primus::ping::<timestamp>` when sending a ping', function (done) {
+      var primus = new Primus(server, { timeout: 25 })
+        , spark = new primus.Spark();
 
-      spark.on('heartbeat', done);
-      spark.emit('incoming::data', JSON.stringify('data'));
-    });
-
-    it('calls heartbeat on a ping event without a timestamp', function (done) {
-      var spark = new primus.Spark();
-
-      spark.on('heartbeat', done);
-      spark.emit('incoming::ping');
+      spark.on('outgoing::ping', function (time) {
+        spark.once('outgoing::data', function (data) {
+          expect(data).to.equal(JSON.stringify('primus::ping::'+ time));
+          spark.on('end', function () {
+            primus.destroy(done);
+          });
+        });
+      });
     });
   });
 });

@@ -548,7 +548,7 @@ describe('Primus', function () {
       var primus = new Primus(server, { timeout: 60000 })
         , socket = new primus.Socket('http://localhost:'+ server.portnumber);
 
-      expect(socket.options.ping).to.equal(50000);
+      expect(socket.options.ping).to.equal(90000);
       socket.on('open', socket.end).on('end', function () {
         primus = new Primus(server, { timeout: false });
         socket = primus.Socket('http://localhost:'+ server.portnumber);

@@ -130,7 +130,7 @@ pathname            | The URL namespace that Primus can own     | `/primus`
 parser              | Message encoder for all communication     | `JSON`
 transformer         | The transformer we should use internally  | `websockets`
 plugin              | The plugins that should be applied        | `{}`
-timeout             | The heartbeat timeout                     | `35000`
+timeout             | Interval at which heartbeats are sent     | `30000`
 global              | Set a custom client class / global name   | `Primus`
 compression         | Use permessage-deflate / HTTP compression | `false`
 maxLength           | Maximum allowed packet size, in bytes     | `10485760`
@@ -154,9 +154,8 @@ is to use it only if you know what you are doing and if you need fine-grained
 control over the real-time framework. Please also keep in mind that some of
 these options are overriden by Primus.
 
-The heartbeat timeout is used to forcefully disconnect a spark if no data is
-received from the client within the specified amount of time. It is possible
-to completely disable the heartbeat timeout by setting the value of the
+The `timeout` option specifies the interval at which heartbeats are transmitted.
+It is possible to completely disable the heartbeats by setting the value of the
 `timeout` option to `false`.
 
 If you don't have a pre-existing server where you want or can attach your Primus
@@ -451,8 +450,7 @@ Name                | Description                             | Default
 --------------------|-----------------------------------------|---------------
 [reconnect]         | Configures the exponential back off     | `{}`
 timeout             | Connect time out                        | `10000` ms
-ping                | Ping interval to test connection        | `25000` ms
-pong                | Time the server has to respond to ping  | `10000` ms
+ping                | Max time to wait for a server ping      | `45000` ms
 [strategy]          | Our reconnect strategies                | `"disconnect,online,timeout"`
 manual              | Manually open the connection            | `false`
 websockets          | Should we use WebSockets                | Boolean, is detected
@@ -1108,11 +1106,11 @@ Event                 | Usage       | Location      | Description
 `initialised`         | **public**  | server        | The server is initialised.
 `plugin`              | **public**  | server        | A new plugin has been added.
 `plugout`             | **public**  | server        | A plugin has been removed.
-`incoming::ping`      | private     | spark         | We received a ping message.
-`outgoing::ping`      | private     | client        | We're sending a ping message.
-`incoming::pong`      | private     | client        | We received a pong message.
-`outgoing::pong`      | private     | spark         | We're sending a pong message.
-`heartbeat`           | **public**  | spark         | We've received a heartbeat and have reset the timer.
+`incoming::ping`      | private     | client        | We received a ping message.
+`outgoing::ping`      | private     | spark         | We're sending a ping message.
+`incoming::pong`      | private     | spark         | We received a pong message.
+`outgoing::pong`      | private     | client        | We're sending a pong message.
+`heartbeat`           | **public**  | spark         | We've received a response to a heartbeat.
 `online`              | **public**  | client        | We've regained a network connection.
 `offline`             | **public**  | client        | We've lost our internet connection.
 `log`                 | **public**  | server        | Log messages.
@@ -1162,19 +1160,12 @@ And of course the `Primus` instance as well.
 
 Heartbeats are used in Primus to figure out if we still have an active, working
 and reliable connection with the server. These heartbeats are sent from the
-**client** to the server.
-
-The heartbeats will only be sent when there is an idle connection, so there is
-very little to no overhead at all. The main reason for this is that we already
-know that the connection is alive when we receive data from the server.
+**server** to the client.
 
 The heartbeat package that we send over the connection is
-`primus::ping::<timestamp>`. The server will echo back the exact same package.
-This allows Primus to also calculate the latency between messages by simply
-getting the `<timestamp>` from echo and comparing it with the local time. This
-heartbeat is then stored in a `primus.latency` property. The initial value of
-the `primus.latency` is to the time it took to send an `open` package and to
-actually receive a confirmation that the connection has been opened.
+`primus::ping::<timestamp>`. The client will echo back the exact same package.
+This allows to also calculate the latency between messages by simply getting
+the `<timestamp>` and comparing it with the local time.
 
 ### Supported Real-time Frameworks
 
@@ -2184,20 +2175,18 @@ and stable between a client and a server. If you are planning on implementing
 Primus in another language you must handle the following `primus::*` prefixed
 messages:
 
-- `primus::ping::<ping>` **client -> server**, The ping type contains the time
+- `primus::ping::<ping>` **server -> client**, The ping type contains the time
   in EPOCH. Ping messages are needed to keep the connection open as certain load
   balancers, proxies and browsers will close connections automatically when
   there is inactivity.
-- `primus::pong::<ping>` **client <- server**, The pong is the response to the
-  `ping` packet. It echoes back the exact value that it received so the client
-  can calculate how long it took for the message to be received/replied by the
-  server so we have the latency of the connection.
-- `primus::server::close` **client <- server**, Indication that the server
+- `primus::pong::<ping>` **client -> server**, The pong is the response to the
+  `ping` packet. It echoes back the exact value that it received.
+- `primus::server::close` **server -> client**, Indication that the server
   intentionally closed the connection and that no reconnection/connection should
   be made.
 - `primus::id::` **client -> server**, Request of the internal `spark.id`
   that's assigned to the connection.
-- `primus::id::<spark.id>` **client <- server**, The internal `id` that we used
+- `primus::id::<spark.id>` **server -> client**, The internal `id` that we used
   on the server to identify the connection as we do not sync this information by
   default and requires a `primus.id()` call on the client.
 
