@@ -34,7 +34,7 @@ function Primus(server, options) {
   options.transport = options.transport || {};        // Transformer specific options.
   options.timeout = 'timeout' in options              // Heartbeat timeout.
     ? options.timeout
-    : 35000;
+    : 30000;
 
   var primus = this
     , key;
@@ -44,6 +44,7 @@ function Primus(server, options) {
   this.ark = Object.create(null);             // Plugin storage.
   this.layers = [];                           // Middleware layers.
   this.transformer = null;                    // Reference to the real-time engine instance.
+  this.interval = null;                       // The heartbeat interval.
   this.encoder = null;                        // Shorthand to the parser's encoder.
   this.decoder = null;                        // Shorthand to the parser's decoder.
   this.connected = 0;                         // Connection counter.
@@ -325,6 +326,13 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   this.use('authorization', require('./middleware/authorization'));
 
   //
+  // Set the heartbeat interval.
+  //
+  if (options.timeout) {
+    this.interval = setInterval(this.heartbeat.bind(this), options.timeout);
+  }
+
+  //
   // Emit the initialised event after the next tick so we have some time to
   // attach listeners.
   //
@@ -411,6 +419,32 @@ Primus.readable('forEach', function forEach(fn, done) {
       iterate();
     });
   }());
+
+  return this;
+});
+
+/**
+ * Send a ping packet to all clients to ensure that they are still connected.
+ *
+ * @returns {Primus}
+ * @api private
+ */
+Primus.readable('heartbeat', function heartbeat() {
+  this.forEach(function forEach(spark) {
+    if (!spark.alive) {
+      //
+      // Set the `reconnect` option to `true` so we don't send a
+      // `primus::server::close` packet to an already broken connection.
+      //
+      spark.end(undefined, { reconnect: true });
+    } else {
+      const now = Date.now();
+
+      spark.alive = false;
+      spark.emit('outgoing::ping', now);
+      spark._write(`primus::ping::${now}`);
+    }
+  });
 
   return this;
 });
@@ -509,9 +543,9 @@ Primus.readable('transform', function transform(type, fn) {
  * @returns {Spark}
  * @api private
  */
-Primus.prototype.spark = function spark(id) {
+Primus.readable('spark', function spark(id) {
   return this.connections[id];
-};
+});
 
 /**
  * Generate a client library.
@@ -560,18 +594,17 @@ Primus.readable('library', function compile(nodejs) {
 
   //
   // As we're given a timeout value on the server side, we need to update the
-  // `ping` interval of the client to ensure that we've sent the server
-  // a message before the timeout gets triggered and we get disconnected.
+  // `ping` timeout of the client.
   //
   if (this.options.timeout) {
     log('updating the default value of the client `ping` option');
     client = client.replace(
-      'options.ping : 25e3;',
-      'options.ping : '+ (this.options.timeout - 10000) +';'
+      'options.ping : 45e3;',
+      `options.ping : ${this.options.timeout + Math.round(this.options.timeout / 2)};`
     );
   } else {
     log('setting the default value of the client `ping` option to `false`');
-    client = client.replace('options.ping : 25e3;', 'options.ping : false;');
+    client = client.replace('options.ping : 45e3;', 'options.ping : false;');
   }
 
   //
@@ -903,6 +936,8 @@ Primus.readable('destroy', function destroy(options, fn) {
 
   var primus = this;
 
+  clearInterval(primus.interval);
+
   setTimeout(function close() {
     var transformer = primus.transformer;
 
@@ -945,7 +980,6 @@ Primus.readable('destroy', function destroy(options, fn) {
  * @returns {Primus}
  * @api private
  */
-
 Primus.readable('close', function close(options, fn) {
   var primus = this;
   //
