@@ -45,8 +45,8 @@ function Spark(primus, headers, address, query, id, request) {
   writable('readable', true);           // Silly stream compatibility.
   writable('queue', []);                // Data queue for data events.
   writable('query', query);             // The query string.
-  writable('timeout', null);            // Heartbeat timeout.
   writable('ultron', new Ultron(this)); // Our event listening cleanup.
+  writable('alive', true);              // Flag used to detect zombie sparks.
 
   //
   // Parse our query string.
@@ -55,7 +55,7 @@ function Spark(primus, headers, address, query, id, request) {
     this.query = parse(this.query);
   }
 
-  this.heartbeat().__initialise.forEach(function execute(initialise) {
+  this.__initialise.forEach(function execute(initialise) {
     initialise.call(spark);
   });
 }
@@ -95,37 +95,6 @@ Spark.writable('__readyState', Spark.OPEN);
 //
 Spark.get('address', function address() {
   return this.request.forwarded || forwarded(this.remote, this.headers, this.primus.whitelist);
-});
-
-/**
- * Set a timer to forcibly disconnect the spark if no data is received from the
- * client within the given timeout.
- *
- * @api private
- */
-Spark.readable('heartbeat', function heartbeat() {
-  var spark = this;
-
-  clearTimeout(spark.timeout);
-
-  if (!spark.primus.options.timeout) return spark;
-
-  log('setting new heartbeat timeout for %s', spark.id);
-
-  this.timeout = setTimeout(function timeout() {
-    //
-    // Set reconnect to true so we're not sending a `primus::server::close`
-    // packet.
-    //
-    spark.end(undefined, { reconnect: true });
-  }, spark.primus.options.timeout);
-
-  //
-  // Emit an event so the application can know the timer has been reset.
-  //
-  spark.emit('heartbeat');
-
-  return this;
 });
 
 /**
@@ -195,12 +164,6 @@ Spark.readable('__initialise', [function initialise() {
   // We've received new data from our client, decode and emit it.
   //
   ultron.on('incoming::data', function message(raw) {
-    //
-    // New data has arrived so we're certain that the connection is still alive,
-    // so it's save to restart the heartbeat sequence.
-    //
-    spark.heartbeat();
-
     primus.decoder.call(spark, raw, function decoding(err, data) {
       //
       // Do a "save" emit('error') when we fail to parse a message. We don't
@@ -221,16 +184,12 @@ Spark.readable('__initialise', [function initialise() {
   });
 
   //
-  // We've received a ping event. This is fired upon receipt of a WebSocket
-  // Ping frame or a `pimus::ping::<timestamp>` message. In the former case
-  // the listener is called without arguments and we should only reset the
-  // heartbeat.
+  // We've received a pong event. This is fired upon receipt of a
+  // `pimus::pong::<timestamp>` message.
   //
-  ultron.on('incoming::ping', function ping(time) {
-    if (time === undefined) return spark.heartbeat();
-
-    spark.emit('outgoing::pong', time);
-    spark._write('primus::pong::'+ time);
+  ultron.on('incoming::pong', function pong() {
+    spark.alive = true;
+    spark.emit('heartbeat');
   });
 
   //
@@ -381,13 +340,13 @@ Spark.readable('protocol', function protocol(msg) {
     , value = msg.slice(last + 2);
 
   switch (msg.slice(8,  last)) {
-    case 'ping':
-      this.emit('incoming::ping', +value);
-    break;
+    case 'pong':
+      this.emit('incoming::pong', +value);
+      break;
 
     case 'id':
       this._write('primus::id::'+ this.id);
-    break;
+      break;
 
     //
     // Unknown protocol, somebody is probably sending `primus::` prefixed

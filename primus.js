@@ -57,8 +57,7 @@ try {
  * - manual, don't automatically call `.open` to start the connection.
  * - websockets, force the use of WebSockets, even when you should avoid them.
  * - timeout, connect timeout, server didn't respond in a timely manner.
- * - ping, The heartbeat interval for sending a ping packet to the server.
- * - pong, The heartbeat timeout for receiving a response to the ping.
+ * - ping, The maximum amount of time to wait for the server to send a ping.
  * - network, Use network events as leading method for network connection drops.
  * - strategy, Reconnection strategies.
  * - transport, Transport options.
@@ -99,10 +98,7 @@ function Primus(url, options) {
   options.reconnect = 'reconnect' in options ? options.reconnect : {};
 
   // Heartbeat ping interval.
-  options.ping = 'ping' in options ? options.ping : 25e3;
-
-  // Heartbeat pong response timeout.
-  options.pong = 'pong' in options ? options.pong : 10e3;
+  options.ping = 'ping' in options ? options.ping : 45e3;
 
   // Reconnect strategies.
   options.strategy = 'strategy' in options ? options.strategy : [];
@@ -397,8 +393,6 @@ Primus.prototype.initialise = function initialise(options) {
       primus.emit('readyStateChange', 'open');
     }
 
-    primus.latency = +new Date() - start;
-    primus.timers.clear('ping', 'pong');
     primus.heartbeat();
 
     if (primus.buffer.length) {
@@ -416,12 +410,11 @@ Primus.prototype.initialise = function initialise(options) {
     primus.emit('open');
   });
 
-  primus.on('incoming::pong', function pong(time) {
+  primus.on('incoming::ping', function ping(time) {
     primus.online = true;
-    primus.timers.clear('pong');
     primus.heartbeat();
-
-    primus.latency = (+new Date()) - time;
+    primus.emit('outgoing::pong', time);
+    primus._write('primus::pong::'+ time);
   });
 
   primus.on('incoming::error', function error(e) {
@@ -625,9 +618,9 @@ Primus.prototype.protocol = function protocol(msg) {
     , value = msg.slice(last + 2);
 
   switch (msg.slice(8,  last)) {
-    case 'pong':
-      this.emit('incoming::pong', +value);
-    break;
+    case 'ping':
+      this.emit('incoming::ping', +value);
+      break;
 
     case 'server':
       //
@@ -637,11 +630,11 @@ Primus.prototype.protocol = function protocol(msg) {
       if ('close' === value) {
         this.disconnect = true;
       }
-    break;
+      break;
 
     case 'id':
       this.emit('incoming::id', value);
-    break;
+      break;
 
     //
     // Unknown protocol, somebody is probably sending `primus::` prefixed
@@ -823,51 +816,26 @@ Primus.prototype._write = function write(data) {
 };
 
 /**
- * Send a new heartbeat over the connection to ensure that we're still
- * connected and our internet connection didn't drop. We cannot use server side
- * heartbeats for this unfortunately.
+ * Set a timer that, upon expiration, closes the client.
  *
  * @returns {Primus}
  * @api private
  */
 Primus.prototype.heartbeat = function heartbeat() {
-  var primus = this;
+  if (!this.options.ping) return this;
 
-  if (!primus.options.ping) return primus;
-
-  /**
-   * Exterminate the connection as we've timed out.
-   *
-   * @api private
-   */
-  function pong() {
-    primus.timers.clear('pong');
-
+  this.timers.clear('ping');
+  this.timers.setTimeout('ping', function ping() {
     //
     // The network events already captured the offline event.
     //
-    if (!primus.online) return;
+    if (!this.online) return;
 
-    primus.online = false;
-    primus.emit('offline');
-    primus.emit('incoming::end');
-  }
+    this.online = false;
+    this.emit('offline');
+    this.emit('incoming::end');
+  }, this.options.ping);
 
-  /**
-   * We should send a ping message to the server.
-   *
-   * @api private
-   */
-  function ping() {
-    var value = +new Date();
-
-    primus.timers.clear('ping');
-    primus._write('primus::ping::'+ value);
-    primus.emit('outgoing::ping', value);
-    primus.timers.setTimeout('pong', pong, primus.options.pong);
-  }
-
-  primus.timers.setTimeout('ping', ping, primus.options.ping);
   return this;
 };
 
