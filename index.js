@@ -32,9 +32,13 @@ function Primus(server, options) {
   options = options || {};
   options.maxLength = options.maxLength || 10485760;  // Maximum allowed packet size.
   options.transport = options.transport || {};        // Transformer specific options.
-  options.timeout = 'timeout' in options              // Heartbeat timeout.
-    ? options.timeout
+  options.pingInterval = 'pingInterval' in options    // Heartbeat interval.
+    ? options.pingInterval
     : 30000;
+
+  if ('timeout' in options) {
+    throw new PrimusError('The `timeout` option has been removed', this);
+  }
 
   var primus = this
     , key;
@@ -43,8 +47,8 @@ function Primus(server, options) {
   this.connections = Object.create(null);     // Connection storage.
   this.ark = Object.create(null);             // Plugin storage.
   this.layers = [];                           // Middleware layers.
+  this.heartbeatInterval = null;              // The heartbeat interval.
   this.transformer = null;                    // Reference to the real-time engine instance.
-  this.interval = null;                       // The heartbeat interval.
   this.encoder = null;                        // Shorthand to the parser's encoder.
   this.decoder = null;                        // Shorthand to the parser's decoder.
   this.connected = 0;                         // Connection counter.
@@ -67,7 +71,7 @@ function Primus(server, options) {
   // connect to the server.
   //
   this.spec = {
-    timeout: options.timeout,
+    pingInterval: options.pingInterval,
     pathname: this.pathname,
     version: this.version
   };
@@ -328,8 +332,11 @@ Primus.readable('initialise', function initialise(Transformer, options) {
   //
   // Set the heartbeat interval.
   //
-  if (options.timeout) {
-    this.interval = setInterval(this.heartbeat.bind(this), options.timeout);
+  if (options.pingInterval) {
+    this.heartbeatInterval = setInterval(
+      this.heartbeat.bind(this),
+      options.pingInterval
+    );
   }
 
   //
@@ -593,18 +600,23 @@ Primus.readable('library', function compile(nodejs) {
     .replace('null; // @import {primus::decoder}', this.decoder.toString());
 
   //
-  // As we're given a timeout value on the server side, we need to update the
-  // `ping` timeout of the client.
+  // As we're given a `pingInterval` value on the server side, we need to update
+  // the `pingTimeout` on the client.
   //
-  if (this.options.timeout) {
-    log('updating the default value of the client `ping` option');
+  if (this.options.pingInterval) {
+    const value = this.options.pingInterval + Math.round(this.options.pingInterval / 2);
+
+    log('updating the default value of the client `pingTimeout` option');
     client = client.replace(
-      'options.ping : 45e3;',
-      `options.ping : ${this.options.timeout + Math.round(this.options.timeout / 2)};`
+      'options.pingTimeout : 45e3;',
+      `options.pingTimeout : ${value};`
     );
   } else {
-    log('setting the default value of the client `ping` option to `false`');
-    client = client.replace('options.ping : 45e3;', 'options.ping : false;');
+    log('setting the default value of the client `pingTimeout` option to `false`');
+    client = client.replace(
+      'options.pingTimeout : 45e3;',
+      'options.pingTimeout : false;'
+    );
   }
 
   //
@@ -936,7 +948,7 @@ Primus.readable('destroy', function destroy(options, fn) {
 
   var primus = this;
 
-  clearInterval(primus.interval);
+  clearInterval(primus.heartbeatInterval);
 
   setTimeout(function close() {
     var transformer = primus.transformer;
