@@ -130,7 +130,7 @@ pathname            | The URL namespace that Primus can own     | `/primus`
 parser              | Message encoder for all communication     | `JSON`
 transformer         | The transformer we should use internally  | `websockets`
 plugin              | The plugins that should be applied        | `{}`
-timeout             | Interval at which heartbeats are sent     | `30000`
+pingInterval        | Interval at which heartbeats are sent     | `30000`
 global              | Set a custom client class / global name   | `Primus`
 compression         | Use permessage-deflate / HTTP compression | `false`
 maxLength           | Maximum allowed packet size, in bytes     | `10485760`
@@ -154,9 +154,9 @@ is to use it only if you know what you are doing and if you need fine-grained
 control over the real-time framework. Please also keep in mind that some of
 these options are overriden by Primus.
 
-The `timeout` option specifies the interval at which heartbeats are transmitted.
-It is possible to completely disable the heartbeats by setting the value of the
-`timeout` option to `false`.
+The `pingInterval` option specifies the interval at which heartbeats are
+transmitted. It is possible to completely disable the heartbeats by setting the
+value of the `pingInterval` option to `false`.
 
 If you don't have a pre-existing server where you want or can attach your Primus
 server to you can also use the `Primus.createServer` convenience method. The
@@ -450,7 +450,7 @@ Name                | Description                             | Default
 --------------------|-----------------------------------------|---------------
 [reconnect]         | Configures the exponential back off     | `{}`
 timeout             | Connect time out                        | `10000` ms
-ping                | Max time to wait for a server ping      | `45000` ms
+pingTimeout         | Max time to wait for a server ping      | `45000` ms
 [strategy]          | Our reconnect strategies                | `"disconnect,online,timeout"`
 manual              | Manually open the connection            | `false`
 websockets          | Should we use WebSockets                | Boolean, is detected
@@ -1160,11 +1160,34 @@ And of course the `Primus` instance as well.
 
 Heartbeats are used in Primus to figure out if we still have an active, working
 and reliable connection with the server. These heartbeats are sent from the
-**server** to the client.
+**server** to the client as shown in the following diagram.
 
-The heartbeat package that we send over the connection is
-`primus::ping::<timestamp>`. The client will echo back the exact same package.
-This allows to also calculate the latency between messages by simply getting
+```
+     client will disconnect
+       if not recv within
+          `pingTimeout`
+
+     primus:pong:{timestamp}
+    +----------------------+
+    |                      |
++---v----+            +---------+
+| server |            |  client |
++--------+            +----^----+
+    |                      |
+    +----------------------+
+     primus:ping:{timestamp}
+
+      sent at `pingInterval`
+      server will disconnect
+      if no response since
+           last ping
+```
+
+The heartbeat message that we send over the connection is
+`primus::ping::<timestamp>`. Upon receipt of this message, the client will send
+back a `primus::pong::<timestamp>` message with the same `<timestamp>` it
+received from the server.
+This allows to calculate the latency between messages by simply getting
 the `<timestamp>` and comparing it with the local time.
 
 ### Supported Real-time Frameworks

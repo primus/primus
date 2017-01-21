@@ -173,9 +173,9 @@ describe('Spark', function () {
     });
   });
 
-  describe('#timeout', function () {
-    it('disconnects if the timeout expires', function (done) {
-      var primus = new Primus(server, { timeout: 25 });
+  describe('#pingInterval', function () {
+    it('disconnects if the client does not respond to a heartbeat', function (done) {
+      var primus = new Primus(server, { pingInterval: 25 });
 
       primus.on('disconnection', function (socket) {
         expect(socket).to.equal(spark);
@@ -287,7 +287,7 @@ describe('Spark', function () {
     });
 
     it('emits `outgoing::ping` when sending a ping', function (done) {
-      var primus = new Primus(server, { timeout: 25 })
+      var primus = new Primus(server, { pingInterval: 25 })
         , spark = new primus.Spark();
 
       spark.on('outgoing::ping', function () {
@@ -298,7 +298,7 @@ describe('Spark', function () {
     });
 
     it('writes `primus::ping::<timestamp>` when sending a ping', function (done) {
-      var primus = new Primus(server, { timeout: 25 })
+      var primus = new Primus(server, { pingInterval: 25 })
         , spark = new primus.Spark();
 
       spark.on('outgoing::ping', function (time) {
