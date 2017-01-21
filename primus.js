@@ -57,7 +57,7 @@ try {
  * - manual, don't automatically call `.open` to start the connection.
  * - websockets, force the use of WebSockets, even when you should avoid them.
  * - timeout, connect timeout, server didn't respond in a timely manner.
- * - ping, The maximum amount of time to wait for the server to send a ping.
+ * - pingTimeout, The maximum amount of time to wait for the server to send a ping.
  * - network, Use network events as leading method for network connection drops.
  * - strategy, Reconnection strategies.
  * - transport, Transport options.
@@ -74,9 +74,10 @@ function Primus(url, options) {
   Primus.Stream.call(this);
 
   if ('function' !== typeof this.client) {
-    var message = 'The client library has not been compiled correctly, ' +
-      'see https://github.com/primus/primus#client-library for more details';
-    return this.critical(new Error(message));
+    return this.critical(new Error(
+      'The client library has not been compiled correctly, see '+
+      'https://github.com/primus/primus#client-library for more details'
+    ));
   }
 
   if ('object' === typeof url) {
@@ -84,6 +85,12 @@ function Primus(url, options) {
     url = options.url || options.uri || defaultUrl;
   } else {
     options = options || {};
+  }
+
+  if ('ping' in options || 'pong' in options) {
+    return this.critical(new Error(
+      'The `ping` and `pong` options have been removed'
+    ));
   }
 
   var primus = this;
@@ -98,7 +105,7 @@ function Primus(url, options) {
   options.reconnect = 'reconnect' in options ? options.reconnect : {};
 
   // Heartbeat ping interval.
-  options.ping = 'ping' in options ? options.ping : 45e3;
+  options.pingTimeout = 'pingTimeout' in options ? options.pingTimeout : 45e3;
 
   // Reconnect strategies.
   options.strategy = 'strategy' in options ? options.strategy : [];
@@ -822,10 +829,10 @@ Primus.prototype._write = function write(data) {
  * @api private
  */
 Primus.prototype.heartbeat = function heartbeat() {
-  if (!this.options.ping) return this;
+  if (!this.options.pingTimeout) return this;
 
-  this.timers.clear('ping');
-  this.timers.setTimeout('ping', function ping() {
+  this.timers.clear('heartbeat');
+  this.timers.setTimeout('heartbeat', function expired() {
     //
     // The network events already captured the offline event.
     //
@@ -834,7 +841,7 @@ Primus.prototype.heartbeat = function heartbeat() {
     this.online = false;
     this.emit('offline');
     this.emit('incoming::end');
-  }, this.options.ping);
+  }, this.options.pingTimeout);
 
   return this;
 };
@@ -1115,10 +1122,7 @@ Primus.prototype.transform = function transform(type, fn) {
  * @api private
  */
 Primus.prototype.critical = function critical(err) {
-  if (this.listeners('error').length) {
-    this.emit('error', err);
-    return this;
-  }
+  if (this.emit('error', err)) return this;
 
   throw err;
 };

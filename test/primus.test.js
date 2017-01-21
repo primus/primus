@@ -544,29 +544,29 @@ describe('Primus', function () {
       expect(library).to.include('i am a client plugin');
     });
 
-    it('updates the default value of the `ping` option', function (done) {
-      var primus = new Primus(server, { timeout: 60000 })
+    it('updates the default value of the `pingTimeout` option', function (done) {
+      var primus = new Primus(server, { pingInterval: 60000 })
         , socket = new primus.Socket('http://localhost:'+ server.portnumber);
 
-      expect(socket.options.ping).to.equal(90000);
+      expect(socket.options.pingTimeout).to.equal(90000);
       socket.on('open', socket.end).on('end', function () {
-        primus = new Primus(server, { timeout: false });
+        primus = new Primus(server, { pingInterval: false });
         socket = primus.Socket('http://localhost:'+ server.portnumber);
 
-        expect(socket.options.ping).to.equal(false);
+        expect(socket.options.pingTimeout).to.equal(false);
         socket.on('open', socket.end).on('end', done);
       });
     });
 
-    it('still allows overriding the value of the `ping` option', function (done) {
-      var primus = new Primus(server, { timeout: 60000 })
+    it('still allows overriding the value of the `pingTimeout` option', function (done) {
+      var primus = new Primus(server, { pingInterval: 60000 })
         , Socket = primus.Socket;
 
       var socket = new Socket('http://localhost:'+ server.portnumber, {
-        ping: 100
+        pingTimeout: 100
       });
 
-      expect(socket.options.ping).to.equal(100);
+      expect(socket.options.pingTimeout).to.equal(100);
       socket.on('open', socket.end).on('end', done);
     });
 
@@ -574,20 +574,20 @@ describe('Primus', function () {
       var Socket = primus.Socket;
 
       var socket = new Socket({
-        ping: 100,
+        pingTimeout: 100,
         strategy: false,
         manual: true
       });
 
       expect(socket.url).to.eql(socket.parse('http://127.0.0.1'));
-      expect(socket.options.ping).to.equal(100);
+      expect(socket.options.pingTimeout).to.equal(100);
       expect(socket.options.strategy).to.have.length(0);
     });
 
     it('allows option.(url|uri) as url', function () {
       var socket = new primus.Socket({
         url: 'http://google.com',
-        ping: 100,
+        pingTimeout: 100,
         strategy: false,
         manual: true
       });
@@ -596,7 +596,7 @@ describe('Primus', function () {
 
       socket = new primus.Socket({
         uri: 'http://google.com',
-        ping: 100,
+        pingTimeout: 100,
         strategy: false,
         manual: true
       });
