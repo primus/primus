@@ -1343,27 +1343,6 @@ if (
     };
 }
 
-// ES5 15.5.4.20
-// whitespace from: http://es5.github.io/#x15.5.4.20
-var ws = '\x09\x0A\x0B\x0C\x0D\x20\xA0\u1680\u180E\u2000\u2001\u2002\u2003' +
-    '\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u3000\u2028' +
-    '\u2029\uFEFF';
-var zeroWidth = '\u200b';
-var wsRegexChars = '[' + ws + ']';
-var trimBeginRegexp = new RegExp('^' + wsRegexChars + wsRegexChars + '*');
-var trimEndRegexp = new RegExp(wsRegexChars + wsRegexChars + '*$');
-var hasTrimWhitespaceBug = StringPrototype.trim && (ws.trim() || !zeroWidth.trim());
-defineProperties(StringPrototype, {
-    // http://blog.stevenlevithan.com/archives/faster-trim-javascript
-    // http://perfectionkills.com/whitespace-deviations/
-    trim: function trim() {
-        if (this === void 0 || this === null) {
-            throw new TypeError("can't convert " + this + ' to object');
-        }
-        return String(this).replace(trimBeginRegexp, '').replace(trimEndRegexp, '');
-    }
-}, hasTrimWhitespaceBug);
-
 // ECMA-262, 3rd B.2.3
 // Not an ECMAScript standard, although ECMAScript 3rd Edition has a
 // non-normative section suggesting uniform semantics and it should be
@@ -1593,6 +1572,8 @@ if (Driver) {
 	module.exports = function WebSocketBrowserDriver(url) {
 		return new Driver(url);
 	};
+} else {
+	module.exports = undefined;
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
@@ -1913,7 +1894,7 @@ BufferedSender.prototype.sendSchedule = function() {
       self.sendStop = null;
       if (err) {
         self.emit('close', err.code || 1006, 'Sending error: ' + err);
-        self._cleanup();
+        self.close();
       } else {
         self.sendScheduleWait();
       }
@@ -1926,7 +1907,7 @@ BufferedSender.prototype._cleanup = function() {
   this.removeAllListeners();
 };
 
-BufferedSender.prototype.stop = function() {
+BufferedSender.prototype.close = function() {
   this._cleanup();
   if (this.sendStop) {
     this.sendStop();
@@ -2050,12 +2031,12 @@ function SenderReceiver(transUrl, urlSuffix, senderFunc, Receiver, AjaxObject) {
 inherits(SenderReceiver, BufferedSender);
 
 SenderReceiver.prototype.close = function() {
+  BufferedSender.prototype.close.call(this);
   this.removeAllListeners();
   if (this.poll) {
     this.poll.abort();
     this.poll = null;
   }
-  this.stop();
 };
 
 module.exports = SenderReceiver;
@@ -2723,10 +2704,11 @@ WebSocketTransport.prototype.send = function(data) {
 };
 
 WebSocketTransport.prototype.close = function() {
-  if (this.ws) {
-    this.ws.close();
-  }
+  var ws = this.ws;
   this._cleanup();
+  if (ws) {
+    ws.close();
+  }
 };
 
 WebSocketTransport.prototype._cleanup = function() {
@@ -2950,6 +2932,7 @@ var JSON3 = _dereq_('json3');
 
 // Some extra characters that Chrome gets wrong, and substitutes with
 // something else on the wire.
+// eslint-disable-next-line no-control-regex
 var extraEscapable = /[\x00-\x1f\ud800-\udfff\ufffe\uffff\u0300-\u0333\u033d-\u0346\u034a-\u034c\u0350-\u0352\u0357-\u0358\u035c-\u0362\u0374\u037e\u0387\u0591-\u05af\u05c4\u0610-\u0617\u0653-\u0654\u0657-\u065b\u065d-\u065e\u06df-\u06e2\u06eb-\u06ec\u0730\u0732-\u0733\u0735-\u0736\u073a\u073d\u073f-\u0741\u0743\u0745\u0747\u07eb-\u07f1\u0951\u0958-\u095f\u09dc-\u09dd\u09df\u0a33\u0a36\u0a59-\u0a5b\u0a5e\u0b5c-\u0b5d\u0e38-\u0e39\u0f43\u0f4d\u0f52\u0f57\u0f5c\u0f69\u0f72-\u0f76\u0f78\u0f80-\u0f83\u0f93\u0f9d\u0fa2\u0fa7\u0fac\u0fb9\u1939-\u193a\u1a17\u1b6b\u1cda-\u1cdb\u1dc0-\u1dcf\u1dfc\u1dfe\u1f71\u1f73\u1f75\u1f77\u1f79\u1f7b\u1f7d\u1fbb\u1fbe\u1fc9\u1fcb\u1fd3\u1fdb\u1fe3\u1feb\u1fee-\u1fef\u1ff9\u1ffb\u1ffd\u2000-\u2001\u20d0-\u20d1\u20d4-\u20d7\u20e7-\u20e9\u2126\u212a-\u212b\u2329-\u232a\u2adc\u302b-\u302c\uaab2-\uaab3\uf900-\ufa0d\ufa10\ufa12\ufa15-\ufa1e\ufa20\ufa22\ufa25-\ufa26\ufa2a-\ufa2d\ufa30-\ufa6d\ufa70-\ufad9\ufb1d\ufb1f\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40-\ufb41\ufb43-\ufb44\ufb46-\ufb4e\ufff0-\uffff]/g
   , extraLookup;
 
@@ -3175,8 +3158,7 @@ module.exports = {
     };
   }
 
-/* jshint undef: false, newcap: false */
-/* eslint no-undef: 0, new-cap: 0 */
+/* eslint no-undef: "off", new-cap: "off" */
 , createHtmlfile: function(iframeUrl, errorCallback) {
     var axo = ['Active'].concat('Object').join('X');
     var doc = new global[axo]('htmlfile');
@@ -3416,7 +3398,7 @@ module.exports = {
 };
 
 },{"url-parse":57}],52:[function(_dereq_,module,exports){
-module.exports = '1.1.1';
+module.exports = '1.1.2';
 
 },{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
@@ -4362,7 +4344,7 @@ var has = Object.prototype.hasOwnProperty;
  * @api public
  */
 function querystring(query) {
-  var parser = /([^=?&]+)=([^&]*)/g
+  var parser = /([^=?&]+)=?([^&]*)/g
     , result = {}
     , part;
 
@@ -4458,11 +4440,10 @@ module.exports = function required(port, protocol) {
 var required = _dereq_('requires-port')
   , lolcation = _dereq_('./lolcation')
   , qs = _dereq_('querystringify')
-  , relativere = /^\/(?!\/)/
-  , protocolre = /^([a-z0-9.+-]+:)?(\/\/)?(.*)$/i; // actual protocol is first match
+  , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\S\s]*)/i;
 
 /**
- * These are the parse instructions for the URL parsers, it informs the parser
+ * These are the parse rules for the URL parser, it informs the parser
  * about:
  *
  * 0. The char it Needs to parse, if it's a string it should be done using
@@ -4473,44 +4454,79 @@ var required = _dereq_('requires-port')
  * 3. Inherit from location if non existing in the parser.
  * 4. `toLowerCase` the resulting value.
  */
-var instructions = [
+var rules = [
   ['#', 'hash'],                        // Extract from the back.
   ['?', 'query'],                       // Extract from the back.
   ['/', 'pathname'],                    // Extract from the back.
   ['@', 'auth', 1],                     // Extract from the front.
   [NaN, 'host', undefined, 1, 1],       // Set left over value.
-  [/\:(\d+)$/, 'port'],                 // RegExp the back.
+  [/:(\d+)$/, 'port', undefined, 1],    // RegExp the back.
   [NaN, 'hostname', undefined, 1, 1]    // Set left over.
 ];
 
- /**
+/**
  * @typedef ProtocolExtract
  * @type Object
- * @property {String} protocol Protocol matched in the URL, in lowercase
- * @property {Boolean} slashes Indicates whether the protocol is followed by double slash ("//")
- * @property {String} rest     Rest of the URL that is not part of the protocol
+ * @property {String} protocol Protocol matched in the URL, in lowercase.
+ * @property {Boolean} slashes `true` if protocol is followed by "//", else `false`.
+ * @property {String} rest Rest of the URL that is not part of the protocol.
  */
 
- /**
-  * Extract protocol information from a URL with/without double slash ("//")
-  *
-  * @param  {String} address   URL we want to extract from.
-  * @return {ProtocolExtract}  Extracted information
-  * @private
-  */
+/**
+ * Extract protocol information from a URL with/without double slash ("//").
+ *
+ * @param {String} address URL we want to extract from.
+ * @return {ProtocolExtract} Extracted information.
+ * @api private
+ */
 function extractProtocol(address) {
   var match = protocolre.exec(address);
+
   return {
     protocol: match[1] ? match[1].toLowerCase() : '',
     slashes: !!match[2],
-    rest: match[3] ? match[3] : ''
+    rest: match[3]
   };
+}
+
+/**
+ * Resolve a relative URL pathname against a base URL pathname.
+ *
+ * @param {String} relative Pathname of the relative URL.
+ * @param {String} base Pathname of the base URL.
+ * @return {String} Resolved pathname.
+ * @api private
+ */
+function resolve(relative, base) {
+  var path = (base || '/').split('/').slice(0, -1).concat(relative.split('/'))
+    , i = path.length
+    , last = path[i - 1]
+    , unshift = false
+    , up = 0;
+
+  while (i--) {
+    if (path[i] === '.') {
+      path.splice(i, 1);
+    } else if (path[i] === '..') {
+      path.splice(i, 1);
+      up++;
+    } else if (up) {
+      if (i === 0) unshift = true;
+      path.splice(i, 1);
+      up--;
+    }
+  }
+
+  if (unshift) path.unshift('');
+  if (last === '.' || last === '..') path.push('');
+
+  return path.join('/');
 }
 
 /**
  * The actual URL instance. Instead of returning an object we've opted-in to
  * create an actual constructor as it's much more memory efficient and
- * faster and it pleases my CDO.
+ * faster and it pleases my OCD.
  *
  * @constructor
  * @param {String} address URL we want to parse.
@@ -4523,8 +4539,8 @@ function URL(address, location, parser) {
     return new URL(address, location, parser);
   }
 
-  var relative = relativere.test(address)
-    , parse, instruction, index, key
+  var relative, extracted, parse, instruction, index, key
+    , instructions = rules.slice()
     , type = typeof location
     , url = this
     , i = 0;
@@ -4545,17 +4561,24 @@ function URL(address, location, parser) {
     location = null;
   }
 
-  if (parser && 'function' !== typeof parser) {
-    parser = qs.parse;
-  }
+  if (parser && 'function' !== typeof parser) parser = qs.parse;
 
   location = lolcation(location);
 
-  // extract protocol information before running the instructions
-  var extracted = extractProtocol(address);
+  //
+  // Extract protocol information before running the instructions.
+  //
+  extracted = extractProtocol(address || '');
+  relative = !extracted.protocol && !extracted.slashes;
+  url.slashes = extracted.slashes || relative && location.slashes;
   url.protocol = extracted.protocol || location.protocol || '';
-  url.slashes = extracted.slashes || location.slashes;
   address = extracted.rest;
+
+  //
+  // When the authority component is absent the URL starts with a path
+  // component.
+  //
+  if (!extracted.slashes) instructions[2] = [/(.*)/, 'pathname'];
 
   for (; i < instructions.length; i++) {
     instruction = instructions[i];
@@ -4576,18 +4599,18 @@ function URL(address, location, parser) {
       }
     } else if (index = parse.exec(address)) {
       url[key] = index[1];
-      address = address.slice(0, address.length - index[0].length);
+      address = address.slice(0, index.index);
     }
 
-    url[key] = url[key] || (instruction[3] || ('port' === key && relative) ? location[key] || '' : '');
+    url[key] = url[key] || (
+      relative && instruction[3] ? location[key] || '' : ''
+    );
 
     //
     // Hostname, host and protocol should be lowercased so they can be used to
     // create a proper `origin`.
     //
-    if (instruction[4]) {
-      url[key] = url[key].toLowerCase();
-    }
+    if (instruction[4]) url[key] = url[key].toLowerCase();
   }
 
   //
@@ -4596,6 +4619,18 @@ function URL(address, location, parser) {
   // parser.
   //
   if (parser) url.query = parser(url.query);
+
+  //
+  // If the URL is relative, resolve the pathname against the base URL.
+  //
+  if (
+      relative
+    && location.slashes
+    && url.pathname.charAt(0) !== '/'
+    && (url.pathname !== '' || location.pathname !== '')
+  ) {
+    url.pathname = resolve(url.pathname, location.pathname);
+  }
 
   //
   // We should not add port numbers if they are already the default port number
@@ -4617,6 +4652,10 @@ function URL(address, location, parser) {
     url.password = instruction[1] || '';
   }
 
+  url.origin = url.protocol && url.host && url.protocol !== 'file:'
+    ? url.protocol +'//'+ url.host
+    : 'null';
+
   //
   // The href is just the compiled result.
   //
@@ -4627,54 +4666,86 @@ function URL(address, location, parser) {
  * This is convenience method for changing properties in the URL instance to
  * insure that they all propagate correctly.
  *
- * @param {String} prop          Property we need to adjust.
+ * @param {String} part          Property we need to adjust.
  * @param {Mixed} value          The newly assigned value.
- * @param {Boolean|Function} fn  When setting the query, it will be the function used to parse
- *                               the query.
- *                               When setting the protocol, double slash will be removed from
- *                               the final url if it is true.
+ * @param {Boolean|Function} fn  When setting the query, it will be the function
+ *                               used to parse the query.
+ *                               When setting the protocol, double slash will be
+ *                               removed from the final url if it is true.
  * @returns {URL}
  * @api public
  */
 URL.prototype.set = function set(part, value, fn) {
   var url = this;
 
-  if ('query' === part) {
-    if ('string' === typeof value && value.length) {
-      value = (fn || qs.parse)(value);
-    }
+  switch (part) {
+    case 'query':
+      if ('string' === typeof value && value.length) {
+        value = (fn || qs.parse)(value);
+      }
 
-    url[part] = value;
-  } else if ('port' === part) {
-    url[part] = value;
+      url[part] = value;
+      break;
 
-    if (!required(value, url.protocol)) {
-      url.host = url.hostname;
-      url[part] = '';
-    } else if (value) {
-      url.host = url.hostname +':'+ value;
-    }
-  } else if ('hostname' === part) {
-    url[part] = value;
+    case 'port':
+      url[part] = value;
 
-    if (url.port) value += ':'+ url.port;
-    url.host = value;
-  } else if ('host' === part) {
-    url[part] = value;
+      if (!required(value, url.protocol)) {
+        url.host = url.hostname;
+        url[part] = '';
+      } else if (value) {
+        url.host = url.hostname +':'+ value;
+      }
 
-    if (/\:\d+/.test(value)) {
-      value = value.split(':');
-      url.hostname = value[0];
-      url.port = value[1];
-    }
-  } else if ('protocol' === part) {
-    url.protocol = value;
-    url.slashes = !fn;
-  } else {
-    url[part] = value;
+      break;
+
+    case 'hostname':
+      url[part] = value;
+
+      if (url.port) value += ':'+ url.port;
+      url.host = value;
+      break;
+
+    case 'host':
+      url[part] = value;
+
+      if (/:\d+$/.test(value)) {
+        value = value.split(':');
+        url.port = value.pop();
+        url.hostname = value.join(':');
+      } else {
+        url.hostname = value;
+        url.port = '';
+      }
+
+      break;
+
+    case 'protocol':
+      url.protocol = value.toLowerCase();
+      url.slashes = !fn;
+      break;
+
+    case 'pathname':
+      url.pathname = value.length && value.charAt(0) !== '/' ? '/' + value : value;
+
+      break;
+
+    default:
+      url[part] = value;
   }
 
+  for (var i = 0; i < rules.length; i++) {
+    var ins = rules[i];
+
+    if (ins[4]) url[ins[1]] = url[ins[1]].toLowerCase();
+  }
+
+  url.origin = url.protocol && url.host && url.protocol !== 'file:'
+    ? url.protocol +'//'+ url.host
+    : 'null';
+
   url.href = url.toString();
+
   return url;
 };
 
@@ -4702,10 +4773,7 @@ URL.prototype.toString = function toString(stringify) {
     result += '@';
   }
 
-  result += url.hostname;
-  if (url.port) result += ':'+ url.port;
-
-  result += url.pathname;
+  result += url.host + url.pathname;
 
   query = 'object' === typeof url.query ? stringify(url.query) : url.query;
   if (query) result += '?' !== query.charAt(0) ? '?'+ query : query;
@@ -4717,10 +4785,12 @@ URL.prototype.toString = function toString(stringify) {
 
 //
 // Expose the URL parser and some additional properties that might be useful for
-// others.
+// others or testing.
 //
-URL.qs = qs;
+URL.extractProtocol = extractProtocol;
 URL.location = lolcation;
+URL.qs = qs;
+
 module.exports = URL;
 
 },{"./lolcation":58,"querystringify":55,"requires-port":56}],58:[function(_dereq_,module,exports){
