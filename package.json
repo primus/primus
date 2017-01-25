@@ -64,7 +64,7 @@
   "devDependencies": {
     "binary-pack": "~1.0.2",
     "browserchannel": "~2.0.0",
-    "browserify": "~13.3.0",
+    "browserify": "~14.0.0",
     "chai": "~3.5.0",
     "condenseify": "~1.1.1",
     "demolish": "~1.0.2",
