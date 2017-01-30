@@ -223,19 +223,26 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
       });
 
-      it('can be closed immediately', function (done) {
-        var socket = new Socket(server.addr)
-          , calls = 0;
+      if ('unixdomainwebsockets' !== transformer_name) {
+        //
+        // @todo Run this test for all transformers when
+        // https://github.com/nodejs/node/commit/18d4ee97 is included in the
+        // current and LTS Node.js versions.
+        //
+        it('can be closed immediately', function (done) {
+          var socket = new Socket(server.addr)
+            , calls = 0;
 
-        socket.on('end', function () {
-          if (++calls === 2) return done();
+          socket.on('end', function () {
+            if (++calls === 2) return done();
 
-          socket.open();
+            socket.open();
+            socket.end();
+          });
+
           socket.end();
         });
-
-        socket.end();
-      });
+      }
 
       it('emits a readyStateChange event', function (done) {
         var socket = new Socket(server.addr)
@@ -1053,20 +1060,17 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.write('balls');
       });
 
-      if (
-          'faye' === transformer
-        || 'sockjs' === transformer
-        || 'websockets' === transformer
-      )
-      it('should connect using basic auth', function (done) {
-        primus.on('connection', function (spark) {
-          expect(spark.headers.authorization).to.equal('Basic dXNyOnBhc3M=');
-          socket.end();
-        });
+      if ('browserchannel' !== transformer && 'engine.io' !== transformer) {
+        it('should connect using basic auth', function (done) {
+          primus.on('connection', function (spark) {
+            expect(spark.headers.authorization).to.equal('Basic dXNyOnBhc3M=');
+            socket.end();
+          });
 
-        var socket = new Socket(server.make_addr('usr:pass', '?foo=bar'));
-        socket.on('end', done);
-      });
+          var socket = new Socket(server.make_addr('usr:pass', '?foo=bar'));
+          socket.on('end', done);
+        });
+      }
 
       it('should emit a timeout event if it cannot connect in a timely manner', function (done) {
         primus.authorize(function (req, next) {
@@ -1080,32 +1084,39 @@ module.exports = function base(transformer, pathname, transformer_name) {
         socket.on('timeout', done);
       });
 
-      it('should reconnect after the timeout', function (done) {
-        primus.authorize(function (req, next) {
-          setTimeout(next, 1000);
+      if ('unixdomainwebsockets' !== transformer_name) {
+        //
+        // @todo Run this test for all transformers when
+        // https://github.com/nodejs/node/commit/18d4ee97 is included in the
+        // current and LTS Node.js versions.
+        //
+        it('should reconnect after the timeout', function (done) {
+          primus.authorize(function (req, next) {
+            setTimeout(next, 1000);
+          });
+
+          var socket = new Socket(server.addr, { timeout: 10 })
+            , pattern = [];
+
+          socket.on('timeout', function () {
+            pattern.push('timeout');
+          });
+
+          socket.once('reconnect scheduled', function () {
+            pattern.push('reconnect scheduled');
+          });
+
+          socket.once('reconnect', function () {
+            pattern.push('reconnect');
+            expect(pattern.join(',')).to.equal('timeout,reconnect scheduled,reconnect');
+
+            socket.end();
+            // outgoing::reconnect is emitted after reconnect whatever we do
+            socket.removeAllListeners('outgoing::reconnect');
+            done();
+          });
         });
-
-        var socket = new Socket(server.addr, { timeout: 10 })
-          , pattern = [];
-
-        socket.on('timeout', function () {
-          pattern.push('timeout');
-        });
-
-        socket.once('reconnect scheduled', function () {
-          pattern.push('reconnect scheduled');
-        });
-
-        socket.once('reconnect', function () {
-          pattern.push('reconnect');
-          expect(pattern.join(',')).to.equal('timeout,reconnect scheduled,reconnect');
-
-          socket.end();
-          // outgoing::reconnect is emitted after reconnect whatever we do
-          socket.removeAllListeners('outgoing::reconnect');
-          done();
-        });
-      });
+      }
 
       it('emits a `reconnected` event', function (done) {
         var socket = new Socket(server.addr);
@@ -1288,69 +1299,86 @@ module.exports = function base(transformer, pathname, transformer_name) {
       });
 
       if ('unixdomainwebsockets' !== transformer_name) {
-      it('should still allow requests to the original listener', function (done) {
-        request(
-          server.addr +'/nothrow',
-          function (err, res, body) {
-            if (err) return done(err);
+        it('should still allow requests to the original listener', function (done) {
+          request(
+            server.addr +'/nothrow',
+            function (err, res, body) {
+              if (err) return done(err);
 
-            expect(body).to.equal('original listener');
-            done();
-          }
-        );
-      });
-
-      it('responds to library requests', function (done) {
-        request(
-          server.addr + '/primus/primus.js',
-          function (err, res, body) {
-            if (err) return done(err);
-
-            expect(res.statusCode).to.equal(200);
-            expect(res.headers['content-type']).to.equal('text/javascript; charset=utf-8');
-            expect(body).to.equal(primus.library());
-            done();
-          }
-        );
-      });
-
-      it('handles requests to non existing routes captured by primus', function (done) {
-        request(
-          server.addr + '/primus.js',
-          function (err, res, body) {
-            if (err) return done(err);
-
-            done();
-          }
-        );
-      });
-
-      it('correctly handles requests when a middleware returns an error', function (done) {
-        primus.use('foo', function foo(req, res, next) {
-          next(new Error('foo failed'));
+              expect(body).to.equal('original listener');
+              done();
+            }
+          );
         });
 
-        primus.on('connection', function (spark) {
-          throw new Error('connection should not be triggered');
+        it('responds to library requests', function (done) {
+          request(
+            server.addr + '/primus/primus.js',
+            function (err, res, body) {
+              if (err) return done(err);
+
+              expect(res.statusCode).to.equal(200);
+              expect(res.headers['content-type']).to.equal('text/javascript; charset=utf-8');
+              expect(body).to.equal(primus.library());
+              done();
+            }
+          );
         });
 
-        var socket = new Socket(server.addr, { strategy: false });
-        socket.on('end', done);
-      });
+        it('handles requests to non existing routes captured by primus', function (done) {
+          request(
+            server.addr + '/primus.js',
+            function (err, res, body) {
+              if (err) return done(err);
 
-      it('correctly parses the ip address', function (done) {
-        primus.on('connection', function (spark) {
-          var address = spark.address;
-          expect(address.port).to.not.equal(0);
-          expect(address.port).to.not.equal(server.portnumber);
-
-          spark.end();
-          done();
+              done();
+            }
+          );
         });
 
-        var socket = new Socket(server.addr);
-      });
-      } // !unixdomainwebsockets
+        it('correctly handles requests when a middleware returns an error', function (done) {
+          primus.use('foo', function foo(req, res, next) {
+            next(new Error('foo failed'));
+          });
+
+          primus.on('connection', function (spark) {
+            throw new Error('connection should not be triggered');
+          });
+
+          var socket = new Socket(server.addr, { strategy: false });
+          socket.on('end', done);
+        });
+
+        it('correctly parses the ip address', function (done) {
+          primus.on('connection', function (spark) {
+            var address = spark.address;
+            expect(address.port).to.not.equal(0);
+            expect(address.port).to.not.equal(server.portnumber);
+
+            spark.end();
+            done();
+          });
+
+          var socket = new Socket(server.addr);
+        });
+
+        it('exposes a spec file with the correct transformer', function (done) {
+          request(
+            server.addr +'/primus/spec',
+            function (err, res, body) {
+              if (err) return done(err);
+              body = JSON.parse(body);
+
+              expect(body.transformer).to.equal(transformer);
+              expect(body.version).to.equal(primus.version);
+              expect(body.pathname).to.equal('/primus');
+              expect(body.parser).to.equal('json');
+              expect(body.timeout).to.equal(35000);
+              done();
+            }
+          );
+        });
+      }
 
       it('uses x-forwarded headers over the connection ip address', function (done) {
         primus.on('connection', function (spark) {
@@ -1373,24 +1401,6 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
 
         var socket = new Socket(server.addr);
-      });
-
-      if ('unixdomainwebsockets' !== transformer_name)
-      it('exposes a spec file with the correct transformer', function (done) {
-        request(
-          server.addr +'/primus/spec',
-          function (err, res, body) {
-            if (err) return done(err);
-            body = JSON.parse(body);
-
-            expect(body.transformer).to.equal(transformer);
-            expect(body.version).to.equal(primus.version);
-            expect(body.pathname).to.equal('/primus');
-            expect(body.parser).to.equal('json');
-            expect(body.timeout).to.equal(35000);
-            done();
-          }
-        );
       });
 
       it('doesnt crash when we write to a closed connection', function (done) {
@@ -1446,36 +1456,32 @@ module.exports = function base(transformer, pathname, transformer_name) {
         });
       });
 
-      if ('browserchannel' !== transformer && 'uws' !== transformer)
-      it('closes the connection when `maxLength` is exceeded', function (done) {
-        primus.destroy(function () {
-          primus = new Primus(server, {
-            pathname: server.pathname,
-            transformer: transformer,
-            maxLength: 5
-          });
-
-          primus.on('connection', function (spark) {
-            spark.on('data', function () {
-              done(new Error('Test invalidation'));
+      if ('browserchannel' !== transformer && 'uws' !== transformer) {
+        it('closes the connection when `maxLength` is exceeded', function (done) {
+          primus.destroy(function () {
+            primus = new Primus(server, {
+              pathname: server.pathname,
+              transformer: transformer,
+              maxLength: 5
             });
-          });
 
-          server.listen(server.portnumber, function () {
-            var socket = new primus.Socket(server.addr, { strategy: false });
-
-            socket.on('open', function () {
-              //
-              // Workaround for https://github.com/websockets/ws/issues/784,
-              // to be removed once the issue is fixed.
-              //
-              if ('websockets' === transformer) this.socket._isServer = true;
-              socket.write('abcdef');
+            primus.on('connection', function (spark) {
+              spark.on('data', function () {
+                done(new Error('Test invalidation'));
+              });
             });
-            socket.on('end', done);
+
+            server.listen(server.portnumber, function () {
+              var socket = new primus.Socket(server.addr, { strategy: false });
+
+              socket.on('open', function () {
+                socket.write('abcdef');
+                socket.on('end', done);
+              });
+            });
           });
         });
-      });
+      }
 
       describe('#transform', function () {
         it('thrown an error if an invalid type is given', function (done) {
