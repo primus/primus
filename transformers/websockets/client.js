@@ -42,15 +42,17 @@ module.exports = function client() {
     // Primus when we connect.
     //
     try {
-      var prot = primus.url.protocol === 'ws+unix:' ? 'ws+unix:' : 'ws:'
-        , options = { protocol: prot, query: true };
+      var options = {
+        protocol: primus.url.protocol === 'ws+unix:' ? 'ws+unix:' : 'ws:',
+        query: true
+      };
 
       //
       // Only allow primus.transport object in Node.js, it will throw in
       // browsers with a TypeError if we supply to much arguments.
       //
       if (Factory.length === 3) {
-        if ('ws+unix:' === prot) {
+        if ('ws+unix:' === options.protocol) {
           options.pathname = primus.url.pathname +':'+ primus.pathname;
         }
         primus.socket = socket = new Factory(
