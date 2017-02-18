@@ -1,8 +1,9 @@
 'use strict';
 
-var chai = require('chai')
-  , http = require('http')
-  , fs = require('fs');
+const crypto = require('crypto');
+const chai = require('chai');
+const http = require('http');
+const fs = require('fs');
 
 chai.config.includeStack = true;
 
@@ -24,18 +25,16 @@ exports.request = require('request');
 //
 // Expose a port number generator.
 //
-var port = 1111;
+let port = 1111;
 Object.defineProperty(exports, 'port', {
-  get: function get() {
-    return port++;
-  }
+  get() { return port++; }
 });
 
 //
 // Expose a server creation utility.
 //
 exports.create = function create(options, fn) {
-  var server = http.createServer(function handle(req, res) {
+  const server = http.createServer(function handle(req, res) {
     console.error('');
     console.error('Uncaught request', req.url);
     console.error('');
@@ -44,7 +43,7 @@ exports.create = function create(options, fn) {
     res.end('original listener');
   });
 
-  var primus = new exports.Primus(server, {
+  const primus = new exports.Primus(server, {
     transformer: options.transformer,
     pathname: options.pathname,
     parser: options.parser
@@ -59,8 +58,8 @@ exports.create = function create(options, fn) {
     });
   });
 
-  var upgrades = []
-    , requests = [];
+  const upgrades = [];
+  const requests = [];
 
   server.on('request', function incoming(req, res) {
     requests.push(res);
@@ -84,11 +83,10 @@ exports.create = function create(options, fn) {
     upgrades.length = requests.length = 0;
   }
 
-  if (options.socketPath) {
-    if (fs.existsSync(options.socketPath)) fs.unlinkSync(options.socketPath);
-    server.portnumber = options.socketPath;
+  if (options.unixSocket) {
+    server.portnumber = `/tmp/primus.${crypto.randomBytes(16).toString('hex')}.socket`;
     server.make_addr = function (auth, query) {
-      return 'ws+unix://'+ (auth ? `${auth}@` : '') + options.socketPath + (query || '');
+      return 'ws+unix://'+ (auth ? `${auth}@` : '') + server.portnumber + (query || '');
     };
   } else {
     server.portnumber = options.port || exports.port;

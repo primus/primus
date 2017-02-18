@@ -32,7 +32,6 @@ module.exports = function base(transformer, transformer_name) {
       , Primus = common.Primus
       , expect = common.expect
       , create = common.create
-      , socketPath
       , Socket
       , server
       , primus;
@@ -40,12 +39,14 @@ module.exports = function base(transformer, transformer_name) {
     transformer_name = transformer_name.toLowerCase();
     transformer = transformer.toLowerCase();
 
-    if ('unixdomainwebsockets' === transformer_name) {
-      socketPath = '/tmp/primus-test.socket';
-    }
+    const options = {
+      unixSocket: 'unixdomainwebsockets' === transformer_name,
+      parser: 'json',
+      transformer
+    };
 
     beforeEach(function beforeEach(done) {
-      var services = create({ parser: 'json', transformer, socketPath }, done);
+      const services = create(options, done);
 
       Socket = services.Socket;
       server = services.server;
