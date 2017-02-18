@@ -717,22 +717,29 @@ module.exports = function base(transformer, transformer_name) {
             socket.write('foo');
           });
 
-          it('prevents the message from being written', function (done) {
-            var socket = new Socket(server.addr);
+          if ('unixdomainwebsockets' !== transformer_name) {
+            //
+            // @todo Run this test for all transformers when
+            // https://github.com/nodejs/node/commit/18d4ee97 is included in the
+            // current and LTS Node.js versions.
+            //
+            it('prevents the message from being written', function (done) {
+              var socket = new Socket(server.addr);
 
-            socket.transform('outgoing', function (data) {
-              setTimeout(function () {
-                socket.end();
-                done();
-              }, 0);
+              socket.transform('outgoing', function (data) {
+                setTimeout(function () {
+                  socket.end();
+                  done();
+                }, 0);
 
-              return false;
+                return false;
+              });
+
+              socket.on('outgoing::data', function () {
+                throw new Error('return false should prevent this emit');
+              }).write('foo');
             });
-
-            socket.on('outgoing::data', function () {
-              throw new Error('return false should prevent this emit');
-            }).write('foo');
-          });
+          }
 
           it('prevents the message from being written async', function (done) {
             var socket = new Socket(server.addr);
