@@ -1,5 +1,3 @@
 'use strict';
 
-if (process.versions.modules >= 46) {
-  require('./transformer.base')('uws');
-}
+require('./transformer.base')('uws');

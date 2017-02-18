@@ -1,9 +1,9 @@
 'use strict';
 
-module.exports = function base(transformer, pathname, transformer_name) {
+module.exports = function base(transformer, transformer_name) {
   transformer_name = transformer_name || '';
 
-  var EventEmitter = require('events').EventEmitter;
+  var EventEmitter = require('events');
 
   var emitter = {
     server: function (primus) {
@@ -32,7 +32,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
       , Primus = common.Primus
       , expect = common.expect
       , create = common.create
-      , destroy
+      , socketPath
       , Socket
       , server
       , primus;
@@ -40,10 +40,13 @@ module.exports = function base(transformer, pathname, transformer_name) {
     transformer_name = transformer_name.toLowerCase();
     transformer = transformer.toLowerCase();
 
-    beforeEach(function beforeEach(done) {
-      var services = create(transformer, 'json', done, pathname);
+    if ('unixdomainwebsockets' === transformer_name) {
+      socketPath = '/tmp/primus-test.socket';
+    }
 
-      destroy = services.destroy;
+    beforeEach(function beforeEach(done) {
+      var services = create({ parser: 'json', transformer, socketPath }, done);
+
       Socket = services.Socket;
       server = services.server;
       primus = services.primus;
@@ -1242,10 +1245,7 @@ module.exports = function base(transformer, pathname, transformer_name) {
       it('should receive querystrings', function (done) {
         primus.on('connection', function (spark) {
           expect(spark.query).to.be.a('object');
-
-          if ('unixdomainwebsockets' !== transformer_name) {
-            expect(spark.query.foo).to.equal('bar');
-          }
+          expect(spark.query.foo).to.equal('bar');
 
           socket.end();
         });

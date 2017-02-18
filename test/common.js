@@ -2,16 +2,14 @@
 
 var chai = require('chai')
   , http = require('http')
-  , path = require('path')
   , fs = require('fs');
 
 chai.config.includeStack = true;
-http.globalAgent.maxSockets = 15;
 
 //
 // Expose primus
 //
-exports.Primus = require('../');
+exports.Primus = require('..');
 
 //
 // Expose our assertions.
@@ -36,24 +34,7 @@ Object.defineProperty(exports, 'port', {
 //
 // Expose a server creation utility.
 //
-exports.create = function create(transformer, parser, fn, port) {
-  var pathname;
-
-  if (typeof port === 'string') {
-    if (port.indexOf('/', port.length - 1) < 0) {
-      pathname = port;
-    } else {
-      pathname = port;
-      port = exports.port;
-      pathname = path.join(pathname, port + '');
-    }
-    if (fs.existsSync(pathname)) {
-      fs.unlinkSync(pathname);
-    }
-  } else {
-    port = port || exports.port;
-  }
-
+exports.create = function create(options, fn) {
   var server = http.createServer(function handle(req, res) {
     console.error('');
     console.error('Uncaught request', req.url);
@@ -64,9 +45,9 @@ exports.create = function create(transformer, parser, fn, port) {
   });
 
   var primus = new exports.Primus(server, {
-    transformer: transformer,
-    pathname: pathname,
-    parser: parser
+    transformer: options.transformer,
+    pathname: options.pathname,
+    parser: options.parser
   });
 
   primus.on('connection', function connection(spark) {
@@ -103,27 +84,28 @@ exports.create = function create(transformer, parser, fn, port) {
     upgrades.length = requests.length = 0;
   }
 
-  server.portnumber = pathname || port;
-  server.pathname = pathname;
-
-  server.listen(pathname || port, fn);
-
-  if (pathname) {
+  if (options.socketPath) {
+    if (fs.existsSync(options.socketPath)) fs.unlinkSync(options.socketPath);
+    server.portnumber = options.socketPath;
     server.make_addr = function (auth, query) {
-      return 'ws+unix://' + (auth ? auth + '@' : '') + pathname;
+      return 'ws+unix://'+ (auth ? `${auth}@` : '') + options.socketPath + (query || '');
     };
   } else {
+    server.portnumber = options.port || exports.port;
     server.make_addr = function (auth, query) {
-      return 'http://' + (auth ? auth + '@' : '') + 'localhost:' + port + (query ? '/' + query : '');
+      return 'http://'+ (auth ? auth + '@' : '') +'localhost:'+ server.portnumber + (query || '');
     };
   }
 
+  server.pathname = options.pathname;
   server.addr = server.make_addr();
+
+  server.listen(server.portnumber, fn);
 
   return {
     Socket: primus.Socket,
-    destroy: destroy,
-    server: server,
-    primus: primus
+    destroy,
+    server,
+    primus
   };
 };

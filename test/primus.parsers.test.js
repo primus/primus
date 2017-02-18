@@ -20,7 +20,7 @@ describe('Parsers', function () {
 
   function sendsAndReceivesTest(parser, done) {
     var create = common.create
-      , services = create('websockets', parser, function () {})
+      , services = create({ transformer: 'websockets', parser }, () => {})
       , Socket = services.Socket
       , primus = services.primus
       , server = services.server;

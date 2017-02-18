@@ -43,24 +43,23 @@ module.exports = function client() {
     //
     try {
       var prot = primus.url.protocol === 'ws+unix:' ? 'ws+unix:' : 'ws:'
-        , qsa = prot === 'ws:';
+        , options = { protocol: prot, query: true };
 
       //
       // Only allow primus.transport object in Node.js, it will throw in
       // browsers with a TypeError if we supply to much arguments.
       //
       if (Factory.length === 3) {
+        if ('ws+unix:' === prot) {
+          options.pathname = primus.url.pathname +':'+ primus.pathname;
+        }
         primus.socket = socket = new Factory(
-          primus.uri({ protocol: prot, query: qsa }),   // URL
-          [],                                           // Sub protocols
-          primus.transport                              // options.
+          primus.uri(options),  // URL
+          [],                   // Sub protocols
+          primus.transport      // options.
         );
       } else {
-        primus.socket = socket = new Factory(primus.uri({
-          protocol: prot,
-          query: qsa
-        }));
-
+        primus.socket = socket = new Factory(primus.uri(options));
         socket.binaryType = 'arraybuffer';
       }
     } catch (e) { return primus.emit('error', e); }
