@@ -225,22 +225,28 @@ describe('Primus', function () {
   });
 
   it('throws a human readable error for an unsupported transformer', function () {
+    var restoreConsole = stub(console, 'error');
     try {
       new Primus(server, { transformer: 'cowsack' });
     } catch (e) {
       expect(e).to.be.instanceOf(Error);
       return expect(e.message).to.include('cowsack');
+    } finally {
+      restoreConsole();
     }
 
     throw new Error('Should have thrown');
   });
 
   it('throws a human readable error for an unsupported parser', function () {
+    var restoreConsole = stub(console, 'error');
     try {
       new Primus(server, { parser: 'cowsack' });
     } catch (e) {
       expect(e).to.be.instanceOf(Error);
       return expect(e.message).to.include('cowsack');
+    } finally {
+      restoreConsole();
     }
 
     throw new Error('Should have thrown');
@@ -667,8 +673,10 @@ describe('Primus', function () {
 
   describe('#createServer', function () {
     it('returns a new primus instance', function (done) {
-      var port = common.port
-        , primus = Primus.createServer({ port: port });
+      const primus = Primus.createServer({
+        port: common.port,
+        iknowhttpsisbetter: true
+      });
 
       expect(primus).to.be.instanceOf(Primus);
       expect(primus.server).to.be.instanceOf(http.Server);
@@ -679,8 +687,11 @@ describe('Primus', function () {
     });
 
     it('applies the options to the Primus server', function (done) {
-      var port = common.port
-        , primus = Primus.createServer({ port: port, transformer: 'engine.io' });
+      const primus = Primus.createServer({
+        port: common.port,
+        transformer: 'engine.io',
+        iknowhttpsisbetter: true
+      });
 
       expect(primus.spec.transformer).to.equal('engine.io');
 
@@ -766,3 +777,9 @@ describe('Primus', function () {
     });
   });
 });
+
+function stub(obj, prop) {
+  const stubbed = obj[prop];
+  obj[prop] = () => {};
+  return () => { obj[prop] = stubbed; };
+}
