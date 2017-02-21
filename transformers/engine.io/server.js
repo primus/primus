@@ -58,8 +58,5 @@ module.exports = function server() {
     };
 
     this.service.handleRequest(req, res);
-  }).once('close',  () => {
-    if (this.service.ws) this.service.ws.close();
-    this.service.close();
-  });
+  }).once('close',  () => this.service.close());
 };
