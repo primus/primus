@@ -69,7 +69,7 @@ module.exports = function server() {
     spark.emit('incoming::data', msg);
   });
 
-  native.server.group.onPing(group, (msg, spark) => spark.emit('incoming::ping'));
+  native.server.group.onPing(group, (msg, spark) => spark.emit('incoming::pong'));
 
   //
   // Listen to upgrade requests.
