@@ -1,3 +1,5 @@
+moved package "lws": "0.6.x", to 0.8.0
+
 # Primus
 
 [![Version npm](https://img.shields.io/npm/v/primus.svg?style=flat-square)](https://www.npmjs.com/package/primus)[![Build Status](https://img.shields.io/travis/primus/primus/master.svg?style=flat-square)](https://travis-ci.org/primus/primus)[![Dependencies](https://img.shields.io/david/primus/primus.svg?style=flat-square)](https://david-dm.org/primus/primus)[![Coverage Status](https://img.shields.io/coveralls/primus/primus/master.svg?style=flat-square)](https://coveralls.io/r/primus/primus?branch=master)[![IRC channel](https://img.shields.io/badge/IRC-irc.freenode.net%23primus-00a8ff.svg?style=flat-square)](https://webchat.freenode.net/?channels=primus)

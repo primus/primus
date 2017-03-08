@@ -539,8 +539,10 @@ Primus.prototype.initialise = function initialise(options) {
     // The disconnect was unintentional, probably because the server has
     // shutdown, so if the reconnection is enabled start a reconnect procedure.
     //
-    if (~primus.options.strategy.indexOf('disconnect')) {
-      return primus.recovery.reconnect();
+    if (primus.options) {
+      if (~primus.options.strategy.indexOf('disconnect')) {
+        return primus.recovery.reconnect();
+      }
     }
 
     primus.emit('outgoing::end');

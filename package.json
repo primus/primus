@@ -1,5 +1,5 @@
 {
-  "name": "primus",
+  "name": "happn-primus",
   "version": "5.2.2",
   "description": "Primus is a simple abstraction around real-time frameworks. It allows you to easily switch between different frameworks without any code changes.",
   "main": "index.js",
@@ -76,7 +76,7 @@
     "engine.io": "1.6.x",
     "engine.io-client": "1.6.x",
     "faye-websocket": "0.11.x",
-    "lws": "0.6.x",
+    "lws": "0.8.0",
     "mocha": "2.5.x",
     "pre-commit": "1.1.x",
     "primus-socket.io-client": "2.0.x",
