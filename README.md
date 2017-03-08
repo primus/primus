@@ -277,7 +277,7 @@ Disconnects are announced using a `disconnection` event:
 
 ```js
 primus.on('disconnection', function (spark) {
-// the spark that disconnected
+  // the spark that disconnected
 });
 ```
 
@@ -816,7 +816,7 @@ a server side client.
    ```js
    var Socket = Primus.createSocket({ transformer: transformer, parser: parser })
      , client = new Socket('http://localhost:8080');
-  ```
+   ```
 
 When you are using plugins with Primus make sure you add them **before** you
 reference the `primus.Socket` or it will compile a client without your plugins.
