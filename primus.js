@@ -539,7 +539,19 @@ Primus.prototype.initialise = function initialise(options) {
     // The disconnect was unintentional, probably because the server has
     // shutdown, so if the reconnection is enabled start a reconnect procedure.
     //
-    if (primus.options) {
+    var dodgeMissingOptions = false;
+    try {
+      dodgeMissingOptions = process.env.PRIMUS_DODGE_MISSING_OPTIONS;
+    } catch (e) {
+      dodgeMissingOptions = false;
+    }
+    if (dodgeMissingOptions) {
+      if (primus.options) {
+        if (~primus.options.strategy.indexOf('disconnect')) {
+          return primus.recovery.reconnect();
+        }
+      }
+    } else {
       if (~primus.options.strategy.indexOf('disconnect')) {
         return primus.recovery.reconnect();
       }
