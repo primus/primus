@@ -541,7 +541,7 @@ Primus.prototype.initialise = function initialise(options) {
     //
     var dodgeMissingOptions = false;
     try {
-      dodgeMissingOptions = process.env.PRIMUS_DODGE_MISSING_OPTIONS;
+      dodgeMissingOptions = global.PRIMUS_DODGE_MISSING_OPTIONS;
     } catch (e) {
       dodgeMissingOptions = false;
     }

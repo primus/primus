@@ -1,6 +1,6 @@
 {
   "name": "happn-primus",
-  "version": "5.2.3",
+  "version": "5.2.4",
   "description": "Primus is a simple abstraction around real-time frameworks. It allows you to easily switch between different frameworks without any code changes.",
   "main": "index.js",
   "scripts": {
