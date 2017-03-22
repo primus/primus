@@ -85,13 +85,25 @@ exports.create = function create(options, fn) {
 
   if (options.unixSocket) {
     server.portnumber = `/tmp/primus.${crypto.randomBytes(16).toString('hex')}.socket`;
-    server.make_addr = function (auth, query) {
-      return 'ws+unix://'+ (auth ? `${auth}@` : '') + server.portnumber + (query || '');
+    server.make_addr = function (auth, pathname, search, upgrade) {
+      return [
+        upgrade !== false ? 'ws+unix://' : 'http://unix:',
+        auth && `${auth}@`,
+        server.portnumber,
+        pathname && `:${pathname}`,
+        search
+      ].filter(Boolean).join('');
     };
   } else {
     server.portnumber = options.port || exports.port;
-    server.make_addr = function (auth, query) {
-      return 'http://'+ (auth ? auth + '@' : '') +'localhost:'+ server.portnumber + (query || '');
+    server.make_addr = function (auth, pathname, search) {
+      return [
+        'http://',
+        auth && `${auth}@`,
+        `localhost:${server.portnumber}`,
+        pathname,
+        search
+      ].filter(Boolean).join('');
     };
   }
 
