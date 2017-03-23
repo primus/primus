@@ -142,6 +142,36 @@ Spark.readable('initialise', {
 }, true);
 
 /**
+ * Send a heartbeat to the client.
+ *
+ * Checks if any message has been received from the client before sending
+ * another heartbeat. If not, we can assume it's dead (no response to our last
+ * ping), so we should close.
+ *
+ * This is intentionally writable so it can be overwritten for custom heartbeat
+ * policies.
+ *
+ * @returns {undefined}
+ * @api public
+ */
+Spark.writable('heartbeat', function heartbeat() {
+  var spark = this;
+  if (!spark.alive) {
+    //
+    // Set the `reconnect` option to `true` so we don't send a
+    // `primus::server::close` packet to an already broken connection.
+    //
+    spark.end(undefined, { reconnect: true });
+  } else {
+    const now = Date.now();
+
+    spark.alive = false;
+    spark.emit('outgoing::ping', now);
+    spark._write(`primus::ping::${now}`);
+  }
+});
+
+/**
  * Attach hooks and automatically announce a new connection.
  *
  * @type {Array}
