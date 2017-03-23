@@ -287,7 +287,7 @@ describe('Spark', function () {
     });
 
     it('emits `outgoing::ping` when sending a ping', function (done) {
-      var primus = new Primus(server, { pingInterval: 25 })
+      var primus = new Primus(server, { pingInterval: 10 })
         , spark = new primus.Spark();
 
       spark.on('outgoing::ping', function () {
@@ -298,7 +298,7 @@ describe('Spark', function () {
     });
 
     it('writes `primus::ping::<timestamp>` when sending a ping', function (done) {
-      var primus = new Primus(server, { pingInterval: 25 })
+      var primus = new Primus(server, { pingInterval: 10 })
         , spark = new primus.Spark();
 
       spark.on('outgoing::ping', function (time) {
@@ -308,6 +308,23 @@ describe('Spark', function () {
             primus.destroy(done);
           });
         });
+      });
+    });
+
+    it('Allows overwriting heartbeat fn', function (done) {
+      var primus = new Primus(server, { pingInterval: 10 })
+        , spark = new primus.Spark();
+
+      var called = false;
+      spark.heartbeat = function() {
+        called = true;
+        spark.emit('outgoing::ping');
+      }
+
+      spark.on('outgoing::ping', function (time) {
+        expect(called).to.equal(true);
+        expect(time).to.equal(undefined);
+        primus.destroy(done);
       });
     });
   });

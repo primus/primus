@@ -438,19 +438,7 @@ Primus.readable('forEach', function forEach(fn, done) {
  */
 Primus.readable('heartbeat', function heartbeat() {
   this.forEach(function forEach(spark) {
-    if (!spark.alive) {
-      //
-      // Set the `reconnect` option to `true` so we don't send a
-      // `primus::server::close` packet to an already broken connection.
-      //
-      spark.end(undefined, { reconnect: true });
-    } else {
-      const now = Date.now();
-
-      spark.alive = false;
-      spark.emit('outgoing::ping', now);
-      spark._write(`primus::ping::${now}`);
-    }
+    spark.heartbeat();
   });
 
   return this;
