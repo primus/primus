@@ -810,7 +810,7 @@ There are two ways of creating a server side client.
    another compatible socket.
 
    ```js
-   var Primus = require("primus"), //Primus library from npm install primus
+   var Primus = require('primus') // Primus library from npm install primus
      , Socket = Primus.createSocket({ transformer: transformer, parser: parser })
      , client = new Socket('http://localhost:8080');
    ```
