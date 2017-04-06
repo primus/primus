@@ -106,7 +106,7 @@ function Socket (uri, opts) {
   this.cert = opts.cert || null;
   this.ca = opts.ca || null;
   this.ciphers = opts.ciphers || null;
-  this.rejectUnauthorized = opts.rejectUnauthorized === undefined ? null : opts.rejectUnauthorized;
+  this.rejectUnauthorized = opts.rejectUnauthorized === undefined ? true : opts.rejectUnauthorized;
   this.forceNode = !!opts.forceNode;
 
   // other options for Node.js client
@@ -1751,7 +1751,7 @@ Polling.prototype.onData = function (data) {
   };
 
   // decode payload
-  parser.decodePayload(data, this.socket.binaryType, callback);
+  parser.decodePayload(data, this.socket.binaryType, this.supportsBinary, callback);
 
   // if an event did not trigger closing
   if ('closed' !== this.readyState) {
@@ -2586,7 +2586,7 @@ module.exports = function(a, b){
  */
 
 var keys = _dereq_('./keys');
-var hasBinary = _dereq_('has-binary');
+var hasBinary = _dereq_('has-binary2');
 var sliceBuffer = _dereq_('arraybuffer.slice');
 var after = _dereq_('after');
 var utf8 = _dereq_('./utf8');
@@ -2952,7 +2952,7 @@ function map(ary, each, done) {
  * @api public
  */
 
-exports.decodePayload = function (data, binaryType, callback) {
+exports.decodePayload = function (data, binaryType, utf8decode, callback) {
   if (typeof data !== 'string') {
     return exports.decodePayloadAsBinary(data, binaryType, callback);
   }
@@ -2962,10 +2962,22 @@ exports.decodePayload = function (data, binaryType, callback) {
     binaryType = null;
   }
 
+  if (typeof utf8decode === 'function') {
+    callback = utf8decode;
+    utf8decode = null;
+  }
+
   var packet;
   if (data === '') {
     // parser error - ignoring payload
     return callback(err, 0, 1);
+  }
+
+  if (utf8decode) {
+    data = tryDecode(data);
+    if (data === false) {
+      return callback(err, 0, 1);
+    }
   }
 
   var length = '', n, msg;
@@ -3189,7 +3201,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
 };
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./keys":17,"./utf8":18,"after":10,"arraybuffer.slice":11,"base64-arraybuffer":12,"blob":13,"has-binary":19}],17:[function(_dereq_,module,exports){
+},{"./keys":17,"./utf8":18,"after":10,"arraybuffer.slice":11,"base64-arraybuffer":12,"blob":13,"has-binary2":19}],17:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -3461,6 +3473,7 @@ module.exports = Object.keys || function keys (obj){
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],19:[function(_dereq_,module,exports){
 (function (global){
+/* global Blob File */
 
 /*
  * Module requirements.
@@ -3477,48 +3490,46 @@ module.exports = hasBinary;
 /**
  * Checks for binary data.
  *
- * Right now only Buffer and ArrayBuffer are supported..
+ * Supports Buffer, ArrayBuffer, Blob and File.
  *
  * @param {Object} anything
  * @api public
  */
 
-function hasBinary(data) {
-
-  function _hasBinary(obj) {
-    if (!obj) return false;
-
-    if ( (global.Buffer && global.Buffer.isBuffer && global.Buffer.isBuffer(obj)) ||
-         (global.ArrayBuffer && obj instanceof ArrayBuffer) ||
-         (global.Blob && obj instanceof Blob) ||
-         (global.File && obj instanceof File)
-        ) {
-      return true;
-    }
-
-    if (isArray(obj)) {
-      for (var i = 0; i < obj.length; i++) {
-          if (_hasBinary(obj[i])) {
-              return true;
-          }
-      }
-    } else if (obj && 'object' == typeof obj) {
-      // see: https://github.com/Automattic/has-binary/pull/4
-      if (obj.toJSON && 'function' == typeof obj.toJSON) {
-        obj = obj.toJSON();
-      }
-
-      for (var key in obj) {
-        if (Object.prototype.hasOwnProperty.call(obj, key) && _hasBinary(obj[key])) {
-          return true;
-        }
-      }
-    }
-
+function hasBinary (obj) {
+  if (!obj || typeof obj !== 'object') {
     return false;
   }
 
-  return _hasBinary(data);
+  if (isArray(obj)) {
+    for (var i = 0, l = obj.length; i < l; i++) {
+      if (hasBinary(obj[i])) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if ((typeof global.Buffer === 'function' && global.Buffer.isBuffer && global.Buffer.isBuffer(obj)) ||
+     (typeof global.ArrayBuffer === 'function' && obj instanceof ArrayBuffer) ||
+     (typeof global.Blob === 'function' && obj instanceof Blob) ||
+     (typeof global.File === 'function' && obj instanceof File)
+    ) {
+    return true;
+  }
+
+  // see: https://github.com/Automattic/has-binary/pull/4
+  if (obj.toJSON && typeof obj.toJSON === 'function' && arguments.length === 1) {
+    return hasBinary(obj.toJSON(), true);
+  }
+
+  for (var key in obj) {
+    if (Object.prototype.hasOwnProperty.call(obj, key) && hasBinary(obj[key])) {
+      return true;
+    }
+  }
+
+  return false;
 }
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
@@ -3553,8 +3564,10 @@ module.exports = function(arr, obj){
   return -1;
 };
 },{}],22:[function(_dereq_,module,exports){
+var toString = {}.toString;
+
 module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
+  return toString.call(arr) == '[object Array]';
 };
 
 },{}],23:[function(_dereq_,module,exports){
