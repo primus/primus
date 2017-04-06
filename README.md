@@ -786,9 +786,7 @@ primus.id(function (id) {
 
 ### Connecting from the server
 
-The client-side library has been made compatible with Node.js so the same code
-base can be re-used for server side connections. There are two ways of creating
-a server side client.
+There are two ways of creating a server side client.
 
 1. When you've created your `primus` instance you can access the `Socket`
    property on it. This `Socket` is automatically configured to connect to the
