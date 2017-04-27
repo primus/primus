@@ -1439,7 +1439,7 @@ module.exports = function base(transformer, transformer_name) {
         });
       });
 
-      if ('browserchannel' !== transformer && 'uws' !== transformer) {
+      if ('browserchannel' !== transformer) {
         it('closes the connection when `maxLength` is exceeded', function (done) {
           primus.destroy(function () {
             primus = new Primus(server, {

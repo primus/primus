@@ -18,16 +18,14 @@ if (native.setNoop) native.setNoop(() => {});
  * @api private
  */
 module.exports = function server() {
-  const options = this.primus.options;
+  const opts = Object.assign({
+    perMessageDeflate: this.primus.options.compression,
+    maxPayload: this.primus.options.maxLength
+  }, this.primus.options.transport);
 
-  //
-  // The `maxPayload` option is ignored by `uws` since version 0.10.0.
-  // The value has been hardcoded to 16 MiB in version 0.10.9 so using
-  // `options.transport.maxPayload` or `options.maxLength` as second
-  // argument is useless here.
-  //
   const group = native.server.group.create(
-    options.compression || options.transport.perMessageDeflate ? 1 : 0
+    opts.perMessageDeflate ? 1 : 0,
+    opts.maxPayload
   );
 
   let upgradeReq = null;
@@ -78,7 +76,7 @@ module.exports = function server() {
     const secKey = req.headers['sec-websocket-key'];
 
     if (soc.readable && soc.writable && secKey && secKey.length === 24) {
-      soc.setNoDelay(options.transport.noDelay);
+      soc.setNoDelay(opts.noDelay);
 
       let socketHandle = soc._handle;
       let sslState = null;
