@@ -898,6 +898,22 @@ module.exports = function base(transformer, transformer_name) {
           done();
         });
       });
+
+      it('should not start heartbeat', function (done) {
+        var num_handles_before = process._getActiveHandles().length
+          , PSocket = Primus.createSocket({
+              transformer: transformer,
+              pathname: server.pathname
+            })
+          , num_handles_after = process._getActiveHandles().length
+          , socket = new PSocket(server.addr);
+
+        expect(num_handles_after).to.equal(num_handles_before);
+        socket.on('open', function () {
+          socket.end();
+          done();
+        });
+      });
     });
 
     describe('Authorization', function () {
