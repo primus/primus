@@ -1094,9 +1094,7 @@ Primus.prototype.reserved.events = {
 Primus.createSocket = function createSocket(options) {
   options = options || {};
   // Make sure the temporary Primus we create below doesn't start a heartbeat
-  options.pingInterval = 'pingInterval' in options
-    ? options.pingInterval
-    : false;
+  options.pingInterval = false;
 
   var primus = new Primus(new EventEmitter(), options);
   return primus.Socket;

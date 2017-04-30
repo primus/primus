@@ -900,19 +900,21 @@ module.exports = function base(transformer, transformer_name) {
       });
 
       it('should not start heartbeat', function (done) {
-        var num_handles_before = process._getActiveHandles().length
-          , PSocket = Primus.createSocket({
-              transformer: transformer,
-              pathname: server.pathname
-            })
-          , num_handles_after = process._getActiveHandles().length
-          , socket = new PSocket(server.addr);
-
-        expect(num_handles_after).to.equal(num_handles_before);
-        socket.on('open', function () {
-          socket.end();
+        var orig_setInterval = setInterval
+          , called = false;
+        setInterval = function () {
+          called = true;
+        };
+        Primus.createSocket({
+          transformer: transformer,
+          pathname: server.pathname
+        })
+        setInterval = orig_setInterval;
+        if (called) {
+          done(new Error('createSocket should not start a heartbeat'));
+        } else {
           done();
-        });
+        }
       });
     });
 
