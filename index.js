@@ -1092,7 +1092,7 @@ Primus.prototype.reserved.events = {
  * @api public
  */
 Primus.createSocket = function createSocket(options) {
-  options = options || {};
+  options = Primus.prototype.merge.call(Primus, {}, options || {});
   // Make sure the temporary Primus we create below doesn't start a heartbeat
   options.pingInterval = false;
 

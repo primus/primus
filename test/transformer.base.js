@@ -901,15 +901,19 @@ module.exports = function base(transformer, transformer_name) {
 
       it('should not start heartbeat', function (done) {
         var orig_setInterval = setInterval
-          , called = false;
+          , called = false
+          , options = {
+              transformer: transformer,
+              pathname: server.pathname,
+              pingInterval: 60000
+            };
         setInterval = function () {
           called = true;
         };
-        Primus.createSocket({
-          transformer: transformer,
-          pathname: server.pathname
-        })
+        Primus.createSocket(options);
+        Primus.createSocket();
         setInterval = orig_setInterval;
+        expect(options.pingInterval).to.equal(60000);
         if (called) {
           done(new Error('createSocket should not start a heartbeat'));
         } else {
