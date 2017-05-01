@@ -1092,7 +1092,8 @@ Primus.prototype.reserved.events = {
  * @api public
  */
 Primus.createSocket = function createSocket(options) {
-  options = options || {};
+  // Make sure the temporary Primus we create below doesn't start a heartbeat
+  options = Object.assign({}, options, { pingInterval: false });
 
   var primus = new Primus(new EventEmitter(), options);
   return primus.Socket;

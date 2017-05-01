@@ -898,6 +898,28 @@ module.exports = function base(transformer, transformer_name) {
           done();
         });
       });
+
+      it('should not start heartbeat', function (done) {
+        var orig_setInterval = setInterval
+          , called = false
+          , options = {
+              transformer: transformer,
+              pathname: server.pathname,
+              pingInterval: 60000
+            };
+        setInterval = function () {
+          called = true;
+        };
+        Primus.createSocket(options);
+        Primus.createSocket();
+        setInterval = orig_setInterval;
+        expect(options.pingInterval).to.equal(60000);
+        if (called) {
+          done(new Error('createSocket should not start a heartbeat'));
+        } else {
+          done();
+        }
+      });
     });
 
     describe('Authorization', function () {
