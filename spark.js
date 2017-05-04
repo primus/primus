@@ -94,7 +94,7 @@ Spark.writable('__readyState', Spark.OPEN);
 // interested in this, we're going to defer parsing until it's actually needed.
 //
 Spark.get('address', function address() {
-  return this.request.forwarded || forwarded(this.remote, this.headers, this.primus.whitelist);
+  return this.request ? this.request.forwarded : forwarded(this.remote, this.headers, this.primus.whitelist);
 });
 
 /**
