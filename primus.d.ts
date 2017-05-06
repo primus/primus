@@ -1,6 +1,11 @@
 import * as http from 'http';
 import { Socket } from 'net';
 
+export interface IPrimusParser {
+  encoder: (data: any, fn: (error: Error, response: any) => void) => void;
+  decoder: (data: any, fn: (error: Error, response: any) => void) => void;
+}
+
 export declare class Primus {
   constructor(server: http.Server, options?: IPrimusOptions);
   authorize(req: http.ClientRequest, done: () => void): void;
@@ -36,12 +41,13 @@ export interface IPrimusOptions {
   maxAge?: string;
   methods?: string;
   origins?: string;
-  parser?: string;
+  parser?: string | IPrimusParser;
   pathname?: string;
   plugin?: Object;
   strategy?: any;
   timeout?: number;
   transformer?: string;
+  [key: string]: any;
 }
 
 export interface IPrimusConnectOptions {
