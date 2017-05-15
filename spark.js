@@ -110,15 +110,36 @@ Spark.readable('heartbeat', function heartbeat() {
 
   if (!spark.primus.timeout) return spark;
 
+  spark.__skipped = 0;
+
   log('setting new heartbeat timeout for %s', spark.id);
 
-  this.timeout = setTimeout(function timeout() {
-    //
-    // Set reconnect to true so we're not sending a `primus::server::close`
-    // packet.
-    //
-    spark.end(undefined, { reconnect: true });
-  }, spark.primus.timeout);
+  var heartBeatTimeout = function(delay){
+
+    spark.timeout = setTimeout(function timeout() {
+
+      spark.__skipped += 1;
+
+      // Set reconnect to true so we're not sending a `primus::server::close`
+      // packet.
+      //
+      if (spark.primus.options.allowSkippedHeartBeats >= spark.__skipped){
+
+        spark.primus.emit('heartbeat-skipped', spark.__skipped);
+
+        heartBeatTimeout(spark.primus.timeout);
+
+      } else {
+
+        spark.end(undefined, { reconnect: true });
+
+        if (spark.primus.options.allowSkippedHeartBeats > 0) spark.primus.emit('flatline', spark.__skipped);
+      }
+
+    }, delay);
+  };
+
+  heartBeatTimeout(spark.primus.timeout);
 
   // Emit an event so the application can know the timer has been reset.
   spark.emit('heartbeat');

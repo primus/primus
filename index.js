@@ -44,6 +44,9 @@ function Primus(server, options) {
     : 35000;
   this.whitelist = [];                        // Forwarded-for white listing.
   this.options = options;                     // The configuration.
+
+  if (!this.options.allowSkippedHeartBeats) this.options.allowSkippedHeartBeats = 0;
+
   this.transformers = {                       // Message transformers.
     outgoing: [],
     incoming: []
