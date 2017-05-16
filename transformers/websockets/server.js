@@ -34,11 +34,11 @@ module.exports = function server() {
   this.on('upgrade', (req, socket, head) => {
     this.service.handleUpgrade(req, socket, head, (socket) => {
       const spark = new this.Spark(
-          socket.upgradeReq.headers               // HTTP request headers.
-        , socket.upgradeReq                       // IP address location.
-        , url.parse(socket.upgradeReq.url).query  // Optional query string.
-        , null                                    // We don't have an unique id.
-        , socket.upgradeReq                       // Reference to the HTTP req.
+          req.headers               // HTTP request headers.
+        , req                       // IP address location.
+        , url.parse(req.url).query  // Optional query string.
+        , null                      // We don't have an unique id.
+        , req                       // Reference to the HTTP req.
       );
 
       spark.on('outgoing::end', () => socket && socket.close());
