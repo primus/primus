@@ -61,6 +61,7 @@ describe('Plugin', function () {
     });
 
     primus.on('connection', function (spark) {
+      expect(spark.query).to.not.have.property('_primuscb');
       expect(spark.query.foo).to.equal('bar');
       primus.destroy(done);
     });

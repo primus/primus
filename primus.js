@@ -1055,11 +1055,6 @@ Primus.prototype.uri = function uri(options) {
     : +url.port || (options.secure ? 443 : 80);
 
   //
-  // Allow transformation of the options before we construct a full URL from it.
-  //
-  this.emit('outgoing::url', options);
-
-  //
   // We need to make sure that we create a unique connection URL every time to
   // prevent back forward cache from becoming an issue. We're doing this by
   // forcing an cache busting query string in to the URL.
@@ -1067,6 +1062,11 @@ Primus.prototype.uri = function uri(options) {
   var querystring = this.querystring(options.query || '');
   querystring._primuscb = yeast();
   options.query = this.querystringify(querystring);
+
+  //
+  // Allow transformation of the options before we construct a full URL from it.
+  //
+  this.emit('outgoing::url', options);
 
   //
   // Automatically suffix the protocol so we can supply `ws:` and `http:` and
