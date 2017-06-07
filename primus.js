@@ -345,8 +345,7 @@ Primus.prototype.reserved.events = {
  * @api private
  */
 Primus.prototype.initialise = function initialise(options) {
-  var primus = this
-    , start;
+  var primus = this;
 
   primus.recovery
   .on('reconnected', primus.emits('reconnected'))
@@ -368,8 +367,6 @@ Primus.prototype.initialise = function initialise(options) {
     if (readyState !== primus.readyState) {
       primus.emit('readyStateChange', 'opening');
     }
-
-    start = +new Date();
   });
 
   primus.on('incoming::open', function opened() {
