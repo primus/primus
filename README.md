@@ -2045,18 +2045,13 @@ primacron can be time savers.
 
 #### Can I use cluster?
 
-The `cluster` module that ships with Node.js is flawed, seriously flawed.
-Cluster in node < 0.12.0 lets the Operating System decide which worker process
-should receive the request. This results in a not even distribution across
-the workers. If you have 3 workers, it's possible that one is used at 70%,
-another at 20% and the last one at 10%. This is of course not wanted when using
-a cluster. In addition, the load balancing done by the OS is not sticky.
+> Note: The following only applies to websocket emulation transformers like
+> sockjs or engine.io. If you are using `ws`, `uws` or `faye-websocket`, there
+> is no need for sticky sessions, and thus no issue.
 
-Cluster in node >= 0.12.0 implements a custom round robin algorithm in order to
-fix this un-even distribution of the load across the workers, but it does not
-address the sticky session requirement.
+The `cluster` module that ships with Node.js does not implement sticky sessions.
 
-There are also projects like `stick-session` which attempt to implement
+There are projects like `stick-session` which attempt to implement
 sticky-sessions in cluster, but the problem with this specific approach is that
 it uses the `remoteAddress` of the connection. For some people this isn't a
 problem but when you add this behind a load balancer the remote address will be
