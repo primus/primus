@@ -28,10 +28,11 @@ function Spark(primus, headers, address, query, id, request) {
   this.fuse();
 
   var writable = this.writable
-    , spark = this;
+    , spark = this
+    , idgen = primus.options.idGenerator;
 
   query = query || {};
-  id = id || yeast();
+  id = idgen ? idgen() : (id || yeast());
   headers = headers || {};
   address = address || {};
   request = request || headers['primus::req::backup'];
