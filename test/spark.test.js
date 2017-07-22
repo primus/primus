@@ -68,7 +68,6 @@ describe('Spark', function () {
     });
     var spark = new primus.Spark();
 
-    expect(spark.id).to.be.a('string');
     expect(spark.id).to.equal('foo');
   });
 
