@@ -59,6 +59,18 @@ describe('Spark', function () {
 
     var spark = new primus.Spark();
   });
+  
+  it('accepts a third-party spark id generator', function () {
+    var primus = new Primus(server, {
+      idGenerator: function () {
+        return 'foo';
+      }
+    });
+    var spark = new primus.Spark();
+
+    expect(spark.id).to.be.a('string');
+    expect(spark.id).to.equal('foo');
+  });
 
   it('emits a `readyStateChange` event when the readyState changes', function (done) {
     var spark = new primus.Spark();

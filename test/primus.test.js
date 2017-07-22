@@ -104,22 +104,6 @@ describe('Primus', function () {
 
     throw new Error('I should have throwed above');
   });
-  
-  it('accepts a third-party spark id generator', function () {
-    function testIdGenerator() {
-      return 'test_'+(Math.random()+1).toString(36).substring(7);
-    }
-
-    var primus = new Primus(server, {idGenerator: testIdGenerator});
-    var spark1 = new primus.Spark();
-    var spark2 = new primus.Spark();
-
-    expect(spark1.id).to.be.a('string');
-    expect(spark1.id.indexOf('test_')).to.equal(0);
-    expect(spark2.id).to.be.a('string');
-    expect(spark2.id.indexOf('test_')).to.equal(0);
-    expect(spark1.id).to.not.equal(spark2.id);
-  });
 
   it('stores new connections internally', function (done) {
     expect(primus.connected).to.equal(0);
