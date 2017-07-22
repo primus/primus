@@ -47,6 +47,7 @@ export interface IPrimusOptions {
   strategy?: any;
   timeout?: number;
   transformer?: string;
+  idGenerator?: Function;
   [key: string]: any;
 }
 
