@@ -9,7 +9,7 @@
     "update": "find transformers -name update.sh -exec bash {} \\;",
     "integration": "npm run build && mocha test/*.integration.js",
     "test": "npm run build && mocha test/*.test.js",
-    "prepublish": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "homepage": "http://primus.io",
   "repository": {
