@@ -201,7 +201,7 @@ Object.defineProperty(Primus.prototype, 'Socket', {
     });
 
     vm.runInNewContext(this.library(true), sandbox, { filename: 'primus.js' });
-    return sandbox.Primus;
+    return sandbox[this.options.global || 'Primus'];
   }
 });
 
