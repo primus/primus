@@ -11,20 +11,16 @@ describe('Primus', function () {
 
   beforeEach(function beforeEach(done) {
     server = http.createServer();
-    primus = new Primus(server);
+    primus = new Primus(server, { pingInterval: false });
 
     server.portnumber = common.port;
     server.listen(server.portnumber, done);
   });
 
   afterEach(function afterEach(done) {
-    try {
-      server.close(function () {
-        done();
-      });
-    } catch (e) {
+    server.close(function () {
       done();
-    }
+    });
   });
 
   it('exposes the Spark constructor', function () {
@@ -62,12 +58,18 @@ describe('Primus', function () {
 
   it('can customize the pathname', function () {
     expect(primus.pathname).to.equal('/primus');
-    expect(new Primus(server, { pathname: '/foo' }).pathname).to.equal('/foo');
-    expect(new Primus(server, { pathname: 'foo' }).pathname).to.equal('/foo');
+    expect(new Primus(server, {
+      pingInterval: false,
+      pathname: '/foo'
+    }).pathname).to.equal('/foo');
+    expect(new Primus(server, {
+      pingInterval: false,
+      pathname: 'foo'
+    }).pathname).to.equal('/foo');
   });
 
   it('emits an `initialised` event when the server is fully constructed', function (done) {
-    var primus = new Primus(server);
+    var primus = new Primus(server, { pingInterval: false });
 
     primus.on('initialised', function (transformer, parser) {
       expect(transformer).to.equal(primus.transformer);
@@ -78,7 +80,7 @@ describe('Primus', function () {
   });
 
   it('accepts custom message parsers', function () {
-    var primus = new Primus(server, { parser: 'ejson' });
+    var primus = new Primus(server, { parser: 'ejson', pingInterval: false });
 
     expect(primus.parser.library).to.be.a('string');
     expect(primus.parser.library).to.include('EJSON');
@@ -90,14 +92,14 @@ describe('Primus', function () {
       decoder: function () {}
     };
 
-    var primus = new Primus(server, { parser: parser });
+    var primus = new Primus(server, { parser, pingInterval: false });
 
     expect(primus.parser).to.equal(parser);
     expect(primus.encoder).to.equal(parser.encoder);
     expect(primus.decoder).to.equal(parser.decoder);
 
     try {
-      new Primus(server, { parser: function () {}});
+      new Primus(server, { parser: function () {}, pingInterval: false });
     } catch (e) {
       return expect(e).to.be.instanceOf(Error);
     }
@@ -143,11 +145,14 @@ describe('Primus', function () {
       client: function () {}
     });
 
-    var primus = new Primus(server, { transformer: Optimus });
+    var primus = new Primus(server, {
+      transformer: Optimus,
+      pingInterval: false
+    });
     expect(primus.transformer).to.be.instanceOf(Optimus);
 
     try {
-      new Primus(server, { transformer: []});
+      new Primus(server, { transformer: [], pingInterval: false });
     } catch (e) {
       return expect(e).to.be.instanceOf(Error);
     }
@@ -200,7 +205,7 @@ describe('Primus', function () {
         });
       });
 
-      primus = new Primus(server);
+      primus = new Primus(server, { pingInterval: false });
       server.portnumber = common.port;
       server.listen(server.portnumber);
     });
@@ -226,6 +231,7 @@ describe('Primus', function () {
 
   it('throws a human readable error for an unsupported transformer', function () {
     var restoreConsole = stub(console, 'error');
+
     try {
       new Primus(server, { transformer: 'cowsack' });
     } catch (e) {
@@ -240,6 +246,7 @@ describe('Primus', function () {
 
   it('throws a human readable error for an unsupported parser', function () {
     var restoreConsole = stub(console, 'error');
+
     try {
       new Primus(server, { parser: 'cowsack' });
     } catch (e) {
@@ -254,6 +261,7 @@ describe('Primus', function () {
 
   it('throws an error if initialised with an invalid server instance', function () {
     var app = function () {};
+
     try {
       new Primus(app);
     } catch (e) {
@@ -342,8 +350,8 @@ describe('Primus', function () {
       var b = Object.create(B.prototype);
 
       primus
-      .plugin('a', a)
-      .plugin('b', b);
+        .plugin('a', a)
+        .plugin('b', b);
 
       expect(primus.foo).to.equal('bar');
       expect(primus.bar).to.equal('foo');
@@ -371,7 +379,7 @@ describe('Primus', function () {
     });
 
     it('calls the supplied server plugin', function (done) {
-      var primus = new Primus(server, { foo: 'bar' });
+      var primus = new Primus(server, { foo: 'bar', pingInterval: false });
 
       primus.plugin('test', {
         server: function server(pri, options) {
@@ -488,8 +496,11 @@ describe('Primus', function () {
 
   describe('#library', function () {
     it('includes the library of the transformer', function () {
-      var primus = new Primus(server, { transformer: 'engine.io' })
-        , library = primus.library();
+      const primus = new Primus(server, {
+        transformer: 'engine.io',
+        pingInterval: false
+      });
+      const library = primus.library();
 
       expect(library).to.be.a('string');
       expect(primus.transformer.library).to.be.a('string');
@@ -498,8 +509,11 @@ describe('Primus', function () {
     });
 
     it('includes the transformers client', function () {
-      var primus = new Primus(server, { transformer: 'engine.io' })
-        , library = primus.library();
+      const primus = new Primus(server, {
+        transformer: 'engine.io',
+        pingInterval: false
+      });
+      const library = primus.library();
 
       expect(library).to.be.a('string');
       expect(primus.transformer.client).to.be.a('function');
@@ -517,7 +531,7 @@ describe('Primus', function () {
     });
 
     it('includes the library of the parsers', function () {
-      var primus = new Primus(server, { parser: 'ejson' })
+      var primus = new Primus(server, { parser: 'ejson', pingInterval: false })
         , library = primus.library();
 
       expect(library).to.be.a('string');
@@ -531,7 +545,7 @@ describe('Primus', function () {
     });
 
     it('includes the client plugins', function () {
-      var primus = new Primus(server)
+      var primus = new Primus(server, { pingInterval: false })
         , library;
 
       primus.plugin('log', { client: function () {
@@ -549,7 +563,8 @@ describe('Primus', function () {
         , socket = new primus.Socket('http://localhost:'+ server.portnumber);
 
       expect(socket.options.pingTimeout).to.equal(90000);
-      socket.on('open', socket.end).on('end', function () {
+      socket.on('open', primus.destroy.bind(primus, { close: false }));
+      socket.on('end', function () {
         primus = new Primus(server, { pingInterval: false });
         socket = primus.Socket('http://localhost:'+ server.portnumber);
 
@@ -559,7 +574,7 @@ describe('Primus', function () {
     });
 
     it('still allows overriding the value of the `pingTimeout` option', function (done) {
-      var primus = new Primus(server, { pingInterval: 60000 })
+      var primus = new Primus(server, { pingInterval: false })
         , Socket = primus.Socket;
 
       var socket = new Socket('http://localhost:'+ server.portnumber, {
@@ -632,20 +647,23 @@ describe('Primus', function () {
       var async = __dirname + '/primus.save.async.js'
         , sync = __dirname + '/primus.save.sync.js';
 
-      var primus = new Primus(server, { global: 'Unicron' })
-        , Socket = primus.Socket; // Ensures that the JS is still executable;
+      var primus = new Primus(server, {
+        pingInterval: false,
+        global: 'Unicron'
+      });
+
+      // Ensures that the JS is still executable;
+      expect(primus.Socket).to.be.a('function');
 
       primus.save(sync);
       expect(fs.readFileSync(sync, 'utf-8')).to.equal(primus.library());
-      expect(fs.readFileSync(sync, 'utf-8').match(/"Unicron"/g)).length
-          .to.be.greaterThan(0);
+      expect(fs.readFileSync(sync, 'utf-8')).to.include('"Unicron"');
 
       primus.save(async, function (error) {
         if (error) return done(error);
 
         expect(fs.readFileSync(async, 'utf-8')).to.equal(primus.library());
-        expect(fs.readFileSync(async, 'utf-8').match(/"Unicron"/g)).length
-          .to.be.greaterThan(0);
+        expect(fs.readFileSync(async, 'utf-8')).to.include('"Unicron"');
         done();
       });
     });
@@ -675,7 +693,8 @@ describe('Primus', function () {
     it('returns a new primus instance', function (done) {
       const primus = Primus.createServer({
         port: common.port,
-        iknowhttpsisbetter: true
+        iknowhttpsisbetter: true,
+        pingInterval: false
       });
 
       expect(primus).to.be.instanceOf(Primus);
@@ -690,7 +709,8 @@ describe('Primus', function () {
       const primus = Primus.createServer({
         port: common.port,
         transformer: 'engine.io',
-        iknowhttpsisbetter: true
+        iknowhttpsisbetter: true,
+        pingInterval: false
       });
 
       expect(primus.spec.transformer).to.equal('engine.io');

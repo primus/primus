@@ -1,45 +1,33 @@
 describe('Parsers', function () {
   'use strict';
 
-  var common = require('./common')
-    , Primus = common.Primus
-    , http = require('http')
-    , expect = common.expect
-    , server;
+  const common = require('./common');
+  const expect = common.expect;
 
   function connectsTest(parser, done) {
-    var primus = new Primus(server, { parser: parser })
-      , Socket = primus.Socket;
+    const services = common.create({ parser }, () => {
+      const port = services.server.portnumber;
+      const socket = new services.Socket(`http://localhost:${port}`);
 
-    var socket = new Socket('http://localhost:'+ server.portnumber);
-
-    socket.on('open', function () {
-      primus.destroy(done);
+      socket.on('open', function () {
+        services.primus.destroy(done);
+      });
     });
   }
 
   function sendsAndReceivesTest(parser, done) {
-    var create = common.create
-      , services = create({ transformer: 'websockets', parser }, () => {})
-      , Socket = services.Socket
-      , primus = services.primus
-      , server = services.server;
+    const services = common.create({ parser }, () => {
+      const port = services.server.portnumber;
+      const socket = new services.Socket(`http://localhost:${port}`);
 
-    var socket = new Socket('http://localhost:'+ server.portnumber);
+      socket.on('data', function (data) {
+        expect(data).to.equal('hello');
+        services.primus.destroy(done);
+      });
 
-    socket.on('data', function (data) {
-      expect(data).to.equal('hello');
-      primus.destroy(done);
+      socket.write({ echo: 'hello' });
     });
-
-    socket.write({ echo: 'hello' });
   }
-
-  beforeEach(function beforeEach(done) {
-    server = http.createServer();
-    server.portnumber = common.port;
-    server.listen(server.portnumber, done);
-  });
 
   describe('binary', function () {
     it('connects with the parser', function (done) {

@@ -38,15 +38,17 @@ describe('Spark', function () {
   });
 
   it('emits a `connection` event on the primus instance when created', function (done) {
+    var spark = new primus.Spark();
+
     primus.on('connection', function (socket) {
       expect(socket).to.equal(spark);
       done();
     });
-
-    var spark = new primus.Spark();
   });
 
   it('can be retreived using primus.spark()', function (done) {
+    var spark = new primus.Spark();
+
     primus.on('connection', function (socket) {
       expect(socket).to.equal(spark);
 
@@ -56,15 +58,12 @@ describe('Spark', function () {
 
       done();
     });
-
-    var spark = new primus.Spark();
   });
-  
+
   it('accepts a third-party spark id generator', function () {
     var primus = new Primus(server, {
-      idGenerator: function () {
-        return 'foo';
-      }
+      idGenerator: () => 'foo',
+      pingInterval: false
     });
     var spark = new primus.Spark();
 
@@ -118,12 +117,13 @@ describe('Spark', function () {
 
   describe('#end', function () {
     it('emits a `disconnection` event on the primus instance when destroyed', function (done) {
+      var spark = new primus.Spark();
+
       primus.on('disconnection', function (socket) {
         expect(socket).to.equal(spark);
         done();
       });
 
-      var spark = new primus.Spark();
       spark.end();
     });
 
@@ -187,6 +187,7 @@ describe('Spark', function () {
   describe('#pingInterval', function () {
     it('disconnects if the client does not respond to a heartbeat', function (done) {
       var primus = new Primus(server, { pingInterval: 25 });
+      var spark = new primus.Spark();
 
       primus.on('disconnection', function (socket) {
         expect(socket).to.equal(spark);
@@ -196,8 +197,6 @@ describe('Spark', function () {
       primus.on('connection', function (socket) {
         expect(socket).to.equal(spark);
       });
-
-      var spark = new primus.Spark();
     });
   });
 
@@ -257,7 +256,7 @@ describe('Spark', function () {
         done();
       };
 
-      var spark = new Spark(primus);
+      new Spark(primus);
     });
 
     it('get initialise returns the last added function', function () {

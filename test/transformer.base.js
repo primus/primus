@@ -104,8 +104,17 @@ module.exports = function base(transformer, transformer_name) {
         });
       });
 
+      it('allows disabling of the reconnect functionality', function () {
+        var socket = new Socket(server.addr, {
+          strategy: false,
+          manual: true
+        });
+
+        expect(socket.options.strategy).to.equal('');
+      });
+
       it('should not throw an error when we connect to a dead server', function (done) {
-        var socket = new Socket('http://localhost:1024');
+        var socket = new Socket('http://localhost:1024', { strategy: false });
 
         socket.on('error', function () {
           done();
@@ -125,15 +134,6 @@ module.exports = function base(transformer, transformer_name) {
           socket.end();
           done();
         }, 100);
-      });
-
-      it('allows disabling of the reconnect functionality', function () {
-        var socket = new Socket(server.addr, {
-          strategy: false,
-          manual: true
-        });
-
-        expect(socket.options.strategy).to.equal('');
       });
 
       it('sets reconnection strategies by default', function () {
@@ -453,6 +453,49 @@ module.exports = function base(transformer, transformer_name) {
         socket.on('end', done);
       });
 
+      it('emits a timeout event if it cannot connect in a timely manner', function (done) {
+        primus.use('delay', function (req, res, next) {
+          setTimeout(next, 500);
+        });
+
+        var socket = new Socket(server.addr, {
+          strategy: 'disconnect,online',
+          timeout: 250
+        });
+
+        socket.on('timeout', function () {
+          socket.on('end', done);
+        });
+      });
+
+      it('reconnects after the timeout', function (done) {
+        primus.use('delay', function (req, res, next) {
+          setTimeout(next, 200);
+        });
+
+        var socket = new Socket(server.addr, { timeout: 50 });
+        var pattern = [];
+
+        socket.removeAllListeners('outgoing::reconnect');
+
+        socket.on('timeout', function () {
+          pattern.push('timeout');
+        });
+
+        socket.on('reconnect scheduled', function () {
+          pattern.push('reconnect scheduled');
+        });
+
+        socket.on('reconnect', function () {
+          expect(pattern).to.deep.equal(['timeout', 'reconnect scheduled']);
+          setImmediate(function () {
+            socket.recovery.reset();
+            socket.end();
+            done();
+          });
+        });
+      });
+
       it('should allow to stop the reconnection procedure', function (done) {
         primus.on('connection', function (spark) {
           spark.end(undefined, { reconnect: true });
@@ -469,27 +512,19 @@ module.exports = function base(transformer, transformer_name) {
         socket.on('end', done);
       });
 
-      it('should not increment the attempt if a backoff is running', function (done) {
-        var socket = new Socket(server.addr)
-          , recovery = socket.recovery
-          , backoff = {}
-          , result;
+      it('emits a `reconnected` event', function (done) {
+        var socket = new Socket(server.addr);
 
-        result = recovery.backoff(function () {
-          socket.end();
-        }, backoff);
+        primus.once('connection', function (spark) {
+          setTimeout(function () {
+            spark.end(undefined, { reconnect: true });
+          }, 20);
+        });
 
-        expect(backoff.attempt).to.equal(1);
-        expect(result).to.equal(recovery);
-
-        result = recovery.backoff(function () {
-          throw new Error('I should not be called yo');
-        }, backoff);
-
-        expect(backoff.attempt).to.equal(1);
-        expect(result).to.equal(recovery);
-
-        socket.on('end', done);
+        socket.on('reconnected', function () {
+          socket.on('open', socket.end);
+          socket.on('end', done);
+        });
       });
 
       it('should receive a `reconnect failed` event when reconnection fails', function (done) {
@@ -559,19 +594,14 @@ module.exports = function base(transformer, transformer_name) {
       });
 
       it('can force websocket avoidance', function (done) {
-        var socket = new Socket(server.addr, {
-          websockets: false
-        });
+        var socket = new Socket(server.addr, { websockets: false });
 
         expect(socket.AVOID_WEBSOCKETS).to.equal(true);
 
         // open is done in a setTimeout 0 so if we end it now then we'll
         // miss the connection
-        socket.on('open', function () {
-          socket.end();
-        });
-
-        done();
+        socket.on('open', socket.end);
+        socket.on('end', done);
       });
 
       it('supports async connection events', function (done) {
@@ -635,6 +665,62 @@ module.exports = function base(transformer, transformer_name) {
         //
         var socket = new Socket(server.addr);
         socket.write('hello');
+      });
+
+      it('can send utf-8', function (done) {
+        var messages = ['pongРУССКИЙ', '€€€']
+          , socket = new Socket(server.addr);
+
+        primus.once('connection', function (spark) {
+          var i = 0;
+
+          spark.on('data', function (msg) {
+            expect(msg).to.equal(messages[i++]);
+            spark.write(msg);
+          });
+
+          spark.once('end', function () {
+            expect(i).to.equal(messages.length);
+            done();
+          });
+        });
+
+        var received = 0;
+        socket.on('data', function (msg) {
+          expect(msg).to.equal(messages[received++]);
+
+          if (received === messages.length) {
+            socket.end();
+          }
+        });
+
+        messages.forEach(function forEach(msg) {
+          socket.write(msg);
+        });
+      });
+
+      it('can send a 0', function (done) {
+        var socket = new Socket(server.addr)
+          , zeros = 0;
+
+        primus.once('connection', function (spark) {
+          spark.on('data', function (msg) {
+            expect(msg).to.equal(0);
+            spark.write(0);
+            spark.end(0);
+          });
+        });
+
+        socket.on('data', function (msg) {
+          expect(msg).to.equal(0);
+
+          if (++zeros === 2) {
+            socket.end();
+            done();
+          }
+        });
+
+        socket.write(0);
       });
 
       describe('#transform', function () {
@@ -1080,126 +1166,17 @@ module.exports = function base(transformer, transformer_name) {
       });
 
       if ('browserchannel' !== transformer && 'engine.io' !== transformer) {
-        it('should connect using basic auth', function (done) {
+        it('connects using basic auth', function (done) {
+          var socket = new Socket(server.make_addr('usr:pass', null, '?foo=bar'));
+
+          socket.on('end', done);
+
           primus.on('connection', function (spark) {
             expect(spark.headers.authorization).to.equal('Basic dXNyOnBhc3M=');
             socket.end();
           });
-
-          var socket = new Socket(server.make_addr('usr:pass', null, '?foo=bar'));
-          socket.on('end', done);
         });
       }
-
-      it('should emit a timeout event if it cannot connect in a timely manner', function (done) {
-        primus.authorize(function (req, next) {
-          setTimeout(next, 1000);
-        });
-
-        var socket = new Socket(server.make_addr('usr:pass', null, '?foo=bar'), {
-          timeout: 500
-        });
-
-        socket.on('timeout', done);
-      });
-
-      it('should reconnect after the timeout', function (done) {
-        primus.authorize(function (req, next) {
-          setTimeout(next, 1000);
-        });
-
-        var socket = new Socket(server.addr, { timeout: 10 })
-          , pattern = [];
-
-        socket.on('timeout', function () {
-          pattern.push('timeout');
-        });
-
-        socket.once('reconnect scheduled', function () {
-          pattern.push('reconnect scheduled');
-        });
-
-        socket.once('reconnect', function () {
-          pattern.push('reconnect');
-          expect(pattern.join(',')).to.equal('timeout,reconnect scheduled,reconnect');
-
-          socket.end();
-          // outgoing::reconnect is emitted after reconnect whatever we do
-          socket.removeAllListeners('outgoing::reconnect');
-          done();
-        });
-      });
-
-      it('emits a `reconnected` event', function (done) {
-        var socket = new Socket(server.addr);
-
-        primus.once('connection', function (spark) {
-          setTimeout(function () {
-            spark.end(undefined, { reconnect: true });
-          }, 10);
-        });
-
-        socket.once('reconnected', function () {
-          socket.end();
-          done();
-        });
-      });
-
-      it('can send utf-8', function (done) {
-        var messages = ['pongРУССКИЙ', '€€€']
-          , socket = new Socket(server.addr);
-
-        primus.once('connection', function (spark) {
-          var i = 0;
-
-          spark.on('data', function (msg) {
-            expect(msg).to.equal(messages[i++]);
-            spark.write(msg);
-          });
-
-          spark.once('end', function () {
-            expect(i).to.equal(messages.length);
-            done();
-          });
-        });
-
-        var received = 0;
-        socket.on('data', function (msg) {
-          expect(msg).to.equal(messages[received++]);
-
-          if (received === messages.length) {
-            socket.end();
-          }
-        });
-
-        messages.forEach(function forEach(msg) {
-          socket.write(msg);
-        });
-      });
-
-      it('can send a 0', function (done) {
-        var socket = new Socket(server.addr)
-          , zeros = 0;
-
-        primus.once('connection', function (spark) {
-          spark.on('data', function (msg) {
-            expect(msg).to.equal(0);
-            spark.write(0);
-            spark.end(0);
-          });
-        });
-
-        socket.on('data', function (msg) {
-          expect(msg).to.equal(0);
-
-          if (++zeros === 2) {
-            socket.end();
-            done();
-          }
-        });
-
-        socket.write(0);
-      });
     });
 
     describe('Server', function () {

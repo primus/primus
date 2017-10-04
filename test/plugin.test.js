@@ -98,7 +98,7 @@ describe('Plugin', function () {
   it('doesn\'t mutate the Spark prototype', function () {
     var expected = Primus.Spark.prototype.__initialise.slice()
       , server = http.createServer()
-      , primus = new Primus(server);
+      , primus = new Primus(server, { pingInterval: false });
 
     primus.plugin('dummy', {
       server: function (primus) {
@@ -111,7 +111,7 @@ describe('Plugin', function () {
 
   it('can instantly modify the prototype', function () {
     var server = http.createServer()
-      , primus = new Primus(server);
+      , primus = new Primus(server, { pingInterval: false });
 
     expect(primus.channel).to.be.a('undefined');
 
@@ -132,7 +132,7 @@ describe('Plugin', function () {
       expect(name).to.equal('foo');
       expect(obj).to.be.a('object');
 
-      next();
+      primus.destroy(next);
     });
 
     primus.plugin('foo', {
@@ -142,7 +142,7 @@ describe('Plugin', function () {
 
   it('allows to get a registered plugin by name', function () {
     var server = http.createServer()
-      , primus = new Primus(server);
+      , primus = new Primus(server, { pingInterval: false });
 
     var plugin = {
       server: function () {}
@@ -155,7 +155,7 @@ describe('Plugin', function () {
 
   it('allows to get all registered plugins', function () {
     var server = http.createServer()
-      , primus = new Primus(server);
+      , primus = new Primus(server, { pingInterval: false });
 
     expect(primus.plugin()).to.eql({});
 
@@ -168,7 +168,7 @@ describe('Plugin', function () {
   });
 
   describe('#plugout', function () {
-    it('emits a `plugout` event when removing a plugin', function (next) {
+    it('emits a `plugout` event when removing a plugin', function (done) {
       var server = http.createServer()
         , primus = new Primus(server);
 
@@ -176,7 +176,7 @@ describe('Plugin', function () {
         expect(name).to.equal('foo');
         expect(obj).to.be.a('object');
 
-        next();
+        primus.destroy(done);
       });
 
       primus.plugin('foo', {
