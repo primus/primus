@@ -30,7 +30,6 @@ module.exports = function client() {
     'Please run `npm install --save faye-websocket`'
   ));
 
-
   //
   // Connect to the given URL.
   //
@@ -59,13 +58,13 @@ module.exports = function client() {
           protocol: 'ws:',
           query: true
         }));
+        socket.binaryType = 'arraybuffer';
       }
     } catch (e) { return primus.emit('error', e); }
 
     //
     // Setup the Event handlers.
     //
-    socket.binaryType = 'arraybuffer';
     socket.onopen = primus.emits('incoming::open');
     socket.onerror = primus.emits('incoming::error');
     socket.onclose = primus.emits('incoming::end');

@@ -60,11 +60,7 @@ module.exports = function server() {
       );
 
       spark.on('outgoing::end', () => websocket && websocket.close());
-      spark.on('outgoing::data', (data) => {
-        if ('string' === typeof data) return websocket.send(data);
-
-        websocket.send(data, { binary: true });
-      });
+      spark.on('outgoing::data', (data) => websocket.send(data));
 
       websocket.on('error', spark.emits('incoming::error'));
       websocket.on('message', spark.emits('incoming::data', (next, evt) => {
