@@ -27,7 +27,7 @@ module.exports = function configure() {
     // add plugins or we will compile the client library without plugins, which
     // is sad :(
     //
-    library = library || new Buffer(primus.library());
+    library = library || Buffer.from(primus.library());
     length = length || library.length;
 
     res.statusCode = 200;
