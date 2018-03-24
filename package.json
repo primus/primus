@@ -85,7 +85,7 @@
     "recovery": "~0.2.6",
     "request": "~2.85.0",
     "rocambole": "~0.7.0",
-    "rocambole-node-remove": "~1.0.0",
+    "rocambole-node-remove": "~2.0.0",
     "sockjs": "~0.3.18",
     "sockjs-client": "~1.1.1",
     "through2": "~2.0.1",
