@@ -4,9 +4,9 @@ var ParserError = require('./errors').ParserError
   , log = require('diagnostics')('primus:spark')
   , parse = require('querystring').parse
   , forwarded = require('forwarded-for')
+  , nanoid = require('nanoid')
   , Ultron = require('ultron')
   , fuse = require('fusing')
-  , yeast = require('yeast')
   , u2028 = /\u2028/g
   , u2029 = /\u2029/g;
 
@@ -32,7 +32,7 @@ function Spark(primus, headers, address, query, id, request) {
     , idgen = primus.options.idGenerator;
 
   query = query || {};
-  id = idgen ? idgen() : (id || yeast());
+  id = idgen ? idgen() : (id || nanoid());
   headers = headers || {};
   address = address || {};
   request = request || headers['primus::req::backup'];

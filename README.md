@@ -159,12 +159,12 @@ The `pingInterval` option specifies the interval at which heartbeats are
 transmitted. It is possible to completely disable the heartbeats by setting the
 value of the `pingInterval` option to `false`.
 
-The `idGenerator` option can be used to define a function which will be called 
+The `idGenerator` option can be used to define a function which will be called
 to set each [`spark.id`](#sparkid). The generator function should return
-a unique string each time it is invoked. If `idGenerator` is not defined, Primus 
-will try to use ids provided by the transformer. If the transformer does not 
-provide ids, Primus will use [yeast](https://github.com/unshiftio/yeast) to 
-generate `Spark` ids.
+a unique string each time it is invoked. If `idGenerator` is not defined, Primus
+will try to use ids provided by the transformer. If the transformer does not
+provide ids, Primus will use [nanoid](https://github.com/ai/nanoid) to generate
+`Spark` ids.
 
 If you don't have a pre-existing server where you want or can attach your Primus
 server to you can also use the `Primus.createServer` convenience method. The
