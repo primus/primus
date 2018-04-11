@@ -47,7 +47,7 @@ module.exports = function server() {
         ? uws.OPCODE_BINARY
         : uws.OPCODE_TEXT;
 
-      native.server.send(socket, data, opcode);
+      native.server.send(socket, data, opcode, undefined, true);
     });
   });
 
