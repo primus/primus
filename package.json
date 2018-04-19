@@ -90,7 +90,7 @@
     "sockjs-client": "~1.1.1",
     "through2": "~2.0.1",
     "tick-tock": "~1.0.0",
-    "url-parse": "~1.3.0",
+    "url-parse": "~1.4.0",
     "uws": "~9.147.0",
     "ws": "~5.1.0",
     "yeast": "~0.1.2"
