@@ -24,7 +24,7 @@ module.exports = function server() {
   }, this.primus.options.transport);
 
   const group = native.server.group.create(
-    opts.perMessageDeflate ? 1 : 0,
+    opts.perMessageDeflate,
     opts.maxPayload
   );
 
