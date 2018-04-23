@@ -19,15 +19,20 @@ if (native.setNoop) native.setNoop(() => {});
  */
 module.exports = function server() {
   const opts = Object.assign({
-    perMessageDeflate: this.primus.options.compression,
+    perMessageDeflate: !!this.primus.options.compression,
     maxPayload: this.primus.options.maxLength
   }, this.primus.options.transport);
 
-  const group = native.server.group.create(
-    opts.perMessageDeflate ? 1 : 0,
-    opts.maxPayload
-  );
+  let flags = 0;
 
+  if (opts.perMessageDeflate) {
+    flags |= uws.PERMESSAGE_DEFLATE;
+    if (opts.perMessageDeflate.serverNoContextTakeover === false) {
+      flags |= uws.SLIDING_DEFLATE_WINDOW;
+    }
+  }
+
+  const group = native.server.group.create(flags, opts.maxPayload);
   let upgradeReq = null;
 
   native.server.group.onConnection(group, (socket) => {
