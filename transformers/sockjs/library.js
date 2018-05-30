@@ -1,4 +1,4 @@
-(function(f){var g;if(typeof window!=='undefined'){g=window}else if(typeof self!=='undefined'){g=self}g.SockJS=f()})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function(f){var g;if(typeof window!=='undefined'){g=window}else if(typeof self!=='undefined'){g=self}g.SockJS=f()})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 'use strict';
 
 var inherits = _dereq_('inherits')
@@ -539,7 +539,7 @@ module.exports = InfoReceiver;
 
 module.exports = global.location || {
   origin: 'http://localhost:80'
-, protocol: 'http'
+, protocol: 'http:'
 , host: 'localhost'
 , port: 80
 , href: 'http://localhost/'
@@ -621,7 +621,7 @@ function SockJS(url, protocols, options) {
 
   var secure = parsedUrl.protocol === 'https:';
   // Step 2 - don't allow secure origin with an insecure protocol
-  if (loc.protocol === 'https' && !secure) {
+  if (loc.protocol === 'https:' && !secure) {
     throw new Error('SecurityError: An insecure SockJS connection may not be initiated from a page loaded over HTTPS');
   }
 
@@ -767,6 +767,10 @@ SockJS.prototype._connect = function() {
 
 SockJS.prototype._transportTimeout = function() {
   if (this.readyState === SockJS.CONNECTING) {
+    if (this._transport) {
+      this._transport.close();
+    }
+
     this._transportClose(2007, 'Transport timed out');
   }
 };
@@ -1445,7 +1449,7 @@ AbstractXHRObject.prototype._start = function(method, url, payload, opts) {
     // Mozilla docs says https://developer.mozilla.org/en/XMLHttpRequest :
     // "This never affects same-site requests."
 
-    this.xhr.withCredentials = 'true';
+    this.xhr.withCredentials = true;
   }
   if (opts && opts.headers) {
     for (var key in opts.headers) {
@@ -3119,17 +3123,17 @@ module.exports = {
       }
     };
     var post = function(msg, origin) {
-      try {
-        // When the iframe is not loaded, IE raises an exception
-        // on 'contentWindow'.
-        setTimeout(function() {
+      setTimeout(function() {
+        try {
+          // When the iframe is not loaded, IE raises an exception
+          // on 'contentWindow'.
           if (iframe && iframe.contentWindow) {
             iframe.contentWindow.postMessage(msg, origin);
           }
-        }, 0);
-      } catch (x) {
-        // intentionally empty
-      }
+        } catch (x) {
+          // intentionally empty
+        }
+      }, 0);
     };
 
     iframe.src = iframeUrl;
@@ -3398,7 +3402,7 @@ module.exports = {
 };
 
 },{"url-parse":57}],52:[function(_dereq_,module,exports){
-module.exports = '1.1.2';
+module.exports = '1.1.5';
 
 },{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
@@ -4337,6 +4341,17 @@ if (typeof Object.create === 'function') {
 var has = Object.prototype.hasOwnProperty;
 
 /**
+ * Decode a URI encoded string.
+ *
+ * @param {String} input The URI encoded string.
+ * @returns {String} The decoded string.
+ * @api private
+ */
+function decode(input) {
+  return decodeURIComponent(input.replace(/\+/g, ' '));
+}
+
+/**
  * Simple query string parser.
  *
  * @param {String} query The query string that needs to be parsed.
@@ -4348,15 +4363,18 @@ function querystring(query) {
     , result = {}
     , part;
 
-  //
-  // Little nifty parsing hack, leverage the fact that RegExp.exec increments
-  // the lastIndex property so we can continue executing this loop until we've
-  // parsed all results.
-  //
-  for (;
-    part = parser.exec(query);
-    result[decodeURIComponent(part[1])] = decodeURIComponent(part[2])
-  );
+  while (part = parser.exec(query)) {
+    var key = decode(part[1])
+      , value = decode(part[2]);
+
+    //
+    // Prevent overriding of existing properties. This ensures that build-in
+    // methods like `toString` or __proto__ are not overriden by malicious
+    // querystrings.
+    //
+    if (key in result) continue;
+    result[key] = value;
+  }
 
   return result;
 }
@@ -4435,12 +4453,13 @@ module.exports = function required(port, protocol) {
 };
 
 },{}],57:[function(_dereq_,module,exports){
+(function (global){
 'use strict';
 
 var required = _dereq_('requires-port')
-  , lolcation = _dereq_('./lolcation')
   , qs = _dereq_('querystringify')
-  , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\S\s]*)/i;
+  , protocolre = /^([a-z][a-z0-9.+-]*:)?(\/\/)?([\S\s]*)/i
+  , slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//;
 
 /**
  * These are the parse rules for the URL parser, it informs the parser
@@ -4463,6 +4482,54 @@ var rules = [
   [/:(\d+)$/, 'port', undefined, 1],    // RegExp the back.
   [NaN, 'hostname', undefined, 1, 1]    // Set left over.
 ];
+
+/**
+ * These properties should not be copied or inherited from. This is only needed
+ * for all non blob URL's as a blob URL does not include a hash, only the
+ * origin.
+ *
+ * @type {Object}
+ * @private
+ */
+var ignore = { hash: 1, query: 1 };
+
+/**
+ * The location object differs when your code is loaded through a normal page,
+ * Worker or through a worker using a blob. And with the blobble begins the
+ * trouble as the location object will contain the URL of the blob, not the
+ * location of the page where our code is loaded in. The actual origin is
+ * encoded in the `pathname` so we can thankfully generate a good "default"
+ * location from it so we can generate proper relative URL's again.
+ *
+ * @param {Object|String} loc Optional default location object.
+ * @returns {Object} lolcation object.
+ * @api public
+ */
+function lolcation(loc) {
+  loc = loc || global.location || {};
+
+  var finaldestination = {}
+    , type = typeof loc
+    , key;
+
+  if ('blob:' === loc.protocol) {
+    finaldestination = new URL(unescape(loc.pathname), {});
+  } else if ('string' === type) {
+    finaldestination = new URL(loc, {});
+    for (key in ignore) delete finaldestination[key];
+  } else if ('object' === type) {
+    for (key in loc) {
+      if (key in ignore) continue;
+      finaldestination[key] = loc[key];
+    }
+
+    if (finaldestination.slashes === undefined) {
+      finaldestination.slashes = slashes.test(loc.href);
+    }
+  }
+
+  return finaldestination;
+}
 
 /**
  * @typedef ProtocolExtract
@@ -4597,7 +4664,7 @@ function URL(address, location, parser) {
           address = address.slice(0, index);
         }
       }
-    } else if (index = parse.exec(address)) {
+    } else if ((index = parse.exec(address))) {
       url[key] = index[1];
       address = address.slice(0, index.index);
     }
@@ -4675,7 +4742,7 @@ function URL(address, location, parser) {
  * @returns {URL}
  * @api public
  */
-URL.prototype.set = function set(part, value, fn) {
+function set(part, value, fn) {
   var url = this;
 
   switch (part) {
@@ -4726,8 +4793,13 @@ URL.prototype.set = function set(part, value, fn) {
       break;
 
     case 'pathname':
-      url.pathname = value.length && value.charAt(0) !== '/' ? '/' + value : value;
-
+    case 'hash':
+      if (value) {
+        var char = part === 'pathname' ? '/' : '#';
+        url[part] = value.charAt(0) !== char ? char + value : value;
+      } else {
+        url[part] = value;
+      }
       break;
 
     default:
@@ -4747,7 +4819,7 @@ URL.prototype.set = function set(part, value, fn) {
   url.href = url.toString();
 
   return url;
-};
+}
 
 /**
  * Transform the properties back in to a valid and full URL string.
@@ -4756,7 +4828,7 @@ URL.prototype.set = function set(part, value, fn) {
  * @returns {String}
  * @api public
  */
-URL.prototype.toString = function toString(stringify) {
+function toString(stringify) {
   if (!stringify || 'function' !== typeof stringify) stringify = qs.stringify;
 
   var query
@@ -4781,7 +4853,9 @@ URL.prototype.toString = function toString(stringify) {
   if (url.hash) result += url.hash;
 
   return result;
-};
+}
+
+URL.prototype = { set: set, toString: toString };
 
 //
 // Expose the URL parser and some additional properties that might be useful for
@@ -4793,64 +4867,8 @@ URL.qs = qs;
 
 module.exports = URL;
 
-},{"./lolcation":58,"querystringify":55,"requires-port":56}],58:[function(_dereq_,module,exports){
-(function (global){
-'use strict';
-
-var slashes = /^[A-Za-z][A-Za-z0-9+-.]*:\/\//;
-
-/**
- * These properties should not be copied or inherited from. This is only needed
- * for all non blob URL's as a blob URL does not include a hash, only the
- * origin.
- *
- * @type {Object}
- * @private
- */
-var ignore = { hash: 1, query: 1 }
-  , URL;
-
-/**
- * The location object differs when your code is loaded through a normal page,
- * Worker or through a worker using a blob. And with the blobble begins the
- * trouble as the location object will contain the URL of the blob, not the
- * location of the page where our code is loaded in. The actual origin is
- * encoded in the `pathname` so we can thankfully generate a good "default"
- * location from it so we can generate proper relative URL's again.
- *
- * @param {Object|String} loc Optional default location object.
- * @returns {Object} lolcation object.
- * @api public
- */
-module.exports = function lolcation(loc) {
-  loc = loc || global.location || {};
-  URL = URL || _dereq_('./');
-
-  var finaldestination = {}
-    , type = typeof loc
-    , key;
-
-  if ('blob:' === loc.protocol) {
-    finaldestination = new URL(unescape(loc.pathname), {});
-  } else if ('string' === type) {
-    finaldestination = new URL(loc, {});
-    for (key in ignore) delete finaldestination[key];
-  } else if ('object' === type) {
-    for (key in loc) {
-      if (key in ignore) continue;
-      finaldestination[key] = loc[key];
-    }
-
-    if (finaldestination.slashes === undefined) {
-      finaldestination.slashes = slashes.test(loc.href);
-    }
-  }
-
-  return finaldestination;
-};
-
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./":57}],59:[function(_dereq_,module,exports){
+},{"querystringify":55,"requires-port":56}],58:[function(_dereq_,module,exports){
 (function (global){
 'use strict';
 
@@ -4864,5 +4882,5 @@ if ('_sockjs_onload' in global) {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./main":13,"./transport-list":15}]},{},[59])(59)
+},{"./main":13,"./transport-list":15}]},{},[58])(58)
 });
