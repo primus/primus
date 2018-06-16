@@ -59,7 +59,7 @@
     "forwarded-for": "~1.0.1",
     "fusing": "~1.0.0",
     "nanoid": "~1.0.2",
-    "setheader": "~0.0.4",
+    "setheader": "~1.0.0",
     "ultron": "~1.1.0"
   },
   "devDependencies": {
