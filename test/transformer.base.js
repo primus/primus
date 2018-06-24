@@ -26,7 +26,11 @@ module.exports = function base(transformer, transformer_name) {
     }
   };
 
-  describe('Transformer: '+ (transformer_name || transformer), function () {
+  (
+    transformer === 'uws' && process.versions.modules < 57
+      ? describe.skip
+      : describe
+  )('Transformer: '+ (transformer_name || transformer), function () {
     var common = require('./common')
       , request = common.request
       , Primus = common.Primus
