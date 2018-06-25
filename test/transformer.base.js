@@ -1213,7 +1213,7 @@ module.exports = function base(transformer, transformer_name) {
         });
       });
 
-      it('should emit an `error` when it fails to encode the data', function (done) {
+      it('emits an `error` when it fails to encode the data', function (done) {
         primus.on('connection', function (spark) {
           var data = { foo: 'bar' };
           data.recursive = data;
@@ -1222,14 +1222,14 @@ module.exports = function base(transformer, transformer_name) {
             expect(err).to.not.be.a('string');
             expect(err.message).to.include('JSON');
 
-            socket.end();
-            done();
+            spark.end();
           });
 
           spark.write(data);
         });
 
         var socket = new Socket(server.addr);
+        socket.on('end', done);
       });
 
       it('should receive querystrings', function (done) {
