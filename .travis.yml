@@ -1,12 +1,9 @@
 language: node_js
-dist: trusty
 sudo: false
 node_js:
   - "10"
-  - "9"
   - "8"
   - "6"
-  - "4"
 script:
   - "npm run test && npm run integration"
 matrix:
