@@ -82,7 +82,7 @@
     "pumpify": "~1.5.0",
     "querystringify": "~2.0.0",
     "recovery": "~0.2.6",
-    "request": "~2.87.0",
+    "request": "~2.88.0",
     "rocambole": "~0.7.0",
     "rocambole-node-remove": "~2.0.0",
     "sockjs": "~0.3.18",
