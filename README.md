@@ -1646,7 +1646,7 @@ primus.plugin('rooms', {
 #### Transforming and intercepting messages
 
 Intercepting and transforming messages is something that a lot of plugins
-require. When your building an `EventEmitter` plugin or something else you
+require. When you're building an `EventEmitter` plugin or something else you
 probably don't want the default `data` event to be emitted but your custom
 event. There are 2 different types of messages that can be transformed:
 
