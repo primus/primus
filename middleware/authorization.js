@@ -37,8 +37,6 @@ module.exports = function configuration() {
         if (code === 401 && err.authenticate) {
           res.setHeader('WWW-Authenticate', err.authenticate);
         }
-
-        res.end(message);
       } else {
         res.write('HTTP/'+ req.httpVersion +' ');
         res.write(code +' '+ require('http').STATUS_CODES[code] +'\r\n');
@@ -51,9 +49,9 @@ module.exports = function configuration() {
         }
 
         res.write('\r\n');
-        res.write(message);
-        res.destroy();
       }
+
+      res.end(message);
     });
   };
 };
