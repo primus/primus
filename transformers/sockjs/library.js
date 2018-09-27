@@ -3402,7 +3402,7 @@ module.exports = {
 };
 
 },{"url-parse":57}],52:[function(_dereq_,module,exports){
-module.exports = '1.2.0';
+module.exports = '1.3.0';
 
 },{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
