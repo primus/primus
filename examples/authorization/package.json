@@ -16,9 +16,9 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "body-parser": "^1.2.0",
-    "express": "^4.2.0",
-    "jwt-simple": "^0.2.0",
-    "pwd": "^0.0.3"
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "jwt-simple": "^0.5.5",
+    "pwd": "^1.1.0"
   }
 }
