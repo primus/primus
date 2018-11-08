@@ -27,7 +27,8 @@ module.exports = function base(transformer, transformer_name) {
   };
 
   (
-    transformer === 'uws' && process.versions.modules < 57
+    transformer === 'uws' &&
+    (process.versions.modules < 57 || process.versions.modules > 64)
       ? describe.skip
       : describe
   )('Transformer: '+ (transformer_name || transformer), function () {
