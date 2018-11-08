@@ -20,7 +20,7 @@ const path = require('path');
 const fs = require('fs');
 
 const options = {
-  entries: [ path.join(dir, 'index.js') ],
+  entries: [ path.join(dir, 'lib', 'index.js') ],
   insertGlobalVars: {
     global: function glob() {
       return 'typeof self !== "undefined" ? self : ' +
