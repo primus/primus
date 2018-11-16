@@ -23,7 +23,7 @@ module.exports = function server() {
     maxPayload: this.primus.options.maxLength
   }, this.primus.options.transport);
 
-  this.uWsServer = native.server;
+  this.service = native.server;
 
   let flags = 0;
 
@@ -49,7 +49,6 @@ module.exports = function server() {
     native.setUserData(socket, spark);
 
     spark.ultron.on('outgoing::end', () => native.server.close(socket));
-    spark._socket = socket;
     spark.on('outgoing::data', (data) => {
       const opcode = Buffer.isBuffer(data)
         ? uws.OPCODE_BINARY
