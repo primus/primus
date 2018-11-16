@@ -39,8 +39,8 @@ module.exports = function server() {
         , url.parse(req.url).query  // Optional query string.
         , null                      // We don't have an unique id.
         , req                       // Reference to the HTTP req.
+        , socket                    // Reference to transformers socket
       );
-      spark.socket = socket;
 
       spark.on('outgoing::end', () => socket && socket.close());
       spark.on('outgoing::data', (data) => {

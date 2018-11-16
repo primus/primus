@@ -43,9 +43,9 @@ module.exports = function server() {
       upgradeReq,                       // IP address location.
       url.parse(upgradeReq.url).query,  // Optional query string.
       null,                             // We don't have an unique id.
-      upgradeReq                        // Reference to the HTTP req.
+      upgradeReq,                       // Reference to the HTTP req.
+      socket                            // Reference to transformers socket
     );
-    spark.socket = socket;
 
     native.setUserData(socket, spark);
 
