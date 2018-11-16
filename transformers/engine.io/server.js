@@ -29,6 +29,7 @@ module.exports = function server() {
       , socket.id               // Unique connection id.
       , socket.request          // Reference to the HTTP req.
     );
+    spark.socket = socket;
 
     spark.on('outgoing::end', () => socket && socket.close());
     spark.on('outgoing::data', (data) => socket.write(data));

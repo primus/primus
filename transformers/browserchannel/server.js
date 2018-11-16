@@ -31,6 +31,7 @@ module.exports = function server() {
       , socket.query                            // Optional query string.
       , socket.id                               // Unique connection id.
     );
+    spark.socket = socket;
 
     spark.on('outgoing::end', function end() {
       if (socket) socket.stop();

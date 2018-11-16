@@ -58,6 +58,7 @@ module.exports = function server() {
         , null                      // We don't have an unique id.
         , req                       // Reference to the HTTP req.
       );
+      spark.socket = websocket;
 
       spark.on('outgoing::end', () => websocket && websocket.close());
       spark.on('outgoing::data', (data) => websocket.send(data));

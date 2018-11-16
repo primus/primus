@@ -59,6 +59,7 @@ module.exports = function server() {
       , url.parse(socket.url).query  // Optional query string.
       , socket.id                    // Unique connection id.
     );
+    spark.socket = socket;
 
     spark.on('outgoing::end', () => socket && socket.close());
     spark.on('outgoing::data', (data) => socket.write(data));

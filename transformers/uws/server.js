@@ -45,6 +45,7 @@ module.exports = function server() {
       null,                             // We don't have an unique id.
       upgradeReq                        // Reference to the HTTP req.
     );
+    spark.socket = socket;
 
     native.setUserData(socket, spark);
 
