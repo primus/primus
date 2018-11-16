@@ -40,6 +40,7 @@ module.exports = function server() {
         , null                      // We don't have an unique id.
         , req                       // Reference to the HTTP req.
       );
+      spark.socket = socket;
 
       spark.on('outgoing::end', () => socket && socket.close());
       spark.on('outgoing::data', (data) => {
