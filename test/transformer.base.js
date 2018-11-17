@@ -1170,7 +1170,11 @@ module.exports = function base(transformer, transformer_name) {
         socket.write('balls');
       });
 
-      if ('browserchannel' !== transformer && 'engine.io' !== transformer) {
+      if (
+        'browserchannel' !== transformer &&
+        'engine.io' !== transformer &&
+        'unixdomainwebsockets' !== transformer_name
+      ) {
         it('connects using basic auth', function (done) {
           var socket = new Socket(server.make_addr('usr:pass', null, '?foo=bar'));
 
