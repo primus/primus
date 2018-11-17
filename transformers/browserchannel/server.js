@@ -30,6 +30,8 @@ module.exports = function server() {
         }
       , socket.query                            // Optional query string.
       , socket.id                               // Unique connection id.
+      , null                                    // We don't have have a HTTP request
+      , socket                                  // Reference to transformers socket
     );
 
     spark.on('outgoing::end', function end() {

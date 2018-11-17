@@ -23,6 +23,8 @@ module.exports = function server() {
     maxPayload: this.primus.options.maxLength
   }, this.primus.options.transport);
 
+  this.service = native.server;
+
   let flags = 0;
 
   if (opts.perMessageDeflate) {
@@ -41,7 +43,8 @@ module.exports = function server() {
       upgradeReq,                       // IP address location.
       url.parse(upgradeReq.url).query,  // Optional query string.
       null,                             // We don't have an unique id.
-      upgradeReq                        // Reference to the HTTP req.
+      upgradeReq,                       // Reference to the HTTP req.
+      socket                            // Reference to transformers socket
     );
 
     native.setUserData(socket, spark);

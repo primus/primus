@@ -22,9 +22,10 @@ var ParserError = require('./errors').ParserError
  * @param {Object} query The query string of request.
  * @param {String} id An optional id of the socket, or we will generate one.
  * @param {Request} request The HTTP Request instance that initialised the spark.
+ * @param {Mixed} socket Reference to the transformer's socket
  * @api public
  */
-function Spark(primus, headers, address, query, id, request) {
+function Spark(primus, headers, address, query, id, request, socket) {
   this.fuse();
 
   var writable = this.writable
@@ -42,6 +43,7 @@ function Spark(primus, headers, address, query, id, request) {
   writable('remote', address);          // The remote address location.
   writable('headers', headers);         // The request headers.
   writable('request', request);         // Reference to an HTTP request.
+  writable('socket', socket);           // Reference to the transformer's socket
   writable('writable', true);           // Silly stream compatibility.
   writable('readable', true);           // Silly stream compatibility.
   writable('queue', []);                // Data queue for data events.
