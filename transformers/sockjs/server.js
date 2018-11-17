@@ -6,7 +6,7 @@ const url = require('url');
 const PrimusError = require('../../errors').PrimusError;
 
 /**
- * Minimum viable Sockjs server for Node.js that works through the primus
+ * Minimum viable SockJS server for Node.js that works through the primus
  * interface.
  *
  * @runat server
@@ -58,8 +58,8 @@ module.exports = function server() {
       , socket                       // IP address location.
       , url.parse(socket.url).query  // Optional query string.
       , socket.id                    // Unique connection id.
-      , null                         // We don't have have a HTTP request
-      , socket                       // Reference to transformers socket
+      , null                         // We don't have have a HTTP request.
+      , socket                       // Reference to the SockJS socket.
     );
 
     spark.on('outgoing::end', () => socket && socket.close());

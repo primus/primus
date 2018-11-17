@@ -4,8 +4,8 @@ var browserchannel = require('browserchannel')
   , http = require('http');
 
 /**
- * Minimum viable Browserchannel server for Node.js that works through the primus
- * interface.
+ * Minimum viable BrowserChannel server for Node.js that works through the
+ * primus interface.
  *
  * @runat server
  * @api private
@@ -23,15 +23,15 @@ module.exports = function server() {
     base: primus.pathname
   }), function connection(socket) {
     var spark = new Spark(
-        socket.headers                          // HTTP request headers.
-      , {                                       // IP address Location.
+        socket.headers                    // HTTP request headers.
+      , {                                 // IP address Location.
           remoteAddress: socket.address,
           remotePort: 1337
         }
-      , socket.query                            // Optional query string.
-      , socket.id                               // Unique connection id.
-      , null                                    // We don't have have a HTTP request
-      , socket                                  // Reference to transformers socket
+      , socket.query                      // Optional query string.
+      , socket.id                         // Unique connection id.
+      , null                              // We don't have have a HTTP request.
+      , socket                            // Reference to the BrowserChannel socket.
     );
 
     spark.on('outgoing::end', function end() {

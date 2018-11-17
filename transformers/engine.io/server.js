@@ -28,7 +28,7 @@ module.exports = function server() {
       , socket.request.query    // Optional query string.
       , socket.id               // Unique connection id.
       , socket.request          // Reference to the HTTP req.
-      , socket                  // Reference to transformers socket
+      , socket                  // Reference to the Engine.IO socket.
     );
 
     spark.on('outgoing::end', () => socket && socket.close());

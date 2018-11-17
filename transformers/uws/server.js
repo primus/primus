@@ -44,7 +44,7 @@ module.exports = function server() {
       url.parse(upgradeReq.url).query,  // Optional query string.
       null,                             // We don't have an unique id.
       upgradeReq,                       // Reference to the HTTP req.
-      socket                            // Reference to transformers socket
+      socket                            // Reference to the socket.
     );
 
     native.setUserData(socket, spark);

@@ -57,7 +57,7 @@ module.exports = function server() {
         , url.parse(req.url).query  // Optional query string.
         , null                      // We don't have an unique id.
         , req                       // Reference to the HTTP req.
-        , websocket                 // Reference to transformers socket
+        , websocket                 // Reference to the WebSocket.
       );
 
       spark.on('outgoing::end', () => websocket && websocket.close());
