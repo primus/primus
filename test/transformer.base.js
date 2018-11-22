@@ -1239,7 +1239,7 @@ module.exports = function base(transformer, transformer_name) {
 
       it('should expose transformers socket', function (done) {
         primus.on('connection', function (spark) {
-          expect(spark.socket).to.be.ok();
+          expect(spark.socket).to.not.equal(undefined);
 
           socket.end();
         });
