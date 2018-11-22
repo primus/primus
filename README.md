@@ -322,6 +322,11 @@ The `spark.query` contains the query string you used to connect to the server. I
 parsed as an object. Please note that this may not be available for all supported
 transformers.
 
+#### spark.socket
+
+The `spark.socket` is set to the underlying socket of the transformer. This is not
+necessarily a raw `Socket` and will differ from transformer to transformer.
+
 #### spark.id
 
 This is a unique id that we use to identify this single connection with. Normally

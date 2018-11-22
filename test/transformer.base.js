@@ -1237,6 +1237,17 @@ module.exports = function base(transformer, transformer_name) {
         socket.on('end', done);
       });
 
+      it('should expose transformers socket', function (done) {
+        primus.on('connection', function (spark) {
+          expect(spark.socket).to.not.equal(undefined);
+
+          socket.end();
+        });
+
+        var socket = new Socket(server.make_addr(null, null));
+        socket.on('end', done);
+      });
+
       it('should receive querystrings', function (done) {
         primus.on('connection', function (spark) {
           expect(spark.query).to.be.a('object');

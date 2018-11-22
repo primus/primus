@@ -82,8 +82,8 @@ function Primus(server, options) {
   // approach listed below is that the prototype extensions are only applied to
   // the Spark of this Primus instance.
   //
-  this.Spark = function Sparky(headers, address, query, id, request) {
-    Spark.call(this, primus, headers, address, query, id, request);
+  this.Spark = function Sparky(headers, address, query, id, request, socket) {
+    Spark.call(this, primus, headers, address, query, id, request, socket);
   };
 
   this.Spark.prototype = Object.create(Spark.prototype, {
