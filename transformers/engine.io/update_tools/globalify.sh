@@ -21,14 +21,7 @@ const fs = require('fs');
 
 const options = {
   entries: [ path.join(dir, 'lib', 'index.js') ],
-  insertGlobalVars: {
-    global: function glob() {
-      return 'typeof self !== "undefined" ? self : ' +
-        'typeof window !== "undefined" ? window : {}';
-    }
-  },
-  standalone: 'eio',
-  builtins: false
+  standalone: 'eio'
 };
 
 //
@@ -40,6 +33,7 @@ const options = {
 // RequireJS is used. See issue #157.
 //
 browserify(options)
+  .ignore('buffer')
   .exclude('debug')
   .exclude('ws')
   .transform(stripify)
