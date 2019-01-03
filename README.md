@@ -177,9 +177,15 @@ server to you can also use the `Primus.createServer` convenience method. The
 - Return the created Primus instance.
 
 ```js
-Primus.createServer(function connection(spark) {
-
-}, { port: 8080, transformer: 'websockets' });
+Primus.createServer(
+    function connection(spark) {
+      
+    },
+    {
+      port: 8080, 
+      transformer: 'websockets'
+    }
+);
 ```
 
 In the above example we automatically create a HTTP server which will listen
