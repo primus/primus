@@ -10,7 +10,7 @@
     "test": "npm run build && mocha test/*.test.js",
     "prepublishOnly": "npm run build"
   },
-  "homepage": "http://primus.io",
+  "homepage": "https://github.com/primus/primus#readme",
   "repository": {
     "type": "git",
     "url": "git://github.com/primus/primus.git"
