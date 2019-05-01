@@ -174,11 +174,9 @@ module.exports = function base(transformer, transformer_name) {
 
         expect(socket.readyState).to.equal(Socket.CLOSED);
 
-        setTimeout(function () {
+        socket.on('outgoing::open', function () {
           expect(socket.readyState).to.equal(Socket.OPENING);
-        }, 0);
-
-        socket.on('open', function () {
+        }).on('open', function () {
           expect(socket.readyState).to.equal(Socket.OPEN);
           socket.end();
         }).on('end', function () {
