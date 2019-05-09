@@ -70,7 +70,7 @@
     "demolish": "~1.0.2",
     "derequire": "~2.0.3",
     "deumdify": "~1.2.3",
-    "ejson": "~2.1.2",
+    "ejson": "~2.2.0",
     "emits": "~3.0.0",
     "engine.io": "~3.3.0",
     "engine.io-client": "~3.3.0",
