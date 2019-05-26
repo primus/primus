@@ -6,6 +6,8 @@ var log = require('diagnostics')('primus:transformer')
   , Ultron = require('ultron')
   , fuse = require('fusing');
 
+function noop() {}
+
 /**
  * Transformer skeleton
  *
@@ -199,7 +201,18 @@ Transformer.readable('upgrade', function upgrade(req, socket, head) {
   });
 
   log('handling HTTP upgrade for url: %s', req.url);
-  this.forEach('upgrade', req, socket, this.emits('upgrade', req, socket, head));
+
+  //
+  // Add a listener for the `'error'` event before running middleware as there
+  // isn't a default one in Node.js >= 10. The socket is destroyed when an error
+  // occurs so there is no need to do anything.
+  //
+  socket.on('error', noop);
+
+  this.forEach('upgrade', req, socket, () => {
+    socket.removeListener('error', noop);
+    this.emit('upgrade', req, socket, head);
+  });
 });
 
 /**
