@@ -1,5 +1,7 @@
 'use strict';
 
+const http = require('http');
+
 /**
  * WARNING: this middleware is only used internally and does not follow the
  * pattern of the other middleware. You should not use it.
@@ -12,9 +14,9 @@
  * @api private
  */
 module.exports = function error(err, req, res) {
-  var message = JSON.stringify({ error: err.message || err })
-    , length = Buffer.byteLength(message)
-    , code = err.statusCode || 500;
+  const message = JSON.stringify({ error: err.message || err });
+  const length = Buffer.byteLength(message);
+  const code = err.statusCode || 500;
 
   //
   // As in the authorization middleware we need to handle two cases here:
@@ -28,12 +30,12 @@ module.exports = function error(err, req, res) {
     return res.end(message);
   }
 
-  res.write('HTTP/'+ req.httpVersion +' ');
-  res.write(code +' '+ require('http').STATUS_CODES[code] +'\r\n');
-  res.write('Connection: close\r\n');
-  res.write('Content-Type: application/json\r\n');
-  res.write('Content-Length: '+ length +'\r\n');
-  res.write('\r\n');
-  res.write(message);
+  res.write(
+    `HTTP/${req.httpVersion} ${code} ${http.STATUS_CODES[code]}\r\n` +
+      'Connection: close\r\n' +
+      'Content-Type: application/json\r\n' +
+      `Content-Length: ${length}\r\n\r\n` +
+      message
+  );
   res.destroy();
 };
