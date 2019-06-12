@@ -79,7 +79,7 @@
     "mocha": "~6.1.0",
     "pre-commit": "~1.2.0",
     "primus-msgpack": "~1.0.2",
-    "pumpify": "~1.5.0",
+    "pumpify": "~2.0.0",
     "querystringify": "~2.1.0",
     "recovery": "~0.2.6",
     "request": "~2.88.0",
