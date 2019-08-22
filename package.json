@@ -86,7 +86,7 @@
     "rocambole": "~0.7.0",
     "rocambole-node-remove": "~3.0.0",
     "sockjs": "~0.3.18",
-    "sockjs-client": "~1.3.0",
+    "sockjs-client": "~1.4.0",
     "through2": "~3.0.0",
     "tick-tock": "~1.0.0",
     "url-parse": "~1.4.0",
