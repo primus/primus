@@ -73,7 +73,7 @@
     "ejson": "~2.2.0",
     "emits": "~3.0.0",
     "engine.io": "~3.4.0",
-    "engine.io-client": "~3.3.0",
+    "engine.io-client": "~3.4.0",
     "faye-websocket": "~0.11.0",
     "inherits": "~2.0.3",
     "mocha": "~6.2.0",
