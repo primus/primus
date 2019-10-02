@@ -595,6 +595,7 @@ function SockJS(url, protocols, options) {
   }
   this._transportsWhitelist = options.transports;
   this._transportOptions = options.transportOptions || {};
+  this._timeout = options.timeout || 0;
 
   var sessionId = options.sessionId || 8;
   if (typeof sessionId === 'function') {
@@ -749,7 +750,7 @@ SockJS.prototype._connect = function() {
     }
 
     // calculate timeout based on RTO and round trips. Default to 5s
-    var timeoutMs = (this._rto * Transport.roundTrips) || 5000;
+    var timeoutMs = Math.max(this._timeout, (this._rto * Transport.roundTrips) || 5000);
     this._transportTimeoutId = setTimeout(this._transportTimeout.bind(this), timeoutMs);
 
     var transportUrl = urlUtils.addPath(this._transUrl, '/' + this._server + '/' + this._generateSessionId());
@@ -3402,7 +3403,7 @@ module.exports = {
 };
 
 },{"url-parse":57}],52:[function(_dereq_,module,exports){
-module.exports = '1.3.0';
+module.exports = '1.4.0';
 
 },{}],53:[function(_dereq_,module,exports){
 if (typeof Object.create === 'function') {
