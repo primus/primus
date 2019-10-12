@@ -1,6 +1,6 @@
 {
   "name": "primus",
-  "version": "7.3.3",
+  "version": "7.3.4",
   "description": "Primus is a simple abstraction around real-time frameworks. It allows you to easily switch between different frameworks without any code changes.",
   "main": "index.js",
   "scripts": {
