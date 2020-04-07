@@ -68,7 +68,7 @@
     "chai": "~4.2.0",
     "condenseify": "~1.1.1",
     "demolish": "~1.0.2",
-    "derequire": "~2.0.3",
+    "derequire": "~2.1.0",
     "deumdify": "~1.2.3",
     "ejson": "~2.2.0",
     "emits": "~3.0.0",
