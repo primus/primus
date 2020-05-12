@@ -54,7 +54,7 @@
     "asyncemit": "~3.0.1",
     "create-server": "~1.0.1",
     "diagnostics": "~2.0.0",
-    "eventemitter3": "~4.0.0",
+    "eventemitter3": "~4.0.4",
     "forwarded-for": "~1.1.0",
     "fusing": "~1.0.0",
     "nanoid": "~3.1.0",
