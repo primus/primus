@@ -1,6 +1,17 @@
 (function(f){var g;if(typeof window!=='undefined'){g=window}else if(typeof self!=='undefined'){g=self}g.eio=f()})(function(){var define,module,exports;return (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(_dereq_,module,exports){
 
 },{}],2:[function(_dereq_,module,exports){
+module.exports = (function () {
+  if (typeof self !== 'undefined') {
+    return self;
+  } else if (typeof window !== 'undefined') {
+    return window;
+  } else {
+    return Function('return this')(); // eslint-disable-line no-new-func
+  }
+})();
+
+},{}],3:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -729,7 +740,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
   return filteredUpgrades;
 };
 
-},{"./transport":3,"./transports/index":4,"component-emitter":13,"engine.io-parser":15,"indexof":21,"parseqs":23,"parseuri":24}],3:[function(_dereq_,module,exports){
+},{"./transport":4,"./transports/index":5,"component-emitter":14,"engine.io-parser":16,"indexof":22,"parseqs":24,"parseuri":25}],4:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -892,7 +903,7 @@ Transport.prototype.onClose = function () {
   this.emit('close');
 };
 
-},{"component-emitter":13,"engine.io-parser":15}],4:[function(_dereq_,module,exports){
+},{"component-emitter":14,"engine.io-parser":16}],5:[function(_dereq_,module,exports){
 /**
  * Module dependencies
  */
@@ -947,14 +958,14 @@ function polling (opts) {
   }
 }
 
-},{"./polling-jsonp":5,"./polling-xhr":6,"./websocket":8,"xmlhttprequest-ssl":9}],5:[function(_dereq_,module,exports){
-(function (global){
+},{"./polling-jsonp":6,"./polling-xhr":7,"./websocket":9,"xmlhttprequest-ssl":10}],6:[function(_dereq_,module,exports){
 /**
  * Module requirements.
  */
 
 var Polling = _dereq_('./polling');
 var inherit = _dereq_('component-inherit');
+var globalThis = _dereq_('../globalThis');
 
 /**
  * Module exports.
@@ -982,15 +993,6 @@ var callbacks;
 function empty () { }
 
 /**
- * Until https://github.com/tc39/proposal-global is shipped.
- */
-function glob () {
-  return typeof self !== 'undefined' ? self
-      : typeof window !== 'undefined' ? window
-      : typeof global !== 'undefined' ? global : {};
-}
-
-/**
  * JSONP Polling constructor.
  *
  * @param {Object} opts.
@@ -1006,8 +1008,7 @@ function JSONPPolling (opts) {
   // we do this here (lazily) to avoid unneeded global pollution
   if (!callbacks) {
     // we need to consider multiple engines in the same page
-    var global = glob();
-    callbacks = global.___eio = (global.___eio || []);
+    callbacks = globalThis.___eio = (globalThis.___eio || []);
   }
 
   // callback identifier
@@ -1189,8 +1190,7 @@ JSONPPolling.prototype.doWrite = function (data, fn) {
   }
 };
 
-}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./polling":7,"component-inherit":14}],6:[function(_dereq_,module,exports){
+},{"../globalThis":2,"./polling":8,"component-inherit":15}],7:[function(_dereq_,module,exports){
 /* global attachEvent */
 
 /**
@@ -1201,6 +1201,8 @@ var XMLHttpRequest = _dereq_('xmlhttprequest-ssl');
 var Polling = _dereq_('./polling');
 var Emitter = _dereq_('component-emitter');
 var inherit = _dereq_('component-inherit');
+
+var globalThis = _dereq_('../globalThis');
 
 /**
  * Module exports.
@@ -1592,7 +1594,7 @@ if (typeof document !== 'undefined') {
   if (typeof attachEvent === 'function') {
     attachEvent('onunload', unloadHandler);
   } else if (typeof addEventListener === 'function') {
-    var terminationEvent = 'onpagehide' in self ? 'pagehide' : 'unload';
+    var terminationEvent = 'onpagehide' in globalThis ? 'pagehide' : 'unload';
     addEventListener(terminationEvent, unloadHandler, false);
   }
 }
@@ -1605,7 +1607,7 @@ function unloadHandler () {
   }
 }
 
-},{"./polling":7,"component-emitter":13,"component-inherit":14,"xmlhttprequest-ssl":9}],7:[function(_dereq_,module,exports){
+},{"../globalThis":2,"./polling":8,"component-emitter":14,"component-inherit":15,"xmlhttprequest-ssl":10}],8:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -1840,7 +1842,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":3,"component-inherit":14,"engine.io-parser":15,"parseqs":23,"xmlhttprequest-ssl":9,"yeast":25}],8:[function(_dereq_,module,exports){
+},{"../transport":4,"component-inherit":15,"engine.io-parser":16,"parseqs":24,"xmlhttprequest-ssl":10,"yeast":26}],9:[function(_dereq_,module,exports){
 (function (Buffer){
 /**
  * Module dependencies.
@@ -1935,19 +1937,23 @@ WS.prototype.doOpen = function () {
 
   var uri = this.uri();
   var protocols = this.protocols;
-  var opts = {
-    agent: this.agent,
-    perMessageDeflate: this.perMessageDeflate
-  };
 
-  // SSL options for Node.js client
-  opts.pfx = this.pfx;
-  opts.key = this.key;
-  opts.passphrase = this.passphrase;
-  opts.cert = this.cert;
-  opts.ca = this.ca;
-  opts.ciphers = this.ciphers;
-  opts.rejectUnauthorized = this.rejectUnauthorized;
+  var opts = {};
+
+  if (!this.isReactNative) {
+    opts.agent = this.agent;
+    opts.perMessageDeflate = this.perMessageDeflate;
+
+    // SSL options for Node.js client
+    opts.pfx = this.pfx;
+    opts.key = this.key;
+    opts.passphrase = this.passphrase;
+    opts.cert = this.cert;
+    opts.ca = this.ca;
+    opts.ciphers = this.ciphers;
+    opts.rejectUnauthorized = this.rejectUnauthorized;
+  }
+
   if (this.extraHeaders) {
     opts.headers = this.extraHeaders;
   }
@@ -2137,10 +2143,11 @@ WS.prototype.check = function () {
 };
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"../transport":3,"buffer":1,"component-inherit":14,"engine.io-parser":15,"parseqs":23,"ws":undefined,"yeast":25}],9:[function(_dereq_,module,exports){
+},{"../transport":4,"buffer":1,"component-inherit":15,"engine.io-parser":16,"parseqs":24,"ws":undefined,"yeast":26}],10:[function(_dereq_,module,exports){
 // browser shim for xmlhttprequest module
 
 var hasCORS = _dereq_('has-cors');
+var globalThis = _dereq_('./globalThis');
 
 module.exports = function (opts) {
   var xdomain = opts.xdomain;
@@ -2171,12 +2178,12 @@ module.exports = function (opts) {
 
   if (!xdomain) {
     try {
-      return new self[['Active'].concat('Object').join('X')]('Microsoft.XMLHTTP');
+      return new globalThis[['Active'].concat('Object').join('X')]('Microsoft.XMLHTTP');
     } catch (e) { }
   }
 };
 
-},{"has-cors":20}],10:[function(_dereq_,module,exports){
+},{"./globalThis":2,"has-cors":21}],11:[function(_dereq_,module,exports){
 module.exports = after
 
 function after(count, callback, err_cb) {
@@ -2206,7 +2213,7 @@ function after(count, callback, err_cb) {
 
 function noop() {}
 
-},{}],11:[function(_dereq_,module,exports){
+},{}],12:[function(_dereq_,module,exports){
 /**
  * An abstraction for slicing an arraybuffer even when
  * ArrayBuffer.prototype.slice is not supported
@@ -2237,7 +2244,7 @@ module.exports = function(arraybuffer, start, end) {
   return result.buffer;
 };
 
-},{}],12:[function(_dereq_,module,exports){
+},{}],13:[function(_dereq_,module,exports){
 /*
  * base64-arraybuffer
  * https://github.com/niklasvh/base64-arraybuffer
@@ -2306,7 +2313,7 @@ module.exports = function(arraybuffer, start, end) {
   };
 })();
 
-},{}],13:[function(_dereq_,module,exports){
+},{}],14:[function(_dereq_,module,exports){
 
 /**
  * Expose `Emitter`.
@@ -2420,6 +2427,13 @@ Emitter.prototype.removeEventListener = function(event, fn){
       break;
     }
   }
+
+  // Remove event specific arrays for event types that no
+  // one is subscribed for to avoid memory leak.
+  if (callbacks.length === 0) {
+    delete this._callbacks['$' + event];
+  }
+
   return this;
 };
 
@@ -2433,8 +2447,13 @@ Emitter.prototype.removeEventListener = function(event, fn){
 
 Emitter.prototype.emit = function(event){
   this._callbacks = this._callbacks || {};
-  var args = [].slice.call(arguments, 1)
+
+  var args = new Array(arguments.length - 1)
     , callbacks = this._callbacks['$' + event];
+
+  for (var i = 1; i < arguments.length; i++) {
+    args[i - 1] = arguments[i];
+  }
 
   if (callbacks) {
     callbacks = callbacks.slice(0);
@@ -2471,7 +2490,7 @@ Emitter.prototype.hasListeners = function(event){
   return !! this.listeners(event).length;
 };
 
-},{}],14:[function(_dereq_,module,exports){
+},{}],15:[function(_dereq_,module,exports){
 
 module.exports = function(a, b){
   var fn = function(){};
@@ -2479,7 +2498,7 @@ module.exports = function(a, b){
   a.prototype = new fn;
   a.prototype.constructor = a;
 };
-},{}],15:[function(_dereq_,module,exports){
+},{}],16:[function(_dereq_,module,exports){
 /**
  * Module dependencies.
  */
@@ -3086,7 +3105,7 @@ exports.decodePayloadAsBinary = function (data, binaryType, callback) {
   });
 };
 
-},{"./keys":16,"./utf8":17,"after":10,"arraybuffer.slice":11,"base64-arraybuffer":12,"blob":18,"has-binary2":19}],16:[function(_dereq_,module,exports){
+},{"./keys":17,"./utf8":18,"after":11,"arraybuffer.slice":12,"base64-arraybuffer":13,"blob":19,"has-binary2":20}],17:[function(_dereq_,module,exports){
 
 /**
  * Gets the keys for an object.
@@ -3107,7 +3126,7 @@ module.exports = Object.keys || function keys (obj){
   return arr;
 };
 
-},{}],17:[function(_dereq_,module,exports){
+},{}],18:[function(_dereq_,module,exports){
 /*! https://mths.be/utf8js v2.1.2 by @mathias */
 
 var stringFromCharCode = String.fromCharCode;
@@ -3319,7 +3338,7 @@ module.exports = {
 	decode: utf8decode
 };
 
-},{}],18:[function(_dereq_,module,exports){
+},{}],19:[function(_dereq_,module,exports){
 /**
  * Create a blob builder even when vendor prefixes exist
  */
@@ -3421,7 +3440,7 @@ module.exports = (function() {
   }
 })();
 
-},{}],19:[function(_dereq_,module,exports){
+},{}],20:[function(_dereq_,module,exports){
 (function (Buffer){
 /* global Blob File */
 
@@ -3489,7 +3508,7 @@ function hasBinary (obj) {
 }
 
 }).call(this,_dereq_("buffer").Buffer)
-},{"buffer":1,"isarray":22}],20:[function(_dereq_,module,exports){
+},{"buffer":1,"isarray":23}],21:[function(_dereq_,module,exports){
 
 /**
  * Module exports.
@@ -3508,7 +3527,7 @@ try {
   module.exports = false;
 }
 
-},{}],21:[function(_dereq_,module,exports){
+},{}],22:[function(_dereq_,module,exports){
 
 var indexOf = [].indexOf;
 
@@ -3519,14 +3538,14 @@ module.exports = function(arr, obj){
   }
   return -1;
 };
-},{}],22:[function(_dereq_,module,exports){
+},{}],23:[function(_dereq_,module,exports){
 var toString = {}.toString;
 
 module.exports = Array.isArray || function (arr) {
   return toString.call(arr) == '[object Array]';
 };
 
-},{}],23:[function(_dereq_,module,exports){
+},{}],24:[function(_dereq_,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -3565,7 +3584,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],24:[function(_dereq_,module,exports){
+},{}],25:[function(_dereq_,module,exports){
 /**
  * Parses an URI
  *
@@ -3606,7 +3625,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],25:[function(_dereq_,module,exports){
+},{}],26:[function(_dereq_,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')
@@ -3676,7 +3695,7 @@ yeast.encode = encode;
 yeast.decode = decode;
 module.exports = yeast;
 
-},{}],26:[function(_dereq_,module,exports){
+},{}],27:[function(_dereq_,module,exports){
 
 module.exports = _dereq_('./socket');
 
@@ -3688,5 +3707,5 @@ module.exports = _dereq_('./socket');
  */
 module.exports.parser = _dereq_('engine.io-parser');
 
-},{"./socket":2,"engine.io-parser":15}]},{},[26])(26)
+},{"./socket":3,"engine.io-parser":16}]},{},[27])(27)
 });
