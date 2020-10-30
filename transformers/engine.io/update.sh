@@ -2,12 +2,10 @@
 
 set -e
 
-CURRENTDIR=$(pwd)
 DESTDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 TEMPDIR=$(mktemp -d 2> /dev/null || mktemp -d -t 'tmp')
 
 cleanup () {
-  cd "$CURRENTDIR"
   [ -d "$TEMPDIR" ] && rm -rf "$TEMPDIR"
 }
 
