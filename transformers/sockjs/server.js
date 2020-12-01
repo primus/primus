@@ -48,6 +48,9 @@ module.exports = function server() {
   // the next tick).
   //
   this.service.on('connection', (socket) => {
+    if (!socket) {
+      return;  
+    }
     const headers = socket.headers.via;
 
     headers.via = headers._via;
