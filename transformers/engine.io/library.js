@@ -75,10 +75,10 @@ class Socket extends Emitter {
       {
         path: "/engine.io",
         agent: false,
+        withCredentials: false,
         upgrade: true,
         jsonp: true,
         timestampParam: "t",
-        policyPort: 843,
         rememberUpgrade: false,
         rejectUnauthorized: true,
         perMessageDeflate: {
@@ -103,6 +103,26 @@ class Socket extends Emitter {
 
     // set on heartbeat
     this.pingTimeoutTimer = null;
+
+    if (typeof addEventListener === "function") {
+      addEventListener(
+        "beforeunload",
+        () => {
+          if (this.transport) {
+            // silently close the transport
+            this.transport.removeAllListeners();
+            this.transport.close();
+          }
+        },
+        false
+      );
+      if (this.hostname !== "localhost") {
+        this.offlineEventListener = () => {
+          this.onClose("transport close");
+        };
+        addEventListener("offline", this.offlineEventListener, false);
+      }
+    }
 
     this.open();
   }
@@ -417,6 +437,9 @@ class Socket extends Emitter {
     this.pingTimeoutTimer = setTimeout(() => {
       this.onClose("ping timeout");
     }, this.pingInterval + this.pingTimeout);
+    if (this.opts.autoUnref) {
+      this.pingTimeoutTimer.unref();
+    }
   }
 
   /**
@@ -599,6 +622,10 @@ class Socket extends Emitter {
       // ignore further transport communication
       this.transport.removeAllListeners();
 
+      if (typeof removeEventListener === "function") {
+        removeEventListener("offline", this.offlineEventListener, false);
+      }
+
       // set ready state
       this.readyState = "closed";
 
@@ -776,7 +803,7 @@ class Transport extends Emitter {
 module.exports = Transport;
 
 },{"component-emitter":14,"engine.io-parser":18}],5:[function(_dereq_,module,exports){
-const XMLHttpRequest = _dereq_("xmlhttprequest-ssl");
+const XMLHttpRequest = _dereq_("../../contrib/xmlhttprequest-ssl/XMLHttpRequest");
 const XHR = _dereq_("./polling-xhr");
 const JSONP = _dereq_("./polling-jsonp");
 const websocket = _dereq_("./websocket");
@@ -822,7 +849,7 @@ function polling(opts) {
   }
 }
 
-},{"./polling-jsonp":6,"./polling-xhr":7,"./websocket":10,"xmlhttprequest-ssl":12}],6:[function(_dereq_,module,exports){
+},{"../../contrib/xmlhttprequest-ssl/XMLHttpRequest":12,"./polling-jsonp":6,"./polling-xhr":7,"./websocket":10}],6:[function(_dereq_,module,exports){
 const Polling = _dereq_("./polling");
 const globalThis = _dereq_("../globalThis");
 
@@ -834,12 +861,6 @@ const rEscapedNewline = /\\n/g;
  */
 
 let callbacks;
-
-/**
- * Noop.
- */
-
-function empty() {}
 
 class JSONPPolling extends Polling {
   /**
@@ -871,17 +892,6 @@ class JSONPPolling extends Polling {
 
     // append to query string
     this.query.j = this.index;
-
-    // prevent spurious errors from being emitted when the window is unloaded
-    if (typeof addEventListener === "function") {
-      addEventListener(
-        "beforeunload",
-        function() {
-          if (self.script) self.script.onerror = empty;
-        },
-        false
-      );
-    }
   }
 
   /**
@@ -898,6 +908,8 @@ class JSONPPolling extends Polling {
    */
   doClose() {
     if (this.script) {
+      // prevent spurious errors from being emitted when the window is unloaded
+      this.script.onerror = () => {};
       this.script.parentNode.removeChild(this.script);
       this.script = null;
     }
@@ -1042,7 +1054,7 @@ module.exports = JSONPPolling;
 },{"../globalThis":2,"./polling":8}],7:[function(_dereq_,module,exports){
 /* global attachEvent */
 
-const XMLHttpRequest = _dereq_("xmlhttprequest-ssl");
+const XMLHttpRequest = _dereq_("../../contrib/xmlhttprequest-ssl/XMLHttpRequest");
 const Polling = _dereq_("./polling");
 const Emitter = _dereq_("component-emitter");
 const { pick } = _dereq_("../util");
@@ -1055,7 +1067,6 @@ const globalThis = _dereq_("../globalThis");
 function empty() {}
 
 const hasXHR2 = (function() {
-  const XMLHttpRequest = _dereq_("xmlhttprequest-ssl");
   const xhr = new XMLHttpRequest({ xdomain: false });
   return null != xhr.responseType;
 })();
@@ -1099,11 +1110,7 @@ class XHR extends Polling {
    * @api private
    */
   request(opts = {}) {
-    Object.assign(
-      opts,
-      { supportsBinary: this.supportsBinary, xd: this.xd, xs: this.xs },
-      this.opts
-    );
+    Object.assign(opts, { xd: this.xd, xs: this.xs }, this.opts);
     return new Request(this.uri(), opts);
   }
 
@@ -1115,11 +1122,9 @@ class XHR extends Polling {
    * @api private
    */
   doWrite(data, fn) {
-    const isBinary = typeof data !== "string" && data !== undefined;
     const req = this.request({
       method: "POST",
-      data: data,
-      isBinary: isBinary
+      data: data
     });
     const self = this;
     req.on("success", fn);
@@ -1161,8 +1166,6 @@ class Request extends Emitter {
     this.uri = uri;
     this.async = false !== opts.async;
     this.data = undefined !== opts.data ? opts.data : null;
-    this.isBinary = opts.isBinary;
-    this.supportsBinary = opts.supportsBinary;
 
     this.create();
   }
@@ -1183,7 +1186,8 @@ class Request extends Emitter {
       "cert",
       "ca",
       "ciphers",
-      "rejectUnauthorized"
+      "rejectUnauthorized",
+      "autoUnref"
     );
     opts.xdomain = !!this.opts.xd;
     opts.xscheme = !!this.opts.xs;
@@ -1202,17 +1206,11 @@ class Request extends Emitter {
             }
           }
         }
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
 
       if ("POST" === this.method) {
         try {
-          if (this.isBinary) {
-            xhr.setRequestHeader("Content-type", "application/octet-stream");
-          } else {
-            xhr.setRequestHeader("Content-type", "text/plain;charset=UTF-8");
-          }
+          xhr.setRequestHeader("Content-type", "text/plain;charset=UTF-8");
         } catch (e) {}
       }
 
@@ -1238,18 +1236,6 @@ class Request extends Emitter {
         };
       } else {
         xhr.onreadystatechange = function() {
-          if (xhr.readyState === 2) {
-            try {
-              const contentType = xhr.getResponseHeader("Content-Type");
-              if (
-                (self.supportsBinary &&
-                  contentType === "application/octet-stream") ||
-                contentType === "application/octet-stream; charset=UTF-8"
-              ) {
-                xhr.responseType = "arraybuffer";
-              }
-            } catch (e) {}
-          }
           if (4 !== xhr.readyState) return;
           if (200 === xhr.status || 1223 === xhr.status) {
             self.onLoad();
@@ -1345,24 +1331,8 @@ class Request extends Emitter {
    * @api private
    */
   onLoad() {
-    let data;
-    try {
-      let contentType;
-      try {
-        contentType = this.xhr.getResponseHeader("Content-Type");
-      } catch (e) {}
-      if (
-        contentType === "application/octet-stream" ||
-        contentType === "application/octet-stream; charset=UTF-8"
-      ) {
-        data = this.xhr.response || this.xhr.responseText;
-      } else {
-        data = this.xhr.responseText;
-      }
-    } catch (e) {
-      this.onError(e);
-    }
-    if (null != data) {
+    const data = this.xhr.responseText;
+    if (data !== null) {
       this.onData(data);
     }
   }
@@ -1415,7 +1385,7 @@ function unloadHandler() {
 module.exports = XHR;
 module.exports.Request = Request;
 
-},{"../globalThis":2,"../util":11,"./polling":8,"component-emitter":14,"xmlhttprequest-ssl":12}],8:[function(_dereq_,module,exports){
+},{"../../contrib/xmlhttprequest-ssl/XMLHttpRequest":12,"../globalThis":2,"../util":11,"./polling":8,"component-emitter":14}],8:[function(_dereq_,module,exports){
 const Transport = _dereq_("../transport");
 const parseqs = _dereq_("parseqs");
 const parser = _dereq_("engine.io-parser");
@@ -1496,7 +1466,7 @@ class Polling extends Transport {
     const self = this;
     const callback = function(packet, index, total) {
       // if its the first message we consider the transport open
-      if ("opening" === self.readyState) {
+      if ("opening" === self.readyState && packet.type === "open") {
         self.onOpen();
       }
 
@@ -1652,12 +1622,7 @@ class WS extends Transport {
   constructor(opts) {
     super(opts);
 
-    const forceBase64 = opts && opts.forceBase64;
-    if (forceBase64) {
-      this.supportsBinary = false;
-    }
-    // WebSockets support binary
-    this.supportsBinary = true;
+    this.supportsBinary = !opts.forceBase64;
   }
 
   /**
@@ -1683,24 +1648,27 @@ class WS extends Transport {
     const uri = this.uri();
     const protocols = this.opts.protocols;
 
-    let opts;
-    if (isReactNative) {
-      opts = pick(this.opts, "localAddress");
-    } else {
-      opts = pick(
-        this.opts,
-        "agent",
-        "perMessageDeflate",
-        "pfx",
-        "key",
-        "passphrase",
-        "cert",
-        "ca",
-        "ciphers",
-        "rejectUnauthorized",
-        "localAddress"
-      );
-    }
+    // React Native only supports the 'headers' option, and will print a warning if anything else is passed
+    const opts = isReactNative
+      ? {}
+      : pick(
+          this.opts,
+          "agent",
+          "perMessageDeflate",
+          "pfx",
+          "key",
+          "passphrase",
+          "cert",
+          "ca",
+          "ciphers",
+          "rejectUnauthorized",
+          "localAddress",
+          "protocolVersion",
+          "origin",
+          "maxPayload",
+          "family",
+          "checkServerIdentity"
+        );
 
     if (this.opts.extraHeaders) {
       opts.headers = this.opts.extraHeaders;
@@ -1728,20 +1696,15 @@ class WS extends Transport {
    * @api private
    */
   addEventListeners() {
-    const self = this;
-
-    this.ws.onopen = function() {
-      self.onOpen();
+    this.ws.onopen = () => {
+      if (this.opts.autoUnref) {
+        this.ws._socket.unref();
+      }
+      this.onOpen();
     };
-    this.ws.onclose = function() {
-      self.onClose();
-    };
-    this.ws.onmessage = function(ev) {
-      self.onData(ev.data);
-    };
-    this.ws.onerror = function(e) {
-      self.onError("websocket error", e);
-    };
+    this.ws.onclose = this.onClose.bind(this);
+    this.ws.onmessage = ev => this.onData(ev.data);
+    this.ws.onerror = e => this.onError("websocket error", e);
   }
 
   /**
@@ -1827,6 +1790,7 @@ class WS extends Transport {
   doClose() {
     if (typeof this.ws !== "undefined") {
       this.ws.close();
+      this.ws = null;
     }
   }
 
@@ -1897,7 +1861,9 @@ module.exports = WS;
 },{"../transport":4,"../util":11,"./websocket-constructor":9,"buffer":1,"engine.io-parser":18,"parseqs":20,"yeast":22}],11:[function(_dereq_,module,exports){
 module.exports.pick = (obj, ...attr) => {
   return attr.reduce((acc, k) => {
-    acc[k] = obj[k];
+    if (obj.hasOwnProperty(k)) {
+      acc[k] = obj[k];
+    }
     return acc;
   }, {});
 };
