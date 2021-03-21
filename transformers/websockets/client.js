@@ -53,7 +53,12 @@ module.exports = function client() {
       //
       if (Factory.length === 3) {
         if ('ws+unix:' === options.protocol) {
-          options.pathname = primus.url.pathname +':'+ primus.pathname;
+          options.pathname =
+            '/' +
+            primus.url.hostname +
+            primus.url.pathname +
+            ':' +
+            primus.pathname;
         }
         primus.socket = socket = new Factory(
           primus.uri(options),  // URL
