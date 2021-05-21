@@ -62,6 +62,10 @@
     "ultron": "~1.1.0"
   },
   "devDependencies": {
+    "@babel/core": "~7.14.3",
+    "@babel/plugin-transform-object-assign": "~7.12.13",
+    "@babel/preset-env": "~7.14.2",
+    "babelify": "~10.0.0",
     "binary-pack": "~1.0.2",
     "browserchannel": "~2.1.0",
     "browserify": "~17.0.0",

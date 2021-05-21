@@ -11,10 +11,13 @@ if (!dir) {
   process.exit(1);
 }
 
+const pluginTransformObjectAssign = require('@babel/plugin-transform-object-assign');
+const presetEnv= require('@babel/preset-env');
 const condenseify = require('condenseify');
 const browserify = require('browserify');
 const derequire = require('derequire');
 const stripify = require('./stripify');
+const babelify = require('babelify');
 const deumdify = require('deumdify');
 const path = require('path');
 const fs = require('fs');
@@ -36,6 +39,10 @@ browserify(options)
   .ignore('buffer')
   .exclude('debug')
   .exclude('ws')
+  .transform(babelify, {
+    presets: [presetEnv],
+    plugins: [pluginTransformObjectAssign]
+  })
   .transform(stripify)
   .transform(condenseify)
   .plugin(deumdify)
