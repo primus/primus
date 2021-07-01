@@ -400,6 +400,7 @@ var Socket = /*#__PURE__*/function (_Emitter) {
           case "ping":
             this.resetPingTimeout();
             this.sendPacket("pong");
+            this.emit("ping");
             this.emit("pong");
             break;
 
@@ -1834,10 +1835,25 @@ module.exports = Polling;
 
 var globalThis = _dereq_("../globalThis");
 
+var nextTick = function () {
+  var isPromiseAvailable = typeof Promise === "function" && typeof Promise.resolve === "function";
+
+  if (isPromiseAvailable) {
+    return function (cb) {
+      return Promise.resolve().then(cb);
+    };
+  } else {
+    return function (cb) {
+      return setTimeout(cb, 0);
+    };
+  }
+}();
+
 module.exports = {
   WebSocket: globalThis.WebSocket || globalThis.MozWebSocket,
   usingBrowserWebSocket: true,
-  defaultBinaryType: "arraybuffer"
+  defaultBinaryType: "arraybuffer",
+  nextTick: nextTick
 };
 
 
@@ -1881,7 +1897,8 @@ var _require = _dereq_("../util"),
 var _require2 = _dereq_("./websocket-constructor"),
     WebSocket = _require2.WebSocket,
     usingBrowserWebSocket = _require2.usingBrowserWebSocket,
-    defaultBinaryType = _require2.defaultBinaryType;
+    defaultBinaryType = _require2.defaultBinaryType,
+    nextTick = _require2.nextTick;
 
  // detect ReactNative environment
 
@@ -2030,11 +2047,11 @@ var WS = /*#__PURE__*/function (_Transport) {
           if (lastPacket) {
             // fake drain
             // defer to next tick to allow Socket to clear writeBuffer
-            setTimeout(function () {
+            nextTick(function () {
               _this3.writable = true;
 
               _this3.emit("drain");
-            }, 0);
+            });
           }
         });
       };
