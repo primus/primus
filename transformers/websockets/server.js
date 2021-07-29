@@ -48,7 +48,11 @@ module.exports = function server() {
         socket.send(data, noop);
       });
 
-      socket.on('message', spark.emits('incoming::data'));
+      socket.on('message',
+        spark.emits('incoming::data', (next, data, isBinary) => {
+          next(undefined, isBinary === false ? data.toString() : data);
+        })
+      );
       socket.on('error', spark.emits('incoming::error'));
       socket.on('ping', spark.emits('incoming::pong', (next) => {
         next(undefined, null);
