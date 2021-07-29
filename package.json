@@ -80,7 +80,7 @@
     "engine.io-client": "~5.1.1",
     "faye-websocket": "~0.11.0",
     "inherits": "~2.0.3",
-    "mocha": "~8.4.0",
+    "mocha": "~9.0.3",
     "pre-commit": "~1.2.0",
     "primus-msgpack": "~1.0.2",
     "pumpify": "~2.0.0",
