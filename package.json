@@ -95,7 +95,7 @@
     "tick-tock": "~1.0.0",
     "url-parse": "~1.5.1",
     "uws": "10.148.1",
-    "ws": "~8.0.0",
+    "ws": "~8.1.0",
     "yeast": "~0.1.2"
   },
   "pre-commit": "test, integration"
