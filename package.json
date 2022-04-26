@@ -64,7 +64,7 @@
   "devDependencies": {
     "@babel/core": "~7.17.9",
     "@babel/plugin-transform-object-assign": "~7.16.7",
-    "@babel/preset-env": "~7.15.0",
+    "@babel/preset-env": "~7.16.11",
     "@rollup/plugin-babel": "~5.3.1",
     "@rollup/plugin-commonjs": "~22.0.0",
     "@rollup/plugin-node-resolve": "~13.2.1",
