@@ -93,7 +93,7 @@
     "rocambole-node-remove": "~3.0.0",
     "rollup": "~2.70.2",
     "sockjs": "~0.3.18",
-    "sockjs-client": "~1.5.0",
+    "sockjs-client": "~1.6.0",
     "through2": "~4.0.2",
     "tick-tock": "~1.0.0",
     "url-parse": "~1.5.1",
