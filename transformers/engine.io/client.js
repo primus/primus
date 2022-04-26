@@ -22,8 +22,13 @@ module.exports = function client() {
   var factory = (function factory() {
     if ('undefined' !== typeof eio) return eio;
 
-    try { return Primus.requires('engine.io-client'); }
-    catch (e) {}
+    try {
+      var Socket = Primus.requires('engine.io-client').Socket;
+
+      return function eio(options) {
+        return new Socket(options);
+      }
+    } catch (e) {}
 
     return undefined;
   })();
@@ -56,15 +61,6 @@ module.exports = function client() {
       forceBase64: true,
 
       //
-      // XDR has been the source of pain for most real-time users. It doesn't
-      // support the full CORS spec and is infested with bugs. It cannot connect
-      // cross-scheme, does not send ANY authorization information like Cookies,
-      // Basic Authorization headers etc. Force this off by default to ensure a
-      // stable connection.
-      //
-      enablesXDR: false,
-
-      //
       // Force timestamps on every single connection. Engine.IO only does this
       // for polling by default, but WebSockets require an explicit `true`
       // boolean.
@@ -75,14 +71,6 @@ module.exports = function client() {
         ? ['polling', 'websocket']
         : ['polling']
     }));
-
-    //
-    // Nuke a growing memory leak as Engine.IO pushes instances in to an exposed
-    // `sockets` array.
-    //
-    if (factory.sockets && factory.sockets.length) {
-      factory.sockets.length = 0;
-    }
 
     //
     // Setup the Event handlers.
