@@ -11,20 +11,45 @@ if (!dir) {
   process.exit(1);
 }
 
-const pluginTransformObjectAssign = require('@babel/plugin-transform-object-assign');
-const presetEnv= require('@babel/preset-env');
-const condenseify = require('condenseify');
-const browserify = require('browserify');
-const derequire = require('derequire');
-const stripify = require('./stripify');
-const babelify = require('babelify');
-const deumdify = require('deumdify');
 const path = require('path');
-const fs = require('fs');
+const pluginCommonJs = require('@rollup/plugin-commonjs');
+const pluginTransformObjectAssign = require('@babel/plugin-transform-object-assign');
+const presetEnv = require('@babel/preset-env');
+const rollup = require('rollup');
+const { babel } = require('@rollup/plugin-babel');
+const { nodeResolve } = require('@rollup/plugin-node-resolve');
 
-const options = {
-  entries: [ path.join(dir, 'lib', 'index.js') ],
-  standalone: 'eio'
+const inputOptions = {
+  input: path.join(dir, 'build', 'esm', 'browser-entrypoint.js'),
+  plugins: [
+    babel({
+      babelHelpers: 'bundled',
+      presets: [presetEnv],
+      plugins: [pluginTransformObjectAssign]
+    }),
+    nodeResolve({ browser: true }),
+    pluginCommonJs()
+  ]
+};
+
+const outputOptions = {
+  banner: [
+    '(function (f) {',
+    '  var g;',
+    '',
+    "  if (typeof window !== 'undefined') {",
+    '    g = window;',
+    "  } else if (typeof self !== 'undefined') {",
+    '    g = self;',
+    '  }',
+    '',
+    '  g.eio = f();',
+    '})(function () {'
+  ].join('\n'),
+  file: path.join(__dirname, '..', 'library.js'),
+  footer: 'return eio;\n});',
+  format: 'iife',
+  name: 'eio'
 };
 
 //
@@ -35,19 +60,12 @@ const options = {
 // available and the UMD wrapper prevents this global from being set when
 // RequireJS is used. See issue #157.
 //
-browserify(options)
-  .ignore('buffer')
-  .exclude('debug')
-  .exclude('ws')
-  .transform(babelify, {
-    presets: [presetEnv],
-    plugins: [pluginTransformObjectAssign]
+rollup
+  .rollup(inputOptions)
+  .then(function (bundle) {
+    return bundle.write(outputOptions);
   })
-  .transform(stripify)
-  .transform(condenseify)
-  .plugin(deumdify)
-  .bundle(function (err, buf) {
-    if (err) throw err;
-
-    fs.writeFileSync(path.join(__dirname, '..', 'library.js'), derequire(buf));
+  .catch(function (err) {
+    console.error(err);
+    process.exit(1);
   });
