@@ -1739,8 +1739,8 @@ The following plugins are part of the Primus project.
   <dd>
     <a href="https://www.npmjs.com/package/fortress-maximus"><img
       src="https://img.shields.io/npm/v/fortress-maximus.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/fortress-maximus"><img
-      src="https://img.shields.io/travis/primus/fortress-maximus/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://github.com/primus/fortress-maximus/actions?query=workflow%3ACI+branch%3Amaster"><img
+      src="https://img.shields.io/github/actions/workflow/status/primus/fortress-maximus/ci.yml?branch=master&label=CI&style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1755,8 +1755,8 @@ The following plugins are part of the Primus project.
   <dd>
     <a href="https://www.npmjs.com/package/metroplex"><img
       src="https://img.shields.io/npm/v/metroplex.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/metroplex"><img
-      src="https://img.shields.io/travis/primus/metroplex/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://github.com/primus/metroplex/actions?query=workflow%3ACI+branch%3Amaster"><img
+      src="https://img.shields.io/github/actions/workflow/status/primus/metroplex/ci.yml?branch=master&label=CI&style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1769,8 +1769,8 @@ The following plugins are part of the Primus project.
   <dd>
     <a href="https://www.npmjs.com/package/mirage"><img
       src="https://img.shields.io/npm/v/mirage.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/mirage"><img
-      src="https://img.shields.io/travis/primus/mirage/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://github.com/primus/mirage/actions?query=workflow%3ACI+branch%3Amaster"><img
+      src="https://img.shields.io/github/actions/workflow/status/primus/mirage/ci.yml?branch=master&label=CI&style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1785,8 +1785,8 @@ The following plugins are part of the Primus project.
   <dd>
     <a href="https://www.npmjs.com/package/omega-supreme"><img
       src="https://img.shields.io/npm/v/omega-supreme.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/omega-supreme"><img
-      src="https://img.shields.io/travis/primus/omega-supreme/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://github.com/primus/omega-supreme/actions?query=workflow%3ACI+branch%3Amaster"><img
+      src="https://img.shields.io/github/actions/workflow/status/primus/omega-supreme/ci.yml?branch=master&label=CI&style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1799,8 +1799,8 @@ The following plugins are part of the Primus project.
   <dd>
     <a href="https://www.npmjs.com/package/primus-analytics"><img
       src="https://img.shields.io/npm/v/primus-analytics.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/primus-analytics"><img
-      src="https://img.shields.io/travis/primus/primus-analytics/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://github.com/primus/primus-analytics/actions?query=workflow%3ACI+branch%3Amaster"><img
+      src="https://img.shields.io/github/actions/workflow/status/primus/primus-analytics/ci.yml?branch=master&label=CI&style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1813,8 +1813,8 @@ The following plugins are part of the Primus project.
   <dd>
     <a href="https://www.npmjs.com/package/primus-emit"><img
       src="https://img.shields.io/npm/v/primus-emit.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/primus-emit"><img
-      src="https://img.shields.io/travis/primus/primus-emit/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://github.com/primus/primus-emit/actions?query=workflow%3ACI+branch%3Amaster"><img
+      src="https://img.shields.io/github/actions/workflow/status/primus/primus-emit/ci.yml?branch=master&label=CI&style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -1829,18 +1829,16 @@ The following plugins are part of the Primus project.
   <dd>
     <a href="https://www.npmjs.com/package/substream"><img
       src="https://img.shields.io/npm/v/substream.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/primus/substream"><img
-      src="https://img.shields.io/travis/primus/substream/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://github.com/primus/substream/actions?query=workflow%3ACI+branch%3Amaster"><img
+      src="https://img.shields.io/github/actions/workflow/status/primus/substream/ci.yml?branch=master&label=CI&style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
 
 #### Community plugins
 
-These are also plugins created by our amazing community. Do you have a module
-that you want to have listed here? Make sure it has test suite and runs on
-[Travis CI]. After that open a pull request where you added your module to this
-README.md and see it be merged automatically.
+These are also plugins created by our amazing community. If you want your module
+to be listed here, please open a pull request.
 
 <dl>
   <dt><a href="https://github.com/Shopetti/backbone.primus">backbone.primus</a></dt>
@@ -1875,8 +1873,8 @@ README.md and see it be merged automatically.
   <dd>
     <a href="https://www.npmjs.com/package/primus-cluster"><img
       src="https://img.shields.io/npm/v/primus-cluster.svg?style=flat-square"
-      alt="NPM version" /></a><a href="https://travis-ci.org/neoziro/primus-cluster"><img
-      src="https://img.shields.io/travis/neoziro/primus-cluster/master.svg?style=flat-square"
+      alt="NPM version" /></a><a href="https://github.com/lemonde/primus-cluster/actions?query=workflow%3ACI+branch%3Amain"><img
+      src="https://img.shields.io/github/actions/workflow/status/lemonde/primus-cluster/ci.yml?branch=main&label=CI&style=flat-square"
       alt="Build Status" /></a>
   </dd>
 </dl>
@@ -2012,8 +2010,6 @@ README.md and see it be merged automatically.
       alt="Build Status" /></a>
   </dd>
 </dl>
-
-[Travis CI]: https://travis-ci.org/
 
 ### Community
 
