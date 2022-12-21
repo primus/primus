@@ -1,6 +1,6 @@
 # Primus
 
-[![Version npm](https://img.shields.io/npm/v/primus.svg?style=flat-square)](https://www.npmjs.com/package/primus)[![Build Status](https://img.shields.io/github/workflow/status/primus/primus/CI/master?label=CI&style=flat-square)](https://github.com/primus/primus/actions?query=workflow%3ACI+branch%3Amaster)[![Coverage Status](https://img.shields.io/coveralls/primus/primus/master.svg?style=flat-square)](https://coveralls.io/r/primus/primus?branch=master)[![IRC channel](https://img.shields.io/badge/IRC-irc.freenode.net%23primus-00a8ff.svg?style=flat-square)](https://webchat.freenode.net/?channels=primus)
+[![Version npm](https://img.shields.io/npm/v/primus.svg?style=flat-square)](https://www.npmjs.com/package/primus)[![Build Status](https://img.shields.io/github/workflow/status/primus/primus/CI/master?label=CI&style=flat-square)](https://github.com/primus/primus/actions?query=workflow%3ACI+branch%3Amaster)[![Coverage Status](https://img.shields.io/coveralls/primus/primus/master.svg?style=flat-square)](https://coveralls.io/r/primus/primus?branch=master)
 
 Primus, the creator god of transformers but now also known as universal wrapper
 for real-time frameworks. There are a lot of real-time frameworks available for
@@ -30,13 +30,6 @@ various real-time frameworks.
    extended.
 9. Last but not least, Primus is built with love, passion and dedication to the
    real-time web.
-
-```
-If you have questions or need help with primus, come chat in our IRC room:
-
-   server: irc.freenode.net
-   room: #primus
-```
 
 ### Installation
 
