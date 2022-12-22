@@ -4,36 +4,34 @@ These are the projects that we're currently supporting under the **primus**
 organization. This is a good indication about the scope of this undertaking and
 the state/health of the various projects.
 
-Project                              | Version                                                            |Build status                                                               | Dependencies                                                            | Coverage
--------------------------------------|--------------------------------------------------------------------|---------------------------------------------------------------------------|-------------------------------------------------------------------------|---------------------------------------------------------------------------------
-[primus][primus]                     | [![Version npm][npm-primus-badge]][npm-primus]                     | [![Build Status][travis-primus-badge]][travis-primus]                     | [![Dependencies][david-primus-badge]][david-primus]                     | [![Coverage Status][coverage-primus-badge]][coverage-primus]
-[access-control][access-control]     | [![Version npm][npm-access-control-badge]][npm-access-control]     | [![Build Status][travis-access-control-badge]][travis-access-control]     | [![Dependencies][david-access-control-badge]][david-access-control]     | [![Coverage Status][coverage-access-control-badge]][coverage-access-control]
-[asyncemit][asyncemit]               | [![Version npm][npm-asyncemit-badge]][npm-asyncemit]               | [![Build Status][travis-asyncemit-badge]][travis-asyncemit]               | [![Dependencies][david-asyncemit-badge]][david-asyncemit]               | [![Coverage Status][coverage-asyncemit-badge]][coverage-asyncemit]
-[binary-pack][binary-pack]           | [![Version npm][npm-binary-pack-badge]][npm-binary-pack]           | [![Build Status][travis-binary-pack-badge]][travis-binary-pack]           | [![Dependencies][david-binary-pack-badge]][david-binary-pack]           | [![Coverage Status][coverage-binary-pack-badge]][coverage-binary-pack]
-[condenseify][condenseify]           | [![Version npm][npm-condenseify-badge]][npm-condenseify]           | [![Build Status][travis-condenseify-badge]][travis-condenseify]           | [![Dependencies][david-condenseify-badge]][david-condenseify]           | [![Coverage Status][coverage-condenseify-badge]][coverage-condenseify]
-[create-server][create-server]       | [![Version npm][npm-create-server-badge]][npm-create-server]       | [![Build Status][travis-create-server-badge]][travis-create-server]       | [![Dependencies][david-create-server-badge]][david-create-server]       | [![Coverage Status][coverage-create-server-badge]][coverage-create-server]
-[deumdify][deumdify]                 | [![Version npm][npm-deumdify-badge]][npm-deumdify]                 | [![Build Status][travis-deumdify-badge]][travis-deumdify]                 | [![Dependencies][david-deumdify-badge]][david-deumdify]                 | [![Coverage Status][coverage-deumdify-badge]][coverage-deumdify]
-[ejson][ejson]                       | [![Version npm][npm-ejson-badge]][npm-ejson]                       | [![Build Status][travis-ejson-badge]][travis-ejson]                       | [![Dependencies][david-ejson-badge]][david-ejson]                       | [![Coverage Status][coverage-ejson-badge]][coverage-ejson]
-[emits][emits]                       | [![Version npm][npm-emits-badge]][npm-emits]                       | [![Build Status][travis-emits-badge]][travis-emits]                       | [![Dependencies][david-emits-badge]][david-emits]                       | [![Coverage Status][coverage-emits-badge]][coverage-emits]
-[eventemitter3][eventemitter3]       | [![Version npm][npm-eventemitter3-badge]][npm-eventemitter3]       | [![Build Status][travis-eventemitter3-badge]][travis-eventemitter3]       | [![Dependencies][david-eventemitter3-badge]][david-eventemitter3]       | [![Coverage Status][coverage-eventemitter3-badge]][coverage-eventemitter3]
-[fortress-maximus][fortress-maximus] | [![Version npm][npm-fortress-maximus-badge]][npm-fortress-maximus] | [![Build Status][travis-fortress-maximus-badge]][travis-fortress-maximus] | [![Dependencies][david-fortress-maximus-badge]][david-fortress-maximus] | [![Coverage Status][coverage-fortress-maximus-badge]][coverage-fortress-maximus]
-[forwarded-for][forwarded-for]       | [![Version npm][npm-forwarded-for-badge]][npm-forwarded-for]       | [![Build Status][travis-forwarded-for-badge]][travis-forwarded-for]       | [![Dependencies][david-forwarded-for-badge]][david-forwarded-for]       | [![Coverage Status][coverage-forwarded-for-badge]][coverage-forwarded-for]
-[metroplex][metroplex]               | [![Version npm][npm-metroplex-badge]][npm-metroplex]               | [![Build Status][travis-metroplex-badge]][travis-metroplex]               | [![Dependencies][david-metroplex-badge]][david-metroplex]               | [![Coverage Status][coverage-metroplex-badge]][coverage-metroplex]
-[mirage][mirage]                     | [![Version npm][npm-mirage-badge]][npm-mirage]                     | [![Build Status][travis-mirage-badge]][travis-mirage]                     | [![Dependencies][david-mirage-badge]][david-mirage]                     | [![Coverage Status][coverage-mirage-badge]][coverage-mirage]
-[omega-supreme][omega-supreme]       | [![Version npm][npm-omega-supreme-badge]][npm-omega-supreme]       | [![Build Status][travis-omega-supreme-badge]][travis-omega-supreme]       | [![Dependencies][david-omega-supreme-badge]][david-omega-supreme]       | [![Coverage Status][coverage-omega-supreme-badge]][coverage-omega-supreme]
-[primacron][primacron]               | [![Version npm][npm-primacron-badge]][npm-primacron]               | [![Build Status][travis-primacron-badge]][travis-primacron]               | [![Dependencies][david-primacron-badge]][david-primacron]               | [![Coverage Status][coverage-primacron-badge]][coverage-primacron]
-[primus-analytics][primus-analytics] | [![Version npm][npm-primus-analytics-badge]][npm-primus-analytics] | [![Build Status][travis-primus-analytics-badge]][travis-primus-analytics] | [![Dependencies][david-primus-analytics-badge]][david-primus-analytics] | [![Coverage Status][coverage-primus-analytics-badge]][coverage-primus-analytics]
-[primus-emit][primus-emit]           | [![Version npm][npm-primus-emit-badge]][npm-primus-emit]           | [![Build Status][travis-primus-emit-badge]][travis-primus-emit]           | [![Dependencies][david-primus-emit-badge]][david-primus-emit]           | [![Coverage Status][coverage-primus-emit-badge]][coverage-primus-emit]
-[primus-msgpack][primus-msgpack]     | [![Version npm][npm-primus-msgpack-badge]][npm-primus-msgpack]     | [![Build Status][travis-primus-msgpack-badge]][travis-primus-msgpack]     | [![Dependencies][david-primus-msgpack-badge]][david-primus-msgpack]     | [![Coverage Status][coverage-primus-msgpack-badge]][coverage-primus-msgpack]
-[substream][substream]               | [![Version npm][npm-substream-badge]][npm-substream]               | [![Build Status][travis-substream-badge]][travis-substream]               | [![Dependencies][david-substream-badge]][david-substream]               | [![Coverage Status][coverage-substream-badge]][coverage-substream]
+Project                              | Version                                                            |Build status                                                               | Coverage
+-------------------------------------|--------------------------------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------------
+[primus][primus]                     | [![Version npm][npm-primus-badge]][npm-primus]                     | [![Build Status][travis-primus-badge]][travis-primus]                     | [![Coverage Status][coverage-primus-badge]][coverage-primus]
+[access-control][access-control]     | [![Version npm][npm-access-control-badge]][npm-access-control]     | [![Build Status][travis-access-control-badge]][travis-access-control]     | [![Coverage Status][coverage-access-control-badge]][coverage-access-control]
+[asyncemit][asyncemit]               | [![Version npm][npm-asyncemit-badge]][npm-asyncemit]               | [![Build Status][travis-asyncemit-badge]][travis-asyncemit]               | [![Coverage Status][coverage-asyncemit-badge]][coverage-asyncemit]
+[binary-pack][binary-pack]           | [![Version npm][npm-binary-pack-badge]][npm-binary-pack]           | [![Build Status][travis-binary-pack-badge]][travis-binary-pack]           | [![Coverage Status][coverage-binary-pack-badge]][coverage-binary-pack]
+[condenseify][condenseify]           | [![Version npm][npm-condenseify-badge]][npm-condenseify]           | [![Build Status][travis-condenseify-badge]][travis-condenseify]           | [![Coverage Status][coverage-condenseify-badge]][coverage-condenseify]
+[create-server][create-server]       | [![Version npm][npm-create-server-badge]][npm-create-server]       | [![Build Status][travis-create-server-badge]][travis-create-server]       | [![Coverage Status][coverage-create-server-badge]][coverage-create-server]
+[deumdify][deumdify]                 | [![Version npm][npm-deumdify-badge]][npm-deumdify]                 | [![Build Status][travis-deumdify-badge]][travis-deumdify]                 | [![Coverage Status][coverage-deumdify-badge]][coverage-deumdify]
+[ejson][ejson]                       | [![Version npm][npm-ejson-badge]][npm-ejson]                       | [![Build Status][travis-ejson-badge]][travis-ejson]                       | [![Coverage Status][coverage-ejson-badge]][coverage-ejson]
+[emits][emits]                       | [![Version npm][npm-emits-badge]][npm-emits]                       | [![Build Status][travis-emits-badge]][travis-emits]                       | [![Coverage Status][coverage-emits-badge]][coverage-emits]
+[eventemitter3][eventemitter3]       | [![Version npm][npm-eventemitter3-badge]][npm-eventemitter3]       | [![Build Status][travis-eventemitter3-badge]][travis-eventemitter3]       | [![Coverage Status][coverage-eventemitter3-badge]][coverage-eventemitter3]
+[fortress-maximus][fortress-maximus] | [![Version npm][npm-fortress-maximus-badge]][npm-fortress-maximus] | [![Build Status][travis-fortress-maximus-badge]][travis-fortress-maximus] | [![Coverage Status][coverage-fortress-maximus-badge]][coverage-fortress-maximus]
+[forwarded-for][forwarded-for]       | [![Version npm][npm-forwarded-for-badge]][npm-forwarded-for]       | [![Build Status][travis-forwarded-for-badge]][travis-forwarded-for]       | [![Coverage Status][coverage-forwarded-for-badge]][coverage-forwarded-for]
+[metroplex][metroplex]               | [![Version npm][npm-metroplex-badge]][npm-metroplex]               | [![Build Status][travis-metroplex-badge]][travis-metroplex]               | [![Coverage Status][coverage-metroplex-badge]][coverage-metroplex]
+[mirage][mirage]                     | [![Version npm][npm-mirage-badge]][npm-mirage]                     | [![Build Status][travis-mirage-badge]][travis-mirage]                     | [![Coverage Status][coverage-mirage-badge]][coverage-mirage]
+[omega-supreme][omega-supreme]       | [![Version npm][npm-omega-supreme-badge]][npm-omega-supreme]       | [![Build Status][travis-omega-supreme-badge]][travis-omega-supreme]       | [![Coverage Status][coverage-omega-supreme-badge]][coverage-omega-supreme]
+[primacron][primacron]               | [![Version npm][npm-primacron-badge]][npm-primacron]               | [![Build Status][travis-primacron-badge]][travis-primacron]               | [![Coverage Status][coverage-primacron-badge]][coverage-primacron]
+[primus-analytics][primus-analytics] | [![Version npm][npm-primus-analytics-badge]][npm-primus-analytics] | [![Build Status][travis-primus-analytics-badge]][travis-primus-analytics] | [![Coverage Status][coverage-primus-analytics-badge]][coverage-primus-analytics]
+[primus-emit][primus-emit]           | [![Version npm][npm-primus-emit-badge]][npm-primus-emit]           | [![Build Status][travis-primus-emit-badge]][travis-primus-emit]           | [![Coverage Status][coverage-primus-emit-badge]][coverage-primus-emit]
+[primus-msgpack][primus-msgpack]     | [![Version npm][npm-primus-msgpack-badge]][npm-primus-msgpack]     | [![Build Status][travis-primus-msgpack-badge]][travis-primus-msgpack]     | [![Coverage Status][coverage-primus-msgpack-badge]][coverage-primus-msgpack]
+[substream][substream]               | [![Version npm][npm-substream-badge]][npm-substream]               | [![Build Status][travis-substream-badge]][travis-substream]               | [![Coverage Status][coverage-substream-badge]][coverage-substream]
 
 [primus]: https://github.com/primus/primus
 [npm-primus-badge]: https://img.shields.io/npm/v/primus.svg?style=flat-square
 [npm-primus]: https://www.npmjs.com/package/primus
 [travis-primus-badge]: https://img.shields.io/travis/primus/primus/master.svg?style=flat-square
 [travis-primus]: https://travis-ci.org/primus/primus
-[david-primus-badge]: https://img.shields.io/david/primus/primus.svg?style=flat-square
-[david-primus]: https://david-dm.org/primus/primus
 [coverage-primus-badge]: https://img.shields.io/coveralls/primus/primus/master.svg?style=flat-square
 [coverage-primus]: https://coveralls.io/r/primus/primus?branch=master
 
@@ -42,8 +40,6 @@ Project                              | Version                                  
 [npm-access-control]: https://www.npmjs.com/package/access-control
 [travis-access-control-badge]: https://img.shields.io/travis/primus/access-control/master.svg?style=flat-square
 [travis-access-control]: https://travis-ci.org/primus/access-control
-[david-access-control-badge]: https://img.shields.io/david/primus/access-control.svg?style=flat-square
-[david-access-control]: https://david-dm.org/primus/access-control
 [coverage-access-control-badge]: https://img.shields.io/coveralls/primus/access-control/master.svg?style=flat-square
 [coverage-access-control]: https://coveralls.io/r/primus/access-control?branch=master
 
@@ -52,8 +48,6 @@ Project                              | Version                                  
 [npm-asyncemit]: https://www.npmjs.com/package/asyncemit
 [travis-asyncemit-badge]: https://img.shields.io/travis/primus/asyncemit/master.svg?style=flat-square
 [travis-asyncemit]: https://travis-ci.org/primus/asyncemit
-[david-asyncemit-badge]: https://img.shields.io/david/primus/asyncemit.svg?style=flat-square
-[david-asyncemit]: https://david-dm.org/primus/asyncemit
 [coverage-asyncemit-badge]: https://img.shields.io/coveralls/primus/asyncemit/master.svg?style=flat-square
 [coverage-asyncemit]: https://coveralls.io/r/primus/asyncemit?branch=master
 
@@ -62,8 +56,6 @@ Project                              | Version                                  
 [npm-binary-pack]: https://www.npmjs.com/package/binary-pack
 [travis-binary-pack-badge]: https://img.shields.io/travis/primus/binary-pack/master.svg?style=flat-square
 [travis-binary-pack]: https://travis-ci.org/primus/binary-pack
-[david-binary-pack-badge]: https://img.shields.io/david/primus/binary-pack.svg?style=flat-square
-[david-binary-pack]: https://david-dm.org/primus/binary-pack
 [coverage-binary-pack-badge]: https://img.shields.io/coveralls/primus/binary-pack/master.svg?style=flat-square
 [coverage-binary-pack]: https://coveralls.io/r/primus/binary-pack?branch=master
 
@@ -72,8 +64,6 @@ Project                              | Version                                  
 [npm-condenseify]: https://www.npmjs.com/package/condenseify
 [travis-condenseify-badge]: https://img.shields.io/travis/primus/condenseify/master.svg?style=flat-square
 [travis-condenseify]: https://travis-ci.org/primus/condenseify
-[david-condenseify-badge]: https://img.shields.io/david/primus/condenseify.svg?style=flat-square
-[david-condenseify]: https://david-dm.org/primus/condenseify
 [coverage-condenseify-badge]: https://img.shields.io/coveralls/primus/condenseify/master.svg?style=flat-square
 [coverage-condenseify]: https://coveralls.io/r/primus/condenseify?branch=master
 
@@ -82,8 +72,6 @@ Project                              | Version                                  
 [npm-create-server]: https://www.npmjs.com/package/create-server
 [travis-create-server-badge]: https://img.shields.io/travis/primus/create-server/master.svg?style=flat-square
 [travis-create-server]: https://travis-ci.org/primus/create-server
-[david-create-server-badge]: https://img.shields.io/david/primus/create-server.svg?style=flat-square
-[david-create-server]: https://david-dm.org/primus/create-server
 [coverage-create-server-badge]: https://img.shields.io/coveralls/primus/create-server/master.svg?style=flat-square
 [coverage-create-server]: https://coveralls.io/r/primus/create-server?branch=master
 
@@ -92,8 +80,6 @@ Project                              | Version                                  
 [npm-deumdify]: https://www.npmjs.com/package/deumdify
 [travis-deumdify-badge]: https://img.shields.io/travis/primus/deumdify/master.svg?style=flat-square
 [travis-deumdify]: https://travis-ci.org/primus/deumdify
-[david-deumdify-badge]: https://img.shields.io/david/primus/deumdify.svg?style=flat-square
-[david-deumdify]: https://david-dm.org/primus/deumdify
 [coverage-deumdify-badge]: https://img.shields.io/coveralls/primus/deumdify/master.svg?style=flat-square
 [coverage-deumdify]: https://coveralls.io/r/primus/deumdify?branch=master
 
@@ -102,8 +88,6 @@ Project                              | Version                                  
 [npm-ejson]: https://www.npmjs.com/package/ejson
 [travis-ejson-badge]: https://img.shields.io/travis/primus/ejson/master.svg?style=flat-square
 [travis-ejson]: https://travis-ci.org/primus/ejson
-[david-ejson-badge]: https://img.shields.io/david/primus/ejson.svg?style=flat-square
-[david-ejson]: https://david-dm.org/primus/ejson
 [coverage-ejson-badge]: https://img.shields.io/coveralls/primus/ejson/master.svg?style=flat-square
 [coverage-ejson]: https://coveralls.io/r/primus/ejson?branch=master
 
@@ -112,8 +96,6 @@ Project                              | Version                                  
 [npm-emits]: https://www.npmjs.com/package/emits
 [travis-emits-badge]: https://img.shields.io/travis/primus/emits/master.svg?style=flat-square
 [travis-emits]: https://travis-ci.org/primus/emits
-[david-emits-badge]: https://img.shields.io/david/primus/emits.svg?style=flat-square
-[david-emits]: https://david-dm.org/primus/emits
 [coverage-emits-badge]: https://img.shields.io/coveralls/primus/emits/master.svg?style=flat-square
 [coverage-emits]: https://coveralls.io/r/primus/emits?branch=master
 
@@ -122,8 +104,6 @@ Project                              | Version                                  
 [npm-eventemitter3]: https://www.npmjs.com/package/eventemitter3
 [travis-eventemitter3-badge]: https://img.shields.io/travis/primus/eventemitter3/master.svg?style=flat-square
 [travis-eventemitter3]: https://travis-ci.org/primus/eventemitter3
-[david-eventemitter3-badge]: https://img.shields.io/david/primus/eventemitter3.svg?style=flat-square
-[david-eventemitter3]: https://david-dm.org/primus/eventemitter3
 [coverage-eventemitter3-badge]: https://img.shields.io/coveralls/primus/eventemitter3/master.svg?style=flat-square
 [coverage-eventemitter3]: https://coveralls.io/r/primus/eventemitter3?branch=master
 
@@ -132,8 +112,6 @@ Project                              | Version                                  
 [npm-fortress-maximus]: https://www.npmjs.com/package/fortress-maximus
 [travis-fortress-maximus-badge]: https://img.shields.io/travis/primus/fortress-maximus/master.svg?style=flat-square
 [travis-fortress-maximus]: https://travis-ci.org/primus/fortress-maximus
-[david-fortress-maximus-badge]: https://img.shields.io/david/primus/fortress-maximus.svg?style=flat-square
-[david-fortress-maximus]: https://david-dm.org/primus/fortress-maximus
 [coverage-fortress-maximus-badge]: https://img.shields.io/coveralls/primus/fortress-maximus/master.svg?style=flat-square
 [coverage-fortress-maximus]: https://coveralls.io/r/primus/fortress-maximus?branch=master
 
@@ -142,8 +120,6 @@ Project                              | Version                                  
 [npm-forwarded-for]: https://www.npmjs.com/package/forwarded-for
 [travis-forwarded-for-badge]: https://img.shields.io/travis/primus/forwarded-for/master.svg?style=flat-square
 [travis-forwarded-for]: https://travis-ci.org/primus/forwarded-for
-[david-forwarded-for-badge]: https://img.shields.io/david/primus/forwarded-for.svg?style=flat-square
-[david-forwarded-for]: https://david-dm.org/primus/forwarded-for
 [coverage-forwarded-for-badge]: https://img.shields.io/coveralls/primus/forwarded-for/master.svg?style=flat-square
 [coverage-forwarded-for]: https://coveralls.io/r/primus/forwarded-for?branch=master
 
@@ -152,8 +128,6 @@ Project                              | Version                                  
 [npm-metroplex]: https://www.npmjs.com/package/metroplex
 [travis-metroplex-badge]: https://img.shields.io/travis/primus/metroplex/master.svg?style=flat-square
 [travis-metroplex]: https://travis-ci.org/primus/metroplex
-[david-metroplex-badge]: https://img.shields.io/david/primus/metroplex.svg?style=flat-square
-[david-metroplex]: https://david-dm.org/primus/metroplex
 [coverage-metroplex-badge]: https://img.shields.io/coveralls/primus/metroplex/master.svg?style=flat-square
 [coverage-metroplex]: https://coveralls.io/r/primus/metroplex?branch=master
 
@@ -162,8 +136,6 @@ Project                              | Version                                  
 [npm-mirage]: https://www.npmjs.com/package/mirage
 [travis-mirage-badge]: https://img.shields.io/travis/primus/mirage/master.svg?style=flat-square
 [travis-mirage]: https://travis-ci.org/primus/mirage
-[david-mirage-badge]: https://img.shields.io/david/primus/mirage.svg?style=flat-square
-[david-mirage]: https://david-dm.org/primus/mirage
 [coverage-mirage-badge]: https://img.shields.io/coveralls/primus/mirage/master.svg?style=flat-square
 [coverage-mirage]: https://coveralls.io/r/primus/mirage?branch=master
 
@@ -172,8 +144,6 @@ Project                              | Version                                  
 [npm-omega-supreme]: https://www.npmjs.com/package/omega-supreme
 [travis-omega-supreme-badge]: https://img.shields.io/travis/primus/omega-supreme/master.svg?style=flat-square
 [travis-omega-supreme]: https://travis-ci.org/primus/omega-supreme
-[david-omega-supreme-badge]: https://img.shields.io/david/primus/omega-supreme.svg?style=flat-square
-[david-omega-supreme]: https://david-dm.org/primus/omega-supreme
 [coverage-omega-supreme-badge]: https://img.shields.io/coveralls/primus/omega-supreme/master.svg?style=flat-square
 [coverage-omega-supreme]: https://coveralls.io/r/primus/omega-supreme?branch=master
 
@@ -182,8 +152,6 @@ Project                              | Version                                  
 [npm-primacron]: https://www.npmjs.com/package/primacron
 [travis-primacron-badge]: https://img.shields.io/travis/primus/primacron/master.svg?style=flat-square
 [travis-primacron]: https://travis-ci.org/primus/primacron
-[david-primacron-badge]: https://img.shields.io/david/primus/primacron.svg?style=flat-square
-[david-primacron]: https://david-dm.org/primus/primacron
 [coverage-primacron-badge]: https://img.shields.io/coveralls/primus/primacron/master.svg?style=flat-square
 [coverage-primacron]: https://coveralls.io/r/primus/primacron?branch=master
 
@@ -192,8 +160,6 @@ Project                              | Version                                  
 [npm-primus-analytics]: https://www.npmjs.com/package/primus-analytics
 [travis-primus-analytics-badge]: https://img.shields.io/travis/primus/primus-analytics/master.svg?style=flat-square
 [travis-primus-analytics]: https://travis-ci.org/primus/primus-analytics
-[david-primus-analytics-badge]: https://img.shields.io/david/primus/primus-analytics.svg?style=flat-square
-[david-primus-analytics]: https://david-dm.org/primus/primus-analytics
 [coverage-primus-analytics-badge]: https://img.shields.io/coveralls/primus/primus-analytics/master.svg?style=flat-square
 [coverage-primus-analytics]: https://coveralls.io/r/primus/primus-analytics?branch=master
 
@@ -202,8 +168,6 @@ Project                              | Version                                  
 [npm-primus-emit]: https://www.npmjs.com/package/primus-emit
 [travis-primus-emit-badge]: https://img.shields.io/travis/primus/primus-emit/master.svg?style=flat-square
 [travis-primus-emit]: https://travis-ci.org/primus/primus-emit
-[david-primus-emit-badge]: https://img.shields.io/david/primus/primus-emit.svg?style=flat-square
-[david-primus-emit]: https://david-dm.org/primus/primus-emit
 [coverage-primus-emit-badge]: https://img.shields.io/coveralls/primus/primus-emit/master.svg?style=flat-square
 [coverage-primus-emit]: https://coveralls.io/r/primus/primus-emit?branch=master
 
@@ -212,8 +176,6 @@ Project                              | Version                                  
 [npm-primus-msgpack]: https://www.npmjs.com/package/primus-msgpack
 [travis-primus-msgpack-badge]: https://img.shields.io/travis/primus/primus-msgpack/master.svg?style=flat-square
 [travis-primus-msgpack]: https://travis-ci.org/primus/primus-msgpack
-[david-primus-msgpack-badge]: https://img.shields.io/david/primus/primus-msgpack.svg?style=flat-square
-[david-primus-msgpack]: https://david-dm.org/primus/primus-msgpack
 [coverage-primus-msgpack-badge]: https://img.shields.io/coveralls/primus/primus-msgpack/master.svg?style=flat-square
 [coverage-primus-msgpack]: https://coveralls.io/r/primus/primus-msgpack?branch=master
 
@@ -222,7 +184,5 @@ Project                              | Version                                  
 [npm-substream]: https://www.npmjs.com/package/substream
 [travis-substream-badge]: https://img.shields.io/travis/primus/substream/master.svg?style=flat-square
 [travis-substream]: https://travis-ci.org/primus/substream
-[david-substream-badge]: https://img.shields.io/david/primus/substream.svg?style=flat-square
-[david-substream]: https://david-dm.org/primus/substream
 [coverage-substream-badge]: https://img.shields.io/coveralls/primus/substream/master.svg?style=flat-square
 [coverage-substream]: https://coveralls.io/r/primus/substream?branch=master
