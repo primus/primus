@@ -34,14 +34,17 @@ Object.defineProperty(exports, 'port', {
 // Expose a server creation utility.
 //
 exports.create = function create(options, fn) {
-  const server = http.createServer(function handle(req, res) {
-    console.error('');
-    console.error('Uncaught request', req.url);
-    console.error('');
+  const server = http.createServer(
+    { keepAliveTimeout: 500 },
+    function handle(req, res) {
+      console.error('');
+      console.error('Uncaught request', req.url);
+      console.error('');
 
-    if (req.url !== '/nothrow') throw new Error('I should never be called');
-    res.end('original listener');
-  });
+      if (req.url !== '/nothrow') throw new Error('I should never be called');
+      res.end('original listener');
+    }
+  );
 
   const primus = new exports.Primus(server, {
     transformer: options.transformer,
