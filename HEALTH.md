@@ -158,7 +158,7 @@ Project                              | Version                                  
 [primus-analytics]: https://github.com/primus/primus-analytics
 [npm-primus-analytics-badge]: https://img.shields.io/npm/v/primus-analytics.svg?style=flat-square
 [npm-primus-analytics]: https://www.npmjs.com/package/primus-analytics
-[ci-primus-analytics-badge]: https://img.shields.io/github/actions/workflow/status/primus/primus.analytics/ci.yml?branch=master&label=CI&style=flat-square
+[ci-primus-analytics-badge]: https://img.shields.io/github/actions/workflow/status/primus/primus-analytics/ci.yml?branch=master&label=CI&style=flat-square
 [ci-primus-analytics]: https://github.com/primus/primus-analytics/actions?query=workflow%3ACI+branch%3Amaster
 [coverage-primus-analytics-badge]: https://img.shields.io/coveralls/primus/primus-analytics/master.svg?style=flat-square
 [coverage-primus-analytics]: https://coveralls.io/r/primus/primus-analytics?branch=master
