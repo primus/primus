@@ -253,16 +253,35 @@ var eio = (function () {
     var fileReader = new FileReader();
     fileReader.onload = function () {
       var content = fileReader.result.split(",")[1];
-      callback("b" + content);
+      callback("b" + (content || ""));
     };
     return fileReader.readAsDataURL(data);
   };
+  function toArray(data) {
+    if (data instanceof Uint8Array) {
+      return data;
+    } else if (data instanceof ArrayBuffer) {
+      return new Uint8Array(data);
+    } else {
+      return new Uint8Array(data.buffer, data.byteOffset, data.byteLength);
+    }
+  }
+  var TEXT_ENCODER;
+  function encodePacketToBinary(packet, callback) {
+    if (withNativeBlob && packet.data instanceof Blob) {
+      return packet.data.arrayBuffer().then(toArray).then(callback);
+    } else if (withNativeArrayBuffer$1 && (packet.data instanceof ArrayBuffer || isView(packet.data))) {
+      return callback(toArray(packet.data));
+    }
+    encodePacket(packet, false, function (encoded) {
+      if (!TEXT_ENCODER) {
+        TEXT_ENCODER = new TextEncoder();
+      }
+      callback(TEXT_ENCODER.encode(encoded));
+    });
+  }
 
-  /*
-   * base64-arraybuffer 1.0.1 <https://github.com/niklasvh/base64-arraybuffer>
-   * Copyright (c) 2022 Niklas von Hertzen <https://hertzen.com>
-   * Released under MIT License
-   */
+  // imported from https://github.com/socketio/base64-arraybuffer
   var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
   // Use a lookup table to find the index.
   var lookup = typeof Uint8Array === 'undefined' ? [] : new Uint8Array(256);
@@ -339,11 +358,22 @@ var eio = (function () {
   var mapBinary = function mapBinary(data, binaryType) {
     switch (binaryType) {
       case "blob":
-        return data instanceof ArrayBuffer ? new Blob([data]) : data;
+        if (data instanceof Blob) {
+          // from WebSocket + binaryType "blob"
+          return data;
+        } else {
+          // from HTTP long-polling or WebTransport
+          return new Blob([data]);
+        }
       case "arraybuffer":
       default:
-        return data;
-      // assuming the data is already an ArrayBuffer
+        if (data instanceof ArrayBuffer) {
+          // from HTTP long-polling (base64) or WebSocket + binaryType "arraybuffer"
+          return data;
+        } else {
+          // from WebTransport (Uint8Array)
+          return data.buffer;
+        }
     }
   };
 
@@ -375,6 +405,17 @@ var eio = (function () {
     }
     return packets;
   };
+  var TEXT_DECODER;
+  function decodePacketFromBinary(data, isBinary, binaryType) {
+    if (!TEXT_DECODER) {
+      // lazily created for compatibility with old browser platforms
+      TEXT_DECODER = new TextDecoder();
+    }
+    // 48 === "0".charCodeAt(0) (OPEN packet type)
+    // 54 === "6".charCodeAt(0) (NOOP packet type)
+    var isPlainBinary = isBinary || data[0] < 48 || data[0] > 54;
+    return decodePacket(isPlainBinary ? data : TEXT_DECODER.decode(data), binaryType);
+  }
   var protocol = 4;
 
   /**
@@ -558,15 +599,15 @@ var eio = (function () {
     }, {});
   }
   // Keep a reference to the real timeout functions so they can be used when overridden
-  var NATIVE_SET_TIMEOUT = setTimeout;
-  var NATIVE_CLEAR_TIMEOUT = clearTimeout;
+  var NATIVE_SET_TIMEOUT = globalThisShim.setTimeout;
+  var NATIVE_CLEAR_TIMEOUT = globalThisShim.clearTimeout;
   function installTimerFunctions(obj, opts) {
     if (opts.useNativeTimers) {
       obj.setTimeoutFn = NATIVE_SET_TIMEOUT.bind(globalThisShim);
       obj.clearTimeoutFn = NATIVE_CLEAR_TIMEOUT.bind(globalThisShim);
     } else {
-      obj.setTimeoutFn = setTimeout.bind(globalThisShim);
-      obj.clearTimeoutFn = clearTimeout.bind(globalThisShim);
+      obj.setTimeoutFn = globalThisShim.setTimeout.bind(globalThisShim);
+      obj.clearTimeoutFn = globalThisShim.clearTimeout.bind(globalThisShim);
     }
   }
   // base64 encoded buffers are about 33% bigger (https://en.wikipedia.org/wiki/Base64)
@@ -598,187 +639,6 @@ var eio = (function () {
     return length;
   }
 
-  var TransportError = /*#__PURE__*/function (_Error) {
-    _inherits(TransportError, _Error);
-    var _super = _createSuper(TransportError);
-    function TransportError(reason, description, context) {
-      var _this;
-      _classCallCheck(this, TransportError);
-      _this = _super.call(this, reason);
-      _this.description = description;
-      _this.context = context;
-      _this.type = "TransportError";
-      return _this;
-    }
-    return _createClass(TransportError);
-  }( /*#__PURE__*/_wrapNativeSuper(Error));
-  var Transport = /*#__PURE__*/function (_Emitter) {
-    _inherits(Transport, _Emitter);
-    var _super2 = _createSuper(Transport);
-    /**
-     * Transport abstract constructor.
-     *
-     * @param {Object} options.
-     * @api private
-     */
-    function Transport(opts) {
-      var _this2;
-      _classCallCheck(this, Transport);
-      _this2 = _super2.call(this);
-      _this2.writable = false;
-      installTimerFunctions(_assertThisInitialized(_this2), opts);
-      _this2.opts = opts;
-      _this2.query = opts.query;
-      _this2.readyState = "";
-      _this2.socket = opts.socket;
-      return _this2;
-    }
-    /**
-     * Emits an error.
-     *
-     * @param {String} reason
-     * @param description
-     * @param context - the error context
-     * @return {Transport} for chaining
-     * @api protected
-     */
-    _createClass(Transport, [{
-      key: "onError",
-      value: function onError(reason, description, context) {
-        _get(_getPrototypeOf(Transport.prototype), "emitReserved", this).call(this, "error", new TransportError(reason, description, context));
-        return this;
-      }
-      /**
-       * Opens the transport.
-       *
-       * @api public
-       */
-    }, {
-      key: "open",
-      value: function open() {
-        if ("closed" === this.readyState || "" === this.readyState) {
-          this.readyState = "opening";
-          this.doOpen();
-        }
-        return this;
-      }
-      /**
-       * Closes the transport.
-       *
-       * @api public
-       */
-    }, {
-      key: "close",
-      value: function close() {
-        if ("opening" === this.readyState || "open" === this.readyState) {
-          this.doClose();
-          this.onClose();
-        }
-        return this;
-      }
-      /**
-       * Sends multiple packets.
-       *
-       * @param {Array} packets
-       * @api public
-       */
-    }, {
-      key: "send",
-      value: function send(packets) {
-        if ("open" === this.readyState) {
-          this.write(packets);
-        }
-      }
-      /**
-       * Called upon open
-       *
-       * @api protected
-       */
-    }, {
-      key: "onOpen",
-      value: function onOpen() {
-        this.readyState = "open";
-        this.writable = true;
-        _get(_getPrototypeOf(Transport.prototype), "emitReserved", this).call(this, "open");
-      }
-      /**
-       * Called with data.
-       *
-       * @param {String} data
-       * @api protected
-       */
-    }, {
-      key: "onData",
-      value: function onData(data) {
-        var packet = decodePacket(data, this.socket.binaryType);
-        this.onPacket(packet);
-      }
-      /**
-       * Called with a decoded packet.
-       *
-       * @api protected
-       */
-    }, {
-      key: "onPacket",
-      value: function onPacket(packet) {
-        _get(_getPrototypeOf(Transport.prototype), "emitReserved", this).call(this, "packet", packet);
-      }
-      /**
-       * Called upon close.
-       *
-       * @api protected
-       */
-    }, {
-      key: "onClose",
-      value: function onClose(details) {
-        this.readyState = "closed";
-        _get(_getPrototypeOf(Transport.prototype), "emitReserved", this).call(this, "close", details);
-      }
-    }]);
-    return Transport;
-  }(Emitter);
-
-  // imported from https://github.com/unshiftio/yeast
-
-  var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split(''),
-    length = 64,
-    map = {};
-  var seed = 0,
-    i = 0,
-    prev;
-  /**
-   * Return a string representing the specified number.
-   *
-   * @param {Number} num The number to convert.
-   * @returns {String} The string representation of the number.
-   * @api public
-   */
-  function encode$1(num) {
-    var encoded = '';
-    do {
-      encoded = alphabet[num % length] + encoded;
-      num = Math.floor(num / length);
-    } while (num > 0);
-    return encoded;
-  }
-  /**
-   * Yeast: A tiny growing id generator.
-   *
-   * @returns {String} A unique id.
-   * @api public
-   */
-  function yeast() {
-    var now = encode$1(+new Date());
-    if (now !== prev) return seed = 0, prev = now;
-    return now + '.' + encode$1(seed++);
-  }
-  //
-  // Map each character to its index.
-  //
-  for (; i < length; i++) {
-    map[alphabet[i]] = i;
-  }
-
   // imported from https://github.com/galkn/querystring
   /**
    * Compiles a querystring
@@ -787,7 +647,7 @@ var eio = (function () {
    * @param {Object}
    * @api private
    */
-  function encode(obj) {
+  function encode$1(obj) {
     var str = '';
     for (var i in obj) {
       if (obj.hasOwnProperty(i)) {
@@ -812,6 +672,212 @@ var eio = (function () {
     }
     return qry;
   }
+
+  var TransportError = /*#__PURE__*/function (_Error) {
+    _inherits(TransportError, _Error);
+    var _super = _createSuper(TransportError);
+    function TransportError(reason, description, context) {
+      var _this;
+      _classCallCheck(this, TransportError);
+      _this = _super.call(this, reason);
+      _this.description = description;
+      _this.context = context;
+      _this.type = "TransportError";
+      return _this;
+    }
+    return _createClass(TransportError);
+  }( /*#__PURE__*/_wrapNativeSuper(Error));
+  var Transport = /*#__PURE__*/function (_Emitter) {
+    _inherits(Transport, _Emitter);
+    var _super2 = _createSuper(Transport);
+    /**
+     * Transport abstract constructor.
+     *
+     * @param {Object} opts - options
+     * @protected
+     */
+    function Transport(opts) {
+      var _this2;
+      _classCallCheck(this, Transport);
+      _this2 = _super2.call(this);
+      _this2.writable = false;
+      installTimerFunctions(_assertThisInitialized(_this2), opts);
+      _this2.opts = opts;
+      _this2.query = opts.query;
+      _this2.socket = opts.socket;
+      return _this2;
+    }
+    /**
+     * Emits an error.
+     *
+     * @param {String} reason
+     * @param description
+     * @param context - the error context
+     * @return {Transport} for chaining
+     * @protected
+     */
+    _createClass(Transport, [{
+      key: "onError",
+      value: function onError(reason, description, context) {
+        _get(_getPrototypeOf(Transport.prototype), "emitReserved", this).call(this, "error", new TransportError(reason, description, context));
+        return this;
+      }
+      /**
+       * Opens the transport.
+       */
+    }, {
+      key: "open",
+      value: function open() {
+        this.readyState = "opening";
+        this.doOpen();
+        return this;
+      }
+      /**
+       * Closes the transport.
+       */
+    }, {
+      key: "close",
+      value: function close() {
+        if (this.readyState === "opening" || this.readyState === "open") {
+          this.doClose();
+          this.onClose();
+        }
+        return this;
+      }
+      /**
+       * Sends multiple packets.
+       *
+       * @param {Array} packets
+       */
+    }, {
+      key: "send",
+      value: function send(packets) {
+        if (this.readyState === "open") {
+          this.write(packets);
+        }
+      }
+      /**
+       * Called upon open
+       *
+       * @protected
+       */
+    }, {
+      key: "onOpen",
+      value: function onOpen() {
+        this.readyState = "open";
+        this.writable = true;
+        _get(_getPrototypeOf(Transport.prototype), "emitReserved", this).call(this, "open");
+      }
+      /**
+       * Called with data.
+       *
+       * @param {String} data
+       * @protected
+       */
+    }, {
+      key: "onData",
+      value: function onData(data) {
+        var packet = decodePacket(data, this.socket.binaryType);
+        this.onPacket(packet);
+      }
+      /**
+       * Called with a decoded packet.
+       *
+       * @protected
+       */
+    }, {
+      key: "onPacket",
+      value: function onPacket(packet) {
+        _get(_getPrototypeOf(Transport.prototype), "emitReserved", this).call(this, "packet", packet);
+      }
+      /**
+       * Called upon close.
+       *
+       * @protected
+       */
+    }, {
+      key: "onClose",
+      value: function onClose(details) {
+        this.readyState = "closed";
+        _get(_getPrototypeOf(Transport.prototype), "emitReserved", this).call(this, "close", details);
+      }
+      /**
+       * Pauses the transport, in order not to lose packets during an upgrade.
+       *
+       * @param onPause
+       */
+    }, {
+      key: "pause",
+      value: function pause(onPause) {}
+    }, {
+      key: "createUri",
+      value: function createUri(schema) {
+        var query = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+        return schema + "://" + this._hostname() + this._port() + this.opts.path + this._query(query);
+      }
+    }, {
+      key: "_hostname",
+      value: function _hostname() {
+        var hostname = this.opts.hostname;
+        return hostname.indexOf(":") === -1 ? hostname : "[" + hostname + "]";
+      }
+    }, {
+      key: "_port",
+      value: function _port() {
+        if (this.opts.port && (this.opts.secure && Number(this.opts.port !== 443) || !this.opts.secure && Number(this.opts.port) !== 80)) {
+          return ":" + this.opts.port;
+        } else {
+          return "";
+        }
+      }
+    }, {
+      key: "_query",
+      value: function _query(query) {
+        var encodedQuery = encode$1(query);
+        return encodedQuery.length ? "?" + encodedQuery : "";
+      }
+    }]);
+    return Transport;
+  }(Emitter);
+
+  // imported from https://github.com/unshiftio/yeast
+
+  var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split(''),
+    length = 64,
+    map = {};
+  var seed = 0,
+    i = 0,
+    prev;
+  /**
+   * Return a string representing the specified number.
+   *
+   * @param {Number} num The number to convert.
+   * @returns {String} The string representation of the number.
+   * @api public
+   */
+  function encode(num) {
+    var encoded = '';
+    do {
+      encoded = alphabet[num % length] + encoded;
+      num = Math.floor(num / length);
+    } while (num > 0);
+    return encoded;
+  }
+  /**
+   * Yeast: A tiny growing id generator.
+   *
+   * @returns {String} A unique id.
+   * @api public
+   */
+  function yeast() {
+    var now = encode(+new Date());
+    if (now !== prev) return seed = 0, prev = now;
+    return now + '.' + encode(seed++);
+  }
+  //
+  // Map each character to its index.
+  //
+  for (; i < length; i++) map[alphabet[i]] = i;
 
   // imported from https://github.com/component/has-cors
   var value = false;
@@ -838,6 +904,7 @@ var eio = (function () {
       } catch (e) {}
     }
   }
+  function createCookieJar() {}
 
   function empty() {}
   var hasXHR2 = function () {
@@ -853,7 +920,7 @@ var eio = (function () {
      * XHR Polling constructor.
      *
      * @param {Object} opts
-     * @api public
+     * @package
      */
     function Polling(opts) {
       var _this;
@@ -868,18 +935,17 @@ var eio = (function () {
           port = isSSL ? "443" : "80";
         }
         _this.xd = typeof location !== "undefined" && opts.hostname !== location.hostname || port !== opts.port;
-        _this.xs = opts.secure !== isSSL;
       }
       /**
        * XHR supports binary
        */
       var forceBase64 = opts && opts.forceBase64;
       _this.supportsBinary = hasXHR2 && !forceBase64;
+      if (_this.opts.withCredentials) {
+        _this.cookieJar = createCookieJar();
+      }
       return _this;
     }
-    /**
-     * Transport name.
-     */
     _createClass(Polling, [{
       key: "name",
       get: function get() {
@@ -889,7 +955,7 @@ var eio = (function () {
        * Opens the socket (triggers polling). We write a PING message to determine
        * when the transport is open.
        *
-       * @api private
+       * @protected
        */
     }, {
       key: "doOpen",
@@ -899,8 +965,8 @@ var eio = (function () {
       /**
        * Pauses polling.
        *
-       * @param {Function} callback upon buffers are flushed and transport is paused
-       * @api private
+       * @param {Function} onPause - callback upon buffers are flushed and transport is paused
+       * @package
        */
     }, {
       key: "pause",
@@ -932,7 +998,7 @@ var eio = (function () {
       /**
        * Starts polling cycle.
        *
-       * @api public
+       * @private
        */
     }, {
       key: "poll",
@@ -944,7 +1010,7 @@ var eio = (function () {
       /**
        * Overloads onData to detect payloads.
        *
-       * @api private
+       * @protected
        */
     }, {
       key: "onData",
@@ -980,7 +1046,7 @@ var eio = (function () {
       /**
        * For polling, send a close packet.
        *
-       * @api private
+       * @protected
        */
     }, {
       key: "doClose",
@@ -1002,9 +1068,8 @@ var eio = (function () {
       /**
        * Writes a packets payload.
        *
-       * @param {Array} data packets
-       * @param {Function} drain callback
-       * @api private
+       * @param {Array} packets - data packets
+       * @protected
        */
     }, {
       key: "write",
@@ -1021,14 +1086,13 @@ var eio = (function () {
       /**
        * Generates uri for connection.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "uri",
       value: function uri() {
-        var query = this.query || {};
         var schema = this.opts.secure ? "https" : "http";
-        var port = "";
+        var query = this.query || {};
         // cache busting is forced
         if (false !== this.opts.timestampRequests) {
           query[this.opts.timestampParam] = yeast();
@@ -1036,19 +1100,13 @@ var eio = (function () {
         if (!this.supportsBinary && !query.sid) {
           query.b64 = 1;
         }
-        // avoid port if default for schema
-        if (this.opts.port && ("https" === schema && Number(this.opts.port) !== 443 || "http" === schema && Number(this.opts.port) !== 80)) {
-          port = ":" + this.opts.port;
-        }
-        var encodedQuery = encode(query);
-        var ipv6 = this.opts.hostname.indexOf(":") !== -1;
-        return schema + "://" + (ipv6 ? "[" + this.opts.hostname + "]" : this.opts.hostname) + port + this.opts.path + (encodedQuery.length ? "?" + encodedQuery : "");
+        return this.createUri(schema, query);
       }
       /**
        * Creates a request.
        *
        * @param {String} method
-       * @api private
+       * @private
        */
     }, {
       key: "request",
@@ -1056,7 +1114,7 @@ var eio = (function () {
         var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
         _extends(opts, {
           xd: this.xd,
-          xs: this.xs
+          cookieJar: this.cookieJar
         }, this.opts);
         return new Request(this.uri(), opts);
       }
@@ -1065,7 +1123,7 @@ var eio = (function () {
        *
        * @param {String} data to send.
        * @param {Function} called upon flush.
-       * @api private
+       * @private
        */
     }, {
       key: "doWrite",
@@ -1083,7 +1141,7 @@ var eio = (function () {
       /**
        * Starts a poll cycle.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "doPoll",
@@ -1106,7 +1164,7 @@ var eio = (function () {
      * Request constructor
      *
      * @param {Object} options
-     * @api public
+     * @package
      */
     function Request(uri, opts) {
       var _this8;
@@ -1116,7 +1174,6 @@ var eio = (function () {
       _this8.opts = opts;
       _this8.method = opts.method || "GET";
       _this8.uri = uri;
-      _this8.async = false !== opts.async;
       _this8.data = undefined !== opts.data ? opts.data : null;
       _this8.create();
       return _this8;
@@ -1124,18 +1181,18 @@ var eio = (function () {
     /**
      * Creates the XHR object and sends the request.
      *
-     * @api private
+     * @private
      */
     _createClass(Request, [{
       key: "create",
       value: function create() {
         var _this9 = this;
+        var _a;
         var opts = pick(this.opts, "agent", "pfx", "key", "passphrase", "cert", "ca", "ciphers", "rejectUnauthorized", "autoUnref");
         opts.xdomain = !!this.opts.xd;
-        opts.xscheme = !!this.opts.xs;
         var xhr = this.xhr = new XHR(opts);
         try {
-          xhr.open(this.method, this.uri, this.async);
+          xhr.open(this.method, this.uri, true);
           try {
             if (this.opts.extraHeaders) {
               xhr.setDisableHeaderCheck && xhr.setDisableHeaderCheck(true);
@@ -1154,6 +1211,7 @@ var eio = (function () {
           try {
             xhr.setRequestHeader("Accept", "*/*");
           } catch (e) {}
+          (_a = this.opts.cookieJar) === null || _a === void 0 ? void 0 : _a.addCookies(xhr);
           // ie6 check
           if ("withCredentials" in xhr) {
             xhr.withCredentials = this.opts.withCredentials;
@@ -1162,6 +1220,10 @@ var eio = (function () {
             xhr.timeout = this.opts.requestTimeout;
           }
           xhr.onreadystatechange = function () {
+            var _a;
+            if (xhr.readyState === 3) {
+              (_a = _this9.opts.cookieJar) === null || _a === void 0 ? void 0 : _a.parseCookies(xhr);
+            }
             if (4 !== xhr.readyState) return;
             if (200 === xhr.status || 1223 === xhr.status) {
               _this9.onLoad();
@@ -1191,7 +1253,7 @@ var eio = (function () {
       /**
        * Called upon error.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "onError",
@@ -1202,7 +1264,7 @@ var eio = (function () {
       /**
        * Cleans up house.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "cleanup",
@@ -1224,7 +1286,7 @@ var eio = (function () {
       /**
        * Called upon load.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "onLoad",
@@ -1239,7 +1301,7 @@ var eio = (function () {
       /**
        * Aborts the request.
        *
-       * @api public
+       * @package
        */
     }, {
       key: "abort",
@@ -1298,8 +1360,8 @@ var eio = (function () {
     /**
      * WebSocket transport constructor.
      *
-     * @api {Object} connection options
-     * @api public
+     * @param {Object} opts - connection options
+     * @protected
      */
     function WS(opts) {
       var _this;
@@ -1308,21 +1370,11 @@ var eio = (function () {
       _this.supportsBinary = !opts.forceBase64;
       return _this;
     }
-    /**
-     * Transport name.
-     *
-     * @api public
-     */
     _createClass(WS, [{
       key: "name",
       get: function get() {
         return "websocket";
       }
-      /**
-       * Opens socket.
-       *
-       * @api private
-       */
     }, {
       key: "doOpen",
       value: function doOpen() {
@@ -1348,7 +1400,7 @@ var eio = (function () {
       /**
        * Adds event listeners to the socket
        *
-       * @api private
+       * @private
        */
     }, {
       key: "addEventListeners",
@@ -1373,12 +1425,6 @@ var eio = (function () {
           return _this2.onError("websocket error", e);
         };
       }
-      /**
-       * Writes data to socket.
-       *
-       * @param {Array} array of packets.
-       * @api private
-       */
     }, {
       key: "write",
       value: function write(packets) {
@@ -1386,7 +1432,7 @@ var eio = (function () {
         this.writable = false;
         // encodePacket efficient as it uses WS framing
         // no need for encodePayload
-        var _loop = function _loop(i) {
+        var _loop = function _loop() {
           var packet = packets[i];
           var lastPacket = i === packets.length - 1;
           encodePacket(packet, _this3.supportsBinary, function (data) {
@@ -1412,14 +1458,9 @@ var eio = (function () {
           });
         };
         for (var i = 0; i < packets.length; i++) {
-          _loop(i);
+          _loop();
         }
       }
-      /**
-       * Closes socket.
-       *
-       * @api private
-       */
     }, {
       key: "doClose",
       value: function doClose() {
@@ -1431,18 +1472,13 @@ var eio = (function () {
       /**
        * Generates uri for connection.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "uri",
       value: function uri() {
-        var query = this.query || {};
         var schema = this.opts.secure ? "wss" : "ws";
-        var port = "";
-        // avoid port if default for schema
-        if (this.opts.port && ("wss" === schema && Number(this.opts.port) !== 443 || "ws" === schema && Number(this.opts.port) !== 80)) {
-          port = ":" + this.opts.port;
-        }
+        var query = this.query || {};
         // append timestamp to URI
         if (this.opts.timestampRequests) {
           query[this.opts.timestampParam] = yeast();
@@ -1451,15 +1487,13 @@ var eio = (function () {
         if (!this.supportsBinary) {
           query.b64 = 1;
         }
-        var encodedQuery = encode(query);
-        var ipv6 = this.opts.hostname.indexOf(":") !== -1;
-        return schema + "://" + (ipv6 ? "[" + this.opts.hostname + "]" : this.opts.hostname) + port + this.opts.path + (encodedQuery.length ? "?" + encodedQuery : "");
+        return this.createUri(schema, query);
       }
       /**
        * Feature detection for WebSocket.
        *
        * @return {Boolean} whether this transport is available.
-       * @api public
+       * @private
        */
     }, {
       key: "check",
@@ -1470,19 +1504,131 @@ var eio = (function () {
     return WS;
   }(Transport);
 
+  function shouldIncludeBinaryHeader(packet, encoded) {
+    // 48 === "0".charCodeAt(0) (OPEN packet type)
+    // 54 === "6".charCodeAt(0) (NOOP packet type)
+    return packet.type === "message" && typeof packet.data !== "string" && encoded[0] >= 48 && encoded[0] <= 54;
+  }
+  var WT = /*#__PURE__*/function (_Transport) {
+    _inherits(WT, _Transport);
+    var _super = _createSuper(WT);
+    function WT() {
+      _classCallCheck(this, WT);
+      return _super.apply(this, arguments);
+    }
+    _createClass(WT, [{
+      key: "name",
+      get: function get() {
+        return "webtransport";
+      }
+    }, {
+      key: "doOpen",
+      value: function doOpen() {
+        var _this = this;
+        // @ts-ignore
+        if (typeof WebTransport !== "function") {
+          return;
+        }
+        // @ts-ignore
+        this.transport = new WebTransport(this.createUri("https"), this.opts.transportOptions[this.name]);
+        this.transport.closed.then(function () {
+          _this.onClose();
+        })["catch"](function (err) {
+          _this.onError("webtransport error", err);
+        });
+        // note: we could have used async/await, but that would require some additional polyfills
+        this.transport.ready.then(function () {
+          _this.transport.createBidirectionalStream().then(function (stream) {
+            var reader = stream.readable.getReader();
+            _this.writer = stream.writable.getWriter();
+            var binaryFlag;
+            var read = function read() {
+              reader.read().then(function (_ref) {
+                var done = _ref.done,
+                  value = _ref.value;
+                if (done) {
+                  return;
+                }
+                if (!binaryFlag && value.byteLength === 1 && value[0] === 54) {
+                  binaryFlag = true;
+                } else {
+                  // TODO expose binarytype
+                  _this.onPacket(decodePacketFromBinary(value, binaryFlag, "arraybuffer"));
+                  binaryFlag = false;
+                }
+                read();
+              })["catch"](function (err) {});
+            };
+            read();
+            var handshake = _this.query.sid ? "0{\"sid\":\"".concat(_this.query.sid, "\"}") : "0";
+            _this.writer.write(new TextEncoder().encode(handshake)).then(function () {
+              return _this.onOpen();
+            });
+          });
+        });
+      }
+    }, {
+      key: "write",
+      value: function write(packets) {
+        var _this2 = this;
+        this.writable = false;
+        var _loop = function _loop() {
+          var packet = packets[i];
+          var lastPacket = i === packets.length - 1;
+          encodePacketToBinary(packet, function (data) {
+            if (shouldIncludeBinaryHeader(packet, data)) {
+              _this2.writer.write(Uint8Array.of(54));
+            }
+            _this2.writer.write(data).then(function () {
+              if (lastPacket) {
+                nextTick(function () {
+                  _this2.writable = true;
+                  _this2.emitReserved("drain");
+                }, _this2.setTimeoutFn);
+              }
+            });
+          });
+        };
+        for (var i = 0; i < packets.length; i++) {
+          _loop();
+        }
+      }
+    }, {
+      key: "doClose",
+      value: function doClose() {
+        var _a;
+        (_a = this.transport) === null || _a === void 0 ? void 0 : _a.close();
+      }
+    }]);
+    return WT;
+  }(Transport);
+
   var transports = {
     websocket: WS,
+    webtransport: WT,
     polling: Polling
   };
 
   // imported from https://github.com/galkn/parseuri
   /**
-   * Parses an URI
+   * Parses a URI
+   *
+   * Note: we could also have used the built-in URL object, but it isn't supported on all platforms.
+   *
+   * See:
+   * - https://developer.mozilla.org/en-US/docs/Web/API/URL
+   * - https://caniuse.com/url
+   * - https://www.rfc-editor.org/rfc/rfc3986#appendix-B
+   *
+   * History of the parse() method:
+   * - first commit: https://github.com/socketio/socket.io-client/commit/4ee1d5d94b3906a9c052b459f1a818b15f38f91c
+   * - export into its own module: https://github.com/socketio/engine.io-client/commit/de2c561e4564efeb78f1bdb1ba39ef81b2822cb3
+   * - reimport: https://github.com/socketio/engine.io-client/commit/df32277c3f6d622eec5ed09f493cae3f3391d242
    *
    * @author Steven Levithan <stevenlevithan.com> (MIT license)
    * @api private
    */
-  var re = /^(?:(?![^:@]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
+  var re = /^(?:(?![^:@\/?#]+:[^:@\/]*@)(http|https|ws|wss):\/\/)?((?:(([^:@\/?#]*)(?::([^:@\/?#]*))?)?@)?((?:[a-f0-9]{0,4}:){2,7}[a-f0-9]{0,4}|[^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/;
   var parts = ['source', 'protocol', 'authority', 'userInfo', 'user', 'password', 'host', 'port', 'relative', 'path', 'directory', 'file', 'query', 'anchor'];
   function parse(str) {
     var src = str,
@@ -1534,15 +1680,15 @@ var eio = (function () {
     /**
      * Socket constructor.
      *
-     * @param {String|Object} uri or options
+     * @param {String|Object} uri - uri or options
      * @param {Object} opts - options
-     * @api public
      */
     function Socket(uri) {
       var _this;
       var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
       _classCallCheck(this, Socket);
       _this = _super.call(this);
+      _this.writeBuffer = [];
       if (uri && "object" === _typeof(uri)) {
         opts = uri;
         uri = null;
@@ -1564,8 +1710,7 @@ var eio = (function () {
       }
       _this.hostname = opts.hostname || (typeof location !== "undefined" ? location.hostname : "localhost");
       _this.port = opts.port || (typeof location !== "undefined" && location.port ? location.port : _this.secure ? "443" : "80");
-      _this.transports = opts.transports || ["polling", "websocket"];
-      _this.readyState = "";
+      _this.transports = opts.transports || ["polling", "websocket", "webtransport"];
       _this.writeBuffer = [];
       _this.prevBufferLen = 0;
       _this.opts = _extends({
@@ -1575,14 +1720,15 @@ var eio = (function () {
         upgrade: true,
         timestampParam: "t",
         rememberUpgrade: false,
+        addTrailingSlash: true,
         rejectUnauthorized: true,
         perMessageDeflate: {
           threshold: 1024
         },
         transportOptions: {},
-        closeOnBeforeunload: true
+        closeOnBeforeunload: false
       }, opts);
-      _this.opts.path = _this.opts.path.replace(/\/$/, "") + "/";
+      _this.opts.path = _this.opts.path.replace(/\/$/, "") + (_this.opts.addTrailingSlash ? "/" : "");
       if (typeof _this.opts.query === "string") {
         _this.opts.query = decode(_this.opts.query);
       }
@@ -1622,9 +1768,9 @@ var eio = (function () {
     /**
      * Creates transport of the given type.
      *
-     * @param {String} transport name
+     * @param {String} name - transport name
      * @return {Transport}
-     * @api private
+     * @private
      */
     _createClass(Socket, [{
       key: "createTransport",
@@ -1636,19 +1782,19 @@ var eio = (function () {
         query.transport = name;
         // session id if we already have one
         if (this.id) query.sid = this.id;
-        var opts = _extends({}, this.opts.transportOptions[name], this.opts, {
+        var opts = _extends({}, this.opts, {
           query: query,
           socket: this,
           hostname: this.hostname,
           secure: this.secure,
           port: this.port
-        });
+        }, this.opts.transportOptions[name]);
         return new transports[name](opts);
       }
       /**
        * Initializes transport to use and starts probe.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "open",
@@ -1681,7 +1827,7 @@ var eio = (function () {
       /**
        * Sets the current transport. Disables the existing one (if any).
        *
-       * @api private
+       * @private
        */
     }, {
       key: "setTransport",
@@ -1700,8 +1846,8 @@ var eio = (function () {
       /**
        * Probes a transport.
        *
-       * @param {String} transport name
-       * @api private
+       * @param {String} name - transport name
+       * @private
        */
     }, {
       key: "probe",
@@ -1786,12 +1932,21 @@ var eio = (function () {
         transport.once("close", onTransportClose);
         this.once("close", onclose);
         this.once("upgrading", onupgrade);
-        transport.open();
+        if (this.upgrades.indexOf("webtransport") !== -1 && name !== "webtransport") {
+          // favor WebTransport
+          this.setTimeoutFn(function () {
+            if (!failed) {
+              transport.open();
+            }
+          }, 200);
+        } else {
+          transport.open();
+        }
       }
       /**
        * Called when connection is deemed open.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "onOpen",
@@ -1802,7 +1957,7 @@ var eio = (function () {
         this.flush();
         // we check for `readyState` in case an `open`
         // listener already closed the socket
-        if ("open" === this.readyState && this.opts.upgrade && this.transport.pause) {
+        if ("open" === this.readyState && this.opts.upgrade) {
           var i = 0;
           var l = this.upgrades.length;
           for (; i < l; i++) {
@@ -1813,7 +1968,7 @@ var eio = (function () {
       /**
        * Handles a packet.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "onPacket",
@@ -1849,7 +2004,7 @@ var eio = (function () {
        * Called upon handshake completion.
        *
        * @param {Object} data - handshake obj
-       * @api private
+       * @private
        */
     }, {
       key: "onHandshake",
@@ -1869,7 +2024,7 @@ var eio = (function () {
       /**
        * Sets and resets ping timeout timer based on server pings.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "resetPingTimeout",
@@ -1886,7 +2041,7 @@ var eio = (function () {
       /**
        * Called on `drain` event
        *
-       * @api private
+       * @private
        */
     }, {
       key: "onDrain",
@@ -1905,7 +2060,7 @@ var eio = (function () {
       /**
        * Flush write buffers.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "flush",
@@ -1949,11 +2104,10 @@ var eio = (function () {
       /**
        * Sends a message.
        *
-       * @param {String} message.
-       * @param {Function} callback function.
+       * @param {String} msg - message.
        * @param {Object} options.
+       * @param {Function} callback function.
        * @return {Socket} for chaining.
-       * @api public
        */
     }, {
       key: "write",
@@ -1970,11 +2124,11 @@ var eio = (function () {
       /**
        * Sends a packet.
        *
-       * @param {String} packet type.
+       * @param {String} type: packet type.
        * @param {String} data.
        * @param {Object} options.
-       * @param {Function} callback function.
-       * @api private
+       * @param {Function} fn - callback function.
+       * @private
        */
     }, {
       key: "sendPacket",
@@ -2004,8 +2158,6 @@ var eio = (function () {
       }
       /**
        * Closes the connection.
-       *
-       * @api public
        */
     }, {
       key: "close",
@@ -2046,7 +2198,7 @@ var eio = (function () {
       /**
        * Called upon transport error
        *
-       * @api private
+       * @private
        */
     }, {
       key: "onError",
@@ -2058,7 +2210,7 @@ var eio = (function () {
       /**
        * Called upon transport close.
        *
-       * @api private
+       * @private
        */
     }, {
       key: "onClose",
@@ -2091,9 +2243,8 @@ var eio = (function () {
       /**
        * Filters upgrades, returning only those matching client transports.
        *
-       * @param {Array} server upgrades
-       * @api private
-       *
+       * @param {Array} upgrades - server upgrades
+       * @private
        */
     }, {
       key: "filterUpgrades",
