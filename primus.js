@@ -1152,48 +1152,6 @@ Primus.prototype.encoder = null; // @import {primus::encoder};
 Primus.prototype.decoder = null; // @import {primus::decoder};
 Primus.prototype.version = null; // @import {primus::version};
 
-if (
-     'undefined' !== typeof document
-  && 'undefined' !== typeof navigator
-) {
-  //
-  // Hack 2: If you press ESC in FireFox it will close all active connections.
-  // Normally this makes sense, when your page is still loading. But versions
-  // before FireFox 22 will close all connections including WebSocket connections
-  // after page load. One way to prevent this is to do a `preventDefault()` and
-  // cancel the operation before it bubbles up to the browsers default handler.
-  // It needs to be added as `keydown` event, if it's added keyup it will not be
-  // able to prevent the connection from being closed.
-  //
-  if (document.addEventListener) {
-    document.addEventListener('keydown', function keydown(e) {
-      if (e.keyCode !== 27 || !e.preventDefault) return;
-
-      e.preventDefault();
-    }, false);
-  }
-
-  //
-  // Hack 3: This is a Mac/Apple bug only, when you're behind a reverse proxy or
-  // have you network settings set to `automatic proxy discovery` the safari
-  // browser will crash when the WebSocket constructor is initialised. There is
-  // no way to detect the usage of these proxies available in JavaScript so we
-  // need to do some nasty browser sniffing. This only affects Safari versions
-  // lower then 5.1.4
-  //
-  var ua = (navigator.userAgent || '').toLowerCase()
-    , parsed = ua.match(/.+(?:rv|it|ra|ie)[/: ](\d+)\.(\d+)(?:\.(\d+))?/) || []
-    , version = +[parsed[1], parsed[2]].join('.');
-
-  if (
-       !~ua.indexOf('chrome')
-    && ~ua.indexOf('safari')
-    && version < 534.54
-  ) {
-    Primus.prototype.AVOID_WEBSOCKETS = true;
-  }
-}
-
 //
 // Expose the library.
 //
